@@ -88,6 +88,9 @@
   .todo li{font-size:.86rem;color:var(--ink2);list-style:none;padding-left:1.1rem;position:relative}
   .todo li::before{content:"";position:absolute;left:0;top:.55em;width:5px;height:5px;border-radius:50%;background:var(--brass)}
   .todo li.big{color:var(--ink);font-weight:600;font-family:var(--fd)}
+  .todo li.star{color:var(--ink);font-weight:600}
+  .todo li.star::before{background:var(--ember);width:7px;height:7px;box-shadow:0 0 0 3px rgba(232,112,58,.18)}
+  .todo li.star::after{content:" ★";color:var(--ember);font-size:.8em}
   .todo li.big::before{background:var(--ember);width:6px;height:6px}
 
   .note{background:var(--surf3);border:1px solid var(--line2);border-left:3px solid var(--ice);border-radius:4px;
@@ -110,7 +113,7 @@
       <svg width="24" height="24" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->19.08.2026, 00:23<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->19.08.2026, 00:34<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -160,23 +163,29 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">de3111d</span><div class="t"><b>Testserver ohne Python: PowerShell-Dateiserver, launch.json korrigiert (Liams Temp-Pfad entfernt)</b></div></div>
       <div class="row"><span class="h">29630d0</span><div class="t"><b>Cockpit generiert sich selbst, bin da/bin raus als Ein-Aufruf-Skripte, Laptop-Anleitung</b></div></div>
       <div class="row"><span class="h">ed41ed4</span><div class="t"><b>Website live: GitHub Pages eingerichtet, bin da/bin raus als Skripte, Cockpit erzeugt sich selbst</b></div></div>
       <div class="row"><span class="h">5d343a7</span><div class="t"><b>Sessionende: Cockpit, Syncstatus und Vault auf Pages-Umstellung nachgezogen</b></div></div>
       <div class="row"><span class="h">f2b4476</span><div class="t"><b>Veroeffentlichung ueber GitHub Pages statt Artifacts</b></div></div>
-      <div class="row"><span class="h">1837512</span><div class="t"><b>Cockpit und Vault-Status auf den aktuellen Commit nachgezogen</b></div></div>
     </div>
   </div>
-<!--STATUS:END-->
+
   <div>
     <h2>Was als Nächstes dran ist</h2>
     <ul class="todo">
-      <li class="big">Deutsche Fassung des Manuskripts &mdash; 12 Kapitel, größter offener Posten</li>
+      <li class="star">Designs einzigartig machen — jedes Theme mit eigener Deko statt nur Farbwechsel: Jungle mit Pflanzen und Jungle-Kleidung auf den Figuren, Sommer mit Palmen und Meer, jedes Theme unverwechselbar</li>
+      <li class="star">Ränge überarbeiten — Level 0 / unranked als Startpunkt, Boss-Aura animiert</li>
+      <li class="star">Körper-Figur links mittig — zeigt je Muskelbereich farblich den Rang (Olympier bis Wood/unranked), bester Bereich mit animiertem Effekt</li>
+      <li class="star">Coach reparieren und deutlich nützlicher machen, Popup-Nachricht prüfen</li>
+      <li class="star">Komplette Seite durchklicken und alle gefundenen Fehler beheben</li>
+      <li>Deutsche Fassung des Manuskripts (12 Kapitel, größter Posten)</li>
       <li>PWA-Manifest und Service Worker</li>
       <li>Demo-Clips für die Progressionsleitern</li>
-      <li>Echte Bestenliste braucht einen Server &mdash; aktuell Demo-Ansicht mit Rangverteilung</li>
-      <li>Kapiteltexte im Hub sind weiter englisch, Oberfläche ist zweisprachig</li>
+      <li>Echte Bestenliste braucht Server; vor Verkauf Zugangsschutz vor den Hub</li>
     </ul>
+  </div>
+<!--STATUS:END-->
   </div>
 
   <div class="note">
