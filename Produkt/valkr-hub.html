@@ -70,6 +70,18 @@
   button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   input,select,textarea{font:inherit}
   :focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+  /* Theme-Szenerie: feste Kulisse am unteren Rand, je Theme eine eigene Welt.
+     Liegt hinter dem Inhalt, stoert nichts, macht aber jedes Theme unverwechselbar. */
+  #scenery{position:fixed;left:0;right:0;bottom:0;height:38vh;max-height:340px;z-index:0;pointer-events:none;overflow:hidden}
+  #scenery svg{position:absolute;bottom:0;left:0;width:100%;height:100%;display:block}
+  .sway{transform-origin:bottom center;animation:sway 7s ease-in-out infinite}
+  .sway2{transform-origin:bottom center;animation:sway 9s ease-in-out infinite reverse}
+  @keyframes sway{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.4deg)}}
+  .bob{animation:bob 6s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .shimmer{animation:shimmer 5s ease-in-out infinite}
+  @keyframes shimmer{0%,100%{opacity:.28}50%{opacity:.6}}
+  @media (prefers-reduced-motion:reduce){.sway,.sway2,.bob,.shimmer{animation:none}}
   #bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
   .shell{max-width:1120px;margin:0 auto;padding:0 clamp(.7rem,3vw,1.5rem) 4rem;position:relative;z-index:1}
 
@@ -473,6 +485,7 @@
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.flake{display:none}#bgfx{display:none}}
 </style>
+<div id="scenery" aria-hidden="true"></div>
 <canvas id="bgfx" aria-hidden="true"></canvas>
 <div id="tipbox" role="tooltip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
@@ -917,7 +930,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='8.2';
+var VERSION='8.3';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1134,6 +1147,30 @@ var IC={
 var HEADS={push:[11,14],pull:[23,18],row:[15,20],press:[23,12],legs:[18,9],core:[10,17],skill:[23,30],lsit:[12,12],pistol:[19,11],handstand:[21,32],muscleup:[23,8],frontlever:[12,20]};
 /* rank cosmetics — unlocked by the overall tier, pure decoration on every figure */
 var curTier=0;
+/* Boss-Aura des hoechsten Rangs: drei Ebenen, alle in Bewegung.
+   Ein pulsierender Kern, ein gegenlaeufig rotierender Strichring und
+   vier umlaufende Funken. Bewusst nur beim Olympier -- sonst waere es Laerm. */
+var BOSSAURA =
+  '<circle cx="23" cy="23" r="17" fill="#F0D060" fill-opacity=".12">'+
+    '<animate attributeName="fill-opacity" values=".07;.20;.07" dur="2.6s" repeatCount="indefinite"/>'+
+  '</circle>'+
+  '<circle cx="23" cy="23" r="19" fill="none" stroke="#F0D060" stroke-width="1.2" opacity=".8">'+
+    '<animate attributeName="r" values="17.5;21.5;17.5" dur="2.2s" repeatCount="indefinite"/>'+
+    '<animate attributeName="opacity" values=".85;.15;.85" dur="2.2s" repeatCount="indefinite"/>'+
+  '</circle>'+
+  '<circle cx="23" cy="23" r="15" fill="none" stroke="#F0D060" stroke-width="1" stroke-dasharray="4 6" opacity=".7">'+
+    '<animateTransform attributeName="transform" type="rotate" from="0 23 23" to="360 23 23" dur="9s" repeatCount="indefinite"/>'+
+  '</circle>'+
+  '<circle cx="23" cy="23" r="21" fill="none" stroke="#FFE9A8" stroke-width=".7" stroke-dasharray="2 12" opacity=".55">'+
+    '<animateTransform attributeName="transform" type="rotate" from="360 23 23" to="0 23 23" dur="6s" repeatCount="indefinite"/>'+
+  '</circle>'+
+  '<g opacity=".9">'+
+    '<animateTransform attributeName="transform" type="rotate" from="0 23 23" to="360 23 23" dur="4.5s" repeatCount="indefinite"/>'+
+    '<circle cx="23" cy="4" r="1.5" fill="#FFE9A8"/>'+
+    '<circle cx="42" cy="23" r="1.1" fill="#F0D060"/>'+
+    '<circle cx="23" cy="42" r="1.5" fill="#FFE9A8"/>'+
+    '<circle cx="4" cy="23" r="1.1" fill="#F0D060"/>'+
+  '</g>';
 function crownAt(x,y){
   var b=y-4.5,t=y-9.5;
   return '<path d="M'+(x-4.5)+' '+b+' L'+(x-4.5)+' '+t+' L'+(x-2)+' '+(t+2.4)+' L'+x+' '+(t-1)+' L'+(x+2)+' '+(t+2.4)+' L'+(x+4.5)+' '+t+' L'+(x+4.5)+' '+b+' Z" fill="#F0D060" stroke="#B8862F" stroke-width=".7"/>';
@@ -1141,9 +1178,7 @@ function crownAt(x,y){
 function figDecor(k){
   var t=curTier,pre='',post='';
   if(t>=8){
-    pre='<circle cx="23" cy="23" r="17" fill="rgba(240,208,96,.14)"/>'+
-        '<circle cx="23" cy="23" r="19" fill="none" stroke="#F0D060" stroke-width="1.1" opacity=".75"><animate attributeName="r" values="17.5;20.5;17.5" dur="2.2s" repeatCount="indefinite"/><animate attributeName="opacity" values=".75;.25;.75" dur="2.2s" repeatCount="indefinite"/></circle>'+
-        '<circle cx="23" cy="23" r="14" fill="none" stroke="#F0D060" stroke-width=".7" opacity=".4"/>';
+    pre=BOSSAURA;
     var h=HEADS[k]||[23,12];post=crownAt(h[0],h[1]);
   }else if(t===7){pre='<circle cx="23" cy="23" r="18" fill="none" stroke="'+TIERS[7].c+'" stroke-width="1" opacity=".6"><animate attributeName="opacity" values=".6;.2;.6" dur="1.6s" repeatCount="indefinite"/></circle>';}
   else if(t===6){pre='<circle cx="23" cy="23" r="18" fill="none" stroke="'+TIERS[6].c+'" stroke-width="1" opacity=".55"/><circle cx="23" cy="23" r="15" fill="none" stroke="'+TIERS[6].c+'" stroke-width=".6" opacity=".3"/>';}
@@ -1152,7 +1187,56 @@ function figDecor(k){
   else if(t===3){post='<circle cx="37" cy="9" r="1.6" fill="'+TIERS[3].c+'" opacity=".9"/><circle cx="9" cy="34" r="1.1" fill="'+TIERS[3].c+'" opacity=".6"/>';}
   return {pre:pre,post:post};
 }
-function sv(k,c,s){s=s||34;var d=figDecor(k);return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 46 46" style="overflow:visible" aria-hidden="true">'+d.pre+(IC[k]||IC.skill).replace(/\{c\}/g,c)+d.post+'</svg>';}
+/* Theme-Ausstattung der Figuren. Liegt ueber der Rang-Deko und aendert nur die
+   Optik -- nie den Rang. Jedes Theme gibt den Maennchen eine eigene Handschrift. */
+function themeOutfit(k){
+  var head=HEADS[k]||[23,12], hx=head[0], hy=head[1];
+  var ac=cvar('--aurora'), ic=cvar('--ice'), br=cvar('--brass'), em=cvar('--ember');
+  if(pack==='jungle'){
+    /* Blattstirnband und ein Blatt am Ruecken */
+    return '<g opacity=".95">'+
+      '<path d="M'+(hx-4.6)+' '+(hy-2.4)+' q4.6 -2.6 9.2 0" fill="none" stroke="'+ac+'" stroke-width="1.8" stroke-linecap="round"/>'+
+      '<path d="M'+(hx+3.4)+' '+(hy-3.2)+' q3.4 -3.4 5.6 -1.2 q-1 3.4 -5.6 1.2 Z" fill="'+ac+'"/>'+
+      '<path d="M'+(hx-3.4)+' '+(hy-3.2)+' q-3.4 -3.4 -5.6 -1.2 q1 3.4 5.6 1.2 Z" fill="'+ac+'" opacity=".8"/>'+
+      '</g>';
+  }
+  if(pack==='summer'){
+    /* Sonnenbrille und Strohhut-Krempe */
+    return '<g>'+
+      '<path d="M'+(hx-5.4)+' '+(hy-3.4)+' q5.4 -2.2 10.8 0" fill="none" stroke="'+br+'" stroke-width="2.2" stroke-linecap="round"/>'+
+      '<rect x="'+(hx-4.4)+'" y="'+(hy-1.3)+'" width="3.6" height="2.6" rx="1" fill="'+cvar('--ink')+'" opacity=".85"/>'+
+      '<rect x="'+(hx+0.8)+'" y="'+(hy-1.3)+'" width="3.6" height="2.6" rx="1" fill="'+cvar('--ink')+'" opacity=".85"/>'+
+      '<path d="M'+(hx-0.8)+' '+hy+' h1.6" stroke="'+cvar('--ink')+'" stroke-width=".8" opacity=".85"/>'+
+      '</g>';
+  }
+  if(pack==='ocean'){
+    /* Taucherbrille und Luftblaeschen */
+    return '<g>'+
+      '<circle cx="'+(hx-1.9)+'" cy="'+(hy-0.3)+'" r="2.1" fill="none" stroke="'+ic+'" stroke-width="1.2"/>'+
+      '<circle cx="'+(hx+1.9)+'" cy="'+(hy-0.3)+'" r="2.1" fill="none" stroke="'+ic+'" stroke-width="1.2"/>'+
+      '<path d="M'+(hx-4)+' '+(hy-0.3)+' h-1.6 M'+(hx+4)+' '+(hy-0.3)+' h1.6" stroke="'+ic+'" stroke-width="1"/>'+
+      '<circle cx="'+(hx+6)+'" cy="'+(hy-5)+'" r="1.5" fill="none" stroke="'+ic+'" stroke-width=".8" opacity=".8">'+
+      '<animate attributeName="cy" values="'+(hy-4)+';'+(hy-13)+'" dur="2.6s" repeatCount="indefinite"/>'+
+      '<animate attributeName="opacity" values=".8;0" dur="2.6s" repeatCount="indefinite"/></circle>'+
+      '<circle cx="'+(hx+8)+'" cy="'+(hy-6)+'" r="1" fill="none" stroke="'+ic+'" stroke-width=".7" opacity=".6">'+
+      '<animate attributeName="cy" values="'+(hy-5)+';'+(hy-15)+'" dur="3.4s" begin="1s" repeatCount="indefinite"/>'+
+      '<animate attributeName="opacity" values=".6;0" dur="3.4s" begin="1s" repeatCount="indefinite"/></circle>'+
+      '</g>';
+  }
+  if(pack==='ember'){
+    /* Glutschweif hinter dem Kopf */
+    return '<g opacity=".9">'+
+      '<path d="M'+(hx-5.5)+' '+(hy+1)+' q-3.5 -2.5 -2.5 -6 q2.5 2 3.5 4.5 Z" fill="'+em+'">'+
+      '<animate attributeName="opacity" values=".9;.35;.9" dur="1.4s" repeatCount="indefinite"/></path>'+
+      '<path d="M'+(hx+5.5)+' '+(hy+1)+' q3.5 -2.5 2.5 -6 q-2.5 2 -3.5 4.5 Z" fill="'+br+'">'+
+      '<animate attributeName="opacity" values=".55;.9;.55" dur="1.8s" repeatCount="indefinite"/></path>'+
+      '</g>';
+  }
+  if(pack==='stone'){ return ''; }
+  /* aurora / auto: Schneeflocke ueber dem Kopf */
+  return '<g opacity=".75"><path d="M'+hx+' '+(hy-7.5)+' v4 M'+(hx-1.7)+' '+(hy-6.5)+' l3.4 2 M'+(hx+1.7)+' '+(hy-6.5)+' l-3.4 2" stroke="'+ic+'" stroke-width="1" stroke-linecap="round"/></g>';
+}
+function sv(k,c,s){s=s||34;var d=figDecor(k);return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 46 46" style="overflow:visible" aria-hidden="true">'+d.pre+(IC[k]||IC.skill).replace(/\{c\}/g,c)+themeOutfit(k)+d.post+'</svg>';}
 function cvar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 var PAT=[
  {id:'push',name:'Push',kind:'Horizontal push',cv:'--aurora',blurb:'Chest, shoulders and triceps.',media:'Push-up - full range - 40 s',
@@ -1983,10 +2067,92 @@ var PACKS=[
 ];
 var pack=get('pack','auto');
 function fxOf(){var f='snow';PACKS.forEach(function(p){if(p.id===pack)f=p.fx;});return f;}
+/* Kulisse je Theme. Silhouetten in Theme-Farben -- leichtgewichtig,
+   liegt hinter dem Inhalt und macht jedes Theme unverwechselbar. */
+function sceneFor(id){
+  var c1=cvar('--surf2'),c2=cvar('--line'),ac=cvar('--aurora'),ic=cvar('--ice'),br=cvar('--brass'),em=cvar('--ember');
+  if(id==='jungle'){
+    return '<svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMax slice">'+
+      '<g opacity=".5" fill="'+c1+'"><path d="M0 340 L0 190 q60 -40 120 -10 q70 -60 150 -6 q60 -50 130 6 l0 160 Z"/>'+
+      '<path d="M1200 340 L1200 200 q-70 -46 -140 -8 q-60 -54 -140 4 l0 144 Z"/></g>'+
+      '<g class="sway" style="transform-origin:120px 340px" fill="none" stroke="'+ac+'" stroke-width="4" stroke-linecap="round" opacity=".8">'+
+      '<path d="M120 340 C118 280 116 240 112 196"/>'+
+      '<path d="M114 300 C86 292 70 276 58 256"/><path d="M116 272 C144 264 162 248 174 228"/>'+
+      '<path d="M113 246 C88 238 74 224 64 206"/><path d="M115 222 C140 214 156 200 166 182"/>'+
+      '<path d="M112 200 C96 190 88 178 82 164"/></g>'+
+      '<g class="sway2" style="transform-origin:1080px 340px" fill="'+ac+'" opacity=".55">'+
+      '<path d="M1080 340 C1078 280 1076 250 1072 214" stroke="'+ac+'" stroke-width="4" fill="none"/>'+
+      '<ellipse cx="1040" cy="196" rx="42" ry="26" transform="rotate(-24 1040 196)"/>'+
+      '<ellipse cx="1116" cy="212" rx="38" ry="23" transform="rotate(22 1116 212)"/>'+
+      '<ellipse cx="1074" cy="160" rx="34" ry="21" transform="rotate(-6 1074 160)"/></g>'+
+      '<g stroke="'+ac+'" stroke-width="3" fill="none" opacity=".35">'+
+      '<path d="M300 340 C304 290 296 250 306 210"/><path d="M900 340 C896 296 904 258 894 222"/></g>'+
+      '<path d="M0 340 L1200 340" stroke="'+c2+'" stroke-width="2" opacity=".5"/></svg>';
+  }
+  if(id==='summer'){
+    return '<svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMax slice">'+
+      '<rect x="0" y="238" width="1200" height="102" fill="'+ic+'" opacity=".28"/>'+
+      '<g stroke="'+ic+'" stroke-width="2.5" fill="none" opacity=".5" class="shimmer">'+
+      '<path d="M0 262 q40 -8 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0"/>'+
+      '<path d="M0 288 q50 -9 100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0 t100 0"/></g>'+
+      '<circle cx="1010" cy="120" r="46" fill="'+br+'" opacity=".38" class="bob"/>'+
+      '<g class="sway" style="transform-origin:150px 340px">'+
+      '<path d="M150 340 C144 270 140 220 132 172" stroke="'+em+'" stroke-width="9" fill="none" stroke-linecap="round" opacity=".75"/>'+
+      '<g fill="'+ac+'" opacity=".7">'+
+      '<path d="M132 170 C92 148 64 152 40 172 C74 160 106 162 132 176 Z"/>'+
+      '<path d="M132 170 C170 142 208 146 232 168 C198 156 162 158 132 176 Z"/>'+
+      '<path d="M132 170 C112 128 84 108 54 102 C90 118 116 142 130 178 Z"/>'+
+      '<path d="M132 170 C154 126 186 106 216 100 C180 118 152 142 134 178 Z"/></g></g>'+
+      '<g class="sway2" style="transform-origin:1090px 340px">'+
+      '<path d="M1090 340 C1094 286 1096 248 1100 212" stroke="'+em+'" stroke-width="7" fill="none" stroke-linecap="round" opacity=".6"/>'+
+      '<g fill="'+ac+'" opacity=".55">'+
+      '<path d="M1100 210 C1068 194 1046 198 1028 214 C1054 204 1080 206 1100 216 Z"/>'+
+      '<path d="M1100 210 C1132 190 1162 194 1180 210 C1152 200 1124 202 1100 216 Z"/>'+
+      '<path d="M1100 210 C1086 178 1064 162 1040 158 C1068 172 1088 190 1099 218 Z"/></g></g>'+
+      '<path d="M0 340 L1200 340" stroke="'+br+'" stroke-width="3" opacity=".35"/></svg>';
+  }
+  if(id==='ocean'){
+    return '<svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMax slice">'+
+      '<g opacity=".22" fill="'+ic+'"><path d="M120 0 L200 340 L60 340 Z"/><path d="M520 0 L600 340 L450 340 Z"/><path d="M960 0 L1030 340 L890 340 Z"/></g>'+
+      '<g stroke="'+ac+'" stroke-width="6" fill="none" stroke-linecap="round" opacity=".55">'+
+      '<path class="sway" style="transform-origin:180px 340px" d="M180 340 C168 286 190 250 176 206 C166 176 182 152 176 130"/>'+
+      '<path class="sway2" style="transform-origin:240px 340px" d="M240 340 C252 292 232 258 244 216 C252 190 238 168 246 148"/>'+
+      '<path class="sway" style="transform-origin:980px 340px" d="M980 340 C992 288 970 254 984 210 C992 184 978 162 986 142"/>'+
+      '<path class="sway2" style="transform-origin:1040px 340px" d="M1040 340 C1028 296 1048 262 1036 224"/></g>'+
+      '<g fill="'+c1+'" opacity=".7"><ellipse cx="420" cy="336" rx="70" ry="18"/><ellipse cx="760" cy="338" rx="90" ry="16"/></g>'+
+      '<path d="M0 340 L1200 340" stroke="'+c2+'" stroke-width="2" opacity=".5"/></svg>';
+  }
+  if(id==='ember'){
+    return '<svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMax slice">'+
+      '<g fill="'+c1+'" opacity=".8"><path d="M0 340 L0 268 L120 232 L250 274 L380 240 L520 282 L660 246 L800 284 L940 250 L1080 286 L1200 258 L1200 340 Z"/></g>'+
+      '<path d="M0 340 L0 300 L160 286 L320 306 L480 288 L640 310 L800 290 L980 312 L1200 292 L1200 340 Z" fill="'+em+'" opacity=".3"/>'+
+      '<g class="shimmer">'+
+      '<ellipse cx="240" cy="330" rx="90" ry="16" fill="'+em+'" opacity=".35"/>'+
+      '<ellipse cx="700" cy="334" rx="120" ry="18" fill="'+br+'" opacity=".28"/>'+
+      '<ellipse cx="1050" cy="330" rx="80" ry="14" fill="'+em+'" opacity=".3"/></g>'+
+      '<g fill="none" stroke="'+em+'" stroke-width="2" opacity=".45" class="bob">'+
+      '<path d="M240 318 C232 300 248 292 240 274"/><path d="M700 320 C692 300 710 292 702 272"/>'+
+      '<path d="M1050 318 C1042 302 1058 294 1050 278"/></g></svg>';
+  }
+  if(id==='stone'){
+    return '<svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMax slice">'+
+      '<g fill="'+c1+'" opacity=".75"><path d="M0 340 L0 292 L180 262 L360 296 L560 268 L760 300 L980 270 L1200 298 L1200 340 Z"/></g>'+
+      '<path d="M0 340 L1200 340" stroke="'+c2+'" stroke-width="2" opacity=".6"/></svg>';
+  }
+  return '<svg viewBox="0 0 1200 340" preserveAspectRatio="xMidYMax slice">'+
+    '<g fill="'+c1+'" opacity=".85"><path d="M0 340 L0 250 L150 140 L280 232 L420 96 L560 220 L700 130 L850 236 L1000 150 L1130 240 L1200 196 L1200 340 Z"/></g>'+
+    '<g fill="'+c2+'" opacity=".55"><path d="M0 340 L0 296 L170 240 L330 300 L500 246 L680 306 L860 250 L1040 304 L1200 258 L1200 340 Z"/></g>'+
+    '<path d="M0 340 L1200 340" stroke="'+c2+'" stroke-width="2" opacity=".5"/></svg>';
+}
+function drawScene(){
+  var el=$('scenery'); if(!el) return;
+  if(cfg.motion==='off'||SYSRED){el.innerHTML='';return;}
+  el.innerHTML=sceneFor(pack);
+}
 function applyPack(id){
   pack=id;set('pack',id);document.documentElement.setAttribute('data-pack',id);
   seen.themes[id]=1;saveSeen();
-  buildThemeGrid();buildTiles();buildSkills();volBar();renderDay();readiness();sizeCv();refresh();
+  buildThemeGrid();buildTiles();buildSkills();volBar();renderDay();readiness();sizeCv();drawScene();refresh();
 }
 function buildThemeGrid(){
   var L=cfg.lang==='de'?1:0;
@@ -2076,7 +2242,7 @@ $('setUnits').addEventListener('change',function(){
   $('f-w').value=toDisp(oldW,'w').toFixed(1);$('f-h').value=toDisp(oldH,'l').toFixed(1);
   syncSettings();buildMeas();calc();drawW();refresh();});
 $('setTrack').addEventListener('change',function(){cfg.track=this.value;saveCfg();renderDay();buildWeeks();volBar();refresh();});
-$('setMotion').addEventListener('change',function(){cfg.motion=this.value;saveCfg();sizeCv();});
+$('setMotion').addEventListener('change',function(){cfg.motion=this.value;saveCfg();sizeCv();drawScene();});
 $('setSound').addEventListener('change',function(){cfg.sound=this.value;saveCfg();if(this.value==='on')beep();});
 $('setHooks').addEventListener('change',function(){cfg.hooks=this.value;saveCfg();$('rotq').style.display=this.value==='on'?'':'none';});
 $('setStart').addEventListener('change',function(){
@@ -2512,7 +2678,7 @@ buildLearn();buildAccess();renderWins();
 renderDay();streak();calc();drawW();volBar();buildWeeks();
 evalAch(true);
 refresh();paint();mobStopF();
-rotQ(true);if(cfg.hooks!=='on')$('rotq').style.display='none';
+drawScene();rotQ(true);if(cfg.hooks!=='on')$('rotq').style.display='none';
 $('y-goal').value=get('goal','');
 tickClock();setInterval(tickClock,20000);
 $('verTag').textContent='v'+VERSION;
