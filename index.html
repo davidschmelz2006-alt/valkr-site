@@ -1,0 +1,222 @@
+<title>VALKR Cockpit</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --night:#08151E;--aurora:#35C39C;--ember:#E8703A;--brass:#D4A73C;--ice:#7FCDE4;
+    --bg:#D8CFBE;--surf:#E4DCCC;--surf2:#CEC4B0;--surf3:#EBE4D6;
+    --ink:#12242F;--ink2:#4F6573;--ink3:#7C8B96;--line:#BFB4A0;--line2:#CDC3B0;
+    --sh:0 1px 2px rgba(0,0,0,.07),0 8px 20px rgba(0,0,0,.09);
+    --fd:"Segoe UI Semibold","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --fm:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+    --fb:Georgia,"Iowan Old Style","Times New Roman",serif;
+  }
+  @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+    --bg:#050F16;--surf:#0D212C;--surf2:#091820;--surf3:#112A37;
+    --ink:#E6EDF0;--ink2:#93A9B6;--ink3:#63798A;--line:#1B3441;--line2:#132631;
+    --sh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);}}
+  :root[data-theme="dark"]{
+    --bg:#050F16;--surf:#0D212C;--surf2:#091820;--surf3:#112A37;
+    --ink:#E6EDF0;--ink2:#93A9B6;--ink3:#63798A;--line:#1B3441;--line2:#132631;
+    --sh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);}
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  :focus-visible{outline:2px solid var(--ember);outline-offset:2px}
+  .shell{max-width:720px;margin:0 auto;padding:clamp(1.4rem,5vw,2.8rem) 1.2rem 3rem;display:flex;flex-direction:column;gap:1.5rem}
+
+  .top{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:.6rem}
+  .brand svg{flex:none}
+  .brand b{font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:.85rem;display:block}
+  .brand span{display:block;font-family:var(--fm);font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--ink3);margin-top:1px}
+  .asof{font-family:var(--fm);font-size:.6rem;color:var(--ink3);letter-spacing:.04em;text-align:right;line-height:1.5}
+
+  .status{display:flex;align-items:center;gap:.9rem;background:var(--night);color:#EFEAE0;
+    border-radius:5px;padding:1.05rem 1.2rem;position:relative;overflow:hidden}
+  .status::before{content:"";position:absolute;inset:-30% -10% auto -10%;height:80%;
+    background:radial-gradient(50% 90% at 25% 50%,rgba(53,195,156,.28),transparent 70%);filter:blur(10px)}
+  .status>*{position:relative}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;background:var(--aurora);box-shadow:0 0 0 4px rgba(53,195,156,.18)}
+  .status b{font-family:var(--fd);font-weight:600;font-size:1.02rem;display:block}
+  .status span{font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;opacity:.62}
+
+  h2{font-family:var(--fd);font-weight:600;font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ink3);margin:.4rem 0 0}
+
+  .doors{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.6rem}
+  .door{background:var(--surf);border:1px solid var(--line);border-left:4px solid var(--brass);border-radius:4px;
+    padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.32rem;text-decoration:none;
+    box-shadow:var(--sh);transition:transform .16s,border-color .16s}
+  .door:hover{transform:translateY(-2px);border-color:var(--aurora)}
+  .door .dt{display:flex;align-items:baseline;gap:.5rem}
+  .door b{font-family:var(--fd);font-weight:600;font-size:1.05rem}
+  .door .v{font-family:var(--fm);font-size:.58rem;letter-spacing:.08em;color:var(--brass)}
+  .door p{margin:0;font-size:.83rem;color:var(--ink2)}
+  .door .go{font-family:var(--fm);font-size:.54rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--brass);margin-top:.4rem}
+
+  .share{background:var(--surf3);border:1px solid var(--line2);border-radius:4px;padding:.8rem .95rem;
+    display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+  .share .lbl{font-family:var(--fm);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);flex:none}
+  .share code{flex:1;min-width:180px;font-family:var(--fm);font-size:.72rem;color:var(--ink2);
+    background:none;padding:0;word-break:break-all}
+  .share button{font:inherit;font-family:var(--fm);font-size:.53rem;letter-spacing:.12em;text-transform:uppercase;
+    border:1px solid var(--brass);background:none;color:var(--brass);border-radius:2px;padding:.34rem .6rem;
+    cursor:pointer;transition:.16s;flex:none}
+  .share button:hover{background:var(--brass);color:var(--bg)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(205px,1fr));gap:.6rem}
+  .file{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.8rem .95rem;
+    display:flex;flex-direction:column;gap:.35rem}
+  .file .fn{font-family:var(--fm);font-size:.7rem;color:var(--ink2);word-break:break-all}
+  .file .fv{font-family:var(--fd);font-weight:600;font-size:1.15rem}
+  .file .fm{display:flex;gap:.9rem;font-family:var(--fm);font-size:.56rem;letter-spacing:.06em;color:var(--ink3);text-transform:uppercase}
+  .file .fm b{font-weight:400;color:var(--ink2);font-variant-numeric:tabular-nums}
+  .ok{color:var(--aurora)}
+
+  .log{display:flex;flex-direction:column;gap:0}
+  .row{display:flex;gap:.8rem;padding:.6rem 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:none}
+  .row .h{font-family:var(--fm);font-size:.6rem;color:var(--ink3);width:4.6rem;flex:none;padding-top:.15rem}
+  .row .t{flex:1;min-width:0}
+  .row .t b{display:block;font-family:var(--fd);font-weight:600;font-size:.87rem}
+  .row .t span{font-size:.81rem;color:var(--ink2)}
+
+  .todo{display:flex;flex-direction:column;gap:.35rem;margin:0;padding:0}
+  .todo li{font-size:.86rem;color:var(--ink2);list-style:none;padding-left:1.1rem;position:relative}
+  .todo li::before{content:"";position:absolute;left:0;top:.55em;width:5px;height:5px;border-radius:50%;background:var(--brass)}
+  .todo li.big{color:var(--ink);font-weight:600;font-family:var(--fd)}
+  .todo li.big::before{background:var(--ember);width:6px;height:6px}
+
+  .note{background:var(--surf3);border:1px solid var(--line2);border-left:3px solid var(--ice);border-radius:4px;
+    padding:.85rem 1rem;display:flex;flex-direction:column;gap:.5rem}
+  .note b{font-family:var(--fd);font-weight:600;font-size:.86rem}
+  .note p{margin:0;font-size:.83rem;color:var(--ink2)}
+  .note ol{margin:0;padding-left:1.15rem;display:flex;flex-direction:column;gap:.28rem}
+  .note li{font-size:.83rem;color:var(--ink2)}
+  .note li::marker{color:var(--brass);font-family:var(--fm);font-size:.75rem}
+  code{font-family:var(--fm);font-size:.86em;background:var(--surf2);padding:.08rem .3rem;border-radius:2px}
+
+  footer{border-top:1px solid var(--line);padding-top:.9rem;font-family:var(--fm);font-size:.54rem;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="shell">
+  <div class="top">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg>
+      <div><b>Valkr</b><span>Cockpit</span></div>
+    </div>
+    <div class="asof">18 Aug 2026, 21:35<br><span id="mode"></span></div>
+  </div>
+
+  <div class="status">
+    <span class="dot" aria-hidden="true"></span>
+    <div><b>Alle Checks bestanden</b><span>Strukturcheck lief sauber über alle drei Dateien</span></div>
+  </div>
+
+  <div>
+    <h2>Die Seiten</h2>
+    <div class="doors">
+      <a class="door" href="Produkt/valkr-hub.html">
+        <span class="dt"><b>Training Hub</b><span class="v">v8.0</span></span>
+        <p>Das Produkt. 13 Bereiche, Live-Coach mit Popup-Hinweisen, Ränge und Bestenliste, Skills, Ernährung.</p>
+        <span class="go">Öffnen &rarr;</span>
+      </a>
+      <a class="door" href="Produkt/valkr-identity.html">
+        <span class="dt"><b>Cover &amp; Marke</b><span class="v">v8.1</span></span>
+        <p>Die visuelle Identität und das Cover des eBooks.</p>
+        <span class="go">Öffnen &rarr;</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="share">
+    <span class="lbl">Diese Seite</span>
+    <code id="myUrl">—</code>
+    <button type="button" id="copyUrl">Link kopieren</button>
+  </div>
+
+  <div>
+    <h2>Versionen</h2>
+    <div class="grid">
+      <div class="file">
+        <span class="fn">Produkt/valkr-hub.html</span>
+        <span class="fv">v8.0</span>
+        <span class="fm"><b>2.390</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+      </div>
+      <div class="file">
+        <span class="fn">Produkt/valkr-identity.html</span>
+        <span class="fv">v8.1</span>
+        <span class="fm"><b>920</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <h2>Letzte Änderungen</h2>
+    <div class="log">
+      <div class="row"><span class="h">f2b4476</span><div class="t"><b>Öffentliche Seite</b><span>Veröffentlichung über GitHub Pages statt Artifacts; Manuskript bleibt im privaten Repo</span></div></div>
+      <div class="row"><span class="h">1837512</span><div class="t"><b>Cockpit</b><span>Diese Seite als eine Einstiegsstelle für Hub, Cover und Status</span></div></div>
+      <div class="row"><span class="h">ad24734</span><div class="t"><b>Sessionende v8.0</b><span>Vault-Status, Syncstatus und Dashboard auf den finalen Stand gezogen</span></div></div>
+      <div class="row"><span class="h">312bee2</span><div class="t"><b>Hub v8.0</b><span>Coach-Popups mit Supplement-Rat, Rangverteilung, Reset inkl. XP, Skill-Figuren, Krone und Boss-Aura, Charset-Fix</span></div></div>
+      <div class="row"><span class="h">0cefdb2</span><div class="t"><b>Vault-Ordner nachziehbar</b><span>Leere Ordner (05 Personen, 99 Anhänge) für git sichtbar gemacht</span></div></div>
+    </div>
+  </div>
+
+  <div>
+    <h2>Was als Nächstes dran ist</h2>
+    <ul class="todo">
+      <li class="big">Deutsche Fassung des Manuskripts &mdash; 12 Kapitel, größter offener Posten</li>
+      <li>PWA-Manifest und Service Worker</li>
+      <li>Demo-Clips für die Progressionsleitern</li>
+      <li>Echte Bestenliste braucht einen Server &mdash; aktuell Demo-Ansicht mit Rangverteilung</li>
+      <li>Kapiteltexte im Hub sind weiter englisch, Oberfläche ist zweisprachig</li>
+    </ul>
+  </div>
+
+  <div class="note">
+    <b>Wie diese Seite entsteht</b>
+    <p>Gebaut wird im privaten Repo. Bei jedem „bin raus" kopiert
+      <code>scripts/publish-site.sh</code> genau drei Dateien &mdash; diese Seite, den Hub
+      und das Cover &mdash; in ein zweites, öffentliches Repo und pusht sie. GitHub Pages
+      liefert sie unter der Adresse oben aus.</p>
+    <p><b>Manuskript, Vault und Finanzen bleiben im privaten Repo</b> und werden nie
+      mitkopiert. Die Kapitel des eBooks sind das Produkt &mdash; die gehören nicht ins
+      offene Netz.</p>
+    <p>Wer die Dateien lieber lokal öffnet: <code>git pull</code> im privaten Repo, dann
+      <code>index.html</code> doppelklicken. Dieselben Links funktionieren dort genauso.</p>
+  </div>
+
+  <footer>
+    <span>Quelle: privates Repo &middot; diese Seite ist Ansicht, nicht Wahrheit</span>
+    <span>Neu erzeugt bei jedem „bin raus"</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var local = location.protocol === 'file:';
+  var el = document.getElementById('myUrl');
+  var url = local ? location.href : location.href.split('#')[0];
+  el.textContent = local ? 'Lokal geöffnet — im Netz steht hier die öffentliche Adresse' : url;
+  document.getElementById('mode').textContent = local ? 'lokal aus dem Repo' : 'öffentliche Ansicht';
+  var btn = document.getElementById('copyUrl');
+  if(local){ btn.disabled = true; btn.style.opacity = '.45'; btn.style.cursor = 'default'; return; }
+  btn.addEventListener('click', function(){
+    var done = function(){ btn.textContent = 'Kopiert'; setTimeout(function(){ btn.textContent = 'Link kopieren'; }, 1600); };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(url).then(done, function(){ btn.textContent = 'Ging nicht'; });
+    } else {
+      var t = document.createElement('textarea');
+      t.value = url; document.body.appendChild(t); t.select();
+      try { document.execCommand('copy'); done(); } catch(e){ btn.textContent = 'Ging nicht'; }
+      t.remove();
+    }
+  });
+})();
+</script>

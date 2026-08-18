@@ -1,0 +1,920 @@
+<title>VALKR Identity</title><meta charset="utf-8">
+<style>
+  :root {
+    /* fixed artefact palette — the book keeps these in any theme */
+    --night:  #08151E;
+    --fjord:  #0F2C3B;
+    --deep:   #14404F;
+    --aurora: #35C39C;
+    --ice:    #7FCDE4;
+    --ember:  #E8703A;
+    --gold:   #D4A73C;
+    --bone:   #E4DBC9;
+
+    /* themed page chrome */
+    --bg:      #EDE8DE;
+    --bg-2:    #E3DCD0;
+    --panel:   #F6F2EA;
+    --ink:     #10222D;
+    --ink-2:   #4E6472;
+    --ink-3:   #7E909B;
+    --rule:    #D2C8B8;
+    --rule-2:  #E2DACC;
+
+    --f-display: "Segoe UI Semibold", "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --f-body:    Georgia, "Iowan Old Style", "Times New Roman", serif;
+    --f-mono:    ui-monospace, "SF Mono", Menlo, Consolas, "Courier New", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg:     #070F15;
+      --bg-2:   #0C1A23;
+      --panel:  #0F2029;
+      --ink:    #E8EEF0;
+      --ink-2:  #93A8B4;
+      --ink-3:  #647A87;
+      --rule:   #1E3642;
+      --rule-2: #162A34;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg:     #070F15;
+    --bg-2:   #0C1A23;
+    --panel:  #0F2029;
+    --ink:    #E8EEF0;
+    --ink-2:  #93A8B4;
+    --ink-3:  #647A87;
+    --rule:   #1E3642;
+    --rule-2: #162A34;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--f-body);
+    font-size: 17px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: clamp(1.5rem,4vw,3rem) clamp(1rem,4vw,2rem) 5rem;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.75rem,6vw,4.5rem);
+  }
+
+  .eyebrow {
+    font-family: var(--f-mono);
+    font-size: .66rem;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--ember);
+    margin: 0;
+  }
+
+  .masthead {
+    display: flex; flex-wrap: wrap; align-items: baseline;
+    justify-content: space-between; gap: 1rem;
+    border-bottom: 1px solid var(--rule); padding-bottom: 1rem;
+  }
+  .masthead h1 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(1.4rem,3.4vw,1.9rem);
+    letter-spacing: .34em; text-transform: uppercase;
+    margin: 0; line-height: 1;
+  }
+  .masthead p { margin: 0; color: var(--ink-2); font-size: .9rem; }
+
+  .block { display: flex; flex-direction: column; gap: 1.5rem; }
+  .block-head { display: flex; flex-direction: column; gap: .4rem; }
+  .block-head h2 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(1.25rem,2.8vw,1.7rem);
+    letter-spacing: .04em; margin: 0; line-height: 1.15; text-wrap: balance;
+  }
+  .block-head p { margin: 0; color: var(--ink-2); max-width: 64ch; font-size: .96rem; }
+
+  /* ============ COVERS ============ */
+  .covers {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(270px,1fr));
+    gap: clamp(1.2rem,3vw,2rem);
+    align-items: start;
+  }
+  .cover {
+    aspect-ratio: 2/3;
+    position: relative;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem 1.4rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,.2), 0 18px 40px rgba(0,0,0,.28);
+    color: var(--bone);
+    isolation: isolate;
+  }
+  .cover-a { background: var(--night); }
+  .cover-d { background: #0B1F2B; }
+  .cover-e { background: var(--deep); }
+  /* centred stack — mark, wordmark, descriptor on one optical axis */
+  .cover.centred { justify-content: center; gap: 0; padding: 2rem 1.4rem; }
+  .cover.centred .rune { margin-bottom: 1.5rem; }
+  /* soft blend so the peak artwork never shows a hard edge */
+  .fade {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 74%;
+    z-index: 0; pointer-events: none;
+  }
+  .fade-a { background: linear-gradient(to bottom, rgba(8,21,30,0) 0%, rgba(8,21,30,.55) 42%, rgba(8,21,30,.92) 78%, #08151E 100%); }
+
+  /* night sky — stars are static, only the shooting star moves */
+  .stars { position: absolute; inset: 0 0 auto 0; height: 62%; z-index: 1; pointer-events: none; }
+  .stars i {
+    position: absolute; display: block; border-radius: 50%; background: #F1ECE2;
+  }
+  .shoot {
+    position: absolute; z-index: 3; pointer-events: none;
+    top: 13%; right: 15%; width: 78px; height: 1.5px;
+    background: linear-gradient(to left, rgba(241,236,226,.95), rgba(241,236,226,0));
+    transform: rotate(24deg); transform-origin: right center;
+    border-radius: 2px;
+    animation: shoot 8s ease-in infinite;
+  }
+  .shoot::after {
+    content: ""; position: absolute; right: -2px; top: -1.5px;
+    width: 4.5px; height: 4.5px; border-radius: 50%; background: #F1ECE2;
+    box-shadow: 0 0 7px 1.5px rgba(241,236,226,.8);
+  }
+  @keyframes shoot {
+    0%   { opacity: 0; transform: rotate(24deg) translateX(34px) scaleX(.25) }
+    5%   { opacity: 1 }
+    16%  { opacity: 0; transform: rotate(24deg) translateX(-100px) scaleX(1) }
+    100% { opacity: 0; transform: rotate(24deg) translateX(-100px) scaleX(1) }
+  }
+  /* print / PDF and reduced motion: hold it mid-streak so it still reads */
+  @media (prefers-reduced-motion: reduce), print {
+    .shoot { animation: none; opacity: .9; transform: rotate(24deg) translateX(-34px) }
+  }
+
+  /* mountain range — near full bleed, touching both edges */
+  .range {
+    position: absolute; left: -2%; right: -2%; bottom: 0;
+    width: 104%; z-index: 0; pointer-events: none; display: block;
+  }
+
+  /* the mark, at proper scale */
+  .cover.centred .mark { display: block; margin-bottom: 1.5rem; }
+  .fade-d { background: linear-gradient(to bottom, rgba(11,31,43,0) 0%, rgba(11,31,43,.5) 45%, rgba(11,31,43,.9) 80%, #0B1F2B 100%); }
+
+  /* aurora band */
+  .aurora {
+    position: absolute; inset: -10% -20% auto -20%; height: 62%;
+    background:
+      radial-gradient(60% 90% at 25% 40%, rgba(53,195,156,.55), transparent 70%),
+      radial-gradient(55% 85% at 62% 25%, rgba(127,205,228,.42), transparent 72%),
+      radial-gradient(45% 70% at 85% 55%, rgba(212,167,60,.28), transparent 75%);
+    filter: blur(6px);
+    z-index: 0;
+  }
+  .peaks { position: absolute; left: 0; right: 0; bottom: 0; z-index: 0; display: block; }
+
+  .cover > * { position: relative; z-index: 4; }
+  /* explicit stack: range, fade, stars, shooting star, then content */
+  .cover > .range  { z-index: 0; }
+  .cover > .fade   { z-index: 1; }
+  .cover > .aurora { z-index: 1; }
+  .cover > .stars  { z-index: 2; }
+  .cover > .shoot  { z-index: 3; }
+
+  .rune { display: block; margin-bottom: 1.6rem; }
+
+  .wordmark {
+    font-family: var(--f-display);
+    font-weight: 600;
+    font-size: clamp(1.65rem, 5.2vw, 2.3rem);
+    letter-spacing: .42em;
+    text-indent: .42em;
+    text-transform: uppercase;
+    margin: 0;
+    line-height: 1;
+    text-align: center;
+  }
+  .under {
+    font-family: var(--f-mono);
+    font-size: clamp(.55rem,1.5vw,.66rem);
+    letter-spacing: .46em;
+    text-indent: .46em;
+    text-transform: uppercase;
+    color: var(--ice);
+    margin: .95rem 0 0;
+    text-align: center;
+  }
+  .hairline {
+    width: 46px; height: 1px; background: var(--gold);
+    margin: 1.35rem auto 0; opacity: .85;
+  }
+  .cover-foot {
+    position: absolute; left: 1.4rem; right: 1.4rem; bottom: 1.2rem;
+    display: flex; justify-content: space-between;
+    font-family: var(--f-mono); font-size: .56rem;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: rgba(241,236,226,.55);
+  }
+
+  /* variant B — banded */
+  .cover-b { background: var(--fjord); }
+  .cover-b .bands { position: absolute; inset: 0; z-index: 0; display: flex; flex-direction: column; }
+  .cover-b .bands i { display: block; flex: 1; }
+  .knot { position: absolute; inset: 0; z-index: 0; opacity: .18; }
+
+  /* variant C — light */
+  .cover-c { background: var(--bone); color: var(--night); }
+  .cover-c .under { color: var(--deep); }
+  .cover-c .hairline { background: var(--ember); }
+  .cover-c .cover-foot { color: rgba(16,34,45,.5); }
+
+  .cap {
+    font-family: var(--f-mono); font-size: .62rem;
+    letter-spacing: .16em; text-transform: uppercase;
+    color: var(--ink-3); margin: .7rem 0 0;
+  }
+
+  /* ============ PATTERN ICONS ============ */
+  .icons {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px,1fr));
+    gap: 1px;
+    background: var(--rule);
+    border: 1px solid var(--rule);
+  }
+  .icon-cell {
+    background: var(--panel);
+    padding: 1.35rem 1rem;
+    display: flex; flex-direction: column; align-items: center;
+    gap: .7rem; text-align: center;
+  }
+  .icon-cell svg { display: block; }
+  .icon-cell b {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: .82rem; letter-spacing: .1em; text-transform: uppercase;
+  }
+  .icon-cell span { font-family: var(--f-mono); font-size: .62rem; color: var(--ink-3); letter-spacing: .08em; }
+
+  /* ============ WEEK GRID ============ */
+  .week {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(158px,1fr));
+    gap: .8rem;
+  }
+  .day {
+    background: var(--panel);
+    border: 1px solid var(--rule);
+    border-top: 4px solid var(--ink-3);
+    padding: .95rem .9rem 1rem;
+    display: flex; flex-direction: column; gap: .55rem;
+    min-height: 208px;
+  }
+  .day.train { border-top-color: var(--aurora); }
+  .day.move  { border-top-color: var(--ice); }
+  .day.rest  { border-top-color: var(--gold); }
+
+  .day-top { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
+  .day-n {
+    font-family: var(--f-mono); font-size: .6rem; letter-spacing: .16em;
+    text-transform: uppercase; color: var(--ink-3);
+  }
+  .day-kind {
+    font-family: var(--f-mono); font-size: .55rem; letter-spacing: .12em;
+    text-transform: uppercase; padding: .12rem .4rem; border-radius: 2px;
+  }
+  .train .day-kind { background: rgba(53,195,156,.16); color: var(--aurora); }
+  .move  .day-kind { background: rgba(127,205,228,.18); color: var(--ice); }
+  .rest  .day-kind { background: rgba(212,167,60,.18); color: var(--gold); }
+
+  .day h4 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: .95rem; margin: 0; letter-spacing: .02em;
+  }
+  .day ul { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: .3rem; }
+  .day li {
+    font-family: var(--f-mono); font-size: .64rem; color: var(--ink-2);
+    display: flex; justify-content: space-between; gap: .5rem;
+    font-variant-numeric: tabular-nums;
+    border-bottom: 1px dotted var(--rule-2); padding-bottom: .28rem;
+  }
+  .day li:last-child { border-bottom: none; }
+  .day li b { font-weight: 400; color: var(--ink); white-space: nowrap; }
+  .day .note { font-family: var(--f-body); font-size: .78rem; color: var(--ink-2); margin: 0; font-style: italic; }
+
+  /* ============ SPREAD ============ */
+  .spread {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(280px,1fr));
+    gap: clamp(1.2rem,3vw,2rem); align-items: start;
+  }
+  .page {
+    aspect-ratio: 2/3; background: #D9CFB9; color: var(--night);
+    border: 1px solid var(--rule);
+    box-shadow: 0 2px 4px rgba(0,0,0,.14), 0 14px 32px rgba(0,0,0,.18);
+    padding: clamp(1.1rem,2.4vw,1.6rem);
+    display: flex; flex-direction: column; gap: .55rem; overflow: hidden;
+    position: relative;
+  }
+  /* dark spread — chapter openers and rule pages */
+  .page.dark { background: var(--fjord); color: #E6E0D2; border-color: #143848; }
+  .page.dark .pagefoot { color: rgba(230,224,210,.42); border-top-color: rgba(230,224,210,.16); }
+  .page.dark .big { color: var(--ice); }
+  .page.dark .stepbar i { background: #7FCDE4; opacity: .3; }
+  .page.dark .stepbar:nth-child(5) i { background: var(--ember); opacity: 1; }
+  .page.dark .stepbar span { color: rgba(230,224,210,.55); }
+  .page.dark .callout { background: #08151E; }
+
+  /* session page — training themed */
+  .page.session { background: #0B2331; color: #E6E0D2; border-color: #143848; }
+  .page.session .pagefoot { color: rgba(230,224,210,.42); border-top-color: rgba(230,224,210,.16); }
+  .daylist { display: flex; flex-direction: column; gap: .3rem; }
+  .dayrow {
+    display: flex; align-items: center; gap: .5rem;
+    border-bottom: 1px solid rgba(230,224,210,.13); padding-bottom: .32rem;
+    font-family: var(--f-mono); font-size: .58rem; font-variant-numeric: tabular-nums;
+  }
+  .dayrow:last-child { border-bottom: none; }
+  .dayrow .nm { flex: 1; font-family: var(--f-display); font-size: .74rem; font-weight: 600; }
+  .dayrow .sv { color: var(--ice); }
+  .bigno {
+    font-family: var(--f-display); font-weight: 600; font-size: 3.4rem;
+    line-height: .85; color: var(--aurora); margin: 0;
+  }
+  .chapnum {
+    font-family: var(--f-display); font-weight: 600; font-size: 4.6rem;
+    line-height: .78; color: var(--ember); margin: 0; letter-spacing: -.02em;
+  }
+  .page .kicker {
+    font-family: var(--f-mono); font-size: .56rem; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--ember); margin: 0;
+  }
+  .page h3 {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: clamp(1.05rem,2.6vw,1.3rem); margin: 0; line-height: 1.1;
+    letter-spacing: .01em;
+  }
+  .page p { font-size: .74rem; line-height: 1.6; margin: 0; }
+  .page .big {
+    font-family: var(--f-display); font-weight: 600;
+    font-size: 1rem; line-height: 1.3; color: var(--deep); margin: 0;
+  }
+  .callout {
+    background: var(--night); color: var(--bone);
+    padding: .7rem .8rem; display: flex; flex-direction: column; gap: .25rem;
+  }
+  .callout em {
+    font-family: var(--f-mono); font-style: normal; font-size: .54rem;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--aurora);
+  }
+  .callout span { font-family: var(--f-display); font-size: .84rem; font-weight: 600; }
+  .steps { display: flex; flex-direction: column; gap: .3rem; margin-top: auto; }
+  .stepbar { display: flex; align-items: center; gap: .5rem; }
+  .stepbar i { display: block; height: 7px; background: var(--deep); opacity: .28; }
+  .stepbar:nth-child(1) i { width: 22%; }
+  .stepbar:nth-child(2) i { width: 38%; }
+  .stepbar:nth-child(3) i { width: 55%; }
+  .stepbar:nth-child(4) i { width: 74%; }
+  .stepbar:nth-child(5) i { width: 92%; background: var(--ember); opacity: 1; }
+  .stepbar span { font-family: var(--f-mono); font-size: .55rem; color: rgba(16,34,45,.6); letter-spacing: .06em; }
+  .pagefoot {
+    display: flex; justify-content: space-between; font-family: var(--f-mono);
+    font-size: .54rem; letter-spacing: .14em; text-transform: uppercase;
+    color: rgba(16,34,45,.45); border-top: 1px solid rgba(16,34,45,.15); padding-top: .5rem;
+  }
+
+  /* ============ HOOKS ============ */
+  .hooks { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: .8rem; }
+  .hook {
+    background: var(--panel); border: 1px solid var(--rule);
+    border-left: 3px solid var(--ember);
+    padding: .9rem 1rem; display: flex; flex-direction: column; gap: .4rem;
+  }
+  .hook q {
+    font-family: var(--f-display); font-weight: 600; font-size: 1rem;
+    line-height: 1.28; quotes: none; text-wrap: balance;
+  }
+  .hook small { font-family: var(--f-mono); font-size: .6rem; letter-spacing: .1em; color: var(--ink-3); text-transform: uppercase; }
+
+  /* ============ SYSTEM ============ */
+  .system { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: clamp(1rem,2.5vw,1.6rem); }
+  .panel {
+    background: var(--panel); border: 1px solid var(--rule);
+    padding: 1.2rem; display: flex; flex-direction: column; gap: .85rem;
+  }
+  .panel h3 {
+    font-family: var(--f-display); font-weight: 600; font-size: .82rem;
+    letter-spacing: .14em; text-transform: uppercase; margin: 0;
+  }
+  .swatches { display: flex; flex-direction: column; gap: .35rem; }
+  .sw { display: flex; align-items: center; gap: .65rem; }
+  .sw i { width: 30px; height: 30px; flex: none; display: block; border: 1px solid var(--rule); }
+  .sw span { font-family: var(--f-mono); font-size: .66rem; color: var(--ink-2); }
+  .sw b { font-family: var(--f-mono); font-size: .66rem; font-weight: 400; margin-left: auto; }
+
+  .trow { display: flex; flex-direction: column; gap: .2rem; padding-bottom: .55rem; border-bottom: 1px solid var(--rule-2); }
+  .trow:last-child { border-bottom: none; padding-bottom: 0; }
+  .trow em { font-family: var(--f-mono); font-style: normal; font-size: .58rem; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-3); }
+  .t-d { font-family: var(--f-display); font-weight: 600; font-size: 1.1rem; letter-spacing: .18em; text-transform: uppercase; }
+  .t-b { font-family: var(--f-body); font-size: .95rem; }
+  .t-m { font-family: var(--f-mono); font-size: .76rem; letter-spacing: .05em; }
+
+  .notes { display: flex; flex-direction: column; gap: .5rem; }
+  .notes p { margin: 0; font-size: .85rem; color: var(--ink-2); }
+  .notes strong { color: var(--ink); }
+
+  footer {
+    border-top: 1px solid var(--rule); padding-top: 1rem;
+    font-family: var(--f-mono); font-size: .64rem; letter-spacing: .1em;
+    color: var(--ink-3); text-transform: uppercase;
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <h1>Valkr</h1>
+    <p>Visual system &middot; draft 2 &middot; 17 Aug 2026</p>
+  </header>
+
+  <!-- ================= COVERS ================= -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">01 — Covers</p>
+      <h2>Direction A, and the ones it beat</h2>
+      <p>The mark is a body hanging from a bar, held in a brass ring &mdash; readable at a glance, and it works shrunk to a profile picture. Stars sit above the peaks with one shooting star on a slow loop. The mountains dissolve into the ground instead of stopping at a hard edge. Everything on the centre line, no white anywhere.</p>
+    </div>
+
+    <div class="covers">
+
+      <div>
+        <div class="cover cover-a centred">
+          <div class="aurora" aria-hidden="true" style="height:40%;opacity:.62"></div>
+
+          <div class="stars" aria-hidden="true">
+            <i style="left:6%;top:7%;width:1.5px;height:1.5px;opacity:.45"></i>
+            <i style="left:13%;top:17%;width:2.5px;height:2.5px;opacity:.9"></i>
+            <i style="left:9%;top:31%;width:1.3px;height:1.3px;opacity:.3"></i>
+            <i style="left:21%;top:4%;width:1.8px;height:1.8px;opacity:.6"></i>
+            <i style="left:18%;top:24%;width:1.3px;height:1.3px;opacity:.38"></i>
+            <i style="left:26%;top:36%;width:2.2px;height:2.2px;opacity:.72"></i>
+            <i style="left:31%;top:11%;width:1.4px;height:1.4px;opacity:.5"></i>
+            <i style="left:37%;top:29%;width:1.2px;height:1.2px;opacity:.28"></i>
+            <i style="left:34%;top:47%;width:1.5px;height:1.5px;opacity:.34"></i>
+            <i style="left:43%;top:15%;width:2.8px;height:2.8px;opacity:.95"></i>
+            <i style="left:47%;top:38%;width:1.3px;height:1.3px;opacity:.32"></i>
+            <i style="left:52%;top:6%;width:1.6px;height:1.6px;opacity:.52"></i>
+            <i style="left:56%;top:26%;width:1.2px;height:1.2px;opacity:.3"></i>
+            <i style="left:61%;top:44%;width:1.7px;height:1.7px;opacity:.4"></i>
+            <i style="left:66%;top:13%;width:2.4px;height:2.4px;opacity:.82"></i>
+            <i style="left:71%;top:33%;width:1.3px;height:1.3px;opacity:.35"></i>
+            <i style="left:74%;top:8%;width:1.5px;height:1.5px;opacity:.48"></i>
+            <i style="left:79%;top:22%;width:1.2px;height:1.2px;opacity:.3"></i>
+            <i style="left:84%;top:41%;width:1.9px;height:1.9px;opacity:.55"></i>
+            <i style="left:88%;top:12%;width:2.6px;height:2.6px;opacity:.88"></i>
+            <i style="left:93%;top:28%;width:1.3px;height:1.3px;opacity:.36"></i>
+            <i style="left:96%;top:9%;width:1.5px;height:1.5px;opacity:.42"></i>
+            <i style="left:11%;top:44%;width:1.2px;height:1.2px;opacity:.24"></i>
+            <i style="left:90%;top:47%;width:1.2px;height:1.2px;opacity:.22"></i>
+          </div>
+          <div class="shoot" aria-hidden="true"></div>
+
+          <!-- range: both flanks dissolve into the ground -->
+          <svg class="range" viewBox="0 0 320 190" aria-hidden="true" preserveAspectRatio="none" style="height:60%">
+            <defs>
+              <linearGradient id="rgA" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#2E7288"/><stop offset=".5" stop-color="#123A4B"/><stop offset="1" stop-color="#08151E"/>
+              </linearGradient>
+              <linearGradient id="rgB" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#16465A"/><stop offset=".55" stop-color="#0C2431"/><stop offset="1" stop-color="#08151E"/>
+              </linearGradient>
+              <linearGradient id="rgFade" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#08151E" stop-opacity="0"/>
+                <stop offset=".58" stop-color="#08151E" stop-opacity=".5"/>
+                <stop offset="1" stop-color="#08151E" stop-opacity="1"/>
+              </linearGradient>
+              <linearGradient id="rgSide" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0" stop-color="#08151E" stop-opacity=".95"/>
+                <stop offset=".13" stop-color="#08151E" stop-opacity="0"/>
+                <stop offset=".87" stop-color="#08151E" stop-opacity="0"/>
+                <stop offset="1" stop-color="#08151E" stop-opacity=".95"/>
+              </linearGradient>
+            </defs>
+            <polygon points="0,190 26,132 62,34 100,96 140,14 182,88 222,40 258,104 292,60 320,150 320,190" fill="url(#rgA)"/>
+            <polygon points="0,190 34,150 78,110 118,152 158,92 198,150 238,104 276,148 320,168 320,190" fill="url(#rgB)" opacity=".96"/>
+            <rect x="0" y="0" width="320" height="190" fill="url(#rgFade)"/>
+            <rect x="0" y="0" width="320" height="190" fill="url(#rgSide)"/>
+          </svg>
+          <div class="fade fade-a" aria-hidden="true" style="height:56%"></div>
+
+          <!-- mark: a real bar, hands gripping it, hanging body -->
+          <svg class="mark" width="116" height="116" viewBox="0 0 84 84" aria-hidden="true">
+            <defs>
+              <linearGradient id="mg" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#F6E1A6"/><stop offset="1" stop-color="#B8861F"/>
+              </linearGradient>
+            </defs>
+            <!-- the bar itself, with end collars -->
+            <rect x="8" y="19.6" width="68" height="3.4" rx="1.7" fill="url(#mg)"/>
+            <rect x="8" y="16.4" width="3.6" height="9.8" rx="1.4" fill="url(#mg)"/>
+            <rect x="72.4" y="16.4" width="3.6" height="9.8" rx="1.4" fill="url(#mg)"/>
+            <!-- hands wrapped over the bar -->
+            <path d="M31 18.2 a4.1 4.1 0 0 0 0 6.6" fill="none" stroke="url(#mg)" stroke-width="2.6" stroke-linecap="round"/>
+            <path d="M53 18.2 a4.1 4.1 0 0 1 0 6.6" fill="none" stroke="url(#mg)" stroke-width="2.6" stroke-linecap="round"/>
+            <!-- arms, head, torso, legs -->
+            <g fill="none" stroke="url(#mg)" stroke-width="2.9" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M31.4 25.4 C32.6 31.2 34.6 35 36.6 37.4"/>
+              <path d="M52.6 25.4 C51.4 31.2 49.4 35 47.4 37.4"/>
+              <circle cx="42" cy="40.6" r="4.9"/>
+              <path d="M42 45.5 C42.2 51.4 42 56.2 41.6 59.8"/>
+              <path d="M41.6 59.8 C39.9 65 37.4 68.8 34.1 72.2"/>
+              <path d="M41.6 59.8 C43.7 65 46.2 68.8 49.6 72.2"/>
+            </g>
+          </svg>
+          <p class="wordmark">Valkr</p>
+          <p class="under">Calisthenics</p>
+          <div class="hairline" aria-hidden="true"></div>
+          <div class="cover-foot"><span>12-week program</span><span>Ed. 01</span></div>
+        </div>
+        <p class="cap" style="color:var(--aurora)">A &mdash; chosen &middot; aurora night</p>
+      </div>
+
+      <div>
+        <div class="cover cover-b centred">
+          <div class="bands" aria-hidden="true">
+            <i style="background:#08151E"></i>
+            <i style="background:#0F2C3B"></i>
+            <i style="background:#14404F"></i>
+            <i style="background:#0F2C3B"></i>
+            <i style="background:#08151E"></i>
+          </div>
+          <svg class="knot" viewBox="0 0 120 180" aria-hidden="true" preserveAspectRatio="xMidYMid slice">
+            <g fill="none" stroke="#7FCDE4" stroke-width="1.1">
+              <path d="M20 20 L60 60 L100 20 M20 60 L60 100 L100 60 M20 100 L60 140 L100 100 M20 140 L60 180 L100 140"/>
+              <path d="M20 60 L60 20 L100 60 M20 100 L60 60 L100 100 M20 140 L60 100 L100 140"/>
+            </g>
+          </svg>
+          <svg class="rune" width="42" height="42" viewBox="0 0 46 46" aria-hidden="true">
+            <g fill="none" stroke="#35C39C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 10 h32"/>
+              <path d="M16 10 L18 17 M30 10 L28 17"/>
+              <circle cx="23" cy="20" r="3.2"/>
+              <path d="M23 23 v9"/>
+              <path d="M23 32 l-4.5 8 M23 32 l4.5 8"/>
+            </g>
+          </svg>
+          <p class="wordmark">Valkr</p>
+          <p class="under">Calisthenics</p>
+          <div class="hairline" aria-hidden="true"></div>
+          <div class="cover-foot"><span>Bodyweight only</span><span>Ed. 01</span></div>
+        </div>
+        <p class="cap">B &mdash; Banded / knotwork</p>
+      </div>
+
+      <div>
+        <div class="cover cover-d centred">
+          <svg class="peaks" viewBox="0 0 300 200" width="100%" aria-hidden="true" preserveAspectRatio="none" style="height:68%">
+            <defs>
+              <linearGradient id="rd1" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#20596E"/><stop offset="1" stop-color="#0B1F2B"/>
+              </linearGradient>
+              <linearGradient id="rd2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#123A4A"/><stop offset="1" stop-color="#0B1F2B"/>
+              </linearGradient>
+            </defs>
+            <polygon points="0,200 70,54 120,132 170,34 230,144 300,74 300,200" fill="url(#rd1)" opacity=".8"/>
+            <polygon points="0,200 55,112 110,164 165,104 220,176 300,122 300,200" fill="url(#rd2)"/>
+          </svg>
+          <div class="fade fade-d" aria-hidden="true"></div>
+          <svg class="rune" width="42" height="42" viewBox="0 0 46 46" aria-hidden="true">
+            <g fill="none" stroke="#7FCDE4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 10 h32"/>
+              <path d="M16 10 L18 17 M30 10 L28 17"/>
+              <circle cx="23" cy="20" r="3.2"/>
+              <path d="M23 23 v9"/>
+              <path d="M23 32 l-4.5 8 M23 32 l4.5 8"/>
+            </g>
+          </svg>
+          <p class="wordmark">Valkr</p>
+          <p class="under">Calisthenics</p>
+          <div class="hairline" aria-hidden="true"></div>
+          <div class="cover-foot"><span>Train anywhere</span><span>Ed. 01</span></div>
+        </div>
+        <p class="cap">D &mdash; Deep peaks, no aurora</p>
+      </div>
+
+      <div>
+        <div class="cover cover-e centred">
+          <div class="aurora" aria-hidden="true" style="inset:auto -20% -18% -20%;height:52%"></div>
+          <svg class="rune" width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+            <circle cx="23" cy="23" r="20" fill="none" stroke="#D4A73C" stroke-width="1.2" opacity=".7"/>
+            <g fill="none" stroke="#E8703A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 15 h22"/>
+              <path d="M19 15 L20.5 20 M27 15 L25.5 20"/>
+              <circle cx="23" cy="23" r="2.6"/>
+              <path d="M23 25.5 v6"/>
+              <path d="M23 31.5 l-3.5 6 M23 31.5 l3.5 6"/>
+            </g>
+          </svg>
+          <p class="wordmark">Valkr</p>
+          <p class="under">Calisthenics</p>
+          <div class="hairline" aria-hidden="true"></div>
+          <div class="cover-foot"><span>Six patterns</span><span>Ed. 01</span></div>
+        </div>
+        <p class="cap">E &mdash; Emblem, fjord ground</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= ICONS ================= -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">02 — Marks</p>
+      <h2>Six patterns, six figures</h2>
+      <p>The abstract runes were too cryptic, so these are bodies doing the actual movement. Same set runs as chapter markers, tiles in the hub, day labels in the plan and stickers on the videos &mdash; one shape always means one thing.</p>
+    </div>
+
+    <div class="icons">
+      <div class="icon-cell">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#35C39C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="14" r="3"/><path d="M14 17 L30 21"/><path d="M30 21 L36 26"/><path d="M17 18 L17 27 M25 20 L25 27"/><path d="M8 30 h30"/></g></svg>
+        <b>Push</b><span>push-up</span>
+      </div>
+      <div class="icon-cell">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#7FCDE4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8 h34"/><path d="M16 8 L18 15 M30 8 L28 15"/><circle cx="23" cy="18" r="3"/><path d="M23 21 v9"/><path d="M23 30 l-4 8 M23 30 l4 8"/></g></svg>
+        <b>Pull</b><span>pull-up</span>
+      </div>
+      <div class="icon-cell">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#7FCDE4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 12 h34"/><circle cx="15" cy="20" r="3"/><path d="M18 21 L34 30"/><path d="M15 17 L20 12 M18 21 L22 13"/><path d="M32 30 h6"/></g></svg>
+        <b>Row</b><span>inverted row</span>
+      </div>
+      <div class="icon-cell">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#35C39C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="23" cy="12" r="3"/><path d="M23 15 v8"/><path d="M23 17 L15 10 M23 17 L31 10"/><path d="M23 23 L17 34 M23 23 L29 34"/></g></svg>
+        <b>Press</b><span>pike push-up</span>
+      </div>
+      <div class="icon-cell">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#E8703A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="9" r="3"/><path d="M18 12 v7"/><path d="M18 19 L27 24 L27 32"/><path d="M18 19 L13 27 L13 34"/><path d="M18 14 L27 12"/></g></svg>
+        <b>Legs</b><span>squat &amp; hinge</span>
+      </div>
+      <div class="icon-cell">
+        <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="17" r="3"/><path d="M13 19 L26 22 L38 17"/><path d="M13 19 L11 27"/><path d="M26 22 L27 30"/><path d="M6 33 h32" stroke-dasharray="3 3"/></g></svg>
+        <b>Core</b><span>hollow hold</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WEEK ================= -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">03 — Day by day</p>
+      <h2>Week 1, spelled out</h2>
+      <p>No guessing what today is. Every one of the twelve weeks looks like this &mdash; green means train, blue means move, gold means rest. Rest is printed as a task, because it is one.</p>
+    </div>
+
+    <div class="week">
+
+      <div class="day train">
+        <div class="day-top"><span class="day-n">Day 1 &middot; Mon</span><span class="day-kind">Train</span></div>
+        <h4>Session A</h4>
+        <ul>
+          <li>Pull-up / row <b>3&times;6&ndash;10</b></li>
+          <li>Push-up <b>3&times;8&ndash;12</b></li>
+          <li>Squat <b>3&times;10&ndash;15</b></li>
+          <li>Inverted row <b>3&times;8&ndash;12</b></li>
+          <li>Hollow hold <b>3&times;max</b></li>
+        </ul>
+      </div>
+
+      <div class="day move">
+        <div class="day-top"><span class="day-n">Day 2 &middot; Tue</span><span class="day-kind">Move</span></div>
+        <h4>Easy day</h4>
+        <ul>
+          <li>Walk <b>30 min</b></li>
+          <li>Wrist prep <b>2 min</b></li>
+          <li>Mobility set <b>8 min</b></li>
+        </ul>
+        <p class="note">You should finish this feeling better than you started.</p>
+      </div>
+
+      <div class="day train">
+        <div class="day-top"><span class="day-n">Day 3 &middot; Wed</span><span class="day-kind">Train</span></div>
+        <h4>Session B</h4>
+        <ul>
+          <li>Inverted row <b>3&times;8&ndash;12</b></li>
+          <li>Pike push-up <b>3&times;6&ndash;10</b></li>
+          <li>Glute bridge <b>3&times;12</b></li>
+          <li>Push-up <b>3&times;8&ndash;12</b></li>
+          <li>Side plank <b>3&times;30s</b></li>
+        </ul>
+      </div>
+
+      <div class="day rest">
+        <div class="day-top"><span class="day-n">Day 4 &middot; Thu</span><span class="day-kind">Rest</span></div>
+        <h4>Off</h4>
+        <ul>
+          <li>Protein target <b>hit it</b></li>
+          <li>Sleep <b>7&ndash;9 h</b></li>
+        </ul>
+        <p class="note">This is where the muscle is actually built.</p>
+      </div>
+
+      <div class="day train">
+        <div class="day-top"><span class="day-n">Day 5 &middot; Fri</span><span class="day-kind">Train</span></div>
+        <h4>Session C</h4>
+        <ul>
+          <li>Pull-up / row <b>3&times;6&ndash;10</b></li>
+          <li>Split squat <b>3&times;8/side</b></li>
+          <li>Push-up, harder <b>3&times;6&ndash;8</b></li>
+          <li>Nordic negative <b>3&times;5</b></li>
+          <li>Knee raise <b>3&times;10&ndash;15</b></li>
+        </ul>
+      </div>
+
+      <div class="day move">
+        <div class="day-top"><span class="day-n">Day 6 &middot; Sat</span><span class="day-kind">Move</span></div>
+        <h4>Optional</h4>
+        <ul>
+          <li>Skill practice <b>10 min</b></li>
+          <li>Walk <b>30&ndash;45 min</b></li>
+        </ul>
+        <p class="note">Skip it guilt-free if the week was heavy.</p>
+      </div>
+
+      <div class="day rest">
+        <div class="day-top"><span class="day-n">Day 7 &middot; Sun</span><span class="day-kind">Rest</span></div>
+        <h4>Off &amp; log</h4>
+        <ul>
+          <li>Weigh-in average <b>write it</b></li>
+          <li>Count hard sets <b>per pattern</b></li>
+        </ul>
+        <p class="note">Two minutes. This is what makes week 12 mean something.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= SPREAD ================= -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">04 — Inside</p>
+      <h2>Four page types, not one</h2>
+      <p>Chapter openers run dark, session pages run darker still and look like a training log, teaching pages stay on stone so long text is easy on the eyes. No page is ever white. The step bars show the ladder before a word is read.</p>
+    </div>
+
+    <div class="spread">
+
+      <div>
+        <div class="page dark">
+          <p class="kicker">Part One &middot; Principles</p>
+          <p class="chapnum">02</p>
+          <h3 style="margin-top:.4rem">How bodyweight training overloads</h3>
+          <div style="height:2px;background:var(--gold);width:44px;margin:.8rem 0"></div>
+          <p style="opacity:.82">Every argument against calisthenics is the same one: you can&rsquo;t add weight, so you can&rsquo;t progress.</p>
+          <p style="opacity:.82">It is wrong &mdash; and wrong in a useful way.</p>
+          <div style="margin-top:auto;display:flex;justify-content:center;padding:1rem 0">
+            <svg width="54" height="54" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="#35C39C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" opacity=".8"><path d="M6 8 h34"/><path d="M16 8 L18 15 M30 8 L28 15"/><circle cx="23" cy="18" r="3"/><path d="M23 21 v9"/><path d="M23 30 l-4 8 M23 30 l4 8"/></g></svg>
+          </div>
+          <div class="pagefoot"><span>Valkr</span><span>23</span></div>
+        </div>
+        <p class="cap">Chapter opener &mdash; dark</p>
+      </div>
+
+      <div>
+        <div class="page session">
+          <p class="kicker">Week 3 &middot; Day 3</p>
+          <h3>Session B</h3>
+          <p class="bigno">42<span style="font-size:.9rem;color:rgba(230,224,210,.6);font-weight:400"> min</span></p>
+          <div class="daylist" style="margin-top:.5rem">
+            <div class="dayrow"><span class="nm">Inverted row</span><span class="sv">3&times;8&ndash;12</span></div>
+            <div class="dayrow"><span class="nm">Pike push-up</span><span class="sv">3&times;6&ndash;10</span></div>
+            <div class="dayrow"><span class="nm">Glute bridge</span><span class="sv">3&times;12</span></div>
+            <div class="dayrow"><span class="nm">Push-up</span><span class="sv">3&times;8&ndash;12</span></div>
+            <div class="dayrow"><span class="nm">Side plank</span><span class="sv">3&times;30s</span></div>
+          </div>
+          <div class="callout" style="margin-top:auto">
+            <em>Rest</em><span>2 minutes. Set a timer.</span>
+          </div>
+          <div class="pagefoot"><span>Program</span><span>48</span></div>
+        </div>
+        <p class="cap">Session page &mdash; log style</p>
+      </div>
+
+      <div>
+        <div class="page">
+          <p class="kicker">Chapter 2 &middot; Push</p>
+          <h3>You can&rsquo;t add weight. You don&rsquo;t need to.</h3>
+          <p class="big">Move your body further from the pivot and the same muscle works harder. Your weight never changed.</p>
+          <p>Hands on a waist-high bar: about 40&nbsp;% of your bodyweight. On the floor: about 65&nbsp;%. Feet up on a chair: about 75&nbsp;%.</p>
+          <div class="callout">
+            <em>Remember</em>
+            <span>Leverage is your weight plate.</span>
+          </div>
+          <div class="steps">
+            <div class="stepbar"><i></i><span>Incline</span></div>
+            <div class="stepbar"><i></i><span>Knees</span></div>
+            <div class="stepbar"><i></i><span>Full</span></div>
+            <div class="stepbar"><i></i><span>Feet up</span></div>
+            <div class="stepbar"><i></i><span>One arm</span></div>
+          </div>
+          <div class="pagefoot"><span>Valkr</span><span>24</span></div>
+        </div>
+        <p class="cap">Teaching page</p>
+      </div>
+
+      <div>
+        <div class="page dark">
+          <p class="kicker">Chapter 7 &middot; Progress</p>
+          <h3>When to move up</h3>
+          <p class="big">Beat the top of your rep range by two, twice in a row. Then step up.</p>
+          <p>Your reps will drop when you do. That is the system working, not you going backwards.</p>
+          <div class="callout">
+            <em>The rule</em>
+            <span>Two extra reps. Two sessions. Step up.</span>
+          </div>
+          <p>If form breaks, stay where you are. A rep only counts if you&rsquo;d be happy to film it.</p>
+          <div class="steps">
+            <div class="stepbar"><i></i><span>Week 1&ndash;2</span></div>
+            <div class="stepbar"><i></i><span>Week 3&ndash;4</span></div>
+            <div class="stepbar"><i></i><span>Week 5&ndash;7</span></div>
+            <div class="stepbar"><i></i><span>Week 8&ndash;10</span></div>
+            <div class="stepbar"><i></i><span>Week 11&ndash;12</span></div>
+          </div>
+          <div class="pagefoot"><span>Valkr</span><span>61</span></div>
+        </div>
+        <p class="cap">Rule page</p>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ================= HOOKS ================= -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">05 — Organic</p>
+      <h2>Hooks that carry the book</h2>
+      <p>Each one is a real chapter, not a promise the book can&rsquo;t keep. First three seconds, spoken flat, no music drop.</p>
+    </div>
+
+    <div class="hooks">
+      <div class="hook"><q>You&rsquo;re not weak. You&rsquo;re doing half reps.</q><small>Ch. 5 &middot; technique</small></div>
+      <div class="hook"><q>30 push-ups and still no chest? Here&rsquo;s the reason.</q><small>Ch. 2 &middot; leverage</small></div>
+      <div class="hook"><q>I couldn&rsquo;t do one pull-up. Six weeks later I could.</q><small>Ch. 5 &middot; negatives</small></div>
+      <div class="hook"><q>Stop switching programs. Here&rsquo;s what it costs you.</q><small>Ch. 1 &middot; overload</small></div>
+      <div class="hook"><q>Your rest day is not lazy. It&rsquo;s the part that builds you.</q><small>Ch. 10 &middot; recovery</small></div>
+      <div class="hook"><q>Three numbers tell you why you&rsquo;re stuck. Take ten seconds.</q><small>Ch. 1 &middot; audit</small></div>
+    </div>
+  </section>
+
+  <!-- ================= SYSTEM ================= -->
+  <section class="block">
+    <div class="block-head">
+      <p class="eyebrow">06 — System</p>
+      <h2>Colour, type, reasoning</h2>
+    </div>
+
+    <div class="system">
+
+      <div class="panel">
+        <h3>Palette</h3>
+        <div class="swatches">
+          <div class="sw"><i style="background:#08151E"></i><span>Night</span><b>#08151E</b></div>
+          <div class="sw"><i style="background:#14404F"></i><span>Fjord</span><b>#14404F</b></div>
+          <div class="sw"><i style="background:#35C39C"></i><span>Aurora &mdash; train</span><b>#35C39C</b></div>
+          <div class="sw"><i style="background:#7FCDE4"></i><span>Ice &mdash; move</span><b>#7FCDE4</b></div>
+          <div class="sw"><i style="background:#D4A73C"></i><span>Brass &mdash; rest</span><b>#D4A73C</b></div>
+          <div class="sw"><i style="background:#E8703A"></i><span>Ember &mdash; emphasis</span><b>#E8703A</b></div>
+          <div class="sw"><i style="background:#F1ECE2"></i><span>Bone &mdash; paper</span><b>#F1ECE2</b></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Type</h3>
+        <div class="trow"><em>Wordmark &mdash; wide tracking</em><span class="t-d">Valkr</span></div>
+        <div class="trow"><em>Headings &mdash; same face, tight</em><span class="t-b" style="font-family:var(--f-display);font-weight:600;font-size:1rem">When to move up</span></div>
+        <div class="trow"><em>Reading text &mdash; serif</em><span class="t-b">Leverage is your weight plate.</span></div>
+        <div class="trow"><em>Numbers &mdash; mono</em><span class="t-m">3&times;8&ndash;12 &middot; RIR 1&ndash;3</span></div>
+      </div>
+
+      <div class="panel">
+        <h3>Why</h3>
+        <div class="notes">
+          <p><strong>Colour carries meaning.</strong> Green trains, blue moves, gold rests. You can read the week without reading a word.</p>
+          <p><strong>Wordmark stays small.</strong> Confidence, not volume &mdash; and it survives being shrunk to a profile picture.</p>
+          <p><strong>Aurora and peaks, not horned helmets.</strong> Nordic through landscape and light, which ages better than costume.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>Draft &mdash; not final. Trademark VALKR pre-checked, similarity search outstanding.</footer>
+
+</div>
