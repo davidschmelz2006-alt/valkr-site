@@ -635,6 +635,34 @@
   .swatch b{font-family:var(--fd);font-weight:600;font-size:var(--t3)}
   .swatch span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
 
+  /* Trainings-Uebersicht vor dem Start: erst sehen was ansteht (und tauschen),
+     dann der kurze Check-in -- der Tag passt sich der Tagesform an. */
+  #sessov{position:fixed;inset:0;z-index:78;background:var(--bg);display:none;overflow:auto;
+    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.2rem calc(1.4rem + env(safe-area-inset-bottom,0px))}
+  #sessov.on{display:flex;justify-content:center}
+  #sessov .sobox{width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;height:max-content}
+  #sessov .sohead{display:flex;align-items:center;gap:.8rem}
+  #sessov .sotit b{font-family:var(--fd);font-weight:600;font-size:1.2rem;display:block}
+  #sessov .sotit span{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+  #sessov #soBody{display:flex;flex-direction:column;gap:.8rem}
+  #sessov .solist{display:flex;flex-direction:column;gap:.45rem}
+  #sessov .sorow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.62rem .75rem}
+  #sessov .sorow .nm{flex:1;min-width:0}
+  #sessov .sorow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:.9rem}
+  #sessov .sorow .nm span{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+  #sessov .sorow .sv{font-family:var(--fm);font-size:.62rem;color:var(--ink2);white-space:nowrap}
+  #sessov .sorow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);transition:.16s}
+  #sessov .sorow .swp:hover{border-color:var(--aurora);color:var(--ink)}
+  #sessov .sogo{width:100%;text-align:center;padding:.8rem}
+  #sessov .soopts{display:flex;flex-direction:column;gap:.5rem}
+  #sessov .soopt{position:relative;text-align:center;background:var(--surf);border:1px solid var(--line);border-radius:5px;
+    padding:.85rem 2.2rem;font-family:var(--fd);font-weight:600;font-size:.95rem;box-shadow:var(--sh);transition:.16s}
+  #sessov .soopt:hover{border-color:var(--aurora)}
+  #sessov .soopt[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
+  #sessov .soopt[aria-pressed="true"]::after{content:"✓";position:absolute;right:.85rem;top:50%;transform:translateY(-50%);color:var(--aurora);font-size:1rem}
+  #sessov textarea{width:100%;min-height:74px;background:var(--surf);border:1px solid var(--line);border-radius:4px;
+    color:var(--ink);padding:.6rem .7rem;font:inherit;font-size:.88rem;resize:vertical}
+  #v-today .hero.go{cursor:pointer}
   /* Einleitung beim ersten Oeffnen: Vollbild, ein Schritt pro Bildschirm,
      grosse Antwortkarten, ruhiger Uebergang. */
   #intro{position:fixed;inset:0;z-index:95;background:var(--bg);display:none;overflow:auto;
@@ -969,6 +997,13 @@
 </div>
 <div id="tipbox" role="tooltip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="sessov" role="dialog" aria-modal="true" aria-label="Session overview"><div class="sobox">
+  <div class="sohead">
+    <button type="button" class="tbtn" id="soClose" aria-label="Close">&#10005;</button>
+    <div class="sotit"><b id="soTitle"></b><span id="soMeta"></span></div>
+  </div>
+  <div id="soBody"></div>
+</div></div>
 <div id="intro" role="dialog" aria-modal="true" aria-label="Welcome"><div class="ibox">
   <div class="idots" id="inDots" aria-hidden="true"></div>
   <div class="istep" id="inStep"></div>
@@ -1493,7 +1528,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.2';
+var VERSION='13.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2719,6 +2754,12 @@ function renderDay(){
       ?(cfg.lang==='de'?'Läuft — Übung '+((run.ex||0)+1)+', Satz '+(run.set||1)+'.':'In progress — exercise '+((run.ex||0)+1)+', set '+(run.set||1)+'.')
       :T('btn.runHint');
   }else rb.style.display='none';
+  var heroEl=document.querySelector('#v-today .hero');
+  if(heroEl){
+    var heroGo=isT&&pl.kind==='train';
+    heroEl.classList.toggle('go',heroGo);
+    heroEl.onclick=heroGo?function(e){if(e.target.closest('button'))return;openSessOv();}:null;
+  }
   $('timerBox').style.display=pl.kind==='train'?'':'none';
   if(pl.kind==='train')setT(pl.ph.rs);
   var tot=items.length,dc=0;for(var k in dn){if(dn[k])dc++;}
@@ -3072,22 +3113,23 @@ var run=get('run',null),runTi=null;
 function runItems(){
   var pl=plan(TODAY);
   if(pl.kind!=='train')return null;
+  var adj=(run&&run.on&&run.key===iso(TODAY)&&run.adj)||0;
   return sessOf(pl).items.map(function(x){
     return{id:x.id,l:x.l,k:x.k,fixed:!!x.v,label:x.v||null,
-           sets:x.v?1:pl.ph.sets,reps:pl.ph.reps,rest:pl.ph.rs};
+           sets:x.v?1:Math.max(2,pl.ph.sets+adj),reps:pl.ph.reps,rest:pl.ph.rs};
   });
 }
 function runValid(){
   return run&&run.on&&run.key===iso(TODAY)&&runItems();
 }
 function saveRun(){set('run',run);}
-function startRun(){
+function startRun(adj){
   var it=runItems();if(!it)return;
   /* Bei bereits abgehakten Bloecken vorn einsteigen, wo es weitergeht. */
   var dn=doneMap[iso(TODAY)]||{},i=0;
   while(i<it.length&&dn[i])i++;
   if(i>=it.length)i=0;
-  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{},t0:Date.now()};
+  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{},t0:Date.now(),adj:adj||0};
   saveRun();openRun();
 }
 function openRun(){
@@ -3174,7 +3216,8 @@ function runPaint(){
   big.textContent=cur.fixed?cur.label:(cur.reps==='test'?(DE?'max':'max'):cur.reps);
   hint.textContent=cur.fixed
     ?(DE?'Frisch und kurz halten, deutlich vor dem Versagen aufhören.':'Keep it fresh and brief, stop well short of failure.')
-    :(DE?'Satz '+run.set+' von '+cur.sets+' · Pause danach '+fmt(cur.rest):'Set '+run.set+' of '+cur.sets+' · rest after: '+fmt(cur.rest));
+    :(DE?'Satz '+run.set+' von '+cur.sets+' · Pause danach '+fmt(cur.rest):'Set '+run.set+' of '+cur.sets+' · rest after: '+fmt(cur.rest))+
+     (run.adj<0?(DE?' · heute reduziert':' · reduced today'):'');
   if(cur.fixed){reps.innerHTML='';}
   else{
     var v=run.reps[runRepsKey()];
@@ -3198,7 +3241,7 @@ function runPaint(){
 }
 $('runStart').addEventListener('click',function(){
   if(runValid()){openRun();return;}
-  startRun();
+  openSessOv();
 });
 $('rnClose').addEventListener('click',closeRun);
 $('rnPrev').addEventListener('click',function(){runJump(-1);});
@@ -4050,6 +4093,80 @@ function dataStats(){
 }
 
 /* ---------- settings wiring ---------- */
+/* ---------- Trainings-Uebersicht + Check-in vor dem Start ----------
+   Der MCI-Fluss: Tageskarte antippen -> Uebersicht aller Uebungen (tauschbar)
+   -> Training starten fragt Energie und Notiz ab -> bei wenig Energie faehrt
+   der Tag einen Satz je Uebung runter. Buchregel, kein Gimmick. */
+var soView='ov',soEnergy='2';
+function soShow(on){var el=$('sessov');if(!el)return;el.classList.toggle('on',!!on);document.body.style.overflow=on?'hidden':'';}
+function openSessOv(){
+  if(runValid()){openRun();return;}
+  if(!runItems())return;
+  soView='ov';soEnergy='2';renderSessOv();soShow(true);
+}
+function renderSessOv(){
+  var DE=cfg.lang==='de',pl=plan(TODAY),it=runItems();
+  if(!it){soShow(false);return;}
+  $('soTitle').textContent=pl.title;
+  $('soMeta').textContent=(DE?'Woche ':'Week ')+pl.w+' · '+pl.ph.name+' · '+(DE?'Pause ':'rest ')+pl.ph.rest;
+  var host=$('soBody'),h='';
+  if(soView==='ov'){
+    h+='<p class="hint">'+(DE?'Das steht heute an. Antippen zum Tauschen: ⇄':'Today\u2019s work. Tap to swap: ⇄')+'</p>';
+    h+='<div class="solist">'+it.map(function(x,i){
+      return '<div class="sorow">'+(x.id?sv(x.id,cvar(pid[x.id].cv),30):'')+
+        '<span class="nm"><b></b><span></span></span>'+
+        '<span class="sv">'+(x.fixed?x.label:(x.sets+' x '+x.reps))+'</span>'+
+        (x.id?'<button type="button" class="swp" data-i="'+i+'" aria-label="Swap">&#8644;</button>':'')+'</div>';
+    }).join('')+'</div>';
+    h+='<button type="button" class="tbtn go sogo" id="soStart">'+(DE?'Training starten':'Start session')+'</button>';
+  }else{
+    h+='<p class="hint">'+(DE?'Kurzer Check, dann geht es los — der Tag passt sich deiner Form an.':'Quick check, then we go — the day adapts to how you feel.')+'</p>';
+    var opts=[['3',DE?'Voll da':'Fresh'],['2',DE?'Normal':'Normal'],['1',DE?'Wenig drin':'Running low']];
+    h+='<div class="soopts">'+opts.map(function(o){
+      return '<button type="button" class="soopt" data-e="'+o[0]+'" aria-pressed="'+(soEnergy===o[0])+'">'+o[1]+'</button>';}).join('')+'</div>';
+    h+='<p class="hint" id="soAdj"></p>';
+    h+='<textarea id="soNote" placeholder="'+(DE?'Notiz (optional): Schulter zwickt, wenig geschlafen …':'Note (optional): shoulder niggle, short night …')+'"></textarea>';
+    h+='<button type="button" class="tbtn go sogo" id="soGo">'+(DE?'Los geht\u2019s':'Let\u2019s go')+'</button>';
+  }
+  host.innerHTML=h;
+  if(soView==='ov'){
+    var rows=host.querySelectorAll('.sorow');
+    it.forEach(function(x,i){
+      rows[i].querySelector('.nm b').textContent=x.l;
+      rows[i].querySelector('.nm span').textContent=x.id?stepName(x.id):(x.k||'');
+    });
+    [].forEach.call(host.querySelectorAll('.swp'),function(b){
+      b.addEventListener('click',function(){
+        var i=parseInt(b.dataset.i,10);
+        openSwap(pl,i,runItems()[i],function(){renderSessOv();});
+      });
+    });
+    $('soStart').addEventListener('click',function(){soView='chk';renderSessOv();});
+  }else{
+    function adjTxt(){$('soAdj').textContent=soEnergy==='1'
+      ?(DE?'Heute eine Runde weniger je Übung — durchkommen zählt.':'One set less per exercise today — showing up counts.')
+      :'';}
+    adjTxt();
+    [].forEach.call(host.querySelectorAll('.soopt'),function(b){
+      b.addEventListener('click',function(){
+        soEnergy=b.dataset.e;
+        [].forEach.call(host.querySelectorAll('.soopt'),function(x){x.setAttribute('aria-pressed',String(x.dataset.e===soEnergy));});
+        adjTxt();
+      });
+    });
+    $('soGo').addEventListener('click',function(){
+      var k=iso(TODAY);if(!logs[k])logs[k]={};
+      logs[k].energy=soEnergy;
+      var nv=$('soNote').value.trim();
+      if(nv)logs[k].note=logs[k].note?(logs[k].note+'. '+nv):nv;
+      set('logs',logs);
+      soShow(false);
+      startRun(soEnergy==='1'?-1:0);
+      paintLog();refresh();
+    });
+  }
+}
+$('soClose').addEventListener('click',function(){soShow(false);});
 /* ---------- Einstieg: fliessende Einleitung beim ersten Oeffnen ---------- */
 var OBL={
  goal:[
@@ -4176,7 +4293,7 @@ $('inNext').addEventListener('click',function(){
   if(k==='ready'){introShow(false);show('test');return;}
   inNextStep();
 });
-function openSwap(pl,idx,it){
+function openSwap(pl,idx,it,after){
   var DE=cfg.lang==='de',L=DE?1:0;
   var list=(EXDB[it.id]||[]).filter(function(e){return exAvail(e)&&exAllowed(e);});
   var sel='<div class="ctl"><select id="swapSel">'+
@@ -4196,6 +4313,7 @@ function openSwap(pl,idx,it){
       var key=cfg.track+':'+pl.s+':'+idx;
       if(v)profile.swaps[key]=v;else delete profile.swaps[key];
       set('profile',profile);applyProfile();renderDay();
+      if(after)after();
     },sel);
 }
 var catPat='all',catQ='';
