@@ -653,6 +653,8 @@
   #sessov .sorow .sv{font-family:var(--fm);font-size:.62rem;color:var(--ink2);white-space:nowrap}
   #sessov .sorow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);transition:.16s}
   #sessov .sorow .swp:hover{border-color:var(--aurora);color:var(--ink)}
+  #runner .rreps textarea{max-width:340px}
+  #runner .rreps{flex-wrap:wrap}
   #sessov .sogo{width:100%;text-align:center;padding:.8rem}
   #sessov .soopts{display:flex;flex-direction:column;gap:.5rem}
   #sessov .soopt{position:relative;text-align:center;background:var(--surf);border:1px solid var(--line);border-radius:5px;
@@ -660,7 +662,7 @@
   #sessov .soopt:hover{border-color:var(--aurora)}
   #sessov .soopt[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
   #sessov .soopt[aria-pressed="true"]::after{content:"✓";position:absolute;right:.85rem;top:50%;transform:translateY(-50%);color:var(--aurora);font-size:1rem}
-  #sessov textarea{width:100%;min-height:74px;background:var(--surf);border:1px solid var(--line);border-radius:4px;
+  #sessov textarea,#runner textarea{width:100%;min-height:74px;background:var(--surf);border:1px solid var(--line);border-radius:4px;
     color:var(--ink);padding:.6rem .7rem;font:inherit;font-size:.88rem;resize:vertical}
   #v-today .hero.go{cursor:pointer}
   /* Einleitung beim ersten Oeffnen: Vollbild, ein Schritt pro Bildschirm,
@@ -1119,19 +1121,7 @@
     </div>
 
     <div class="noteblk">
-      <p class="eyebrow" id="logFor">Session log</p>
-      <div class="fgrid">
-        <div class="field"><label data-i18n="log.effort">How hard was it? (RPE)</label><div class="rpe" id="rpeRow"></div></div>
-        <div class="field"><label data-i18n="log.energy">Energy before</label><div class="ctl"><select id="logEnergy"><option value="3">Fresh</option><option value="2" selected>Normal</option><option value="1">Flat</option><option value="0">Empty</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label data-i18n="log.dur">Duration</label><div class="ctl hasunit"><input id="logDur" type="number" min="0" max="240" placeholder="42"><span class="unit">min</span></div></div>
-      </div>
-      <div class="field"><label data-i18n="log.pain">Anything hurt? Tap the area</label><div class="bodymap" id="painRow"></div></div>
-      <div class="field"><label data-i18n="log.notes">Notes</label>
-        <div class="quickchips" id="quickChips"></div>
-        <textarea id="noteBox" placeholder="Reps, how it felt, what you changed."></textarea>
-      </div>
       <div class="savebar">
-        <button class="tbtn go" id="noteSave" data-i18n="btn.save">Save log</button>
         <button class="tbtn" id="markDone" data-i18n="btn.markDone">Mark whole day done</button>
         <span class="saved" id="savedFlag">Saved</span>
       </div>
@@ -1528,7 +1518,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.3';
+var VERSION='13.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2618,51 +2608,38 @@ document.addEventListener('click',function(e){
 $('setBtn').addEventListener('click',function(){show('settings');});
 $('back').addEventListener('click',function(){show('train');});
 
-/* ---------- session log ---------- */
+/* ---------- session log --------------------------------------------------
+   Das grosse Formular unter der Tagesliste ist weg. Erfasst wird kompakt an
+   den zwei Momenten, wo es hingehoert: beim Start (Energie, Schmerz, Notiz)
+   und am Ende (RPE, Notiz). Die Dauer schreibt der Trainingsmodus selbst.
+   Hier unten bleibt nur die Ein-Zeilen-Zusammenfassung des Tageslogs. */
 var PAIN=['None','Wrist','Elbow','Shoulder','Lower back','Knee','Hip'];
-var QUICK=['Felt strong','Form held','Last set was ugly','Short on sleep','Rushed it','Added a step'];
-function buildLogUI(){
-  var r=$('rpeRow');r.innerHTML='';
-  for(var i=5;i<=10;i++){(function(i){
-    var b=document.createElement('button');b.type='button';b.textContent=i;
-    if(i>=9)b.className='hard';
-    b.addEventListener('click',function(){var L=curLog();L.rpe=(L.rpe===i?null:i);paintLog();});
-    r.appendChild(b);})(i);}
-  var p=$('painRow');p.innerHTML='';
-  PAIN.forEach(function(x){
-    var b=document.createElement('button');b.type='button';b.textContent=x;
-    b.addEventListener('click',function(){var L=curLog();L.pain=(L.pain===x?null:x);paintLog();});
-    p.appendChild(b);});
-  var q=$('quickChips');q.innerHTML='';
-  QUICK.forEach(function(x){
-    var b=document.createElement('button');b.type='button';b.textContent='+ '+x;
-    b.addEventListener('click',function(){
-      var t=$('noteBox');t.value=(t.value?t.value.replace(/\s*$/,'')+'. ':'')+x;t.focus();});
-    q.appendChild(b);});
-}
+var PAIN_DE={'None':'Nichts','Wrist':'Handgelenk','Elbow':'Ellbogen','Shoulder':'Schulter','Lower back':'Unterer Rücken','Knee':'Knie','Hip':'Hüfte'};
 function curLog(){var k=iso(sel);if(!logs[k])logs[k]={};return logs[k];}
-function paintLog(){
-  var L=curLog();
-  [].forEach.call($('rpeRow').children,function(b){b.setAttribute('aria-pressed',String(+b.textContent===L.rpe));});
-  [].forEach.call($('painRow').children,function(b){b.setAttribute('aria-pressed',String(b.textContent===L.pain));});
-  $('logEnergy').value=L.energy!==undefined?L.energy:'2';
-  $('logDur').value=L.dur||'';
-  $('noteBox').value=L.note||'';
-  $('logFor').textContent=(cfg.lang==='de'?'Trainingslog — ':'Session log — ')+sel.toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
-  var prev=null,d=add(sel,-1);
-  for(var i=0;i<14;i++){var k=iso(d);if(logs[k]&&(logs[k].note||logs[k].rpe)){prev=logs[k];prev._d=new Date(d);break;}d=add(d,-1);}
-  $('logRecall').innerHTML=prev
-    ? '<b>'+(cfg.lang==='de'?'Letztes Log':'Last log')+' ('+prev._d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'):</b> '+
-      (prev.rpe?'RPE '+prev.rpe+'. ':'')+(prev.pain&&prev.pain!=='None'?(cfg.lang==='de'?'Schmerz: ':'Pain: ')+prev.pain+'. ':'')+(prev.note||'')
-    : (cfg.lang==='de'?'Noch kein Log. Was du hier schreibst, liest der Coach mit.':'No log yet. What you write here feeds the coach.');
+function logLine(L,DE){
+  var parts=[];
+  if(L.energy!==undefined){var EL={'3':DE?'voll da':'fresh','2':'normal','1':DE?'wenig drin':'low','0':DE?'leer':'empty'};parts.push((DE?'Energie: ':'Energy: ')+(EL[L.energy]||L.energy));}
+  if(L.rpe)parts.push('RPE '+L.rpe);
+  if(L.pain&&L.pain!=='None')parts.push((DE?'Schmerz: ':'Pain: ')+(DE?(PAIN_DE[L.pain]||L.pain):L.pain));
+  if(L.dur)parts.push(L.dur+' min');
+  if(L.note)parts.push(L.note);
+  return parts.join(' · ');
 }
-$('logEnergy').addEventListener('change',function(){curLog().energy=this.value;});
-$('logDur').addEventListener('input',function(){curLog().dur=this.value;});
-$('noteSave').addEventListener('click',function(){
-  var L=curLog();L.note=$('noteBox').value.trim();L.energy=$('logEnergy').value;L.dur=$('logDur').value;
-  if(!L.note&&!L.rpe&&!L.pain&&!L.dur)delete logs[iso(sel)];
-  set('logs',logs);flash('savedFlag');buildWeeks();refresh();paintLog();
-});
+function paintLog(){
+  var el=$('logRecall');if(!el)return;
+  var DE=cfg.lang==='de',k=iso(sel),L=logs[k];
+  if(L&&(L.note||L.rpe||L.pain||L.energy!==undefined)){
+    el.innerHTML='<b>'+(DE?'Log für diesen Tag: ':'Log for this day: ')+'</b>';
+    el.appendChild(document.createTextNode(logLine(L,DE)));
+    return;
+  }
+  var prev=null,d=add(sel,-1);
+  for(var i=0;i<14;i++){var kk=iso(d);if(logs[kk]&&(logs[kk].note||logs[kk].rpe)){prev=logs[kk];prev._d=new Date(d);break;}d=add(d,-1);}
+  el.innerHTML=prev
+    ? '<b>'+(DE?'Letztes Log':'Last log')+' ('+prev._d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'):</b> '
+    : (DE?'Noch kein Log. Start- und End-Check im Training füllen ihn — der Coach liest mit.':'No log yet. The start and finish check-ins fill it — the coach reads along.');
+  if(prev)el.appendChild(document.createTextNode(logLine(prev,DE)));
+}
 
 /* ---------- today ---------- */
 function sessOf(pl){
@@ -3164,7 +3141,12 @@ function runAfterSet(){
     var k=iso(TODAY),dn=doneMap[k]||{};dn[run.ex]=true;doneMap[k]=dn;set('done',doneMap);
     if(cur.id)markTrained(cur.id,k);
     streak();
-    if(run.ex>=it.length-1){run.ph='done';run.left=0;saveRun();runPaint();return;}
+    if(run.ex>=it.length-1){
+      run.ph='done';run.left=0;saveRun();
+      /* Dauer kommt aus der echten Trainingszeit, nicht aus einem Feld. */
+      var lk=iso(TODAY);if(!logs[lk])logs[lk]={};
+      logs[lk].dur=String(runMinutes());set('logs',logs);
+      runPaint();return;}
     run.ex++;run.set=1;
   }
   run.ph='rest';run.left=cur.rest||120;saveRun();runPaint();runStartTi();
@@ -3193,9 +3175,31 @@ function runPaint(){
     big.textContent='✓';
     $('rnEx').textContent=DE?'Einheit fertig':'Session done';
     $('rnStep').textContent='';$('rnIcon').innerHTML='';
-    hint.textContent=DE?'Alle Blöcke abgehakt. Trag unten noch RPE und ein, zwei Sätze Notiz ein — das ist es, womit der Coach arbeitet.'
-                       :'Every block ticked. Add your RPE and a line of notes below — that is what the coach works with.';
+    hint.textContent=DE?'Alle Blöcke abgehakt. Wie hart war die Einheit? Damit rechnet der Coach.'
+                       :'Every block ticked. How hard was it? That is what the coach works with.';
     reps.innerHTML='';
+    var lk=iso(TODAY);if(!logs[lk])logs[lk]={};
+    var rw=document.createElement('div');rw.className='rpe';rw.style.justifyContent='center';
+    for(var ri=5;ri<=10;ri++){(function(ri){
+      var b=document.createElement('button');b.type='button';b.textContent=ri;
+      if(ri>=9)b.className='hard';
+      b.setAttribute('aria-pressed',String(logs[lk].rpe===ri));
+      b.addEventListener('click',function(){
+        logs[lk].rpe=(logs[lk].rpe===ri?null:ri);set('logs',logs);
+        [].forEach.call(rw.children,function(x){x.setAttribute('aria-pressed',String(+x.textContent===logs[lk].rpe));});
+        paintLog();refresh();
+      });
+      rw.appendChild(b);})(ri);}
+    reps.appendChild(rw);
+    var ta=document.createElement('textarea');ta.id='rnNote';
+    ta.placeholder=DE?'Notiz (optional): letzter Satz wackelig, Stufe geschafft …':'Note (optional): last set ugly, cleared a step …';
+    ta.value=logs[lk].note||'';
+    ta.addEventListener('change',function(){
+      var v=ta.value.trim();
+      if(v)logs[lk].note=v;else delete logs[lk].note;
+      set('logs',logs);paintLog();
+    });
+    reps.appendChild(ta);
     if(cfg.health==='on'&&isApple()){
       var hb=document.createElement('button');hb.type='button';hb.className='tbtn';
       hb.textContent=DE?'In Apple Health eintragen':'Log to Apple Health';
@@ -4125,7 +4129,12 @@ function renderSessOv(){
     h+='<div class="soopts">'+opts.map(function(o){
       return '<button type="button" class="soopt" data-e="'+o[0]+'" aria-pressed="'+(soEnergy===o[0])+'">'+o[1]+'</button>';}).join('')+'</div>';
     h+='<p class="hint" id="soAdj"></p>';
-    h+='<textarea id="soNote" placeholder="'+(DE?'Notiz (optional): Schulter zwickt, wenig geschlafen …':'Note (optional): shoulder niggle, short night …')+'"></textarea>';
+    var curPain=(logs[iso(TODAY)]&&logs[iso(TODAY)].pain)||'None';
+    h+='<p class="hint" style="margin-bottom:-.2rem">'+(DE?'Muskelkater oder Schmerz? Tippe wo:':'Sore or hurting? Tap where:')+'</p>';
+    h+='<div class="chips" id="soPain">'+PAIN.map(function(x){
+      return '<button type="button" class="chip" data-p="'+x+'" aria-pressed="'+(curPain===x)+'">'+(DE?PAIN_DE[x]:x)+'</button>';
+    }).join('')+'</div>';
+    h+='<textarea id="soNote" placeholder="'+(DE?'Notiz (optional): wenig geschlafen, langer Tag …':'Note (optional): short night, long day …')+'"></textarea>';
     h+='<button type="button" class="tbtn go sogo" id="soGo">'+(DE?'Los geht\u2019s':'Let\u2019s go')+'</button>';
   }
   host.innerHTML=h;
@@ -4154,9 +4163,17 @@ function renderSessOv(){
         adjTxt();
       });
     });
+    var soPainV=curPain;
+    [].forEach.call(host.querySelectorAll('#soPain .chip'),function(b){
+      b.addEventListener('click',function(){
+        soPainV=b.dataset.p;
+        [].forEach.call(host.querySelectorAll('#soPain .chip'),function(x){x.setAttribute('aria-pressed',String(x.dataset.p===soPainV));});
+      });
+    });
     $('soGo').addEventListener('click',function(){
       var k=iso(TODAY);if(!logs[k])logs[k]={};
       logs[k].energy=soEnergy;
+      logs[k].pain=soPainV;
       var nv=$('soNote').value.trim();
       if(nv)logs[k].note=logs[k].note?(logs[k].note+'. '+nv):nv;
       set('logs',logs);
@@ -4987,11 +5004,10 @@ function initSliders(){
   pairSlider('m-pro',{min:60,max:260,step:5,empty:130});
   pairSlider('m-fat',{min:30,max:150,step:5,empty:70});
   pairSlider('y-sleep',{min:3,max:12,step:0.5,dec:1,empty:7});
-  pairSlider('logDur',{min:0,max:180,step:5,empty:45});
 }
 initSliders();
 applyI18n();syncSettings();buildThemeGrid();
-buildLogUI();buildTiles();buildSkills();buildMob();buildTest();buildSup();buildMeas();buildPR();buildChips();
+buildTiles();buildSkills();buildMob();buildTest();buildSup();buildMeas();buildPR();buildChips();
 buildLearn();buildAccess();renderWins();
 /* buildWeeks() lief beim Start, obwohl der Plan-Bereich nicht sichtbar ist --
    und show('plan') baut ihn ohnehin beim Oeffnen. Zwoelf Wochen mit allen
