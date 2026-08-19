@@ -1275,6 +1275,7 @@
   <section class="view" id="v-test">
     <div><h2 class="sec" data-i18n="test.h">Find your starting point</h2><p class="sub" data-i18n="test.s">Four tests, twenty minutes. Warm up first, rest three minutes between each, and stop the moment your form breaks. Your lowest score is your level.</p></div>
     <div class="form">
+      <p class="hint" data-i18n="test.note0">Day one measures you in automatically &mdash; first contact with an exercise runs three max sets inside the session. This page is for the week 6 and week 12 retests.</p>
       <div class="fgrid" id="testGrid"></div>
       <div class="out" id="testOut"></div>
       <p class="hint" id="testNote"></p>
@@ -1520,7 +1521,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.6';
+var VERSION='13.7';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1720,6 +1721,7 @@ var DICT={
  'mob.d1':['Before every session','Vor jeder Einheit'],'mob.d2':['After two sessions','Nach zwei Einheiten'],'mob.d3':['Optional full sequence','Optional komplett'],
  'mob.note':['Static stretching before training briefly lowers force output. Save the long holds for after, or for their own slot.','Statisches Dehnen vor dem Training senkt kurzzeitig die Kraft. Lange Halten danach oder separat.'],
  'test.h':['Find your starting point','Finde deinen Startpunkt'],
+ 'test.note0':['Day one measures you in automatically — first contact with an exercise runs three max sets inside the session. This page is for the week 6 and week 12 retests.','Tag eins misst dich automatisch ein — der Erstkontakt mit einer Übung läuft als drei Max-Sätze in der Einheit. Diese Seite ist für die Wiederholungstests in Woche 6 und 12.'],
  'test.s':['Four tests, twenty minutes. Warm up first, rest three minutes between each, and stop the moment your form breaks. Your lowest score is your level.','Vier Tests, zwanzig Minuten. Vorher aufwärmen, drei Minuten Pause dazwischen, abbrechen sobald die Form bricht. Dein schwächster Wert ist dein Level.'],
  'test.tbl':['Test','Test'],'test.retest':['Retest at week 6 and week 12','Wiederholung in Woche 6 und 12'],
  'test.retestP':['Same warm-up, same standards, same tests. The temptation is to loosen your form so the number looks better. The only person that flatters is you.','Gleiches Aufwärmen, gleiche Maßstäbe. Die Versuchung ist, die Form zu lockern damit die Zahl besser aussieht. Damit betrügst du nur dich.'],
@@ -3100,10 +3102,81 @@ function runItems(){
   var pl=plan(TODAY);
   if(pl.kind!=='train')return null;
   var adj=(run&&run.on&&run.key===iso(TODAY)&&run.adj)||0;
+  var xl=get('exlog',{});
   return sessOf(pl).items.map(function(x){
-    return{id:x.id,l:x.l,k:x.k,fixed:!!x.v,label:x.v||null,
-           sets:x.v?1:Math.max(2,pl.ph.sets+adj),reps:pl.ph.reps,rest:pl.ph.rs};
+    /* Einmessen im Training: hat das Muster noch keine Basis, sind es drei
+       Saetze "max" -- die eingetragenen Wiederholungen setzen danach Leiter
+       und Basiswert. Kein separater Test vor dem ersten Training mehr. */
+    var cal=false,pa=0;
+    if(x.id&&!x.v){
+      var pb=0;PRS.forEach(function(q){if(q.n===PRMAP[x.id])pb=q.b;});
+      if(pb<=0)cal=true;
+      /* Autoregulation aus der letzten Einheit derselben Uebung:
+         - Wiederholungen brechen ueber die Saetze stark ein (< 60 % des
+           ersten Satzes): ein Satz weniger.
+         - Session-RPE 9+: ein Satz weniger. RPE 6 oder lockerer UND alle
+           Saetze am oberen Ende des Bereichs: ein Satz mehr.
+         Das ist der Kern der RPE-Literatur (Helms u. a.) und der
+         Mehrsatz-Metaanalysen (Schoenfeld 2017, Ralston 2017):
+         Anfaenger fahren mit 2-3 Saetzen fast optimal, mehr als 5 lohnt
+         im Wochenvolumen kaum. Deshalb harte Grenzen 2 bis 5. */
+      var h=xl[x.l];
+      if(!cal&&h&&h.reps&&h.reps.length){
+        var top=parseInt(String(pl.ph.reps).split('-')[1]||pl.ph.reps,10)||12;
+        var rp=(logs[h.d]&&logs[h.d].rpe)||0;
+        if(h.reps.length>=2&&h.reps[h.reps.length-1]<h.reps[0]*.6)pa=-1;
+        else if(rp>=9)pa=-1;
+        else if(rp>0&&rp<=6&&h.reps.every(function(n){return n>=top;}))pa=1;
+      }
+    }
+    return{id:x.id,l:x.l,k:x.k,fixed:!!x.v,label:x.v||null,cal:cal,
+           sets:x.v?1:(cal?3:Math.min(5,Math.max(2,pl.ph.sets+adj+pa))),
+           reps:cal?'max':pl.ph.reps,rest:pl.ph.rs};
   });
+}
+/* Nach der Einheit: erfasste Wiederholungen je Uebung ablegen (fuer die
+   Autoregulation der naechsten Einheit) und Erstkontakte einmessen --
+   bester Satz wird Basiswert, die Leiter startet auf der passenden Stufe.
+   Zuordnung ueber die Testtabellen; Rudern wird an der Klimmzug-, Pike an
+   der Liegestuetz-Tabelle gemessen (grobe Startwerte -- die 2-fuer-2-Regel
+   korrigiert von da an selbst). */
+function sessWrap(it){
+  var xl=get('exlog',{}),calDone=false;
+  it.forEach(function(x,ei){
+    if(!x.id||x.fixed)return;
+    var reps=[];
+    for(var si=1;si<=x.sets;si++){var v=run.reps[ei+'-'+si];if(v!==undefined)reps.push(v);}
+    if(!reps.length)return;
+    xl[x.l]={d:iso(TODAY),reps:reps};
+    if(x.cal){
+      var best=Math.max.apply(null,reps);
+      if(best>0){
+        var nm=PRMAP[x.id],found=false;
+        PRS.forEach(function(q){if(q.n===nm){if(q.b<=0){q.b=best;q.v=Math.max(q.v,best);found=true;calDone=true;}}});
+        if(found)calPlace(x.id,best);
+      }
+    }
+  });
+  set('exlog',xl);
+  if(calDone){
+    set('prs',PRS);set('steps',steps);
+    buildTiles();buildPR();
+    coachSay(cfg.lang==='de'?'Eingemessen':'Calibrated',
+      cfg.lang==='de'?'Deine ersten Sätze haben Basiswerte und Leiterstufen gesetzt.':'Your first sets just set your baselines and ladder steps.');
+  }
+}
+function calPlace(id,best){
+  var tmap={push:'pushup',pull:'pullup',legs:'squat',core:'hollow',row:'pullup',press:'pushup'};
+  var t=null;TESTS.forEach(function(x){if(x.id===tmap[id])t=x;});
+  var p=pid[id];if(!t||!p)return;
+  var v=best;
+  if(id==='press')v=best*2;
+  if(id==='row')v=Math.round(best*0.5);
+  var lv=1;for(var i=0;i<t.t.length;i++){if(v>=t.t[i][0]&&v<=t.t[i][1]){lv=i+1;break;}}
+  var frac=(lv-1)/(t.t.length-1);
+  var target=Math.round(frac*(p.ladder.length-1)*0.85);
+  var curStep=steps[id]||0;
+  steps[id]=Math.max(curStep,Math.max(0,Math.min(p.ladder.length-1,target)));
 }
 function runValid(){
   return run&&run.on&&run.key===iso(TODAY)&&runItems();
@@ -3155,6 +3228,7 @@ function runAfterSet(){
       /* Dauer kommt aus der echten Trainingszeit, nicht aus einem Feld. */
       var lk=iso(TODAY);if(!logs[lk])logs[lk]={};
       logs[lk].dur=String(runMinutes());set('logs',logs);
+      sessWrap(it);
       runPaint();return;}
     run.ex++;run.set=1;
   }
@@ -3229,6 +3303,8 @@ function runPaint(){
   big.textContent=cur.fixed?cur.label:(cur.reps==='test'?(DE?'max':'max'):cur.reps);
   hint.textContent=cur.fixed
     ?(DE?'Frisch und kurz halten, deutlich vor dem Versagen aufhören.':'Keep it fresh and brief, stop well short of failure.')
+    :cur.cal
+    ?(DE?'Einmessen, Satz '+run.set+' von '+cur.sets+': so viele saubere Wiederholungen wie drin sind, Zahl eintragen. Damit stellt sich deine Leiter.':'Calibration, set '+run.set+' of '+cur.sets+': as many clean reps as you have, then enter the number. This sets your ladder.')
     :(DE?'Satz '+run.set+' von '+cur.sets+' · Pause danach '+fmt(cur.rest):'Set '+run.set+' of '+cur.sets+' · rest after: '+fmt(cur.rest))+
      (run.adj<0?(DE?' · heute reduziert':' · reduced today'):'');
   if(cur.fixed){reps.innerHTML='';}
@@ -4047,7 +4123,7 @@ function askReset(){
       :'This wipes your logs, records, measurements, weight history, ladder positions and settings — and with them your rank, XP, level, badges and your leaderboard row. It cannot be undone. Type RESET to confirm.',
     DE?'Alles löschen':'Wipe everything',
     function(){
-      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile']
+      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile','exlog']
         .forEach(del);
       SKILLS.forEach(function(s){del('skill_'+s.id);});
       location.reload();
@@ -4092,7 +4168,7 @@ function syncUndo(){
   ['undoBtn','undoBtn2'].forEach(function(id){var b=$(id);if(!b)return;b.disabled=!ok;b.style.opacity=ok?'':'.4';});
 }
 $('exportBtn').addEventListener('click',function(){
-  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile'].forEach(function(k){dump[k]=get(k,null);});
+  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile','exlog'].forEach(function(k){dump[k]=get(k,null);});
   var txt=JSON.stringify(dump);
   try{navigator.clipboard.writeText(txt);}catch(e){}
   flash('expFlag');
@@ -4239,8 +4315,8 @@ var IT={
  exp:{t:['How long have you trained?','Wie lange trainierst du schon?'],
   s:['Sets your starting rungs — the strength test fine-tunes them next.','Setzt deine Startstufen — der Krafttest justiert gleich fein nach.']},
  ready:{t:['Your plan is ready.','Dein Plan steht.'],
-  s:['Today shows your session — every exercise has a swap button. The coach reads your numbers and speaks up when something matters. One last step makes it precise: the strength test. Ten minutes, four moves, and every ladder starts at your level.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf. Der Coach liest deine Zahlen und meldet sich, wenn etwas wichtig ist. Ein letzter Schritt macht den Plan präzise: der Krafttest. Zehn Minuten, vier Übungen, und jede Leiter startet auf deinem Level.'],
-  n:['Take the strength test','Jetzt zum Krafttest'],n2:['Straight to the app','Direkt zur App']}
+  s:['Today shows your session — every exercise has a swap button, and the coach reads your numbers. Your first session measures you in: three sets per exercise, you enter your reps, and every ladder starts at your level. No test before the training — the training is the test.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf, und der Coach liest deine Zahlen mit. Dein erstes Training misst dich ein: drei Sätze je Übung, du trägst deine Wiederholungen ein, und jede Leiter startet auf deinem Level. Kein Test vor dem Training — das Training ist der Test.'],
+  n:['Start day one','Los mit Tag eins']}
 };
 var ISTEPS=['hello','goal','days','eq','avoid','exp','ready'],inIdx=0;
 function introShow(on){
@@ -4304,22 +4380,14 @@ function renderIntro(){
   var back=$('inBack'),next=$('inNext');
   back.style.display=(inIdx===0||k==='ready')?'none':'';
   back.textContent=cfg.lang==='de'?'Zurück':'Back';
-  if(k==='hello'||k==='eq'||k==='avoid'){next.style.display='';next.textContent=T.n[L];}
-  else if(k==='ready'){next.style.display='';next.textContent=T.n[L];}
+  if(k==='hello'||k==='eq'||k==='avoid'||k==='ready'){next.style.display='';next.textContent=T.n[L];}
   else next.style.display='none';
-  /* Zweiter Knopf am Ende: direkt zur App */
   var old=$('inSkip');if(old)old.remove();
-  if(k==='ready'){
-    var sk=document.createElement('button');sk.type='button';sk.className='tbtn';sk.id='inSkip';
-    sk.textContent=T.n2[L];
-    sk.addEventListener('click',function(){introShow(false);});
-    next.parentNode.insertBefore(sk,next.nextSibling);
-  }
 }
 $('inBack').addEventListener('click',function(){inIdx=Math.max(0,inIdx-1);renderIntro();});
 $('inNext').addEventListener('click',function(){
   var k=ISTEPS[inIdx];
-  if(k==='ready'){introShow(false);show('test');return;}
+  if(k==='ready'){introShow(false);return;}
   inNextStep();
 });
 function openSwap(pl,idx,it,after){
