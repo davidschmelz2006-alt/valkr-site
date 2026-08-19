@@ -200,7 +200,10 @@
        Einstellungen -- sechs Bedienelemente ueber dem Inhalt sind auf einem
        Telefon kein Werkzeug, sondern Unruhe. */
     #undoBtn,#resetBtn,#themeBtn{display:none}
-    .bar{flex-wrap:nowrap;padding:.6rem 0 .55rem}
+    /* Achtung Kaskade: diese Regel ueberschreibt das .bar-Padding von oben.
+       Ohne env() landet die Kopfzeile auf iPhones unter Uhrzeit und Akku --
+       Settings ist dann nicht mehr antippbar. Genau so war der Fehler. */
+    .bar{flex-wrap:nowrap;padding:calc(.6rem + env(safe-area-inset-top,0px)) 0 .55rem}
     .stat{font-size:var(--t1)}
     /* Fingerkuppen sind etwa 44 px breit. Alles darunter wird zum Gluecksspiel,
        erst recht mit verschwitzten Haenden waehrend einer Einheit. */
@@ -715,7 +718,7 @@
   footer{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:1rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
   /* Trainingsmodus. Bewusst gross und mit wenig drauf: das hier wird mit
      verschwitzten Haenden aus zwei Metern Entfernung bedient. */
-  #runner{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:1rem}
+  #runner{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(1rem + env(safe-area-inset-top,0px)) 1rem calc(1rem + env(safe-area-inset-bottom,0px))}
   #runner.on{display:flex;animation:fade .2s ease}
   #runner .rbox{width:100%;max-width:460px;display:flex;flex-direction:column;gap:1rem;text-align:center}
   #runner .rtop{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
@@ -1414,7 +1417,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.4';
+var VERSION='11.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
