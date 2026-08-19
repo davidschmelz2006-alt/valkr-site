@@ -1417,7 +1417,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.6';
+var VERSION='11.7';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2017,12 +2017,12 @@ var DEMOS={
    ],head:[23,yS-4.6]};}},
  /* Rudern: Fersen fest am Boden, der Koerper bleibt ein Brett und zieht
     die Brust zur Stange. */
- row:{dur:2.8,refs:['M9 10 H33','M5 34 H42'],pose:function(u){
-   var r=_rep(u),F=[40,33],H=[19,10.8],L=26;
-   var a=(17+24*r)*_DG;
+ row:{dur:2.8,refs:['M9 12 H33','M5 34 H42'],pose:function(u){
+   var r=_rep(u),F=[40,33],H=[19,12.8],L=26;
+   var a=(17+16*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
    var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
-   var e=_ik(H,S,7.7,7.7,-1);
+   var e=_ik(H,S,6.7,6.7,-1);
    var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4];
    return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
  /* Pike: Haende und Zehen fest, die Huefte bleibt der Gipfel, Schultern
