@@ -635,6 +635,34 @@
   .swatch b{font-family:var(--fd);font-weight:600;font-size:var(--t3)}
   .swatch span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
 
+  /* Einleitung beim ersten Oeffnen: Vollbild, ein Schritt pro Bildschirm,
+     grosse Antwortkarten, ruhiger Uebergang. */
+  #intro{position:fixed;inset:0;z-index:95;background:var(--bg);display:none;overflow:auto;
+    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.2rem calc(1.4rem + env(safe-area-inset-bottom,0px))}
+  #intro.on{display:flex;align-items:center;justify-content:center}
+  #intro .ibox{width:100%;max-width:430px;display:flex;flex-direction:column;gap:1.1rem;justify-content:center;min-height:min(540px,84vh)}
+  #intro .idots{display:flex;gap:.4rem;justify-content:center}
+  #intro .idots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s}
+  #intro .idots i.on{background:var(--aurora)}
+  #intro .istep{display:flex;flex-direction:column;gap:.9rem}
+  #intro .istep.slide{animation:inslide .3s ease}
+  @keyframes inslide{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
+  #intro .brandline{display:flex;align-items:center;gap:.6rem;justify-content:center;margin-bottom:.4rem}
+  #intro .brandline b{font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:1rem}
+  #intro h2{font-family:var(--fd);font-weight:600;font-size:1.45rem;margin:0;line-height:1.2;text-align:center}
+  #intro .isub{margin:0;color:var(--ink2);font-size:.92rem;text-align:center}
+  #intro .iopts{display:flex;flex-direction:column;gap:.5rem}
+  #intro .iopt{text-align:left;background:var(--surf);border:1px solid var(--line);border-radius:5px;padding:.85rem 1rem;
+    font-family:var(--fd);font-weight:600;font-size:.95rem;transition:.16s;box-shadow:var(--sh)}
+  #intro .iopt:hover{border-color:var(--aurora);transform:translateY(-1px)}
+  #intro .iopt[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
+  #intro .iopt small{display:block;font-family:var(--fb);font-weight:400;font-size:.78rem;color:var(--ink3);margin-top:.15rem}
+  #intro .inav{display:flex;gap:.5rem;justify-content:space-between;align-items:center}
+  #intro .ilang{display:flex;gap:.4rem;justify-content:center}
+  #intro .ilang button{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+    border:1px solid var(--line);border-radius:2px;padding:.3rem .6rem;color:var(--ink2)}
+  #intro .ilang button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  @media (prefers-reduced-motion:reduce){#intro .istep.slide{animation:none}}
   #modal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.62);padding:1rem}
   #modal.on{display:flex;animation:fade .2s ease}
   #modal .box{background:var(--surf);border:1px solid var(--line);border-radius:5px;max-width:400px;width:100%;padding:1.3rem;display:flex;flex-direction:column;gap:.8rem;box-shadow:0 20px 50px rgba(0,0,0,.5)}
@@ -936,6 +964,14 @@
 </div>
 <div id="tipbox" role="tooltip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="intro" role="dialog" aria-modal="true" aria-label="Welcome"><div class="ibox">
+  <div class="idots" id="inDots" aria-hidden="true"></div>
+  <div class="istep" id="inStep"></div>
+  <div class="inav">
+    <button type="button" class="tbtn" id="inBack">Back</button>
+    <button type="button" class="tbtn go" id="inNext">Next</button>
+  </div>
+</div></div>
 <div id="modal" role="dialog" aria-modal="true"><div class="box">
   <h3 id="mdTitle"></h3><p id="mdBody"></p>
   <div id="mdExtra"></div>
@@ -1006,27 +1042,6 @@
   <p class="warnstrip" id="storeWarn" hidden></p>
 
   <section class="view on" id="v-today">
-    <div class="form" id="obCard" style="display:none">
-      <p class="eyebrow" data-i18n="ob.h">Your plan &mdash; five quick questions</p>
-      <p class="hint" data-i18n="ob.s">Answer once, get a plan that fits your gear and your body. Everything stays changeable later &mdash; every exercise can be swapped.</p>
-      <div class="field"><label data-i18n="ob.goal">Goal</label><div class="chips" id="obGoal"></div></div>
-      <div class="field"><label data-i18n="ob.days">Training days per week</label><div class="chips" id="obDays"></div></div>
-      <div class="field"><label data-i18n="ob.eq">What do you have? (tap all that apply)</label><div class="chips" id="obEq"></div></div>
-      <div class="field"><label data-i18n="ob.avoid">Anything to protect? (optional)</label><div class="chips" id="obAvoid"></div></div>
-      <div class="field"><label data-i18n="ob.exp">Training experience</label><div class="chips" id="obExp"></div></div>
-      <div class="savebar">
-        <button class="tbtn go" id="obSave" data-i18n="btn.obSave">Create my plan</button>
-      </div>
-      <p class="hint" data-i18n="ob.note">No gear at all is fine &mdash; wall, table and chair cover every pattern until a pull-up bar arrives.</p>
-    </div>
-    <div class="form" id="obNext" style="display:none">
-      <p class="eyebrow" data-i18n="ob.testH">One more thing: the strength test</p>
-      <p class="hint" data-i18n="ob.testS">Ten minutes, four simple moves, stop when your form breaks. Your reps are saved and set every ladder to the right step &mdash; so day one is neither too easy nor too hard.</p>
-      <div class="savebar">
-        <button class="tbtn go" id="obTest" data-i18n="btn.obTest">Take the test now</button>
-        <button class="tbtn" id="obLater" data-i18n="btn.obLater">Later</button>
-      </div>
-    </div>
     <div class="dbar">
       <button class="nb" id="prevDay">&larr;</button>
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
@@ -1473,7 +1488,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.0';
+var VERSION='13.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1611,6 +1626,9 @@ function storeNote(){
 
 /* ---------- settings ---------- */
 var cfg=get('cfg',{lang:'en',clock:'24',units:'metric',track:'3',motion:'calm',sound:'off',hooks:'on',health:'off'});
+/* Allererster Start: Geraetesprache uebernehmen. Wer schon eine Einstellung
+   hat, behaelt sie. */
+if(rawGet('cfg')===null&&/^de/i.test(navigator.language||''))cfg.lang='de';
 function saveCfg(){set('cfg',cfg);}
 
 /* ---------- i18n ---------- */
@@ -2016,10 +2034,10 @@ function exAllowed(e){if(!profile||!profile.avoid)return true;var f=e[3]||'';
   if(profile.avoid.knee&&f.indexOf('k')>-1)return false;
   return true;}
 function exFind(pat,name){var L=EXDB[pat]||[];for(var i=0;i<L.length;i++)if(L[i][0]===name)return L[i];return null;}
-function exPick(pat,wantTier){var best=null,bd=99;
+function exPick(pat,wantTier,used){var best=null,bd=99;
   (EXDB[pat]||[]).forEach(function(e){
     if(!exAvail(e)||!exAllowed(e))return;
-    var d=Math.abs(e[1]-wantTier);
+    var d=Math.abs(e[1]-wantTier)+((used&&used[e[0]])?2:0);
     if(d<bd){bd=d;best=e;}});
   return best;}
 /* Standard-Uebung je Sitzungs-Slot (Name im Katalog). Der Generator behaelt
@@ -2040,14 +2058,20 @@ function applyProfile(){
   if(profile.days&&cfg.track!==profile.days){cfg.track=profile.days;saveCfg();}
   [['3',SESS3],['4',SESS4]].forEach(function(pair){
     Object.keys(pair[1]).forEach(function(k){
-      var defs=SLOTDEF[pair[0]+':'+k]||[];
+      var defs=SLOTDEF[pair[0]+':'+k]||[],used={};
       pair[1][k].items.forEach(function(it,i){
         var e=null,sw=profile.swaps&&profile.swaps[pair[0]+':'+k+':'+i];
         if(sw)e=exFind(it.id,sw);
         if(!e){var d=defs[i]?exFind(it.id,defs[i]):null;
+          var want=d?d[1]:patTier(it.id);
           if(d&&exAvail(d)&&exAllowed(d))e=d;
-          else e=exPick(it.id,d?d[1]:patTier(it.id))||d;}
-        if(e)it.l=e[0];
+          else e=exPick(it.id,want,used);
+          /* Ohne Stange gibt es kein vertikales Ziehen -- dann ersetzt
+             Rudern den Klimmzug-Slot. Das ist die Buchregel, kein Notnagel:
+             "No bar - a table edge works." */
+          if(!e&&it.id==='pull')e=exPick('row',want,used);
+          if(!e)e=d;}
+        if(e){it.l=e[0];used[e[0]]=1;}
       });
     });
   });
@@ -4021,57 +4045,131 @@ function dataStats(){
 }
 
 /* ---------- settings wiring ---------- */
-/* ---------- Onboarding, Tauschen, Katalog ---------- */
+/* ---------- Einstieg: fliessende Einleitung beim ersten Oeffnen ---------- */
 var OBL={
- goal:[['muscle',['Build muscle','Muskeln aufbauen']],['lean',['Get lean','Abnehmen und straffen']],['skills',['Learn skills','Skills lernen']],['fit',['General fitness','Allgemein fit']]],
- days:[['3',['3 days - full body','3 Tage - Ganzkörper']],['4',['4 days - upper/lower','4 Tage - Ober/Unter']]],
- eq:[['bar',['Pull-up bar','Klimmzugstange']],['dip',['Dip bars','Barren/Dips']],['rings',['Rings','Ringe']]],
- avoid:[['wrist',['Wrists','Handgelenke']],['shoulder',['Overhead shoulder','Schulter über Kopf']],['knee',['Knees','Knie']]],
- exp:[['0',['Just starting','Fange gerade an']],['1',['Under 6 months','Unter 6 Monate']],['2',['6-12 months','6-12 Monate']],['3',['1-3 years','1-3 Jahre']],['4',['Over 3 years','Über 3 Jahre']]]
+ goal:[
+  ['muscle',['Build muscle','Muskeln aufbauen'],['Visible strength, clear progression','Sichtbare Kraft, klare Progression']],
+  ['lean',['Get lean','Abnehmen und straffen'],['Drop fat, keep the strength you build','Fett runter, aufgebaute Kraft behalten']],
+  ['skills',['Learn skills','Skills lernen'],['Muscle-up, handstand, L-sit and friends','Muscle-up, Handstand, L-Sit und Co.']],
+  ['fit',['General fitness','Allgemein fit'],['Strong for everyday life','Stark für den Alltag']]],
+ days:[
+  ['3',['3 days a week','3 Tage pro Woche'],['Full body — the classic start','Ganzkörper — der Klassiker zum Einstieg']],
+  ['4',['4 days a week','4 Tage pro Woche'],['Upper/lower split — more volume','Ober-/Unterkörper geteilt — mehr Volumen']]],
+ eq:[
+  ['bar',['Pull-up bar','Klimmzugstange'],['A doorway bar is all it takes','Ein Türreck reicht völlig']],
+  ['dip',['Dip bars','Barren / Dip-Gelegenheit'],['Parallettes or two sturdy chairs','Parallettes oder zwei stabile Stühle']],
+  ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen']]],
+ avoid:[
+  ['wrist',['Wrists','Handgelenke'],null],
+  ['shoulder',['Overhead shoulder','Schulter über Kopf'],null],
+  ['knee',['Knees','Knie'],null]],
+ exp:[
+  ['0',['Just starting','Fange gerade an'],null],
+  ['1',['Under 6 months','Unter 6 Monate'],null],
+  ['2',['6-12 months','6-12 Monate'],null],
+  ['3',['1-3 years','1-3 Jahre'],null],
+  ['4',['Over 3 years','Über 3 Jahre'],null]]
 };
 var obState={goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
-function obChips(host,list,multi,stateKey){
-  var el=$(host);if(!el)return;el.innerHTML='';var L=cfg.lang==='de'?1:0;
-  list.forEach(function(o){
-    var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=o[1][L];
-    var on=multi?!!obState[stateKey][o[0]]:obState[stateKey]===o[0];
-    b.setAttribute('aria-pressed',String(on));
-    b.addEventListener('click',function(){
-      if(multi){obState[stateKey][o[0]]=!obState[stateKey][o[0]];}
-      else{obState[stateKey]=o[0];}
-      obChips(host,list,multi,stateKey);
-    });
-    el.appendChild(b);});
+var IT={
+ hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
+  s:['VALKR builds you a 12-week calisthenics plan around what you have and what you can do. Five quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Calisthenics-Plan um das, was du hast und was du kannst. Fünf schnelle Fragen — alles bleibt später änderbar.'],
+  n:['Let\u2019s go','Los geht\u2019s']},
+ goal:{t:['What are you here for?','Wofür bist du hier?'],
+  s:['Shapes how your week is built.','Bestimmt, wie deine Woche aufgebaut wird.']},
+ days:{t:['How often can you train?','Wie oft kannst du trainieren?'],
+  s:['Honest beats ambitious — three real days beat four skipped ones.','Ehrlich schlägt ehrgeizig — drei echte Tage schlagen vier ausgefallene.']},
+ eq:{t:['What gear do you have?','Welches Equipment hast du?'],
+  s:['None at all is fine — wall, table and chair cover every pattern. Tap all that apply, or nothing.','Gar keins ist okay — Wand, Tisch und Stuhl decken jedes Muster ab. Tippe an, was zutrifft — oder nichts.'],
+  n:['Next','Weiter']},
+ avoid:{t:['Anything to protect?','Etwas zu schonen?'],
+  s:['The plan then avoids exercises that load these joints. Skip if nothing hurts.','Der Plan meidet dann Übungen, die diese Gelenke belasten. Einfach weiter, wenn nichts zwickt.'],
+  n:['Next','Weiter']},
+ exp:{t:['How long have you trained?','Wie lange trainierst du schon?'],
+  s:['Sets your starting rungs — the strength test fine-tunes them next.','Setzt deine Startstufen — der Krafttest justiert gleich fein nach.']},
+ ready:{t:['Your plan is ready.','Dein Plan steht.'],
+  s:['Today shows your session — every exercise has a swap button. The coach reads your numbers and speaks up when something matters. One last step makes it precise: the strength test. Ten minutes, four moves, and every ladder starts at your level.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf. Der Coach liest deine Zahlen und meldet sich, wenn etwas wichtig ist. Ein letzter Schritt macht den Plan präzise: der Krafttest. Zehn Minuten, vier Übungen, und jede Leiter startet auf deinem Level.'],
+  n:['Take the strength test','Jetzt zum Krafttest'],n2:['Straight to the app','Direkt zur App']}
+};
+var ISTEPS=['hello','goal','days','eq','avoid','exp','ready'],inIdx=0;
+function introShow(on){
+  var el=$('intro');if(!el)return;
+  el.classList.toggle('on',!!on);
+  document.body.style.overflow=on?'hidden':'';
 }
-function syncOb(){
-  var card=$('obCard');if(!card)return;
-  card.style.display=profile?'none':'';
-  if(!profile){
-    obChips('obGoal',OBL.goal,false,'goal');
-    obChips('obDays',OBL.days,false,'days');
-    obChips('obEq',OBL.eq,true,'eq');
-    obChips('obAvoid',OBL.avoid,true,'avoid');
-    obChips('obExp',OBL.exp,false,'exp');
-  }
-  var nx=$('obNext');
-  var tested=TESTS.some(function(t){return (testVals[t.id]||0)>0;});
-  nx.style.display=(profile&&!profile.testAsked&&!tested)?'':'none';
-}
-$('obSave').addEventListener('click',function(){
+function syncIntro(){if(!profile){inIdx=0;renderIntro();introShow(true);}else introShow(false);}
+function introFinishProfile(){
   profile={goal:obState.goal,days:obState.days,
     eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
     avoid:{wrist:!!obState.avoid.wrist,shoulder:!!obState.avoid.shoulder,knee:!!obState.avoid.knee},
-    exp:obState.exp,swaps:{}};
+    exp:obState.exp,swaps:{},testAsked:1};
   set('profile',profile);
   var ye=$('y-exp');if(ye)ye.selectedIndex=parseInt(profile.exp,10)||0;
-  applyProfile();syncOb();buildCatalog();
-  renderDay();volBar();refresh();flash('savedFlag');
-});
-$('obTest').addEventListener('click',function(){
-  profile.testAsked=1;set('profile',profile);syncOb();show('test');
-});
-$('obLater').addEventListener('click',function(){
-  profile.testAsked=1;set('profile',profile);syncOb();
+  applyProfile();buildCatalog();renderDay();volBar();refresh();
+}
+function inNextStep(){inIdx=Math.min(ISTEPS.length-1,inIdx+1);renderIntro();}
+function renderIntro(){
+  var L=cfg.lang==='de'?1:0,k=ISTEPS[inIdx],T=IT[k],host=$('inStep');
+  $('inDots').innerHTML=ISTEPS.map(function(_,i){return '<i class="'+(i<=inIdx?'on':'')+'"></i>';}).join('');
+  var h='';
+  if(k==='hello'){
+    h+='<div class="brandline"><svg width="30" height="30" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg><b>Valkr</b></div>';
+  }
+  h+='<h2></h2><p class="isub"></p>';
+  if(k==='hello'){
+    h+='<div class="ilang"><button type="button" data-lang="de" aria-pressed="'+(L===1)+'">Deutsch</button><button type="button" data-lang="en" aria-pressed="'+(L===0)+'">English</button></div>';
+  }
+  var opts=OBL[k];
+  if(opts){
+    h+='<div class="iopts">'+opts.map(function(o,i){
+      var multi=(k==='eq'||k==='avoid');
+      var on=multi?!!obState[k][o[0]]:obState[k]===o[0];
+      return '<button type="button" class="iopt" data-i="'+i+'" aria-pressed="'+on+'">'+o[1][L]+(o[2]?'<small>'+o[2][L]+'</small>':'')+'</button>';
+    }).join('')+'</div>';
+  }
+  host.innerHTML=h;
+  host.querySelector('h2').textContent=T.t[L];
+  host.querySelector('.isub').textContent=T.s[L];
+  /* Uebergang neu anstossen */
+  host.classList.remove('slide');void host.offsetWidth;host.classList.add('slide');
+  if(k==='hello'){
+    [].forEach.call(host.querySelectorAll('.ilang button'),function(b){
+      b.addEventListener('click',function(){cfg.lang=b.dataset.lang;saveCfg();applyI18n();renderIntro();});
+    });
+  }
+  if(opts){
+    [].forEach.call(host.querySelectorAll('.iopt'),function(b){
+      b.addEventListener('click',function(){
+        var o=opts[parseInt(b.dataset.i,10)],multi=(k==='eq'||k==='avoid');
+        if(multi){obState[k][o[0]]=!obState[k][o[0]];b.setAttribute('aria-pressed',String(!!obState[k][o[0]]));}
+        else{
+          obState[k]=o[0];
+          if(k==='exp'){introFinishProfile();}
+          inNextStep();
+        }
+      });
+    });
+  }
+  var back=$('inBack'),next=$('inNext');
+  back.style.visibility=(inIdx===0||k==='ready')?'hidden':'visible';
+  back.textContent=cfg.lang==='de'?'Zurück':'Back';
+  if(k==='hello'||k==='eq'||k==='avoid'){next.style.display='';next.textContent=T.n[L];}
+  else if(k==='ready'){next.style.display='';next.textContent=T.n[L];}
+  else next.style.display='none';
+  /* Zweiter Knopf am Ende: direkt zur App */
+  var old=$('inSkip');if(old)old.remove();
+  if(k==='ready'){
+    var sk=document.createElement('button');sk.type='button';sk.className='tbtn';sk.id='inSkip';
+    sk.textContent=T.n2[L];
+    sk.addEventListener('click',function(){introShow(false);});
+    next.parentNode.insertBefore(sk,next);
+  }
+}
+$('inBack').addEventListener('click',function(){inIdx=Math.max(0,inIdx-1);renderIntro();});
+$('inNext').addEventListener('click',function(){
+  var k=ISTEPS[inIdx];
+  if(k==='ready'){introShow(false);show('test');return;}
+  inNextStep();
 });
 function openSwap(pl,idx,it){
   var DE=cfg.lang==='de',L=DE?1:0;
@@ -4775,11 +4873,12 @@ buildLearn();buildAccess();renderWins();
 /* buildWeeks() lief beim Start, obwohl der Plan-Bereich nicht sichtbar ist --
    und show('plan') baut ihn ohnehin beim Oeffnen. Zwoelf Wochen mit allen
    Tagen im Voraus zu bauen kostet Startzeit fuer etwas, das niemand sieht. */
-applyProfile();syncOb();buildCatalog();
+applyProfile();buildCatalog();
 renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
 clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
+syncIntro();
 /* Im Theme „Automatisch" haengen alle Farben am Systemmodus. Wechselt der,
    aendern sich die Variablen, ohne dass jemand einen Knopf gedrueckt hat --
    der Farbspeicher muss dann geleert werden, sonst zeichnet die App mit den
