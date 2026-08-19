@@ -508,11 +508,60 @@
   #tierTable .distbar{display:inline-block;vertical-align:middle;width:70px;height:7px;background:var(--surf2);border-radius:2px;overflow:hidden;margin-right:.4rem}
   #tierTable .distbar i{display:block;height:100%;background:var(--aurora)}
   footer{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:1rem;font-family:var(--fm);font-size:.52rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  /* Trainingsmodus. Bewusst gross und mit wenig drauf: das hier wird mit
+     verschwitzten Haenden aus zwei Metern Entfernung bedient. */
+  #runner{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:1rem}
+  #runner.on{display:flex;animation:fade .2s ease}
+  #runner .rbox{width:100%;max-width:460px;display:flex;flex-direction:column;gap:1rem;text-align:center}
+  #runner .rtop{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+  #runner .rprog{font-family:var(--fm);font-size:.56rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+  #runner .rmain{display:flex;flex-direction:column;align-items:center;gap:.35rem}
+  #runner .ricon svg{width:56px;height:56px}
+  #runner h3{font-family:var(--fd);font-weight:600;font-size:1.5rem;margin:.2rem 0 0;line-height:1.2}
+  #runner .rstep{margin:0;font-size:.86rem;color:var(--ink2)}
+  #runner .rbig{font-family:var(--fm);font-size:clamp(3rem,17vw,4.6rem);line-height:1;font-variant-numeric:tabular-nums;margin:.5rem 0 .1rem;color:var(--aurora)}
+  #runner .rbig.rest{color:var(--brass)}
+  #runner .rhint{margin:0;font-size:.84rem;color:var(--ink2);min-height:1.2em;max-width:34ch}
+  #runner .rreps{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.2rem}
+  #runner .rreps label{font-family:var(--fm);font-size:.52rem;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+  #runner .rreps button{width:34px;height:34px;border:1px solid var(--line);border-radius:3px;color:var(--ink2);font-size:1.1rem;line-height:1}
+  #runner .rreps button:hover{border-color:var(--aurora);color:var(--ink)}
+  #runner .rreps input{width:64px;text-align:center;font-family:var(--fm);font-size:1.05rem;padding:.35rem;border:1px solid var(--line);border-radius:3px;background:var(--surf);color:var(--ink)}
+  #runner .rbtns{display:flex;gap:.5rem;align-items:stretch}
+  #runner .rbtns .tbtn{padding:.9rem .8rem;font-size:.72rem}
+  #runner .rmainbtn{flex:1;font-size:.8rem;letter-spacing:.12em}
+  @media (max-width:420px){#runner h3{font-size:1.25rem}}
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.flake{display:none}#bgfx{display:none}}
 </style>
 <div id="scenery" aria-hidden="true"></div>
 <canvas id="bgfx" aria-hidden="true"></canvas>
+<!-- Trainingsmodus: der Bildschirm, den man waehrend der Einheit offen hat.
+     Vorher gab es nur Haekchen und einen gemeinsamen Timer -- damit war der
+     Hub etwas fuer davor und danach, nicht fuer dabei. -->
+<div id="runner" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="rbox">
+    <div class="rtop">
+      <span class="rprog" id="rnProg"></span>
+      <button class="iconbtn" id="rnClose" aria-label="Close">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      </button>
+    </div>
+    <div class="rmain">
+      <span class="ricon" id="rnIcon"></span>
+      <h3 id="rnEx"></h3>
+      <p class="rstep" id="rnStep"></p>
+      <div class="rbig" id="rnBig"></div>
+      <p class="rhint" id="rnHint"></p>
+      <div class="rreps" id="rnReps"></div>
+    </div>
+    <div class="rbtns">
+      <button class="tbtn" id="rnPrev" aria-label="Previous">&larr;</button>
+      <button class="tbtn go rmainbtn" id="rnMain"></button>
+      <button class="tbtn" id="rnNext" aria-label="Next">&rarr;</button>
+    </div>
+  </div>
+</div>
 <div id="tipbox" role="tooltip" aria-hidden="true"></div>
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="modal" role="dialog" aria-modal="true"><div class="box">
@@ -588,9 +637,14 @@
         <text id="ringTxt" x="31" y="35" text-anchor="middle" fill="currentColor" style="font-family:ui-monospace,monospace;font-size:12px">0%</text>
       </svg>
     </div>
+    <div class="savebar" id="runBar" style="display:none">
+      <button class="tbtn go" id="runStart" data-i18n="btn.runStart">Start session</button>
+      <span class="hint" id="runHintTxt" data-i18n="btn.runHint">Guided: one set at a time, rest starts by itself.</span>
+    </div>
     <div>
       <p class="eyebrow" data-i18n="today.tick">Tick the box when a block is done &middot; tap the name for technique</p>
       <div class="exlist" id="today-list"></div>
+      <div id="blockBox"></div>
     </div>
     <div class="timer" id="timerBox">
       <div class="clock" id="clock">2:00</div>
@@ -623,7 +677,7 @@
   </section>
 
   <section class="view" id="v-plan">
-    <div><h2 class="sec" data-i18n="plan.h">The twelve weeks</h2><p class="sub" data-i18n="plan.s">One row per week. Open a week to see its days and jump to any of them.</p></div>
+    <div><h2 class="sec">The twelve weeks</h2><p class="sub">One row per week. Open a week to see its days and jump to any of them.</p></div>
     <div class="kpis" id="planKpis"></div>
     <div class="weeks" id="weeks"></div>
     <div class="noteblk">
@@ -779,9 +833,9 @@
       <p class="eyebrow" data-i18n="fuel.about">About you</p>
       <div class="fgrid">
         <div class="field"><label for="f-sex" data-i18n="f.sex">Sex</label><div class="ctl"><select id="f-sex"><option value="m">Male</option><option value="f">Female</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" value="20" min="14" max="90"><span class="unit">yrs</span></div></div>
-        <div class="field"><label for="f-h" data-i18n="f.height">Height</label><div class="ctl hasunit"><input id="f-h" type="number" value="180" min="130" max="220"><span class="unit" id="u-h">cm</span></div></div>
-        <div class="field"><label for="f-w" data-i18n="f.weight">Weight</label><div class="ctl hasunit"><input id="f-w" type="number" value="78" min="35" max="200" step="0.5"><span class="unit" id="u-w">kg</span></div></div>
+        <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" placeholder="20" min="14" max="90"><span class="unit">yrs</span></div></div>
+        <div class="field"><label for="f-h" data-i18n="f.height">Height</label><div class="ctl hasunit"><input id="f-h" type="number" placeholder="180" min="130" max="220"><span class="unit" id="u-h">cm</span></div></div>
+        <div class="field"><label for="f-w" data-i18n="f.weight">Weight</label><div class="ctl hasunit"><input id="f-w" type="number" placeholder="78" min="35" max="200" step="0.5"><span class="unit" id="u-w">kg</span></div></div>
         <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2">Mostly sitting</option><option value="1.375" selected>On feet some</option><option value="1.55">On feet a lot</option><option value="1.725">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected>Build muscle</option><option value="0">Maintain</option><option value="-450">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
@@ -822,6 +876,11 @@
   <section class="view" id="v-you">
     <div><h2 class="sec" data-i18n="you.h">You</h2><p class="sub" data-i18n="you.s">Baseline is week 1. Everything here is measured against your own start, not against anyone else.</p></div>
     <div class="kpis" id="youKpis"></div>
+    <div class="chartbox" id="blockHist" style="display:none">
+      <h4 data-i18n="you.blocks">Your blocks so far</h4>
+      <div id="blockHistBody"></div>
+      <p class="hint" data-i18n="you.blocksNote">Each block is twelve weeks. Your ladder steps carry over, so block two starts where block one finished &mdash; that is where the long-term progress actually shows.</p>
+    </div>
     <div class="chartbox">
       <h4 data-i18n="you.ready">Readiness right now</h4>
       <div class="gauge">
@@ -837,7 +896,7 @@
       <p class="eyebrow" data-i18n="you.habits">Habits &mdash; the coach reads these live</p>
       <div class="fgrid">
         <div class="field"><label for="y-exp" data-i18n="y.exp">Training since</label><div class="ctl"><select id="y-exp"><option>Just starting</option><option selected>Under 6 months</option><option>6-12 months</option><option>1-3 years</option><option>Over 3 years</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label for="y-sleep" data-i18n="y.sleep">Sleep average</label><div class="ctl hasunit"><input id="y-sleep" type="number" value="7" min="3" max="12" step="0.5"><span class="unit">h</span></div></div>
+        <div class="field"><label for="y-sleep" data-i18n="y.sleep">Sleep average</label><div class="ctl hasunit"><input id="y-sleep" type="number" placeholder="7" min="3" max="12" step="0.5"><span class="unit">h</span></div></div>
         <div class="field"><label for="y-mood" data-i18n="y.mood">Motivation now</label><div class="ctl"><select id="y-mood"><option value="3">Keen</option><option value="2" selected>Normal</option><option value="1">Dragging</option><option value="0">Dreading it</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="y-sore" data-i18n="y.sore">Soreness</label><div class="ctl"><select id="y-sore"><option value="0" selected>None to mild</option><option value="1">Noticeable</option><option value="2">Heavy, 3+ days</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="y-stress" data-i18n="y.stress">Life load</label><div class="ctl"><select id="y-stress"><option value="0" selected>Normal</option><option value="1">Busy spell</option><option value="2">Exams or crisis</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
@@ -957,7 +1016,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='9.1';
+var VERSION='9.5';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1011,6 +1070,9 @@ var DICT={
  'rk.h3':['Following the plan adds the rest — and a logged rest day counts exactly like a session.','Plan einhalten macht den Rest — und ein eingetragener Ruhetag zählt genau wie eine Einheit.'],
  'streak':['Streak','Serie'],'week':['Week','Woche'],
  'btn.theme':['Theme','Design'],
+ 'btn.runStart':['Start session','Einheit starten'],
+ 'btn.runHint':['Guided: one set at a time, rest starts by itself.','Geführt: ein Satz nach dem anderen, die Pause läuft von selbst.'],
+ 'btn.runResume':['Resume session','Einheit fortsetzen'],
  'btn.backToday':['Back to today','Zurück zu heute'],'btn.start':['Start','Start'],'btn.reset':['Reset','Zurück'],
  'btn.save':['Save log','Log speichern'],'btn.markDone':['Mark whole day done','Ganzen Tag abhaken'],
  'btn.logIt':['Log it','Eintragen'],'btn.allPatterns':['All patterns','Alle Muster'],
@@ -1068,6 +1130,8 @@ var DICT={
  'acc.h':['Book or hub?','Buch oder Hub?'],'acc.s':['Same knowledge in both. The difference is whether you read it once, or use it every session.','Gleiches Wissen in beidem. Der Unterschied ist, ob du es einmal liest oder jede Einheit benutzt.'],
  'acc.get':['What you get','Was du bekommst'],'acc.once':['one payment','einmalig'],'acc.forever':['one payment, keep forever','einmalig, für immer'],'acc.later':['not open yet','noch nicht offen'],
  'set.h':['Settings','Einstellungen'],'set.s':['Everything here is stored in your browser only.','Alles hier wird nur in deinem Browser gespeichert.'],
+ 'you.blocks':['Your blocks so far','Deine Blöcke bisher'],
+ 'you.blocksNote':['Each block is twelve weeks. Your ladder steps carry over, so block two starts where block one finished — that is where the long-term progress actually shows.','Ein Block sind zwölf Wochen. Die Leiterstufen wandern mit, Block zwei beginnt also da, wo Block eins aufgehört hat — dort wird der Fortschritt über Monate erst sichtbar.'],
  'set.theme':['Theme','Design'],
  'set.themeNote':['Each theme changes the palette and the ambient effect — snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.','Jedes Design ändert Farben und Hintergrundeffekt — Schnee, Glühwürmchen, Pollen, Blasen oder Funken. Auto folgt deiner Systemeinstellung.'],
  'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],'set.clock':['Time format','Zeitformat'],
@@ -1125,12 +1189,46 @@ function fmtClock(d){
 function tickClock(){$('clockNow').textContent=fmtClock(new Date());}
 
 /* ---------- program ---------- */
+/* ---------- Bloecke ------------------------------------------------------
+   Ein Block sind zwoelf Wochen. Vorher war danach Schluss: plan() lieferte ab
+   Woche 13 einen leeren Bildschirm mit dem Satz „nochmal laufen lassen" --
+   kein Knopf, kein neuer Plan. Damit war das Produkt nach drei Monaten zu
+   Ende, egal wie gut die zwoelf Wochen waren.
+   Jetzt folgen Bloecke mit eigenem Schwerpunkt aufeinander, jeder von den
+   Stufen aus, die der Retest in Woche 12 gerade gesetzt hat. Nach drei
+   Bloecken faengt der Zyklus von vorn an -- dann aber auf ganz anderem
+   Niveau, weil die Leitern mitgewandert sind. */
+var BLOCKS=[
+ {id:'foundation',n:['Foundation','Basis'],
+  d:['Technique and a clean base. Moderate sets, full range, nothing heroic.',
+     'Technik und eine saubere Basis. Mittlere Sätze, voller Weg, nichts Heroisches.'],
+  ph:[{n:['Phase 1 · Foundation','Phase 1 · Basis'],sets:3,reps:'8-12',rest:['2 min','2 Min'],rs:120},
+      {n:['Phase 2 · Build','Phase 2 · Aufbau'],sets:4,reps:'6-10',rest:['2-3 min','2-3 Min'],rs:150},
+      {n:['Phase 3 · Strength','Phase 3 · Kraft'],sets:4,reps:'5-8',rest:['3 min','3 Min'],rs:180}]},
+ {id:'density',n:['Density','Dichte'],
+  d:['Same steps, more work in less time. Rest shrinks, volume climbs — this is where a base turns into staying power.',
+     'Gleiche Stufen, mehr Arbeit in weniger Zeit. Pausen kürzer, Volumen höher — hier wird aus der Basis Durchhaltevermögen.'],
+  ph:[{n:['Phase 1 · Volume','Phase 1 · Volumen'],sets:4,reps:'8-12',rest:['90 s','90 s'],rs:90},
+      {n:['Phase 2 · Density','Phase 2 · Dichte'],sets:5,reps:'8-12',rest:['75 s','75 s'],rs:75},
+      {n:['Phase 3 · Capacity','Phase 3 · Kapazität'],sets:5,reps:'10-15',rest:['60 s','60 s'],rs:60}]},
+ {id:'skill',n:['Skill','Können'],
+  d:['Volume drops so the nervous system has room. Every session opens with skill practice — fresh, brief, well short of failure.',
+     'Volumen runter, damit das Nervensystem Platz hat. Jede Einheit beginnt mit Skill-Übung — frisch, kurz, deutlich vor dem Versagen.'],
+  ph:[{n:['Phase 1 · Practice','Phase 1 · Übung'],sets:3,reps:'6-8',rest:['2 min','2 Min'],rs:120},
+      {n:['Phase 2 · Strength','Phase 2 · Kraft'],sets:3,reps:'5-8',rest:['2-3 min','2-3 Min'],rs:150},
+      {n:['Phase 3 · Peak','Phase 3 · Spitze'],sets:4,reps:'4-6',rest:['3 min','3 Min'],rs:180}]}
+];
+var blockNo=get('block',1);
+function blockOf(n){return BLOCKS[(((n||1)-1)%BLOCKS.length+BLOCKS.length)%BLOCKS.length];}
+function curBlock(){return blockOf(blockNo);}
+/* Deload und Retest sind in jedem Block gleich -- sie sind der Uebergang,
+   nicht der Inhalt. */
 function phase(w){
-  if(w===11)return{name:cfg.lang==='de'?'Deload':'Deload',sets:2,reps:'8-10',rest:'2 min',rs:120};
-  if(w===12)return{name:cfg.lang==='de'?'Wiederholungstest':'Retest',sets:3,reps:'test',rest:'3 min',rs:180};
-  if(w<=4)return{name:cfg.lang==='de'?'Phase 1 · Basis':'Phase 1 · Foundation',sets:3,reps:'8-12',rest:'2 min',rs:120};
-  if(w<=8)return{name:cfg.lang==='de'?'Phase 2 · Aufbau':'Phase 2 · Build',sets:4,reps:'6-10',rest:'2-3 min',rs:150};
-  return{name:cfg.lang==='de'?'Phase 3 · Kraft':'Phase 3 · Strength',sets:4,reps:'5-8',rest:'3 min',rs:180};
+  var L=cfg.lang==='de'?1:0;
+  if(w===11)return{name:L?'Deload':'Deload',sets:2,reps:'8-10',rest:L?'2 Min':'2 min',rs:120};
+  if(w===12)return{name:L?'Wiederholungstest':'Retest',sets:3,reps:'test',rest:L?'3 Min':'3 min',rs:180};
+  var p=curBlock().ph[w<=4?0:(w<=8?1:2)];
+  return{name:p.n[L],sets:p.sets,reps:p.reps,rest:p.rest[L],rs:p.rs};
 }
 var SESS3={
  pull:{title:'Pull day',sub:'Pull / Row / Push / Squat / Core',items:[{id:'pull',l:'Pull-up or negative'},{id:'row',l:'Inverted row'},{id:'push',l:'Push-up'},{id:'legs',l:'Squat'},{id:'core',l:'Hollow hold'}]},
@@ -1480,6 +1578,11 @@ function show(n){
   if(n==='plan')buildWeeks();
   if(n==='train')volBar();
   if(n==='ranks'){evalAch(false);renderRanks();}
+  /* Coach und Du rechnen beim Oeffnen neu. Vorher liefen sie nur bei
+     refresh() mit -- wer einen Test eintrug und dann auf Coach ging, sah
+     noch den Stand von davor. */
+  if(n==='coach')runCoach();
+  if(n==='you'){youKpis();readiness();drawBlockHist();}
   hideTip();window.scrollTo({top:0,behavior:'smooth'});
 }
 [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.addEventListener('click',function(){show(b.dataset.view);});});
@@ -1533,7 +1636,15 @@ $('noteSave').addEventListener('click',function(){
 });
 
 /* ---------- today ---------- */
-function sessOf(pl){return (cfg.track==='4'?SESS4:SESS3)[pl.s];}
+function sessOf(pl){
+  var base=(cfg.track==='4'?SESS4:SESS3)[pl.s];
+  if(!base||curBlock().id!=='skill')return base;
+  /* Skill-Block: die Skill-Uebung kommt nach vorn, weil sie frisch etwas
+     taugt und nach vier harten Saetzen nichts mehr. */
+  var DE=cfg.lang==='de';
+  return{title:base.title,sub:base.sub,
+    items:[{id:null,l:DE?'Skill-Übung':'Skill practice',k:DE?'frisch, kurz':'fresh and brief',v:'10 min'}].concat(base.items)};
+}
 function renderDay(){
   var d=sel,pl=plan(d),key=iso(d),isT=key===iso(TODAY);
   $('dayName').textContent=dname(d)+', '+d.toLocaleDateString(undefined,{day:'numeric',month:'long'});
@@ -1541,7 +1652,9 @@ function renderDay(){
   var relTxt=cfg.lang==='de'
     ?(rel===0?'Heute':(rel===-1?'Gestern':(rel===1?'Morgen':(rel<0?'vor '+(-rel)+' Tagen':'in '+rel+' Tagen'))))
     :(rel===0?'Today':(rel===-1?'Yesterday':(rel===1?'Tomorrow':(rel<0?(-rel)+' days ago':'in '+rel+' days'))));
-  $('dayMeta').textContent=relTxt+(pl.w>=1&&pl.w<=12?' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+pl.ph.name:'');
+  $('dayMeta').textContent=relTxt+(pl.w>=1&&pl.w<=12
+    ?' · '+(cfg.lang==='de'?'Block ':'Block ')+blockNo+' '+curBlock().n[cfg.lang==='de'?1:0]+
+     ' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+pl.ph.name:'');
   $('jumpToday').style.display=isT?'none':'';
   $('h-tag').textContent=(pl.w>=1&&pl.w<=12)?((cfg.lang==='de'?'Tag ':'Day ')+(((dIdx(d)%7)+7)%7+1)+(cfg.lang==='de'?' der Woche':' of the week')):(pl.note||'');
   $('h-title').textContent=pl.title;$('h-sub').textContent=pl.sub||'';
@@ -1550,14 +1663,41 @@ function renderDay(){
     :(pl.note?'<span>'+pl.note+'</span>':'');
   var list=$('today-list');list.innerHTML='';
   var dn=doneMap[key]||{};
-  var items=pl.kind==='train'?sessOf(pl).items.map(function(x){return{id:x.id,l:x.l,v:pl.ph.sets+' x '+pl.ph.reps};}):(pl.items||[]).map(function(x){return{id:null,l:x.l,v:x.v};});
+  var items=pl.kind==='train'?sessOf(pl).items.map(function(x){return{id:x.id,l:x.l,k:x.k,v:x.v||(pl.ph.sets+' x '+pl.ph.reps)};}):(pl.items||[]).map(function(x){return{id:null,l:x.l,v:x.v};});
   items.forEach(function(it,i){
     var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
     var icon=it.id?sv(it.id,cvar(pid[it.id].cv),28):'';
-    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(pl.kind==='rest'?'recovery':'easy'))+'</span></span><span class="sets">'+it.v+'</span>';
+    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?'recovery':'easy')))+'</span></span><span class="sets">'+it.v+'</span>';
     row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);renderDay();streak();refresh();});
     if(it.id)row.querySelector('.nm').addEventListener('click',function(){openDetail(it.id);});
     list.appendChild(row);});
+  /* Blockabschluss: der einzige Bildschirm, der von hier aus weiterfuehrt.
+     Vorher stand hier ein Satz und sonst nichts. */
+  var bb=$('blockBox');
+  if(pl.kind==='post'){
+    var L=cfg.lang==='de'?1:0,cb=curBlock(),nb=blockOf(blockNo+1);
+    var hist=get('blocks',[]),climbed=0,pk;
+    var prev=hist.length?hist[hist.length-1].steps:null;
+    for(pk in steps){if(prev&&typeof prev[pk]==='number')climbed+=Math.max(0,steps[pk]-prev[pk]);}
+    bb.innerHTML='<div class="card"><h4>'+(L?'Block ':'Block ')+blockNo+' — '+cb.n[L]+(L?' abgeschlossen':' complete')+'</h4>'+
+      '<p class="hint">'+(L?'Zwölf Wochen, ':'Twelve weeks, ')+totalSets()+(L?' Blöcke abgehakt':' blocks ticked')+
+      (prev?(L?', '+climbed+' Leiterstufen seit dem letzten Block':', '+climbed+' ladder steps since the last block'):'')+'.</p>'+
+      '<p class="hint"><b>'+(L?'Block ':'Block ')+(blockNo+1)+' — '+nb.n[L]+'</b><br>'+nb.d[L]+'</p>'+
+      '<div class="savebar"><button class="tbtn go" id="nextBlockBtn">'+
+      (L?'Block '+(blockNo+1)+' starten':'Start block '+(blockNo+1))+'</button></div></div>';
+    $('nextBlockBtn').addEventListener('click',startNextBlock);
+  }else bb.innerHTML='';
+  /* Der Startknopf steht nur an Trainingstagen und nur fuer heute --
+     eine gefuehrte Einheit fuer vorgestern ergibt keinen Sinn. */
+  var rb=$('runBar');
+  if(pl.kind==='train'&&isT){
+    rb.style.display='';
+    var open=run&&run.on&&run.key===key;
+    $('runStart').textContent=T(open?'btn.runResume':'btn.runStart');
+    $('runHintTxt').textContent=open
+      ?(cfg.lang==='de'?'Läuft — Übung '+((run.ex||0)+1)+', Satz '+(run.set||1)+'.':'In progress — exercise '+((run.ex||0)+1)+', set '+(run.set||1)+'.')
+      :T('btn.runHint');
+  }else rb.style.display='none';
   $('timerBox').style.display=pl.kind==='train'?'':'none';
   if(pl.kind==='train')setT(pl.ph.rs);
   var tot=items.length,dc=0;for(var k in dn){if(dn[k])dc++;}
@@ -1565,6 +1705,26 @@ function renderDay(){
   $('ringArc').setAttribute('stroke-dashoffset',String(163.4*(1-pct/100)));
   $('ringTxt').textContent=pct+'%';
   paintLog();
+}
+/* Naechsten Block starten. Leiterstufen, Rekorde und Erfolge bleiben -- nur
+   der Kalender wird neu angesetzt, damit Woche 1 wieder heute liegt.
+   Der alte Block wandert mit seinen Stufen in die Historie, daraus entsteht
+   der Langzeitverlauf. */
+function startNextBlock(){
+  var DE=cfg.lang==='de',nb=blockOf(blockNo+1);
+  openModal(DE?('Block '+(blockNo+1)+' starten?'):('Start block '+(blockNo+1)+'?'),
+    DE?('Schwerpunkt: '+nb.n[1]+'. Deine Leiterstufen, Rekorde, XP und Erfolge bleiben alle erhalten — nur der Plan beginnt wieder bei Woche 1, von den Stufen aus, auf denen du jetzt stehst.')
+      :('Emphasis: '+nb.n[0]+'. Your ladder steps, records, XP and achievements all stay — only the plan restarts at week 1, from the steps you are on now.'),
+    DE?'Block starten':'Start block',
+    function(){
+      var hist=get('blocks',[]);
+      hist.push({n:blockNo,id:curBlock().id,from:get('start',null),to:iso(TODAY),
+        steps:JSON.parse(JSON.stringify(steps)),sets:totalSets()});
+      set('blocks',hist);
+      blockNo=blockNo+1;set('block',blockNo);
+      set('start',iso(monday(TODAY)));
+      location.reload();
+    });
 }
 $('prevDay').addEventListener('click',function(){sel=add(sel,-1);renderDay();});
 $('nextDay').addEventListener('click',function(){sel=add(sel,1);renderDay();});
@@ -1580,13 +1740,19 @@ function streak(){
   for(var i=0;i<400;i++){if(dayDone(iso(d))){n++;d=add(d,-1);}else break;}
   streakVal=n;
   $('s-streak').textContent=n;
-  var w=wkOf(TODAY);$('s-week').textContent=(w<1?'-':(w>12?'done':w+' / 12'));
+  var w=wkOf(TODAY);
+  $('s-week').textContent=(w<1?'-':(w>12?(cfg.lang==='de'?'fertig':'done'):'B'+blockNo+' · '+w+'/12'));
   return n;
 }
 
 /* ---------- plan ---------- */
 function buildWeeks(){
   var wrap=$('weeks');wrap.innerHTML='';
+  /* Ueberschrift traegt den Block, sonst sehen zwoelf Wochen im Block 3
+     genauso aus wie zwoelf Wochen im Block 1. */
+  var LB=cfg.lang==='de'?1:0,cbk=curBlock(),hd=document.querySelector('#v-plan h2.sec'),sb=document.querySelector('#v-plan p.sub');
+  if(hd)hd.textContent=(LB?'Block ':'Block ')+blockNo+' · '+cbk.n[LB];
+  if(sb)sb.textContent=cbk.d[LB];
   var curW=wkOf(TODAY),totDone=0,totTrain=0;
   for(var w=1;w<=12;w++){(function(w){
     var ph=phase(w),done=0,tot=0,dots='';
@@ -1819,12 +1985,175 @@ $('tStart').addEventListener('click',function(){
   if(tl<=0)tl=tb;this.textContent=cfg.lang==='de'?'Pause':'Pause';
   ti=setInterval(function(){tl--;paint();if(tl<=0){stopT();beep();burst(window.innerWidth/2,150,18);}},1000);paint();});
 $('tReset').addEventListener('click',function(){stopT();tl=tb;paint();});
+/* ---------- Trainingsmodus ----------------------------------------------
+   Fuehrt durch die Einheit: eine Uebung, ein Satz, danach laeuft die Pause
+   von selbst und springt weiter. Der Zustand liegt im Speicher, damit ein
+   gesperrtes Handy oder ein versehentliches Schliessen die Einheit nicht
+   verliert -- genau das passiert waehrend eines Trainings staendig.
+   Die Pausendauer kommt aus dem Block, nicht aus einem festen Wert. */
+var run=get('run',null),runTi=null;
+function runItems(){
+  var pl=plan(TODAY);
+  if(pl.kind!=='train')return null;
+  return sessOf(pl).items.map(function(x){
+    return{id:x.id,l:x.l,k:x.k,fixed:!!x.v,label:x.v||null,
+           sets:x.v?1:pl.ph.sets,reps:pl.ph.reps,rest:pl.ph.rs};
+  });
+}
+function runValid(){
+  return run&&run.on&&run.key===iso(TODAY)&&runItems();
+}
+function saveRun(){set('run',run);}
+function startRun(){
+  var it=runItems();if(!it)return;
+  /* Bei bereits abgehakten Bloecken vorn einsteigen, wo es weitergeht. */
+  var dn=doneMap[iso(TODAY)]||{},i=0;
+  while(i<it.length&&dn[i])i++;
+  if(i>=it.length)i=0;
+  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{}};
+  saveRun();openRun();
+}
+function openRun(){
+  $('runner').classList.add('on');$('runner').setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
+  runPaint();
+}
+function closeRun(){
+  $('runner').classList.remove('on');$('runner').setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+  runStopTi();renderDay();refresh();
+}
+function runStopTi(){if(runTi){clearInterval(runTi);runTi=null;}}
+function runStartTi(){
+  runStopTi();
+  runTi=setInterval(function(){
+    if(!run||run.ph!=='rest'){runStopTi();return;}
+    run.left--;
+    if(run.left<=0){runStopTi();beep();burst(window.innerWidth/2,window.innerHeight/2,14);runAdvance();}
+    else{saveRun();runPaint();}
+  },1000);
+}
+/* Ein Satz ist fertig: entweder kommt der naechste Satz oder die naechste
+   Uebung. Dazwischen liegt immer die Pause -- ausser am Ende. */
+function runAfterSet(){
+  var it=runItems();if(!it)return;
+  var cur=it[run.ex];
+  if(run.set<cur.sets){run.set++;}
+  else{
+    var k=iso(TODAY),dn=doneMap[k]||{};dn[run.ex]=true;doneMap[k]=dn;set('done',doneMap);
+    streak();
+    if(run.ex>=it.length-1){run.ph='done';run.left=0;saveRun();runPaint();return;}
+    run.ex++;run.set=1;
+  }
+  run.ph='rest';run.left=cur.rest||120;saveRun();runPaint();runStartTi();
+}
+function runAdvance(){
+  run.ph='work';run.left=0;saveRun();runPaint();
+}
+function runJump(d){
+  var it=runItems();if(!it)return;
+  runStopTi();
+  run.ex=Math.max(0,Math.min(it.length-1,run.ex+d));
+  run.set=1;run.ph='work';run.left=0;saveRun();runPaint();
+}
+function runRepsKey(){return run.ex+'-'+run.set;}
+function runPaint(){
+  var it=runItems();if(!it){closeRun();return;}
+  var DE=cfg.lang==='de',cur=it[run.ex],L=DE?1:0;
+  $('rnProg').textContent=(DE?'Übung ':'Exercise ')+(run.ex+1)+'/'+it.length+
+    ((run.ph==='done'||cur.fixed)?'':' · '+(DE?'Satz ':'Set ')+run.set+'/'+cur.sets);
+  $('rnIcon').innerHTML=cur.id?sv(cur.id,cvar(pid[cur.id].cv),56):'';
+  $('rnEx').textContent=cur.l;
+  $('rnStep').textContent=cur.id?stepName(cur.id):(cur.k||'');
+  var big=$('rnBig'),hint=$('rnHint'),reps=$('rnReps'),mb=$('rnMain');
+  big.className='rbig'+(run.ph==='rest'?' rest':'');
+  if(run.ph==='done'){
+    big.textContent='✓';
+    $('rnEx').textContent=DE?'Einheit fertig':'Session done';
+    $('rnStep').textContent='';$('rnIcon').innerHTML='';
+    hint.textContent=DE?'Alle Blöcke abgehakt. Trag unten noch RPE und ein, zwei Sätze Notiz ein — das ist es, womit der Coach arbeitet.'
+                       :'Every block ticked. Add your RPE and a line of notes below — that is what the coach works with.';
+    reps.innerHTML='';
+    mb.textContent=DE?'Fertig':'Done';
+    return;
+  }
+  if(run.ph==='rest'){
+    big.textContent=fmt(Math.max(0,run.left));
+    var nxt=(run.set===1&&run.ex>0)?it[run.ex]:cur;
+    hint.textContent=(DE?'Pause. Danach: ':'Rest. Up next: ')+nxt.l+' · '+(DE?'Satz ':'set ')+run.set;
+    reps.innerHTML='';
+    mb.textContent=DE?'Pause überspringen':'Skip rest';
+    return;
+  }
+  big.textContent=cur.fixed?cur.label:(cur.reps==='test'?(DE?'max':'max'):cur.reps);
+  hint.textContent=cur.fixed
+    ?(DE?'Frisch und kurz halten, deutlich vor dem Versagen aufhören.':'Keep it fresh and brief, stop well short of failure.')
+    :(DE?'Satz '+run.set+' von '+cur.sets+' · Pause danach '+fmt(cur.rest):'Set '+run.set+' of '+cur.sets+' · rest after: '+fmt(cur.rest));
+  if(cur.fixed){reps.innerHTML='';}
+  else{
+    var v=run.reps[runRepsKey()];
+    reps.innerHTML='<label for="rnRepsIn">'+(DE?'Wdh':'Reps')+'</label>'+
+      '<button type="button" id="rnMinus" aria-label="-">&minus;</button>'+
+      '<input id="rnRepsIn" type="number" min="0" max="200" inputmode="numeric" value="'+(v===undefined?'':v)+'" placeholder="—">'+
+      '<button type="button" id="rnPlus" aria-label="+">+</button>';
+    $('rnRepsIn').addEventListener('input',function(){
+      var n=parseInt(this.value,10);
+      if(isNaN(n))delete run.reps[runRepsKey()];else run.reps[runRepsKey()]=n;
+      saveRun();});
+    $('rnMinus').addEventListener('click',function(){bump(-1);});
+    $('rnPlus').addEventListener('click',function(){bump(1);});
+  }
+  mb.textContent=cur.fixed?(DE?'Erledigt':'Done'):(DE?'Satz fertig':'Set done');
+  function bump(d){
+    var e=$('rnRepsIn'),n=parseInt(e.value,10);
+    if(isNaN(n))n=0;
+    n=Math.max(0,n+d);e.value=n;run.reps[runRepsKey()]=n;saveRun();
+  }
+}
+$('runStart').addEventListener('click',function(){
+  if(runValid()){openRun();return;}
+  startRun();
+});
+$('rnClose').addEventListener('click',closeRun);
+$('rnPrev').addEventListener('click',function(){runJump(-1);});
+$('rnNext').addEventListener('click',function(){runJump(1);});
+$('rnMain').addEventListener('click',function(){
+  if(!run)return;
+  if(run.ph==='done'){
+    run.on=false;saveRun();closeRun();show('today');
+    var n=$('noteBox');if(n)n.focus();
+    return;
+  }
+  if(run.ph==='rest'){runStopTi();runAdvance();return;}
+  runAfterSet();
+});
+document.addEventListener('keydown',function(e){
+  if(!$('runner').classList.contains('on'))return;
+  if(e.key==='Escape')closeRun();
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();$('rnMain').click();}
+});
+
 /* ---------- fuel ---------- */
 var over=get('over',{});
 function nv(id){var x=parseFloat($(id).value);return isNaN(x)?0:x;}
 function kgNow(){return Math.max(35,fromDisp(nv('f-w'),'w'));}
 function cmNow(){return Math.max(130,fromDisp(nv('f-h'),'l'));}
+/* Ohne eigene Koerperdaten wird hier nichts gerechnet. Vorher standen
+   Alter 20 / 180 cm / 78 kg fest im Feld -- der Rechner lieferte damit
+   Kalorien- und Proteinziele aus dem Koerper eines Fremden, die aussahen
+   wie eigene. Leere Felder sind ehrlicher als plausible Fremdzahlen. */
+function hasBody(){return nv('f-age')>0&&nv('f-h')>0&&nv('f-w')>0;}
 function calc(){
+  if(!hasBody()){
+    $('est').innerHTML='<p class="hint" style="margin:0;grid-column:1/-1">'+(cfg.lang==='de'
+      ?'Trag Alter, Größe und Gewicht ein — dann rechnet das hier deine Werte. Vorher stünden hier nur fremde Zahlen.'
+      :'Enter your age, height and weight — then this calculates your numbers. Anything before that would be somebody else&rsquo;s.')+'</p>';
+    ['m-cal','m-pro','m-fat','m-carb'].forEach(function(id){if(document.activeElement!==$(id))$(id).value='';});
+    $('mbar').innerHTML='';$('perkg').innerHTML='';$('f-note').textContent='';
+    if($('mealplan'))$('mealplan').innerHTML='';
+    if($('hydrOut'))$('hydrOut').innerHTML='';
+    return;
+  }
   var kg=kgNow(),cm=cmNow(),age=Math.max(14,nv('f-age'));
   var bmr=Math.round(10*kg+6.25*cm-5*age+($('f-sex').value==='m'?5:-161));
   var tdee=Math.round(bmr*parseFloat($('f-act').value));
@@ -2028,6 +2357,20 @@ function suppNote(){
   $('suppnote').innerHTML=w.length?'<b>'+w.join(', ')+'</b> — '+(cfg.lang==='de'?'keine belastbare Evidenz. Das Geld ist in Essen besser angelegt.':'no good evidence these do anything for you. That money buys a lot of food.'):(cfg.lang==='de'?'Nichts auf deiner Liste ist verbranntes Geld. Gut.':'Nothing on your list is wasted money. Good.');
 }
 function readiness(){
+  var DEr=cfg.lang==='de';
+  /* Leeres Schlaffeld ist keine Angabe von null Stunden. Vorher rechnete die
+     Belastbarkeit beim Frischstart mit 0 h und zeigte einen Wert, den nie
+     jemand eingegeben hatte. */
+  if($('y-sleep').value===''){
+    $('rdArc').setAttribute('stroke-dashoffset','213.6');
+    $('rdArc').setAttribute('stroke',cvar('--line'));
+    $('rdVal').textContent='–';$('rdVal').style.color=cvar('--ink3');
+    $('rdLbl').textContent=DEr?'Noch keine Angaben':'Nothing entered yet';
+    $('rdNote').textContent=DEr
+      ?'Trag oben deinen Schlafschnitt ein, dann rechnet die Belastbarkeit mit.'
+      :'Enter your sleep average above and this starts working.';
+    lastRd=0;return -1;
+  }
   var sleep=parseFloat($('y-sleep').value)||0;
   var mood=parseInt($('y-mood').value,10),sore=parseInt($('y-sore').value,10),stress=parseInt($('y-stress').value,10);
   var s=Math.max(0,Math.min(40,(sleep-4)/5*40))+mood/3*25+(2-sore)/2*20+(2-stress)/2*15;
@@ -2042,43 +2385,220 @@ function readiness(){
     :(s>=70?'Green light. Take working sets to within one to three reps of failure.':s>=45?'Do the session, keep the same step, do not chase a record today.':'Halve the sets and stay well short of failure. Showing up beats skipping.');
   return s;
 }
+/* Blockverlauf: was ueber Monate passiert ist, sieht man sonst nirgends.
+   Erscheint erst, wenn wirklich ein Block hinter einem liegt. */
+function drawBlockHist(){
+  var box=$('blockHist');if(!box)return;
+  var hist=get('blocks',[]),L=cfg.lang==='de'?1:0;
+  if(!hist.length){box.style.display='none';return;}
+  box.style.display='';
+  var rows=hist.map(function(h,i){
+    var b=blockOf(h.n),prev=i>0?hist[i-1].steps:null,climb=0,k;
+    for(k in h.steps){if(prev&&typeof prev[k]==='number')climb+=Math.max(0,h.steps[k]-prev[k]);}
+    var tot=0;for(k in h.steps)tot+=h.steps[k];
+    return '<div class="row"><div class="h">'+(L?'Block ':'Block ')+h.n+'</div><div class="t">'+
+      '<b>'+b.n[L]+'</b><span>'+(h.from||'?')+' – '+(h.to||'?')+' · '+(h.sets||0)+(L?' Blöcke':' blocks')+
+      ' · '+(L?'Leitersumme ':'ladder total ')+tot+(i>0?(L?', +'+climb+' Stufen':', +'+climb+' steps'):'')+'</span></div></div>';
+  });
+  var cb=curBlock();
+  rows.push('<div class="row"><div class="h">'+(L?'Block ':'Block ')+blockNo+'</div><div class="t"><b>'+cb.n[L]+
+    '</b><span>'+(L?'läuft gerade · Woche ':'in progress · week ')+Math.max(1,Math.min(12,wkOf(TODAY)))+'/12</span></div></div>');
+  $('blockHistBody').innerHTML='<div class="log">'+rows.join('')+'</div>';
+}
 function youKpis(){
   var tot=0,n=0;PRS.forEach(function(p){if(p.b>0){tot+=(p.v-p.b)/p.b;n++;}});
   var avg=n?Math.round(tot/n*100):0;
   var wch=wlog.length>1?toDisp(wlog[wlog.length-1].v-wlog[0].v,'w').toFixed(1):'-';
   $('youKpis').innerHTML=kpi(cfg.lang==='de'?'Ø Rekordzuwachs':'Average PR gain',avg+'%',cfg.lang==='de'?'seit Woche 1':'since week 1')+
     kpi(cfg.lang==='de'?'Gewicht':'Weight change',wch==='-'?'-':((wch>0?'+':'')+wch+' '+uw()),wlog.length+'x')+
-    kpi(cfg.lang==='de'?'Schlaf':'Sleep',$('y-sleep').value+' h','Ø')+
+    kpi(cfg.lang==='de'?'Schlaf':'Sleep',$('y-sleep').value?($('y-sleep').value+' h'):'–','Ø')+
     kpi(cfg.lang==='de'?'Serie':'Streak',$('s-streak').textContent,cfg.lang==='de'?'Tage':'days');
 }
 
 /* ---------- coach ---------- */
+/* ---- Situationsbezug fuer den Coach -------------------------------------
+   „Du hast Muskelkater" weiss der Nutzer selbst. Nuetzlich wird es erst, wenn
+   der Coach sagt wovon: welches Muster zuletzt wirklich abgehakt wurde, auf
+   welcher Leiterstufe, und was daraus folgt. Alles aus vorhandenen Daten --
+   kein Netz, kein fremder Dienst, keine Gesundheitsdaten verlassen das Geraet. */
+var MUSC={
+  push:['chest and triceps','Brust und Trizeps'],
+  pull:['back and biceps','Rücken und Bizeps'],
+  row:['mid-back and rear shoulders','oberen Rücken und hintere Schulter'],
+  press:['shoulders','Schultern'],
+  legs:['legs and glutes','Beine und Gesäß'],
+  core:['core','Rumpf']
+};
+var PAINDE={'Wrist':'Handgelenk','Elbow':'Ellbogen','Shoulder':'Schulter',
+  'Lower back':'unteren Rücken','Knee':'Knie','Hip':'Hüfte'};
+/* Schmerzstelle -> welche Muster laden sie, und was man konkret aendert.
+   Bewusst ohne Diagnose: Belastung anpassen, und ab zwei Wochen zum Arzt.
+   Diese Regeln bleiben fest verdrahtet -- Belastungsempfehlungen bei Schmerz
+   sind nichts, was man einem Sprachmodell zum Formulieren ueberlaesst. */
+var PAINFIX={
+  'Wrist':{pat:['push','press'],
+    en:'Do the wrist prep before every session — rocking on all fours, hands turned in, then on fists. Until it settles, press on fists or handles so the joint stays straight.',
+    de:'Handgelenks-Prep vor jede Einheit — im Vierfüßler wippen, Hände eingedreht, dann auf Fäusten. Bis es ruhig ist auf Fäusten oder Griffen drücken, damit das Gelenk gerade bleibt.'},
+  'Elbow':{pat:['pull','row'],
+    en:'Usually load, not damage. Drop one ladder step, slow the lowering to three seconds, and drop any false grip for two weeks.',
+    de:'Meist Belastung, kein Schaden. Eine Leiterstufe zurück, das Ablassen auf drei Sekunden verlangsamen, und zwei Wochen ohne falschen Griff.'},
+  'Shoulder':{pat:['press','push'],
+    en:'Rows first in every session, pressing last, and nothing overhead for two weeks. Elbows at about 45 degrees, not flared wide.',
+    de:'Rudern an den Anfang jeder Einheit, Drücken ans Ende, zwei Wochen nichts über Kopf. Ellbogen auf etwa 45 Grad, nicht weit abgespreizt.'},
+  'Lower back':{pat:['legs','core'],
+    en:'Swap sit-up style work for hollow holds and side planks, and hinge with a shorter range until it quiets down.',
+    de:'Sit-up-artiges gegen Hollow Hold und Seitstütz tauschen, und die Hüftstreckung mit kürzerem Weg fahren, bis Ruhe ist.'},
+  'Knee':{pat:['legs'],
+    en:'Squat to a box at a height that does not hurt, heels stay down, knees track over the toes. Depth comes back later.',
+    de:'Auf eine Box beugen, deren Höhe nicht wehtut, Fersen bleiben unten, Knie über den Zehen. Die Tiefe kommt später zurück.'},
+  'Hip':{pat:['legs'],
+    en:'Two minutes of hip flexor work before legs, and cut squat depth until the pinch is gone.',
+    de:'Zwei Minuten Hüftbeuger vor den Beinen, und die Kniebeugentiefe reduzieren, bis das Klemmen weg ist.'}
+};
+/* Welche Muster wurden in den letzten n Tagen abgehakt -- und wie lange ist es
+   her? Zaehlt nur tatsaechlich Abgehaktes, nicht den Plan. */
+function recentTrained(n){
+  var seen={},i,j;
+  for(i=0;i<n;i++){
+    var d=add(TODAY,-i),k=iso(d),pl=plan(d);
+    if(pl.kind!=='train')continue;
+    var dn=doneMap[k];if(!dn)continue;
+    var its=sessOf(pl).items;
+    for(j=0;j<its.length;j++){
+      if(dn[j]&&its[j].id&&seen[its[j].id]===undefined)seen[its[j].id]=i;
+    }
+  }
+  return seen;
+}
+function lastSession(){
+  var rec=recentTrained(5),best=99,ids=[],k;
+  for(k in rec)if(rec[k]<best)best=rec[k];
+  for(k in rec)if(rec[k]===best)ids.push(k);
+  return{age:best,ids:ids};
+}
+function stepName(id){
+  var p=pid[id];if(!p)return '';
+  return p.ladder[Math.min(steps[id]||0,p.ladder.length-1)];
+}
+function listMusc(ids,L){
+  var n=ids.map(function(i){return (MUSC[i]||['',''])[L];}).filter(Boolean);
+  if(n.length<=1)return n[0]||'';
+  return n.slice(0,-1).join(', ')+(L?' und ':' and ')+n[n.length-1];
+}
+function agoTxt(n,DE){
+  if(DE)return n===0?'heute':(n===1?'gestern':(n===2?'vorgestern':'vor '+n+' Tagen'));
+  return n===0?'today':(n===1?'yesterday':(n===2?'two days ago':n+' days ago'));
+}
+
 function runCoach(){
   var out=[],w=wkOf(TODAY),DE=cfg.lang==='de';
   var sleep=parseFloat($('y-sleep').value)||0;
   var mood=parseInt($('y-mood').value,10),sore=parseInt($('y-sore').value,10),stress=parseInt($('y-stress').value,10);
   var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*1.9);
   var rd=readiness();
-  if(sleep<7)out.push(['hi',DE?'Schlaf ist dein Engpass':'Sleep is your bottleneck',DE?('Du liegst bei '+sleep+' Stunden. Unter sieben fühlt sich dieselbe Einheit härter an, du erzeugst weniger Kraft und regenerierst langsamer. Hebel: feste Weckzeit, Koffein-Schluss acht Stunden vor dem Bett, Zimmer dunkel und kühl. Supplement-seitig hilft höchstens Magnesium — und nur bei echtem Mangel, testen statt raten.'):('You are averaging '+sleep+' hours. Under seven, the same session feels harder and you recover slower. Levers: fixed wake time, caffeine cut-off eight hours before bed, dark cool room. On the supplement side only magnesium is worth a look — and only if you are actually low. Test, do not guess.')]);
-  if(sore===2)out.push(['hi',DE?'Starker Muskelkater über Tage':'Heavy soreness for days',DE?'Das ist ein Regenerationssignal. Diese Woche halbe Sätze, deutlich vor dem Versagen. Dazu Protein ans Tagesziel, Wasser und ein lockerer Spaziergang. Kreatin (3–5 g täglich) lohnt ohnehin — akut repariert aber vor allem Schlaf.':'That is a recovery signal, not a badge. Cut this week to half the sets. Then hit your protein target, drink water, take an easy walk. Creatine (3–5 g daily) is worth it anyway — but what repairs you acutely is sleep.']);
+  var anyTest=false;TESTS.forEach(function(t){if((testVals[t.id]||0)>0)anyTest=true;});
+
+  /* ---- Frischstart -----------------------------------------------------
+     Solange nichts abgehakt ist, sind saemtliche Diagnoseregeln bedeutungslos.
+     „Du laesst Einheiten aus" am ersten Tag ist schlicht falsch — der Plan
+     zaehlt ab Wochenbeginn, der Nutzer ist aber gerade erst angekommen.
+     Statt Beschwerden also die Reihenfolge zum Anfangen, mit Haken an dem,
+     was schon erledigt ist. */
+  if(totalSets()===0){
+    var guide=[
+      {ok:anyTest,
+       t:['Step 1 — do the level test','Schritt 1 — Level-Test machen'],
+       d:['Four tests, about twenty minutes, under "Test". They decide where you start on each ladder. Without them the programme is guessing, and it lands either too hard or too easy.',
+          'Vier Tests, etwa zwanzig Minuten, unter „Test". Sie legen fest, wo du auf jeder Leiter anfängst. Ohne sie rät das Programm — und liegt entweder zu hoch oder zu niedrig.']},
+      {ok:hasBody(),
+       t:['Step 2 — enter your body data','Schritt 2 — Körperdaten eintragen'],
+       d:['Age, height and weight under "Fuel". Nothing is prefilled on purpose — targets calculated from somebody else’s body look convincing and are worthless.',
+          'Alter, Größe und Gewicht unter „Ernährung". Da steht absichtlich nichts vor — Zielwerte aus dem Körper eines Fremden sehen überzeugend aus und taugen nichts.']},
+      {ok:false,
+       t:['Step 3 — tick your first session','Schritt 3 — erste Einheit abhaken'],
+       d:['Open "Today" and tick each block as you finish it. From the first tick onwards this page turns into real coaching — before that it has nothing to work with.',
+          'Öffne „Heute" und hak jeden Block ab, sobald er erledigt ist. Ab dem ersten Haken wird diese Seite zu echtem Coaching — vorher hat sie nichts, womit sie arbeiten könnte.']}
+    ];
+    var nx=-1;guide.forEach(function(g,i){if(nx<0&&!g.ok)nx=i;});
+    $('coachList').innerHTML=guide.map(function(g,i){
+      var sev=g.ok?'ok':(i===nx?'hi':'md');
+      var lbl=g.ok?(DE?'Erledigt':'Done'):(i===nx?(DE?'Jetzt':'Now'):(DE?'Danach':'Next'));
+      return '<div class="cnote '+sev+'" style="animation-delay:'+(i*50)+'ms"><span class="sev">'+lbl+
+        '</span><div><b>'+g.t[DE?1:0]+'</b><p>'+g.d[DE?1:0]+'</p></div></div>';
+    }).join('');
+    var open=guide.filter(function(g){return !g.ok;}).length;
+    $('coachBadge').textContent=open;$('coachBadge').style.display=open?'':'none';
+    return;
+  }
+
+  if(sleep>0&&sleep<7)out.push(['hi',DE?'Schlaf ist dein Engpass':'Sleep is your bottleneck',DE?('Du liegst bei '+sleep+' Stunden. Unter sieben fühlt sich dieselbe Einheit härter an, du erzeugst weniger Kraft und regenerierst langsamer. Hebel: feste Weckzeit, Koffein-Schluss acht Stunden vor dem Bett, Zimmer dunkel und kühl. Supplement-seitig hilft höchstens Magnesium — und nur bei echtem Mangel, testen statt raten.'):('You are averaging '+sleep+' hours. Under seven, the same session feels harder and you recover slower. Levers: fixed wake time, caffeine cut-off eight hours before bed, dark cool room. On the supplement side only magnesium is worth a look — and only if you are actually low. Test, do not guess.')]);
+  if(sore===2){
+    /* Bei einer Ganzkoerper-Einheit alle Muster aufzuzaehlen ergibt eine
+       unlesbare Kette -- und der Rat „die uebrigen laufen normal weiter"
+       waere dann auch noch falsch. Ab drei Mustern also zusammenfassen. */
+    var ls=lastSession(),known=(ls.age<=3&&ls.ids.length>0),many=ls.ids.length>2;
+    var lsM=(known&&!many)?listMusc(ls.ids,DE?1:0):'';
+    var lsS=(known&&ls.ids.length===1)?stepName(ls.ids[0]):'';
+    var head=!known?''
+      :(many?(DE?('Deine letzte Einheit war '+agoTxt(ls.age,true)+' und ging über den ganzen Körper. ')
+                :('Your last session was '+agoTxt(ls.age,false)+' and covered the whole body. '))
+            :(DE?('Du hast '+agoTxt(ls.age,true)+' '+lsM+' trainiert'+(lsS?' — '+lsS:'')+'. ')
+                :('You trained '+lsM+' '+agoTxt(ls.age,false)+(lsS?' — '+lsS:'')+'. ')));
+    var act=(known&&!many)
+      ?(DE?('Diese Woche für '+lsM+' halbe Sätze und zwei Wiederholungen früher aufhören — die übrigen Muster laufen normal weiter, Pausieren macht es nicht besser.')
+          :('This week cut '+lsM+' to half the sets and stop two reps earlier — the other patterns carry on as normal, sitting still does not help.'))
+      :(DE?'Diese Woche überall halbe Sätze und zwei Wiederholungen früher aufhören. Ganz aussetzen macht es nicht besser, leichte Bewegung schon.'
+          :'This week cut every pattern to half the sets and stop two reps earlier. Sitting it out does not help, light movement does.');
+    out.push(['hi',DE?'Starker Muskelkater über Tage':'Heavy soreness for days',
+      head+(DE?'Über drei Tage ist das ein Regenerationssignal, kein Abzeichen. ':'Past three days that is a recovery signal, not a badge. ')+act+
+      (DE?' Dazu Protein ans Tagesziel, Wasser und ein lockerer Spaziergang. Kreatin (3–5 g täglich) lohnt ohnehin, akut repariert aber Schlaf.'
+         :' Then hit your protein target, drink water, take an easy walk. Creatine (3–5 g daily) is worth it anyway, but what repairs you acutely is sleep.')]);
+  }
   if(stress===2)out.push(['md',DE?'Hohe Alltagsbelastung':'High life load',DE?'Stufen halten und nicht steigern. Durchhalten in einem harten Monat ist ein Erfolg. Ashwagandha hat brauchbare Evidenz bei Stress und Schlafqualität — bei Schilddrüsenproblemen vorher zum Arzt.':'Hold your current steps and stop trying to progress. Maintaining through a hard month is a win. Ashwagandha has decent evidence for stress and sleep quality — ask a doctor first if you have a thyroid condition.']);
   if(mood===0)out.push(['md',DE?'Motivation ist weg':'Motivation is gone',DE?'Nur die erste Übung machen. Wenn du dann noch gehen willst, geh. Nie zweimal hintereinander aussetzen. Koffein (3–6 mg/kg, nicht nach dem frühen Nachmittag) rettet den Einstieg öfter als jede Motivationsrede.':'Do the first exercise only. If you still want to leave after that, leave. Never miss twice in a row. Caffeine (3–6 mg/kg, never after early afternoon) saves the first set more often than any pep talk.']);
-  if(pro/kg<1.6)out.push(['hi',DE?'Protein zu niedrig':'Protein is too low',(DE?'Du liegst bei ':'You are at ')+(pro/kg).toFixed(1)+(DE?' g pro kg. Unter 1,6 deckelt das, was Training aufbauen kann. Whey oder Casein ist keine Magie, nur Essen in praktischer Form — 20–40 g schließen die Lücke, wenn Mahlzeiten nicht reichen.':' g per kg. Under 1.6 caps what your training can build. Whey or casein is not magic, just food in a convenient shape — 20–40 g closes the gap when meals fall short.')]);
-  if(rd<45)out.push(['md',DE?'Belastbarkeit niedrig':'Readiness is low today',(DE?'Wert ':'Score ')+rd+(DE?'. Sätze halbieren, Bewegungen behalten.':'. Halve the sets, keep the movements.')]);
+  if(hasBody()&&pro/kg<1.6)out.push(['hi',DE?'Protein zu niedrig':'Protein is too low',(DE?'Du liegst bei ':'You are at ')+(pro/kg).toFixed(1)+(DE?' g pro kg. Unter 1,6 deckelt das, was Training aufbauen kann. Whey oder Casein ist keine Magie, nur Essen in praktischer Form — 20–40 g schließen die Lücke, wenn Mahlzeiten nicht reichen.':' g per kg. Under 1.6 caps what your training can build. Whey or casein is not magic, just food in a convenient shape — 20–40 g closes the gap when meals fall short.')]);
+  if(rd>=0&&rd<45)out.push(['md',DE?'Belastbarkeit niedrig':'Readiness is low today',(DE?'Wert ':'Score ')+rd+(DE?'. Sätze halbieren, Bewegungen behalten.':'. Halve the sets, keep the movements.')]);
+  /* Gezaehlt wird ab dem ersten Haken, nicht ab Wochenbeginn -- sonst steht
+     direkt nach der ersten Einheit „du laesst Einheiten aus", weil der Plan
+     Tage mitzaehlt, an denen es den Nutzer hier noch gar nicht gab. Und
+     geurteilt wird erst ab vier moeglichen Einheiten. */
+  var firstDay=null,kk;
+  for(kk in doneMap){if(!firstDay||kk<firstDay)firstDay=kk;}
   var last14=0,poss=0;
-  for(var i=0;i<14;i++){var d=add(TODAY,-i),pl=plan(d);if(pl.kind==='train'){poss++;if(dayDone(iso(d)))last14++;}}
-  if(poss>0&&last14/poss<0.6)out.push(['md',DE?'Du lässt Einheiten aus':'You are missing sessions',(DE?'Nur ':'Only ')+last14+(DE?' von ':' of ')+poss+(DE?' Einheiten in zwei Wochen. Senk die Hürde, statt zu streichen.':' sessions in the last two weeks. Lower the bar rather than skipping.')]);
+  for(var i=0;i<14;i++){
+    var d=add(TODAY,-i),ds=iso(d);
+    if(firstDay&&ds<firstDay)continue;
+    if(plan(d).kind==='train'){poss++;if(dayDone(ds))last14++;}
+  }
+  if(poss>=4&&last14/poss<0.6)out.push(['md',DE?'Du lässt Einheiten aus':'You are missing sessions',(DE?'Nur ':'Only ')+last14+(DE?' von ':' of ')+poss+(DE?' Einheiten seit dem Start. Senk die Hürde, statt zu streichen.':' sessions since you started. Lower the bar rather than skipping.')]);
   var stall=[];PRS.forEach(function(p){if(p.b>0&&p.v<=p.b)stall.push(p.n);});
   if(stall.length>=2)out.push(['md',DE?'Rekorde stehen':'Records are not moving',(DE?'Kein Fortschritt bei ':'No progress on ')+stall.slice(0,3).join(', ')+(DE?'. Prüfe Schlaf, Essen, Stress, Volumen, Wochen seit Deload.':'. Check sleep, food, life stress, volume, weeks since a deload.')]);
   var painDays=0,recentPain=null;
   for(var i=0;i<10;i++){var k=iso(add(TODAY,-i));if(logs[k]&&logs[k].pain&&logs[k].pain!=='None'){painDays++;recentPain=logs[k].pain;}}
-  if(painDays>=2)out.push(['hi',DE?'Wiederkehrender Schmerz':'Pain keeps coming back',(DE?'Du hast an ':'You logged ')+painDays+(DE?' Tagen Schmerz am '+recentPain+' notiert. Reduziere die Belastung dort und lass es abklären, wenn es zwei Wochen bleibt.':' days with pain at the '+recentPain+'. Reduce load there, and get it looked at if it persists two weeks.')]);
+  if(painDays>=2){
+    var fx=PAINFIX[recentPain],loc=DE?(PAINDE[recentPain]||recentPain):recentPain,pTxt='';
+    if(fx){
+      var pn=fx.pat.map(function(i){return pid[i]?pid[i].name:'';}).filter(Boolean).join(DE?' und ':' and ');
+      pTxt=(DE?(' Belastet wird die Stelle vor allem von '+pn+'.'):(' That spot is loaded mainly by '+pn+'.'));
+    }
+    out.push(['hi',DE?'Wiederkehrender Schmerz':'Pain keeps coming back',
+      (DE?('An '+painDays+' von zehn Tagen Schmerz am '+loc+' notiert.')
+         :('You logged pain at the '+loc+' on '+painDays+' of the last ten days.'))+
+      pTxt+(fx?' '+(DE?fx.de:fx.en):'')+
+      (DE?' Wenn es nach zwei Wochen nicht besser ist, gehört das ärztlich abgeklärt — hier steht keine Diagnose.'
+         :' If it is no better after two weeks, get it looked at — nothing here is a diagnosis.')]);
+  }
   var rpes=[];for(var i=0;i<10;i++){var k=iso(add(TODAY,-i));if(logs[k]&&logs[k].rpe)rpes.push(logs[k].rpe);}
+  var avgR=rpes.length>=3?rpes.reduce(function(a,b){return a+b;},0)/rpes.length:0;
   if(rpes.length>=3){
-    var avgR=rpes.reduce(function(a,b){return a+b;},0)/rpes.length;
     if(avgR>=9)out.push(['md',DE?'Jede Einheit am Limit':'Every session at the limit',(DE?'Dein Schnitt liegt bei RPE ':'Your average is RPE ')+avgR.toFixed(1)+(DE?'. Das ist auf Dauer nicht regenerierbar. Ziel ist 7 bis 8.':'. That is not recoverable long term. Aim for 7 to 8.')]);
     else if(avgR<=6)out.push(['md',DE?'Zu weit vom Versagen':'Too far from failure',(DE?'Schnitt RPE ':'Average RPE ')+avgR.toFixed(1)+(DE?'. Sätze bis ein bis drei Wiederholungen vor Schluss führen.':'. Take sets to within one to three reps of failure.')]);
   }
+  /* Einzeln je ein Hinweis, zusammen der Vorbote: viel Belastung, wenig Reparatur. */
+  if(sleep>0&&sleep<7&&avgR>=8.5)out.push(['hi',
+    DE?'Wenig Schlaf bei voller Anstrengung':'Little sleep at full effort',
+    (DE?('Du liegst bei '+sleep+' Stunden Schlaf und im Schnitt bei RPE '+avgR.toFixed(1)+'. Einzeln wäre das je ein Hinweis, zusammen ist es die Kombination, aus der Verletzungen und Abbrüche entstehen — maximale Belastung bei minimaler Reparatur. Entweder Schlaf hoch oder Anstrengung runter. Beides gleichzeitig laufen zu lassen geht ein paar Wochen gut und dann nicht mehr.')
+       :('You are at '+sleep+' hours of sleep and averaging RPE '+avgR.toFixed(1)+'. Either one alone is a note; together they are the combination that produces injuries and quitting — maximum load on minimum repair. Push the sleep up or the effort down. Running both at once works for a few weeks and then stops.'))]);
   if(w>=8&&w<=10)out.push(['md',DE?'Deload steht an':'Deload is coming',DE?'Woche 11 ist Deload. Gleiche Übungen, halbe Sätze. Nicht überspringen, weil du dich gut fühlst.':'Week 11 is a deload. Same exercises, half the sets. Do not skip it because you feel fine.']);
   if(w===11)out.push(['ok',DE?'Deload-Woche':'This is deload week',DE?'Halbe Sätze, vier Wiederholungen vor Schluss aufhören.':'Half the sets, stop four reps short.']);
   if(w===12)out.push(['ok',DE?'Testwoche':'Retest week',DE?'Gleiche vier Tests, gleiche Maßstäbe.':'Same four tests, same standards.']);
@@ -2123,7 +2643,7 @@ function runCoach(){
       (DE?' LP. Setz die naechsten vier Wochen '+lo.n+' an den Anfang jeder Einheit — was zuerst kommt, wird besser.':' LP. Put '+lo.n+' first in every session for the next four weeks — whatever comes first improves.')]);
   }
   /* Level-Test nie gemacht */
-  var anyTest=false;TESTS.forEach(function(t){if((testVals[t.id]||0)>0)anyTest=true;});
+  /* anyTest steht oben schon bereit -- Frischstart-Block nutzt es ebenfalls */
   if(!anyTest)out.push(['hi',DE?'Startpunkt fehlt':'No starting point set',
     DE?'Du hast den Level-Test noch nicht gemacht. Ohne ihn raten die Leitern, wo du stehst — und das Programm passt entweder nicht oder ist zu leicht. Vier Tests, zwanzig Minuten, unter „Test".'
       :'You have not done the level test. Without it the ladders are guessing where you stand, so the programme is either too hard or too easy. Four tests, twenty minutes, under "Test".']);
@@ -2131,13 +2651,17 @@ function runCoach(){
   var lastStep=get('lastStepUp',null);
   if(lastStep){
     var daysSince=Math.round((TODAY-new Date(lastStep+'T00:00:00'))/86400000);
-    if(daysSince>=28)out.push(['md',DE?'Seit vier Wochen keine Stufe':'No step-up in four weeks',
+    /* Frisch hochgegangen und es zieht: das ist die Anpassung, kein Fehler.
+       Ohne diese Einordnung gehen Leute unnoetig wieder eine Stufe zurueck. */
+    if(daysSince<=7&&(sore>=1||avgR>=8.5))out.push(['ok',
+      DE?'Neue Stufe, und es zieht':'New step, and it bites',
+      (DE?('Du bist vor '+daysSince+' Tagen eine Stufe hochgegangen. Dass es jetzt zieht und die Wiederholungen fallen, gehört dazu — das ist die Anpassung, nicht ein Fehler. Halte die Stufe zwei bis drei Wochen, bevor du wieder etwas änderst.')
+         :('You moved up a step '+daysSince+' days ago. Soreness and lower reps right now are the adaptation, not a mistake. Hold this step for two to three weeks before you change anything else.'))]);
+    else if(daysSince>=28)out.push(['md',DE?'Seit vier Wochen keine Stufe':'No step-up in four weeks',
       (DE?'Letzter Stufenaufstieg vor ':'Last ladder step-up was ')+daysSince+(DE?' Tagen. Wenn die Form sitzt und du oben im Wiederholungsbereich bist: hochgehen. Die Zahl darf danach fallen.':' days ago. If form holds and you are at the top of the range, move up. Reps are supposed to drop afterwards.')]);
   }
-  /* Erststart: noch gar nichts abgehakt */
-  if(totalSets()===0)out.push(['ok',DE?'Noch nichts abgehakt':'Nothing ticked yet',
-    DE?'Alles steht auf null — genau richtig für den Anfang. Reihenfolge: Level-Test machen, Stufen setzen, dann die erste Einheit unter „Heute" abhaken.'
-      :'Everything is at zero, which is exactly right at the start. Order: do the level test, set your steps, then tick your first session under "Today".']);
+  /* Der Erststart-Hinweis ist entfallen -- diese Stelle wird nie mehr mit
+     totalSets()===0 erreicht, der Frischstart-Block oben faengt das ab. */
   var badSupp=[];SUPPS.forEach(function(s,i){if(taken[i]&&BADS[s])badSupp.push(s);});
   if(badSupp.length)out.push(['md',DE?'Geld ohne Gegenwert':'Money going nowhere',(DE?'Du nimmst ':'You listed ')+badSupp.join(', ')+(DE?'. Keine davon rechtfertigt den Preis.':'. None of those have evidence worth the price.')]);
   if(!out.length)out.push(['ok',DE?'Nichts zu beheben':'Nothing to fix',DE?'Schlaf, Protein, Konsistenz, Belastbarkeit und Volumenbalance passen. Weitermachen.':'Sleep, protein, consistency, readiness and volume balance all look fine. Keep going.']);
@@ -2206,6 +2730,10 @@ function fxOf(){var f='snow';PACKS.forEach(function(p){if(p.id===pack)f=p.fx;});
    demselben Knoten wuerde die Platzierung ueberschreiben. */
 var SCH=340;
 function r1(n){return Math.round(n*10)/10;}
+/* Deterministischer Pseudozufall. Gleiche Breite ergibt immer dieselbe Szene,
+   aber die Pflanzen stehen nicht mehr im sichtbaren Raster einer for-Schleife.
+   Genau daran erkennt man erzeugte Kulissen sofort. */
+function rnd(i){var x=Math.sin(i*127.1+311.7)*43758.5453;return x-Math.floor(x);}
 function sceneW(){
   var el=$('scenery');
   var w=(el&&el.clientWidth)||window.innerWidth||1200;
@@ -2345,23 +2873,35 @@ function scJungle(W,G){
       lime='#C6E86A',trunk='#4A3F28',trunk2='#5A4C33',hib='#E8434F',pink='#F2748A',orch='#C265CE',
       sun='#F6C445',heli='#F0913F',bird='#0B1710',beak='#F5A623',bf1='#4C8BF5',bf2='#8FD3FF',s='',i,n;
   s+='<defs><linearGradient id="jbeam" x1="0" y1="0" x2="0" y2="1">'+
-     '<stop offset="0" stop-color="'+lime+'" stop-opacity=".13"/><stop offset="1" stop-color="'+lime+'" stop-opacity="0"/>'+
+     '<stop offset="0" stop-color="'+lime+'" stop-opacity=".09"/><stop offset="1" stop-color="'+lime+'" stop-opacity="0"/>'+
      '</linearGradient></defs>';
   s+='<path d="M0 '+G+' L0 '+(G-158)+' Q'+r1(W*.16)+' '+(G-218)+' '+r1(W*.33)+' '+(G-156)+
      ' Q'+r1(W*.5)+' '+(G-104)+' '+r1(W*.64)+' '+(G-172)+' Q'+r1(W*.83)+' '+(G-230)+' '+W+' '+(G-150)+' L'+W+' '+G+' Z" fill="'+far+'"/>';
   s+='<g fill="url(#jbeam)" class="shimmer"><path d="M'+r1(W*.22)+' 0 h64 l-128 '+G+' h-96 Z"/><path d="M'+r1(W*.66)+' 0 h48 l-104 '+G+' h-78 Z"/></g>';
-  n=Math.ceil(W/170);
-  for(i=0;i<=n;i++)s+='<ellipse cx="'+r1(i*170+(i%3)*26)+'" cy="'+(G-4)+'" rx="120" ry="'+(52+(i*37)%46)+'" fill="'+bush1+'"/>';
+  n=Math.ceil(W/150);
+  for(i=0;i<=n;i++)s+='<ellipse cx="'+r1(i*150+rnd(i)*90-20)+'" cy="'+r1(G-4+rnd(i+2)*18)+'" rx="'+r1(96+rnd(i+4)*64)+'" ry="'+r1(44+rnd(i+6)*62)+'" fill="'+bush1+'"/>';
+  /* Blaetterdach haengt von oben ins Bild. Rahmt den Streifen und nimmt die
+     leere dunkle Flaeche ueber der Bepflanzung raus. */
+  [[.02,2.6,22],[.1,1.9,-16],[.91,2.4,-22],[.98,1.8,15]].forEach(function(o){
+    s+=put(W*o[0],-8,monstera(o[1],far,'#061F12',1),'sway',1,180+o[2]);
+  });
   [.11,.29,.47,.68,.86].forEach(function(v,j){s+=put(W*v,0,vine(126+(j%3)*58,'#2C6B41',leaf,.75),j%2?'sway2':'sway');});
   s+=put(W*.06,G,palm(256,20,trunk,leaf,near,1,'#7A5426'),'sway');
   s+=put(W*.96,G,palm(216,-24,trunk2,near,leaf,.95,'#7A5426'),'sway2');
-  n=Math.ceil(W/210);
-  for(i=0;i<=n;i++)s+='<ellipse cx="'+r1(i*210+96)+'" cy="'+(G+6)+'" rx="132" ry="'+(34+(i*29)%26)+'" fill="'+bush2+'"/>';
-  s+=put(W*.18,G+8,monstera(3.6,near,far,1),'sway2');
-  s+=put(W*.26,G+6,monstera(2.5,leaf,bush1,1),'sway');
-  s+=put(W*.87,G+8,monstera(3.2,near,far,1),'sway');
-  s+=put(W*.79,G+6,monstera(2.2,leaf,bush1,.95),'sway2');
-  [[.37,1.7],[.44,1.25],[.6,1.5],[.71,1.8],[.53,1.15]].forEach(function(f){s+=put(W*f[0],G+2,fern(f[1],lit,.85),'sway2');});
+  n=Math.ceil(W/190);
+  for(i=0;i<=n;i++)s+='<ellipse cx="'+r1(i*190+rnd(i+13)*120)+'" cy="'+r1(G+6+rnd(i+15)*12)+'" rx="'+r1(104+rnd(i+17)*70)+'" ry="'+r1(30+rnd(i+19)*38)+'" fill="'+bush2+'"/>';
+  /* Fensterblaetter auf verschiedenen Hoehen -- vorher standen alle auf einer
+     Linie, was den ganzen Streifen flach wirken liess. */
+  s+=put(W*.17,G+16,monstera(3.7,near,far,1),'sway2');
+  s+=put(W*.26,G-8,monstera(2.4,leaf,bush1,1),'sway');
+  s+=put(W*.33,G+22,monstera(1.9,near,bush1,.9),'sway2');
+  s+=put(W*.88,G+14,monstera(3.3,near,far,1),'sway');
+  s+=put(W*.79,G-6,monstera(2.2,leaf,bush1,.95),'sway2');
+  s+=put(W*.68,G+24,monstera(1.7,leaf,bush1,.85),'sway');
+  for(i=0;i<11;i++){
+    var fx=W*(.02+rnd(i+21)*.96),fy=G+6-rnd(i+23)*26;
+    s+=put(fx,fy,fern(.9+rnd(i+25)*1.1,rnd(i+27)<.4?lime:lit,.8),i%2?'sway2':'sway');
+  }
   s+=put(W*.215,G-122,flower(26,hib,sun),'bob');
   s+=put(W*.252,G-96,flower(17,pink,sun),'bob');
   s+=put(W*.63,G-66,flower(21,orch,sun),'bob');
@@ -2375,28 +2915,66 @@ function scJungle(W,G){
   }
   if(W>1050)s+=put(W*.71,G-186,macaw(1.8,'#D8443C','#3C6FD8',sun,'#EFE7D2'),'bob');
   s+=put(W*.55,G-128,bfly(1.9,bf1,bf2),'bob');
-  n=Math.ceil(W/44);
-  for(i=0;i<=n;i++){var bh=26+((i*29)%30);
-    s+='<g transform="translate('+r1(i*44+((i*17)%23))+','+(G+2)+') rotate('+(-90+((i*13)%40-20))+')">'+blade(bh,bh*.4,i%3?leaf:lit,.95)+'</g>';}
+  n=Math.ceil(W/34);
+  for(i=0;i<=n;i++){var bh=22+rnd(i+31)*36;
+    s+='<g transform="translate('+r1(i*34+rnd(i+33)*26)+','+r1(G+4-rnd(i+35)*10)+') rotate('+r1(-90+(rnd(i+37)-.5)*54)+')">'+
+       blade(bh,bh*(.32+rnd(i+39)*.16),rnd(i+41)<.3?lit:leaf,.95)+'</g>';}
   return s+'<path d="M0 '+G+' H'+W+'" stroke="'+far+'" stroke-width="4"/>';
 }
 function scSummer(W,G){
-  var sky='#8FD3E8',sea='#2E9FBE',sand='#E0BE7E',sand2='#C9A164',pal='#3F8F46',pal2='#5CAF52',
-      trunk='#8A6236',sun='#F6C445',hib='#E2454F',shell='#EE8E6E',s='',i,hz=G-124;
-  s+='<rect x="0" y="'+(hz-70)+'" width="'+W+'" height="70" fill="'+sky+'" opacity=".3"/>';
-  s+='<circle cx="'+r1(W*.74)+'" cy="'+(hz-56)+'" r="42" fill="'+sun+'" opacity=".6" class="bob"/>';
-  s+='<rect x="0" y="'+hz+'" width="'+W+'" height="'+(G-hz)+'" fill="'+sea+'" opacity=".42"/>';
-  s+='<g class="shimmer">'+wavy(W,hz+16,-7,'#7FD8E8',.55,2.5)+wavy(W,hz+34,6,'#BDECF2',.4,2)+'</g>';
-  s+='<path d="M0 '+(G-56)+' Q'+r1(W*.26)+' '+(G-76)+' '+r1(W*.52)+' '+(G-58)+' T'+W+' '+(G-62)+' L'+W+' '+G+' L0 '+G+' Z" fill="'+sand+'" opacity=".9"/>';
-  s+='<path d="M0 '+(G-30)+' Q'+r1(W*.3)+' '+(G-44)+' '+r1(W*.6)+' '+(G-28)+' T'+W+' '+(G-32)+' L'+W+' '+G+' L0 '+G+' Z" fill="'+sand2+'" opacity=".55"/>';
-  s+=put(W*.1,G-24,palm(240,22,trunk,pal,pal2,.95,'#7A5A2E'),'sway');
-  s+=put(W*.9,G-20,palm(198,-18,trunk,pal2,pal,.9,'#7A5A2E'),'sway2');
-  [[.2,.9],[.27,.65],[.79,.8],[.86,.6]].forEach(function(f){s+=put(W*f[0],G-38,fern(f[1],pal2,.7),'sway2');});
-  s+=put(W*.16,G-152,flower(12,hib,sun),'bob');
-  s+=put(W*.83,G-118,flower(10,'#F2748A',sun),'bob');
-  s+='<g fill="'+shell+'" opacity=".8"><path d="M'+r1(W*.42)+' '+(G-16)+' l7 -11 l7 11 l-7 5 Z"/><ellipse cx="'+r1(W*.57)+'" cy="'+(G-12)+'" rx="9" ry="6"/></g>';
-  s+=put(W*.5,G-146,bfly(.9,'#F0913F','#F6C445'),'bob');
-  return s+'<path d="M0 '+G+' H'+W+'" stroke="'+sand2+'" stroke-width="4" opacity=".7"/>';
+  /* Vorher eine Abfolge waagerechter Streifen: Himmelband, Meerband, Sandband.
+     Jetzt Verlaeufe statt Baender, eine geschwungene Uferlinie mit Schaum und
+     eine Sonne mit Schein und Spiegelung -- das nimmt die Streifenwirkung raus. */
+  var sky1='#A9E2F0',sky2='#FFDFAE',sea1='#1E8FB4',sea2='#4FC4D2',foam='#F0FAFB',
+      sand='#E9C97D',sand2='#D0A257',wet='#DDBE84',pal='#35853F',pal2='#57A94C',
+      trunk='#7E5A31',sun='#FFD24A',hib='#E8434F',pink='#F2748A',shell='#F09B72',
+      s='',i,n,hz=G-192;
+  s+='<defs>'+
+     '<linearGradient id="sSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+sky1+'" stop-opacity=".05"/><stop offset="1" stop-color="'+sky2+'" stop-opacity=".62"/></linearGradient>'+
+     '<linearGradient id="sSea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+sea1+'"/><stop offset="1" stop-color="'+sea2+'"/></linearGradient>'+
+     '<radialGradient id="sSun"><stop offset="0" stop-color="'+sun+'" stop-opacity=".85"/><stop offset="1" stop-color="#FFA23C" stop-opacity="0"/></radialGradient>'+
+     '</defs>';
+  s+='<rect x="0" y="0" width="'+W+'" height="'+hz+'" fill="url(#sSky)"/>';
+  var sx=W*.72,sy=hz-46;
+  s+='<circle cx="'+r1(sx)+'" cy="'+r1(sy)+'" r="118" fill="url(#sSun)"/>';
+  s+='<circle cx="'+r1(sx)+'" cy="'+r1(sy)+'" r="33" fill="'+sun+'" class="bob"/>';
+  s+='<rect x="0" y="'+hz+'" width="'+W+'" height="'+(G-hz)+'" fill="url(#sSea)" opacity=".8"/>';
+  /* Sonnenstrasse auf dem Wasser */
+  s+='<g class="shimmer" stroke="'+foam+'" stroke-linecap="round" opacity=".5">';
+  for(i=0;i<7;i++){var ly=hz+8+i*13,lw=16+rnd(i)*44;
+    s+='<path d="M'+r1(sx-lw)+' '+r1(ly)+' H'+r1(sx+lw)+'" stroke-width="'+r1(2+rnd(i+9)*2)+'"/>';}
+  s+='</g>';
+  s+='<g class="shimmer">'+wavy(W,hz+30,-9,'#8FDDEA',.45,2.6)+wavy(W,hz+66,8,'#C6EEF4',.35,2.2)+
+     wavy(W,hz+102,-7,'#8FDDEA',.3,2)+'</g>';
+  /* Segler am Horizont und zwei Voegel -- ohne die ist der Himmel eine leere
+     Flaeche, und die Tiefe des Bildes fehlt. */
+  var bx=W*.28,by=hz-4;
+  s+='<g class="bob" opacity=".7"><path d="M'+r1(bx)+' '+r1(by)+' l16 0 l-4 6 l-11 0 Z" fill="#5A6B72"/>'+
+     '<path d="M'+r1(bx+6)+' '+r1(by-2)+' l0 -22 l13 22 Z" fill="'+foam+'"/>'+
+     '<path d="M'+r1(bx+4)+' '+r1(by-2)+' l0 -15 l-8 15 Z" fill="'+foam+'" opacity=".85"/></g>';
+  s+='<g fill="none" stroke="#6E7F86" stroke-width="2" stroke-linecap="round" opacity=".55" class="bob">'+
+     '<path d="M'+r1(W*.44)+' '+r1(hz-104)+' q7 -6 14 0 q7 -6 14 0"/>'+
+     '<path d="M'+r1(W*.52)+' '+r1(hz-72)+' q5 -4 10 0 q5 -4 10 0"/></g>';
+  /* Uferlinie: nasser Sand, Schaumkante, trockener Sand */
+  s+='<path d="M0 '+(G-74)+' Q'+r1(W*.22)+' '+(G-94)+' '+r1(W*.47)+' '+(G-72)+' T'+W+' '+(G-80)+' L'+W+' '+G+' L0 '+G+' Z" fill="'+wet+'" opacity=".8"/>';
+  s+='<path d="M0 '+(G-74)+' Q'+r1(W*.22)+' '+(G-94)+' '+r1(W*.47)+' '+(G-72)+' T'+W+' '+(G-80)+'" fill="none" stroke="'+foam+'" stroke-width="5" opacity=".75" class="shimmer"/>';
+  s+='<path d="M0 '+(G-46)+' Q'+r1(W*.3)+' '+(G-66)+' '+r1(W*.62)+' '+(G-44)+' T'+W+' '+(G-50)+' L'+W+' '+G+' L0 '+G+' Z" fill="'+sand+'"/>';
+  s+='<path d="M0 '+(G-18)+' Q'+r1(W*.36)+' '+(G-32)+' '+r1(W*.7)+' '+(G-16)+' T'+W+' '+(G-20)+' L'+W+' '+G+' L0 '+G+' Z" fill="'+sand2+'" opacity=".55"/>';
+  s+=put(W*.09,G-40,palm(248,24,trunk,pal,pal2,1,'#7A5A2E'),'sway');
+  s+=put(W*.93,G-34,palm(206,-20,trunk,pal2,pal,.95,'#7A5A2E'),'sway2');
+  /* Strandhafer in Buescheln, nicht im Raster */
+  for(i=0;i<14;i++){
+    var gx=W*(.04+rnd(i)*.92),gy=G-30-rnd(i+3)*16;
+    if(gx>W*.2&&gx<W*.78&&rnd(i+7)<.55)continue;
+    s+=put(gx,gy,fern(.5+rnd(i+11)*.5,pal2,.75),'sway2');
+  }
+  s+=put(W*.15,G-176,flower(15,hib,sun),'bob');
+  s+=put(W*.88,G-132,flower(13,pink,sun),'bob');
+  s+='<g fill="'+shell+'"><path d="M'+r1(W*.4)+' '+(G-22)+' l9 -14 l9 14 l-9 6 Z"/>'+
+     '<ellipse cx="'+r1(W*.55)+'" cy="'+(G-14)+'" rx="11" ry="7"/>'+
+     '<path d="M'+r1(W*.64)+' '+(G-12)+' a8 8 0 1 1 .1 0 Z" opacity=".8"/></g>';
+  s+=put(W*.47,G-166,bfly(1.5,'#F0913F',sun),'bob');
+  return s;
 }
 function scOcean(W,G){
   var deep='#04202F',rock='#0B2C42',rock2='#12405C',kelp='#1C8F7E',kelp2='#2FB39A',
@@ -2536,7 +3114,7 @@ function askReset(){
       :'This wipes your logs, records, measurements, weight history, ladder positions and settings — and with them your rank, XP, level, badges and your leaderboard row. It cannot be undone. Type RESET to confirm.',
     DE?'Alles löschen':'Wipe everything',
     function(){
-      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid']
+      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run']
         .forEach(del);
       SKILLS.forEach(function(s){del('skill_'+s.id);});
       location.reload();
@@ -2559,7 +3137,7 @@ function syncUndo(){
   b.style.opacity=canRewind()?'':'.4';
 }
 $('exportBtn').addEventListener('click',function(){
-  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid'].forEach(function(k){dump[k]=get(k,null);});
+  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run'].forEach(function(k){dump[k]=get(k,null);});
   var txt=JSON.stringify(dump);
   try{navigator.clipboard.writeText(txt);}catch(e){}
   flash('expFlag');
@@ -2768,6 +3346,8 @@ var ACH=[
  {id:'sets100',cat:'consistency',n:['Century','Hundert'],d:['100 blocks ticked','100 Blöcke abgehakt'],p:30,f:function(){return totalSets()>=100;}},
  {id:'sets500',cat:'consistency',n:['Five hundred','Fünfhundert'],d:['500 blocks ticked','500 Blöcke abgehakt'],p:80,f:function(){return totalSets()>=500;}},
  {id:'block',cat:'consistency',n:['Block complete','Block beendet'],d:['Reach week 12','Woche 12 erreichen'],p:120,f:function(){return wkOf(TODAY)>=12;}},
+ {id:'block2',cat:'consistency',n:['Second block','Zweiter Block'],d:['Start block 2','Block 2 starten'],p:180,f:function(){return blockNo>=2;}},
+ {id:'block4',cat:'consistency',n:['Full cycle','Voller Zyklus'],d:['Reach block 4 — a year of training','Block 4 erreichen — ein Jahr Training'],p:400,f:function(){return blockNo>=4;}},
 
  {id:'pullup1',cat:'strength',n:['First pull-up','Erster Klimmzug'],d:['Reach the full pull-up step','Volle Klimmzug-Stufe erreichen'],p:60,f:function(){return (steps.pull||0)>=4;}},
  {id:'pullup10',cat:'strength',n:['Ten strict','Zehn strikte'],d:['10 clean pull-ups','10 saubere Klimmzüge'],p:90,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Pull-ups')r=p.v;});return r>=10;}},
