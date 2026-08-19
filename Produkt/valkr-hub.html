@@ -348,7 +348,10 @@
      nach dem Zahlenfeld gut vierzig Pixel Schiene uebrig -- damit laesst sich
      nichts treffen, und der Regler waere reine Dekoration. Die Klasse setzt
      pairSlider, damit kein Feld ohne Regler unnoetig Platz frisst. */
-  .fgrid .field.hasSlide{grid-column:1/-1}
+  /* Die Breite ist zusaetzlich gedeckelt: am Rechner waere die Schiene sonst
+     ueber 900 Pixel lang, und fuer ein Alter zwischen 14 und 90 sieht das
+     nicht grosszuegig aus, sondern verloren. */
+  .fgrid .field.hasSlide{grid-column:1/-1;max-width:560px}
   .warnstrip{display:flex;gap:.55rem;align-items:flex-start;margin:0 0 .9rem;padding:.62rem .78rem;
     border:1px solid var(--brass);border-left-width:3px;border-radius:var(--r1);
     background:rgba(212,167,60,.10);font-size:var(--t3);line-height:1.45}
@@ -374,6 +377,14 @@
   input[type=range].rng::-moz-range-progress{height:6px;border-radius:3px;background:var(--aurora)}
   input[type=range].rng::-moz-range-thumb{width:20px;height:20px;border-radius:50%;
     background:var(--surf3);border:2px solid var(--aurora);box-shadow:var(--sh)}
+  /* Leeres Feld: der Regler steht zwar irgendwo, hat aber keinen Wert. Ohne
+     die farbige Fuellung liest er sich als „noch nichts eingetragen" statt als
+     Zahl, die niemand gesetzt hat. Dieselbe Haltung wie beim Rechner unten:
+     lieber nichts zeigen als eine fremde Zahl. */
+  input[type=range].rng.unset::-webkit-slider-runnable-track{background:var(--line)}
+  input[type=range].rng.unset::-moz-range-progress{background:var(--line)}
+  input[type=range].rng.unset::-webkit-slider-thumb{background:var(--surf2);border-color:var(--line)}
+  input[type=range].rng.unset::-moz-range-thumb{background:var(--surf2);border-color:var(--line)}
   input[type=range].rng:focus-visible{outline:none}
   input[type=range].rng:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(var(--p1),.28)}
   input[type=range].rng:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px rgba(var(--p1),.28)}
@@ -534,7 +545,13 @@
   .prrow input{width:60px;background:var(--surf);border:1px solid var(--line);color:var(--ink);padding:.3rem .4rem;font-family:var(--fm);font-size:var(--t3);border-radius:2px;text-align:right}
   .prrow .u{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);width:1.9rem}
   .prrow .delta{font-family:var(--fm);font-size:var(--t2);width:3.7rem;text-align:right}
-  .prrow .del{color:var(--ink3);font-size:var(--t3);flex:none}.prrow .del:hover{color:var(--ember)}
+  /* 22 Pixel hoch war das Loeschkreuz -- unter jeder Empfehlung fuer
+     Beruehrungsziele, und ausgerechnet an einer Stelle, wo ein Fehlgriff
+     einen Bestwert loescht. Jetzt 32 Pixel und ein eigener Rahmen. */
+  .prrow .del{color:var(--ink3);font-size:var(--t3);flex:none;
+    min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center;
+    border-radius:var(--r1)}
+  .prrow .del:hover{color:var(--ember);background:color-mix(in srgb,var(--ember) 12%,transparent)}
   .delta.up{color:var(--aurora)}.delta.flat{color:var(--ink3)}.delta.down{color:var(--ember)}
 
   .chips{display:flex;flex-wrap:wrap;gap:.34rem}
@@ -1397,7 +1414,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.2';
+var VERSION='11.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1476,9 +1493,11 @@ function slFill(r){
    wer 90 Liegestuetze schafft, soll sie eintragen duerfen, auch wenn der
    Regler bei 80 endet -- dann steht der Griff eben am Anschlag. */
 function slSync(rec){
-  var v=parseFloat(rec.num.value);
+  var raw=String(rec.num.value).trim();
+  var v=parseFloat(raw);
   if(isNaN(v))v=(rec.empty!==undefined?rec.empty:+rec.r.min);
   rec.r.value=Math.max(+rec.r.min,Math.min(+rec.r.max,v));
+  rec.r.classList.toggle('unset',raw==='');
   slFill(rec.r);
 }
 function pairSlider(num,opt){
@@ -2123,6 +2142,27 @@ var CH=[
   rule:'The person who trains imperfectly for two years beats the one who trains perfectly for two months.'}
 ];
 /* ---------- views ---------- */
+/* SVG-Animationen laufen auch in einem ausgeblendeten Bereich weiter. Der
+   Browser zeichnet sie dort nicht, rechnet sie aber in jedem Bild -- und das
+   bei der Bildwiederholrate des Geraets, auf heutigen Telefonen also 120 Mal
+   je Sekunde. Allein die Raenge tragen sieben davon (Ranglisten-Auren), und
+   die liefen bisher rund um die Uhr mit, auch wenn man den Bereich nie
+   geoeffnet hat.
+   pauseAnimations() haelt die Zeitachse einer SVG-Wurzel an; jedes Abzeichen
+   ist eine eigene Wurzel, es trifft also genau die unsichtbaren. */
+function pauseHiddenSvg(){
+  var a=document.querySelectorAll('animate,animateTransform'),done=[];
+  for(var i=0;i<a.length;i++){
+    var s=a[i].ownerSVGElement;
+    if(!s||typeof s.pauseAnimations!=='function'||done.indexOf(s)>=0)continue;
+    done.push(s);
+    var v=s.closest('.view');
+    /* Was ausserhalb der Bereiche liegt -- Meldung, Kulisse, Leisten --
+       bleibt unangetastet. */
+    if(!v||v.classList.contains('on')){if(s.animationsPaused())s.unpauseAnimations();}
+    else if(!s.animationsPaused())s.pauseAnimations();
+  }
+}
 var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',fuel:'v-fuel',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
 function show(n){
   /* Die Bewegungsdemo aus dem Speicher nehmen, sobald man die Ansicht verlaesst.
@@ -2130,6 +2170,7 @@ function show(n){
      sieht sie nicht, der Browser rechnet sie trotzdem in jedem Bild. */
   if(n!=='detail'){var dm=$('d-demo');if(dm&&dm.firstChild)dm.innerHTML='';}
   Object.keys(VS).forEach(function(k){$(VS[k]).classList.toggle('on',k===n);});
+  pauseHiddenSvg();
   var key=(n==='detail')?'train':n;
   [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
   $('setBtn').setAttribute('aria-current',key==='settings'?'true':'false');
@@ -3374,7 +3415,11 @@ function coachPulse(){
   if(s.ppk<1.6&&p.ppk>=1.6)coachSay(DE?'Protein gefallen':'Protein dropped',DE?'Du bist unter 1,6 g/kg gerutscht. 20–40 g Whey schließen die Lücke, wenn Mahlzeiten nicht reichen.':'You slipped under 1.6 g/kg. 20–40 g of whey closes the gap when meals fall short.','prolow');
   if(s.rd<45&&p.rd>=45)coachSay(DE?'Belastbarkeit niedrig':'Readiness is low',(DE?'Wert ':'Score ')+s.rd+(DE?'. Heute Sätze halbieren und deutlich vor dem Versagen bleiben.':'. Halve the sets today and stay well short of failure.'),'rdlow');
 }
-function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks();coachPulse();syncUndo();}
+/* pauseHiddenSvg() gehoert ans Ende: renderRanks() baut die Abzeichen neu auf,
+   und frisch erzeugte SVG-Elemente starten immer laufend -- auch wenn der
+   Bereich gerade nicht sichtbar ist. Ohne diese Zeile waeren die Auren nach
+   jedem Neuaufbau wieder unterwegs, obwohl sie niemand sieht. */
+function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks();coachPulse();syncUndo();pauseHiddenSvg();}
 ['y-sleep','y-mood','y-sore','y-stress'].forEach(function(id){$(id).addEventListener('input',function(){refresh();calc();});$(id).addEventListener('change',function(){refresh();calc();});});
 $('y-goal').addEventListener('input',function(){set('goal',this.value);});
 /* ---------- themes ---------- */
