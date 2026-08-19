@@ -669,16 +669,34 @@
   #tipbox .dose{display:block;margin-top:.38rem;font-family:var(--fm);font-size:var(--t2);color:var(--ice)}
 
   .coach{display:flex;flex-direction:column;gap:.5rem}
-  .cnote{background:var(--surf);border:1px solid var(--line);border-left:4px solid var(--ink3);border-radius:4px;padding:.82rem .92rem;display:flex;gap:.75rem;align-items:flex-start;box-shadow:var(--sh);animation:slidein .35s ease both}
+  /* ---- Coach-Meldungen --------------------------------------------------
+     Der Coach schreibt in ganzen Saetzen, und das soll er auch -- eine
+     Trainingsempfehlung in Stichworten ist keine. Nur: sechs solcher Meldungen
+     untereinander sind eine Textwand, und wer eine Wand sieht, liest keine
+     davon. Deshalb stehen zunaechst zwei Zeilen; ein Tippen klappt die
+     ganze Meldung auf.
+     Bewusst nicht gekuerzt, sondern eingeklappt: der Inhalt bleibt vollstaendig
+     da, nur die Menge auf dem ersten Blick ist begrenzt. */
+  .cnote{background:var(--surf);border:1px solid var(--line);border-left:3px solid var(--ink3);
+    border-radius:var(--r2);padding:.85rem .95rem;display:flex;gap:.75rem;align-items:flex-start;
+    box-shadow:var(--sh);animation:slidein .35s ease both;width:100%;text-align:left;
+    font-family:var(--fb);color:var(--ink);cursor:pointer;transition:border-color .16s}
+  button.cnote:hover{border-color:var(--aurora)}
   @keyframes slidein{from{opacity:0;transform:translateX(-10px)}to{opacity:1;transform:none}}
   .cnote.hi{border-left-color:var(--ember)}.cnote.md{border-left-color:var(--brass)}.cnote.ok{border-left-color:var(--aurora)}
-  .cnote .sev{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;padding:.14rem .38rem;border-radius:2px;flex:none;margin-top:.15rem}
+  .cnote .sev{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;padding:.16rem .4rem;border-radius:3px;flex:none;margin-top:.15rem}
   .cnote.hi .sev{background:rgba(232,112,58,.16);color:var(--ember)}
   .cnote.md .sev{background:rgba(212,167,60,.16);color:var(--brass)}
   .cnote.ok .sev{background:rgba(var(--p1),.16);color:var(--aurora)}
-  .cnote div{flex:1}
-  .cnote b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t5);margin-bottom:.14rem}
-  .cnote p{margin:0;font-size:var(--t3);color:var(--ink2)}
+  .cnote div{flex:1;min-width:0}
+  .cnote b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t5);margin-bottom:.16rem}
+  .cnote p{margin:0;font-size:var(--t3);color:var(--ink2);
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+  .cnote.open p{-webkit-line-clamp:unset;display:block}
+  /* Der Hinweis erscheint nur, solange etwas verdeckt ist. */
+  .cnote .more{display:block;margin-top:.3rem;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+  .cnote.open .more{color:var(--aurora)}
 
   .chartbox{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:1rem;box-shadow:var(--sh);display:flex;flex-direction:column;gap:.55rem}
   .chartbox h4{font-family:var(--fd);font-weight:600;font-size:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--ink2)}
@@ -1680,7 +1698,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.2';
+var VERSION='14.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1831,7 +1849,7 @@ var DICT={
  'nav.learn':['Learn','Wissen'],'nav.access':['Access','Zugang'],'nav.settings':['Settings','Einstellungen'],
  'nav.ranks':['Ranks','Ränge'],'nav.more':['More','Mehr'],'nav.moreTitle':['More sections','Weitere Bereiche'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
- 'rk.s':['Your rank comes from where you stand on each ladder, not from how much you sweat. Rest days count as followed — this system will never reward you for skipping recovery.','Dein Rang kommt daher, wo du auf jeder Leiter stehst, nicht davon wie sehr du schwitzt. Ruhetage zählen als erledigt — dieses System belohnt nie das Überspringen von Regeneration.'],
+ 'rk.s':['From where you stand on each ladder, not from how hard you sweat.','Aus deinem Stand auf jeder Leiter, nicht daraus wie sehr du schwitzt.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
  'lb.h':['Leaderboard','Bestenliste'],
  'rk.dist':['All ranks — who stands where','Alle Ränge — wer steht wo'],
@@ -1869,22 +1887,22 @@ var DICT={
  'train.volHint':['Pull should never sit below push. That imbalance is the most common cause of shoulder trouble in calisthenics.','Zug darf nie unter Druck liegen. Dieses Ungleichgewicht ist die häufigste Ursache für Schulterprobleme.'],
  'train.ladder':['Your ladder — tap a step to set where you are','Deine Leiter — Stufe antippen um deinen Stand zu setzen'],
  'train.how':['How to do it','Ausführung'],'train.wrong':['What goes wrong','Typische Fehler'],'train.numbers':['Numbers','Zahlen'],
- 'skills.h':['Skills','Skills'],'skills.s':['These are why most people start calisthenics. Each one has an entry requirement — the hub checks yours against it.','Deswegen fangen die meisten mit Calisthenics an. Jeder Skill hat eine Voraussetzung — das Hub prüft deine dagegen.'],
+ 'skills.h':['Skills','Skills'],'skills.s':['Each one has an entry requirement. The hub checks yours against it.','Jeder Skill hat eine Voraussetzung. Das Hub prüft deine dagegen.'],
  'skills.rules':['Three rules for skill work','Drei Regeln für Skill-Training'],
  'skills.r1':['Train it fresh, right after the warm-up, before anything else.','Ausgeruht trainieren, direkt nach dem Aufwärmen, vor allem anderen.'],
  'skills.r2':['Stop well short of failure. Skills are coordination, and tired practice builds a sloppy pattern.','Deutlich vor dem Versagen aufhören. Skills sind Koordination, müdes Üben baut ein schlampiges Muster.'],
  'skills.r3':['Ten minutes four or five times a week beats an hour once.','Zehn Minuten vier- bis fünfmal die Woche schlagen eine Stunde einmal.'],
  'mob.h':['Mobility that earns its place','Mobilität, die sich lohnt'],
- 'mob.s':['Under thirty minutes a week, aimed at the five restrictions that actually limit bodyweight training. Test yourself, then fix what fails.','Unter dreißig Minuten pro Woche, gezielt auf die fünf Einschränkungen, die Körpergewichtstraining wirklich begrenzen.'],
+ 'mob.s':['Under thirty minutes a week, aimed at five restrictions.','Unter dreißig Minuten die Woche, gezielt auf fünf Einschränkungen.'],
  'mob.guided':['Guided routine','Geführte Routine'],'mob.dose':['The weekly dose','Wochendosis'],
  'mob.d1':['Before every session','Vor jeder Einheit'],'mob.d2':['After two sessions','Nach zwei Einheiten'],'mob.d3':['Optional full sequence','Optional komplett'],
  'mob.note':['Static stretching before training briefly lowers force output. Save the long holds for after, or for their own slot.','Statisches Dehnen vor dem Training senkt kurzzeitig die Kraft. Lange Halten danach oder separat.'],
  'test.h':['Find your starting point','Finde deinen Startpunkt'],
- 'test.note0':['Day one measures you in automatically — first contact with an exercise runs three max sets inside the session. This page is for the week 6 and week 12 retests.','Tag eins misst dich automatisch ein — der Erstkontakt mit einer Übung läuft als drei Max-Sätze in der Einheit. Diese Seite ist für die Wiederholungstests in Woche 6 und 12.'],
- 'test.s':['Four tests, twenty minutes. Warm up first, rest three minutes between each, and stop the moment your form breaks. Your lowest score is your level.','Vier Tests, zwanzig Minuten. Vorher aufwärmen, drei Minuten Pause dazwischen, abbrechen sobald die Form bricht. Dein schwächster Wert ist dein Level.'],
+ 'test.note0':['Day one measures you in automatically — first contact with an exercise runs three max sets inside the session. This page is for the week 6 and week 12 retests. Warm up first, rest three minutes between tests, and stop the moment your form breaks.','Tag eins misst dich automatisch ein — der Erstkontakt mit einer Übung läuft als drei Max-Sätze in der Einheit. Diese Seite ist für die Wiederholungstests in Woche 6 und 12. Vorher aufwärmen, drei Minuten Pause zwischen den Tests, abbrechen sobald die Form bricht.'],
+ 'test.s':['Four tests, twenty minutes. Your lowest score is your level.','Vier Tests, zwanzig Minuten. Dein schwächster Wert ist dein Level.'],
  'test.tbl':['Test','Test'],'test.retest':['Retest at week 6 and week 12','Wiederholung in Woche 6 und 12'],
  'test.retestP':['Same warm-up, same standards, same tests. The temptation is to loosen your form so the number looks better. The only person that flatters is you.','Gleiches Aufwärmen, gleiche Maßstäbe. Die Versuchung ist, die Form zu lockern damit die Zahl besser aussieht. Damit betrügst du nur dich.'],
- 'fuel.h':['Fuel','Ernährung'],'fuel.s':['Mifflin–St Jeor for the estimate. Then override anything — change calories or protein and the rest recalculates around it.','Mifflin-St-Jeor als Schätzung. Danach alles überschreibbar — Kalorien oder Protein ändern und der Rest rechnet sich neu.'],
+ 'fuel.h':['Fuel','Ernährung'],'fuel.s':['Estimated with Mifflin–St Jeor. Tap any target to change it.','Geschätzt nach Mifflin-St-Jeor. Jeden Zielwert antippen zum Ändern.'],
  'fuel.about':['About you','Über dich'],'fuel.targets':['Your targets — edit any of them','Deine Ziele — alles änderbar'],
  'fuel.split':['Split across the day','Auf den Tag verteilt'],'fuel.hydr':['Water and caffeine','Wasser und Koffein'],
  'fuel.hydrNote':['Thirst is a decent guide for most people. The number below is a rough floor, not a quota to force down. Caffeine cut-off is eight hours before bed.','Durst ist für die meisten ein guter Maßstab. Die Zahl ist eine grobe Untergrenze, kein Soll. Koffein-Schluss acht Stunden vor dem Schlafen.'],
@@ -1900,7 +1918,7 @@ var DICT={
  'you.prs':['Personal records — clean reps only','Rekorde — nur saubere Wiederholungen'],'you.taking':['What you are taking','Was du nimmst'],
  'y.exp':['Training since','Trainiere seit'],'y.sleep':['Sleep average','Schlaf im Schnitt'],'y.mood':['Motivation now','Motivation heute'],
  'y.sore':['Soreness','Muskelkater'],'y.stress':['Life load','Belastung im Alltag'],'y.goal':['Your goal','Dein Ziel'],
- 'coach.h':['Coach','Coach'],'coach.s':['Reads everything you have entered, updates the moment you change a number, and now speaks up on its own — a popup from the coach when something important shifts. Ordered by what costs you the most.','Liest alles was du eingetragen hast, aktualisiert sofort und meldet sich jetzt von selbst — eine Popup-Nachricht vom Coach, sobald etwas Wichtiges kippt. Sortiert nach dem was dich am meisten kostet.'],
+ 'coach.h':['Coach','Coach'],'coach.s':['Reads your numbers and speaks up when something shifts. Ordered by what costs you the most.','Liest deine Zahlen mit und meldet sich, wenn etwas kippt. Sortiert nach dem, was dich am meisten kostet.'],
  'coach.how':['How this works','Wie das funktioniert'],
  'coach.howP':['No guessing. It applies the same rules the book uses — sleep, volume balance, deloads, whether your records move — to your own numbers, live. When something shifts it tells you what to do about it: the training lever, the recovery lever, and where the evidence supports one, a supplement with its dose. None of this is medical advice — persistent pain or illness goes to a doctor, not a checklist.','Kein Raten. Er wendet dieselben Regeln wie das Buch live auf deine Zahlen an — Schlaf, Volumenbalance, Deloads, ob deine Rekorde steigen. Kippt etwas, sagt er dir was dagegen hilft: der Trainingshebel, der Regenerationshebel und, wo die Datenlage es hergibt, ein Supplement samt Dosis. Nichts davon ist medizinische Beratung — anhaltender Schmerz oder Krankheit gehört zum Arzt, nicht in eine Checkliste.'],
  'learn.h':['The book, in short','Das Buch, kompakt'],
@@ -1912,7 +1930,7 @@ var DICT={
  'ev.s':['Every number in this app has a reason. These are the main ones. Findings are summarised in plain language — look them up if you want the detail.','Jede Zahl in dieser App hat einen Grund. Das sind die wichtigsten. Die Befunde stehen in einfacher Sprache da — wer es genau will, schlägt nach.'],
  'ev.noteB':['Not medical advice.','Keine medizinische Beratung.'],
  'ev.note':['These references support the training principles, not any promise about your individual result. Persistent pain, illness or a known condition goes to a doctor, not to a checklist.','Die Quellen stützen die Trainingsprinzipien, nicht ein Versprechen über dein persönliches Ergebnis. Anhaltender Schmerz, Krankheit oder eine bekannte Vorerkrankung gehören zum Arzt, nicht auf eine Checkliste.'],
- 'learn.s':['All twelve chapters as a reference you can scan mid-session. The full prose lives in the PDF; this is the part you look up when you forget a rule.','Alle zwölf Kapitel als Nachschlagewerk für zwischendurch. Der volle Text steht im PDF; das hier ist was du nachschlägst wenn du eine Regel vergisst.'],
+ 'learn.s':['Twelve chapters, short enough to look up mid-session.','Zwölf Kapitel, kurz genug zum Nachschlagen zwischendurch.'],
  'acc.h':['Book or hub?','Buch oder Hub?'],'acc.s':['Same knowledge in both. The difference is whether you read it once, or use it every session.','Gleiches Wissen in beidem. Der Unterschied ist, ob du es einmal liest oder jede Einheit benutzt.'],
  'acc.get':['What you get','Was du bekommst'],'acc.once':['one payment','einmalig'],'acc.forever':['one payment, keep forever','einmalig, für immer'],'acc.later':['not open yet','noch nicht offen'],
  'set.h':['Settings','Einstellungen'],'set.s':['Everything here is stored in your browser only.','Alles hier wird nur in deinem Browser gespeichert.'],
@@ -4293,6 +4311,26 @@ function agoTxt(n,DE){
 
 /* Die Tableiste unten braucht denselben Zaehler wie die Reihe oben. */
 function coachBadge2(n){var b=$('coachBadge2');if(!b)return;b.textContent=n;b.style.display=n?'block':'none';}
+/* Meldung antippen klappt sie auf. Ein Zuhoerer auf der Liste, weil die
+   Meldungen bei jeder Neurechnung neu entstehen. Der Hinweis "Mehr" wird
+   ausgeblendet, sobald ohnehin alles sichtbar ist -- sonst steht er auch
+   unter zweizeiligen Meldungen und verspricht etwas, das es nicht gibt. */
+$('coachList').addEventListener('click',function(e){
+  var b=e.target.closest('button.cnote');if(!b)return;
+  b.classList.toggle('open');
+  var m=b.querySelector('.more');
+  if(m)m.textContent=b.classList.contains('open')
+    ? (cfg.lang==='de'?'Weniger':'Less')
+    : (cfg.lang==='de'?'Mehr':'More');
+});
+/* Nach dem Aufbau pruefen, welche Meldung ueberhaupt abgeschnitten ist. */
+function trimCoachHints(){
+  [].forEach.call($('coachList').querySelectorAll('button.cnote'),function(b){
+    var p=b.querySelector('p'),m=b.querySelector('.more');
+    if(!p||!m)return;
+    m.style.display=(p.scrollHeight>p.clientHeight+2)?'':'none';
+  });
+}
 function runCoach(){
   var out=[],w=wkOf(TODAY),DE=cfg.lang==='de';
   var sleep=parseFloat($('y-sleep').value)||0;
@@ -4326,9 +4364,10 @@ function runCoach(){
     $('coachList').innerHTML=guide.map(function(g,i){
       var sev=g.ok?'ok':(i===nx?'hi':'md');
       var lbl=g.ok?(DE?'Erledigt':'Done'):(i===nx?(DE?'Jetzt':'Now'):(DE?'Danach':'Next'));
-      return '<div class="cnote '+sev+'" style="animation-delay:'+(i*50)+'ms"><span class="sev">'+lbl+
-        '</span><div><b>'+g.t[DE?1:0]+'</b><p>'+g.d[DE?1:0]+'</p></div></div>';
+      return '<button type="button" class="cnote '+sev+'" style="animation-delay:'+(i*50)+'ms"><span class="sev">'+lbl+
+        '</span><div><b>'+g.t[DE?1:0]+'</b><p>'+g.d[DE?1:0]+'</p><span class="more">'+(DE?'Mehr':'More')+'</span></div></button>';
     }).join('');
+    trimCoachHints();
     var open=guide.filter(function(g){return !g.ok;}).length;
     $('coachBadge').textContent=open;$('coachBadge').style.display=open?'':'none';coachBadge2(open);
     return;
@@ -4471,9 +4510,10 @@ function runCoach(){
   var order={hi:0,md:1,ok:2},LBL={hi:DE?'Zuerst':'Fix first',md:DE?'Beobachten':'Watch',ok:DE?'Gut':'Good'};
   out.sort(function(a,b){return order[a[0]]-order[b[0]];});
   $('coachList').innerHTML=out.map(function(o,i){
-    return '<div class="cnote '+o[0]+'" style="animation-delay:'+(i*50)+'ms"><span class="sev">'+LBL[o[0]]+'</span><div><b>'+o[1]+'</b><p>'+o[2]+'</p></div></div>';}).join('');
+    return '<button type="button" class="cnote '+o[0]+'" style="animation-delay:'+(i*50)+'ms"><span class="sev">'+LBL[o[0]]+'</span><div><b>'+o[1]+'</b><p>'+o[2]+'</p><span class="more">'+(DE?'Mehr':'More')+'</span></div></button>';}).join('');
   var urgent=out.filter(function(o){return o[0]!=='ok';}).length;
   $('coachBadge').textContent=urgent;$('coachBadge').style.display=urgent?'':'none';coachBadge2(urgent);
+  trimCoachHints();
 }
 /* coach pulse — watches the live state and speaks up with a popup when something shifts */
 var prevSnap=null,lastRd=0;
