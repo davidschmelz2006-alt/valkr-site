@@ -122,8 +122,10 @@
   /* Der Schimmer liegt hinter der ganzen Seite, nicht nur im unteren Streifen.
      Auf dem Handy fuellen die Karten die volle Breite -- ein Effekt nur am
      unteren Rand waere dort komplett verdeckt. */
-  #scenery{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;
-    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 18%,#000 100%);mask-image:linear-gradient(to bottom,transparent 0,#000 18%,#000 100%)}
+  /* Maske entfernt: die Atmosphaere ist inzwischen ein weicher Verlauf, der
+     von selbst ausblendet. Eine zusaetzliche Maske auf einer bildschirmgrossen
+     festen Flaeche kostet auf dem Telefon Rechenzeit fuer nichts. */
+  #scenery{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
   #scenery svg{position:absolute;bottom:0;left:0;width:100%;height:100%;display:block}
   .glowA{animation:glowP 16s ease-in-out infinite}
   .glowB{animation:glowP 21s ease-in-out infinite reverse}
@@ -207,7 +209,17 @@
       background:var(--surf);border-top:1px solid var(--line);border-bottom:none;
       padding:.7rem .7rem calc(.7rem + env(safe-area-inset-bottom,0px));
       box-shadow:0 -8px 24px rgba(0,0,0,.24);max-height:60vh;overflow:auto}
-    nav#nav.open{display:flex}
+    /* „Mehr" zeigte alle zwoelf Eintraege -- also auch die vier, die direkt
+       daneben in der Tableiste stehen. Doppelt und vollgepackt. Jetzt stehen
+       dort nur die acht, die es sonst nirgends gibt, in zwei ruhigen Spalten
+       statt als Knopfhaufen. */
+    nav#nav.open{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
+    nav#nav button{justify-content:flex-start;text-align:left;padding:.7rem .8rem;
+      border-radius:var(--r1);font-family:var(--fb);font-weight:600;font-size:.78rem;
+      letter-spacing:.01em;text-transform:none}
+    nav#nav::before{content:attr(data-title);grid-column:1/-1;
+      font-family:var(--fm);font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
+      color:var(--ink3);padding:.1rem .2rem .3rem}
     body{padding-bottom:64px}
     /* Der Trainingsmodus liegt ueber allem, sonst verdeckt die Leiste den Knopf. */
     #runner{z-index:90}
@@ -224,6 +236,8 @@
   nav button{font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;padding:.44rem .68rem;border:1px solid var(--line);color:var(--ink2);border-radius:2px;transition:.18s}
   nav button:hover{border-color:var(--aurora);color:var(--ink);transform:translateY(-1px)}
   nav button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  /* Einstellungen sitzen auf dem Desktop oben in der Leiste -- in der Reihe
+     waeren sie doppelt. Nur im Handy-Menue tauchen sie auf. */
   nav button .badge{display:inline-block;margin-left:.3rem;background:var(--ember);color:#fff;border-radius:8px;padding:0 .3rem;font-size:var(--t1)}
 
   .view{display:none;flex-direction:column;gap:1.3rem;padding-top:1.1rem}
@@ -654,14 +668,18 @@
      wenigen Flaechen -- nicht auf Listenzeilen, von denen es ein Dutzend gibt.
      Sonst faellt genau die Bildrate, die auf 120-Hz-Geraeten den Unterschied
      macht. Die Zeilen bekommen die Durchsicht ohne Unschaerfe. */
-  .card,.chartbox,.form,.acc>div{background:color-mix(in srgb,var(--surf) 74%,transparent);
-    backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
-  .exrow,.tile,.kpi{background:color-mix(in srgb,var(--surf) 72%,transparent)}
-  .hero{backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
-  /* Bewegungen laufen ausschliesslich ueber transform und opacity -- die
-     rechnet die Grafikeinheit, alles andere zwingt zu neuem Layout und
-     bricht auf hohen Bildraten ein. */
-  .exrow,.tile,.tbtn,.iconbtn,.txtbtn,.nb{will-change:transform}
+  /* Unschaerfe nur auf dem, was FEST steht: Kopfleiste, Tableiste, Schublade,
+     Trainingsmodus. Das sind vier Flaechen statt zweiundvierzig.
+     Auf mitscrollenden Karten muss der Browser die Unschaerfe in jedem Bild
+     neu rechnen -- das ist genau die Bremse, die man auf dem Telefon spuert
+     und die auf dem Desktop niemand bemerkt. Die Karten bleiben trotzdem
+     durchscheinend, sie verwischen den Hintergrund nur nicht mehr. */
+  .card,.chartbox,.form,.acc>div{background:color-mix(in srgb,var(--surf) 78%,transparent)}
+  .exrow,.tile,.kpi{background:color-mix(in srgb,var(--surf) 76%,transparent)}
+  /* Kein will-change. Das war ein Fehler: jede so markierte Flaeche bekommt
+     eine eigene Compositor-Ebene, und bei 55 Elementen frisst allein deren
+     Verwaltung mehr, als die angebliche Optimierung bringt. Browser
+     beschleunigen transform-Animationen ohnehin von selbst. */
   .hero{border-radius:var(--r3)}
   .tbtn,.nb,input,select,textarea{border-radius:var(--r1)}
   .iconbtn,.txtbtn{border-radius:var(--r1)}
@@ -673,6 +691,19 @@
   .hueRow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--surf3);border:2px solid var(--ink);cursor:pointer;box-shadow:var(--sh)}
   .hueRow input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surf3);border:2px solid var(--ink);cursor:pointer}
   .hueDot{width:24px;height:24px;border-radius:50%;background:var(--aurora);border:1px solid var(--line);flex:none}
+
+  /* ---- Handy-Menue, ganz am Ende ------------------------------------
+     Muss hier unten stehen: Medienabfragen erhoehen die Spezifitaet nicht,
+     also gewinnt bei gleicher Staerke die spaetere Regel. Weiter oben
+     wurden diese Zeilen von den allgemeinen nav-Regeln ueberschrieben. */
+  nav#nav button[data-view="settings"]{display:none}
+  @media (max-width:640px){
+    /* Die vier, die direkt daneben in der Tableiste stehen, gehoeren nicht
+       nochmal ins Menue -- das war das Doppelte und Vollgepackte. */
+    nav#nav button[data-view="today"],nav#nav button[data-view="train"],
+    nav#nav button[data-view="coach"],nav#nav button[data-view="you"]{display:none}
+    nav#nav button[data-view="settings"]{display:block}
+  }
 
   /* Tableiste als schwebende Glasleiste. Die abgerundete Oberkante und der
      Abstand zum Rand nehmen ihr das Klebrige -- sie sitzt auf der Seite,
@@ -791,7 +822,7 @@
   <!-- Reihenfolge = Weg des Nutzers: wer du bist, was heute ansteht, der Plan,
        das Training, dann messen, Rang, Coach, Ernaehrung, Wissen, Kauf.
        Einstellungen sitzen oben in der Leiste, nicht im Weg. -->
-  <nav id="nav">
+  <nav id="nav" data-title="Weitere Bereiche">
     <button data-view="you" data-i18n="nav.you">You</button>
     <button data-view="today" data-i18n="nav.today">Today</button>
     <button data-view="plan" data-i18n="nav.plan">Plan</button>
@@ -804,6 +835,7 @@
     <button data-view="fuel" data-i18n="nav.fuel">Fuel</button>
     <button data-view="learn" data-i18n="nav.learn">Learn</button>
     <button data-view="access" data-i18n="nav.access">Access</button>
+    <button data-view="settings" data-i18n="nav.settings">Settings</button>
   </nav>
   <!-- Auf dem Handy eine feste Leiste unten statt zwölf umbrechender Knoepfe.
        Die vier meistgenutzten Ansichten plus "Mehr" fuer den Rest. -->
@@ -1229,7 +1261,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='10.1';
+var VERSION='10.5';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1269,7 +1301,7 @@ var DICT={
  'nav.skills':['Skills','Skills'],'nav.mobility':['Mobility','Mobilität'],'nav.test':['Test','Test'],
  'nav.fuel':['Fuel','Ernährung'],'nav.you':['You','Du'],'nav.coach':['Coach','Coach'],
  'nav.learn':['Learn','Wissen'],'nav.access':['Access','Zugang'],'nav.settings':['Settings','Einstellungen'],
- 'nav.ranks':['Ranks','Ränge'],'nav.more':['More','Mehr'],
+ 'nav.ranks':['Ranks','Ränge'],'nav.more':['More','Mehr'],'nav.moreTitle':['More sections','Weitere Bereiche'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
  'rk.s':['Your rank comes from where you stand on each ladder, not from how much you sweat. Rest days count as followed — this system will never reward you for skipping recovery.','Dein Rang kommt daher, wo du auf jeder Leiter stehst, nicht davon wie sehr du schwitzt. Ruhetage zählen als erledigt — dieses System belohnt nie das Überspringen von Regeneration.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
@@ -1376,6 +1408,7 @@ function applyI18n(){
   [].forEach.call(document.querySelectorAll('[data-i18n-t]'),function(el){
     el.firstChild.nodeValue=T(el.dataset.i18nT);
   });
+  var nv=$('nav');if(nv)nv.dataset.title=T('nav.moreTitle');
   document.documentElement.lang=cfg.lang;
 }
 
@@ -3284,7 +3317,17 @@ function mk(any){
     s:(fx==='bubbles'?.35:fx==='sparks'?.5:fx==='fireflies'?.14:.18)+Math.random()*(fx==='sparks'?.8:.4),
     d:Math.random()*6.283,sw:.2+Math.random()*.6,o:.16+Math.random()*.4,ph:Math.random()*6.283};
 }
-function tick(){
+/* Partikel auf etwa 30 Bilder je Sekunde begrenzt. Sie driften so langsam,
+   dass 120 Hz optisch nichts hinzufuegen -- kosten wuerde es aber das
+   Vierfache, weil jedes Bild die volle Bildschirmflaeche neu zeichnet.
+   Der Rest der Oberflaeche laeuft weiter mit voller Bildrate. */
+var lastFx=0,FXSTEP=1000/30;
+function tick(ts){
+  raf=requestAnimationFrame(tick);
+  if(ts!==undefined){
+    if(ts-lastFx<FXSTEP)return;
+    lastFx=ts;
+  }
   cx.clearRect(0,0,W,H);
   var rgb=pcol(),fx=fxOf(),up=(fx==='bubbles'||fx==='sparks'||fx==='fireflies');
   for(var i=0;i<parts.length;i++){
@@ -3319,7 +3362,7 @@ function tick(){
       if(s.life>s.max||s.x<-80||s.x>W+80||s.y>H+40)shots.splice(j,1);
     }
   }
-  raf=requestAnimationFrame(tick);
+  /* Der naechste Frame wird oben in tick() angefordert, nicht mehr hier -- sonst laufen zwei Schleifen. */
 }
 function mkShot(){
   var L=Math.random()<.5;
@@ -3666,7 +3709,10 @@ function renderBoard(avgLp){
 applyI18n();syncSettings();buildThemeGrid();
 buildLogUI();buildTiles();buildSkills();buildMob();buildTest();buildSup();buildMeas();buildPR();buildChips();
 buildLearn();buildAccess();renderWins();
-renderDay();streak();calc();drawW();volBar();buildWeeks();
+/* buildWeeks() lief beim Start, obwohl der Plan-Bereich nicht sichtbar ist --
+   und show('plan') baut ihn ohnehin beim Oeffnen. Zwoelf Wochen mit allen
+   Tagen im Voraus zu bauen kostet Startzeit fuer etwas, das niemand sieht. */
+renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
 applyHue();syncHueUI();syncThemeColor();
@@ -3718,7 +3764,26 @@ recording=true;syncUndo();
 
 if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',function(){
-    navigator.serviceWorker.register('valkr-sw.js').catch(function(){});
+    navigator.serviceWorker.register('valkr-sw.js').then(function(reg){
+      /* Weil die Seite zuerst aus dem Cache kommt, sieht man eine neue Fassung
+         sonst erst beim uebernaechsten Start -- genau der Grund, warum eine
+         behobene Sache "immer noch kaputt" wirkt. Sobald im Hintergrund eine
+         neue Fassung bereitliegt, sagen wir das und laden auf Tippen neu. */
+      reg.addEventListener('updatefound',function(){
+        var w=reg.installing;if(!w)return;
+        w.addEventListener('statechange',function(){
+          if(w.state==='installed'&&navigator.serviceWorker.controller){
+            var DE=cfg.lang==='de',bar=$('a2hs');
+            if(!bar)return;
+            $('a2how').textContent=DE?'Tippe, um die neue Fassung zu laden.':'Tap to load the new version.';
+            bar.querySelector('b').textContent=DE?'Neue Fassung verfügbar':'New version available';
+            var go=$('a2go');go.style.display='';go.textContent=DE?'Aktualisieren':'Update';
+            go.onclick=function(){location.reload();};
+            bar.classList.add('on');bar.setAttribute('aria-hidden','false');
+          }
+        });
+      });
+    }).catch(function(){});
   });
 }
 })();

@@ -2,15 +2,17 @@
    Zweck: die Zusage „works offline" im Access-Tab wahr machen. Bis hierher war
    das eine Werbeaussage ohne Technik dahinter.
 
-   Strategie: Netz zuerst, Cache als Rueckfall.
-   Online liefert immer die frische Datei und legt sie nebenbei in den Cache.
-   Ohne Netz kommt die letzte gesehene Fassung. Damit gibt es kein
-   „haengt fuer immer auf einer alten Version", der klassische Service-Worker-
-   Fehler, den man hinterher nur noch mit Anleitung aus dem Browser bekommt.
-
-   Der Cache-Name traegt die Hub-Version. Neue Version -> neuer Cache ->
-   der alte wird beim Aktivieren geloescht. */
-var CACHE = 'valkr-v10.1';
+   Strategie: Cache zuerst, Netz nebenher ("stale-while-revalidate").
+   Die Antwort kommt sofort aus dem Cache, die frische Fassung wird im
+   Hintergrund geholt und greift beim naechsten Start.
+   Vorher war es umgekehrt -- Netz zuerst. Das ist zwar immer aktuell, aber
+   jeder Start wartete erst auf eine Antwort aus dem Netz, obwohl die App
+   vollstaendig lokal lag. Auf Mobilfunk waren das ein bis zwei Sekunden
+   schwarzer Bildschirm bei jedem Oeffnen.
+   Das alte Problem „haengt fuer immer auf einer alten Version" bleibt
+   trotzdem geloest: der Cache-Name traegt die Version, beim Aktivieren
+   fliegt alles Aeltere raus. */
+var CACHE = 'valkr-v10.5';
 var ASSETS = [
   './valkr-hub.html',
   './valkr-identity.html',
@@ -51,21 +53,34 @@ self.addEventListener('fetch', function (e) {
   /* Nur eigene Herkunft. Fremde Adressen gehen uns nichts an. */
   if (new URL(req.url).origin !== self.location.origin) return;
 
+  /* Cache zuerst, Netz im Hintergrund ("stale-while-revalidate").
+     Vorher wurde bei jedem Oeffnen erst das Netz abgewartet, obwohl die App
+     vollstaendig im Cache lag -- auf Mobilfunk sind das schnell ein bis zwei
+     Sekunden schwarzer Bildschirm. Das war der Grund, warum sich die App
+     traege anfuehlte.
+     Jetzt kommt die Antwort sofort aus dem Cache und die frische Fassung wird
+     nebenher geholt; sie greift beim naechsten Start. Das alte Problem
+     "haengt fuer immer auf einer alten Version" bleibt geloest, weil der
+     Cache-Name die Version traegt und beim Aktivieren alles Aeltere fliegt. */
+  /* ignoreSearch ist entscheidend: caches.match vergleicht sonst die volle
+     Adresse samt "?parameter". Ein Aufruf wie valkr-hub.html?ref=tiktok
+     verfehlt den Cache dann komplett und wartet erst den Netz-Fehlschlag ab
+     -- gemessen 2,3 Sekunden, obwohl die Datei lokal liegt. Genau solche
+     Adressen entstehen bei jedem Link aus einem sozialen Netzwerk. */
   e.respondWith(
-    fetch(req).then(function (res) {
-      if (res && res.ok && res.type === 'basic') {
-        var copy = res.clone();
-        caches.open(CACHE).then(function (c) { c.put(req, copy); });
-      }
-      return res;
-    }).catch(function () {
-      return caches.match(req).then(function (hit) {
+    caches.match(req, {ignoreSearch: true}).then(function (hit) {
+      var net = fetch(req).then(function (res) {
+        if (res && res.ok && res.type === 'basic') {
+          var copy = res.clone();
+          caches.open(CACHE).then(function (c) { c.put(req, copy); });
+        }
+        return res;
+      }).catch(function () {
         if (hit) return hit;
-        /* Navigation ohne Treffer: Hub ausliefern, sonst sieht der Nutzer
-           die Dinosaurier-Seite obwohl die App im Cache liegt. */
-        if (req.mode === 'navigate') return caches.match('./valkr-hub.html');
+        if (req.mode === 'navigate') return caches.match('./valkr-hub.html', {ignoreSearch: true});
         return Response.error();
       });
+      return hit || net;
     })
   );
 });
