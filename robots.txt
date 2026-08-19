@@ -1,0 +1,6 @@
+# Das Produkt ist noch nicht verkaufsfertig und hat in keinem Suchindex etwas
+# verloren. Das ist ausdruecklich KEIN Zugangsschutz -- wer die Adresse kennt,
+# kommt weiterhin rein. Es haelt nur zufaellige Funde ueber Google fern.
+# Vor dem Verkauf: siehe Produkt/ZUGANGSSCHUTZ.md
+User-agent: *
+Disallow: /

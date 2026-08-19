@@ -1,0 +1,16 @@
+{
+  "name": "VALKR Training Hub",
+  "short_name": "VALKR",
+  "description": "Calisthenics-Trainingsplan, Ranglisten und Coach — laeuft im Browser, Daten bleiben auf dem Geraet.",
+  "start_url": "./valkr-hub.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050F16",
+  "theme_color": "#050F16",
+  "lang": "de",
+  "icons": [
+    { "src": "./valkr-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./valkr-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

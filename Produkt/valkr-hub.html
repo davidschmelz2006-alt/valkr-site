@@ -1,4 +1,11 @@
 <title>VALKR Training Hub</title><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Solange das Produkt nicht verkauft wird, hat es in keinem Suchindex etwas
+     verloren. Das ist kein Zugangsschutz, es hält nur zufällige Funde fern. -->
+<meta name="robots" content="noindex,nofollow">
+<link rel="manifest" href="valkr-manifest.json">
+<meta name="theme-color" content="#050F16">
+<link rel="icon" href="valkr-icon.svg" type="image/svg+xml">
 <script>(function(){try{var p=JSON.parse(localStorage.getItem('vk_pack')||'"auto"');document.documentElement.setAttribute('data-pack',p);}catch(e){document.documentElement.setAttribute('data-pack','auto');}})();</script>
 <style>
   :root{
@@ -240,8 +247,12 @@
   .dhead p{margin:.2rem 0 0;color:var(--ink2);font-size:.86rem}
   .media{aspect-ratio:16/9;background:var(--hero);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;gap:.6rem;color:var(--ink3);position:relative;overflow:hidden;box-shadow:var(--sh)}
   .media::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 90% at 50% 20%,rgba(var(--p1),.18),transparent 70%)}
-  .media svg,.media span{position:relative}
+  .media svg,.media span,.media .demo{position:relative}
   .media span{font-family:var(--fm);font-size:.55rem;letter-spacing:.18em;text-transform:uppercase}
+  /* Die Demo bekommt die Hoehe der Box, die Beschriftung steht daneben. */
+  .media{flex-direction:column;gap:.2rem;padding:.7rem 0 .9rem}
+  .media .demo{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+  .media .demo svg{height:100%;width:auto;max-width:100%;color:var(--heroInk)}
 
   .ladder{display:flex;flex-direction:column;gap:.3rem}
   .rung{display:flex;align-items:center;gap:.68rem;background:var(--surf);border:1px solid var(--line);padding:.5rem .7rem;border-radius:3px;width:100%;text-align:left;transition:.16s}
@@ -639,7 +650,7 @@
     <button class="back" id="back">&larr; <span data-i18n="btn.allPatterns">All patterns</span></button>
     <div class="dhead"><span id="d-icon"></span><div><h3 id="d-name"></h3><p id="d-blurb"></p></div></div>
     <div class="media">
-      <svg width="42" height="42" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="20" fill="none" stroke="var(--aurora)" stroke-width="1.4" opacity=".55"/><path d="M19 15 L32 23 L19 31 Z" fill="var(--aurora)"/></svg>
+      <div class="demo" id="d-demo"></div>
       <span id="d-media"></span>
     </div>
     <div><p class="eyebrow" data-i18n="train.ladder">Your ladder &mdash; tap a step to set where you are</p><div class="ladder" id="d-ladder"></div></div>
@@ -946,7 +957,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='9.0';
+var VERSION='9.1';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1304,34 +1315,80 @@ function themeOutfit(k){
   return '<g transform="rotate('+rot+' '+hx+' '+hy+')">'+g+'</g>';
 }
 function sv(k,c,s){s=s||34;var d=figDecor(k);return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 46 46" style="overflow:visible" aria-hidden="true">'+d.pre+(IC[k]||IC.skill).replace(/\{c\}/g,c)+themeOutfit(k)+d.post+'</svg>';}
+
+/* Bewegungsdemo. Vorher sass hier eine 16:9-Box mit Play-Knopf und
+   „40 s" darunter -- ohne Video dahinter. Ein Abspielknopf, der nichts
+   abspielt, ist ein Versprechen, das die Seite nicht halten kann.
+   Jetzt laeuft die Bewegung wirklich: zwei Posen je Uebung, der Browser
+   blendet dazwischen. Beide Posen brauchen dieselbe Befehlsfolge, sonst
+   interpoliert er nicht. */
+var MOVES={
+ push:{dur:2.6,ref:'M5 38 H42',head:[11,20,11.6,26.4],
+   body:['M14.6 20.8 L27 26 L39.6 31','M14.6 27.2 L27 29.4 L39.6 32.2'],
+   arm:['M15.4 22 L15.6 30 L15 37.6','M15.4 28.4 L20.8 33 L15 37.6']},
+ pull:{dur:2.8,ref:'M5 8 H41',head:[23,21,23,13.6],
+   arm:['M17 9 L18.6 15.4 L21.4 24.6 M29 9 L27.4 15.4 L24.6 24.6','M17 9 L14.6 14.6 L21 17.2 M29 9 L31.4 14.6 L25 17.2'],
+   body:['M23 25 V34 M23 34 L19.6 41.4 M23 34 L26.4 41.4','M23 17.6 V26.6 M23 26.6 L19.6 34 M23 26.6 L26.4 34']},
+ row:{dur:2.6,ref:'M7 9 H35 M5 34 H42',head:[16.6,20.6,16.6,16.4],
+   arm:['M20 10 L19.6 15.6 L21.6 21.4','M20 10 L17.6 13.6 L21.6 17.4'],
+   body:['M21.6 21.4 L30 25.6 L38.6 29.8','M21.6 17.4 L30 22.6 L38.6 27.8']},
+ press:{dur:2.6,ref:'M5 38 H41',head:[14.6,29.4,14.2,34.4],
+   body:['M12 37.4 L17 26 L27 13.4','M12 37.4 L19.6 30.4 L27 14.6'],
+   leg:['M27 13.4 L32.8 25 L36 37.4','M27 14.6 L32.8 25.6 L36 37.4']},
+ legs:{dur:3,ref:'M5 39 H41',head:[17,11,17.6,17.4],
+   body:['M17.4 14.6 L23 25','M18 21 L23.6 29'],
+   leg:['M23 25 L14 27 L14.5 38 M14.5 38 L10 38','M23.6 29 L13.6 30.6 L14.5 38 M14.5 38 L10 38'],
+   arm:['M18.6 17.6 L9.6 15.6','M19.2 24 L10.2 22']},
+ core:{dur:3.2,ref:'M5 34 H41',head:[12,20.6,12.6,22.6],
+   body:['M15.4 23 Q25 33 31 27.6 L39 22','M16 25 Q25 34.4 31.4 29.6 L39.4 24.4'],
+   arm:['M15.4 23 L7 17.6','M16 25 L7.6 19.6']}
+};
+function dAnim(attr,a,b,dur){
+  return '<animate attributeName="'+attr+'" values="'+a+';'+b+';'+a+'" dur="'+dur+'s"'+
+    ' repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1"'+
+    ' keySplines="0.42 0 0.58 1;0.42 0 0.58 1"/>';
+}
+function moveSvg(id,c){
+  var d=MOVES[id]; if(!d)return '';
+  var t=d.dur||2.6,g='';
+  g+='<path d="'+d.ref+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" opacity=".34"/>';
+  ['body','arm','leg'].forEach(function(k){
+    if(!d[k])return;
+    g+='<path d="'+d[k][0]+'" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+
+       (SYSRED||cfg.motion==='off'?'':dAnim('d',d[k][0],d[k][1],t))+'</path>';
+  });
+  g+='<circle cx="'+d.head[0]+'" cy="'+d.head[1]+'" r="3.4" fill="'+c+'">'+
+     (SYSRED||cfg.motion==='off'?'':dAnim('cx',d.head[0],d.head[2],t)+dAnim('cy',d.head[1],d.head[3],t))+'</circle>';
+  return '<svg viewBox="0 0 46 46" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+g+'</svg>';
+}
 function cvar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
 var PAT=[
- {id:'push',name:'Push',kind:'Horizontal push',cv:'--aurora',blurb:'Chest, shoulders and triceps.',media:'Push-up - full range - 40 s',
+ {id:'push',name:'Push',kind:'Horizontal push',cv:'--aurora',blurb:'Chest, shoulders and triceps.',media:'Push-up · full range',
   ladder:['Wall push-up','Hands on a table','Hands on a chair','Full push-up','Feet elevated','Archer push-up','One-arm push-up'],
   cues:['Hands a little wider than your shoulders.','Squeeze your glutes before the first rep.','Lower until your chest is a fist above the floor.','Elbows back at about 45 degrees.','Lock out at the top.'],
   bad:['Hips dropping - your back takes the load.','Elbows flared wide - bad for the shoulder.','Half reps.'],
   facts:[['Rest','2 min'],['Leave in tank','1-3 reps'],['Per week','8-14 sets'],['Move up','+2 reps, twice']]},
- {id:'pull',name:'Pull',kind:'Vertical pull',cv:'--ice',blurb:'Back and biceps. The one most home programs skip.',media:'Dead-hang pull-up - 35 s',
+ {id:'pull',name:'Pull',kind:'Vertical pull',cv:'--ice',blurb:'Back and biceps. The one most home programs skip.',media:'Dead-hang pull-up',
   ladder:['Dead hang for time','Scapular pull','Negative pull-up','Band assisted','Full pull-up','Weighted pull-up'],
   cues:['Hang with straight arms, shoulders active.','Shoulder blades down first, then bend the arms.','Elbows toward your ribs.','Chin clearly over the bar.','Lower all the way.'],
   bad:['Stopping short at the bottom.','Kipping.','Craning your neck over the bar.'],
   facts:[['Rest','2-3 min'],['No pull-up yet','Negatives 3 x 5'],['Per week','8-14 sets'],['First rep in','6-8 weeks']]},
- {id:'row',name:'Row',kind:'Horizontal pull',cv:'--ice',blurb:'Mid-back and rear shoulders. Keeps your pushing healthy.',media:'Inverted row - 30 s',
+ {id:'row',name:'Row',kind:'Horizontal pull',cv:'--ice',blurb:'Mid-back and rear shoulders. Keeps your pushing healthy.',media:'Inverted row',
   ladder:['Bar at chest height','Bar at waist height','Bar at hip height','Feet elevated','Paused at top','One-arm row'],
   cues:['Body straight from heel to head.','Shoulder blades move first.','Chest all the way to the bar.','Pause a beat at the top.'],
   bad:['Leading with the arms.','Hips sagging.','Not touching the bar.'],
   facts:[['Rest','2 min'],['Rule','Pull sets >= push sets'],['No bar','A table edge works'],['Per week','8-14 sets']]},
- {id:'press',name:'Press',kind:'Vertical push',cv:'--aurora',blurb:'Shoulders. The road to a handstand push-up.',media:'Pike push-up - 30 s',
+ {id:'press',name:'Press',kind:'Vertical push',cv:'--aurora',blurb:'Shoulders. The road to a handstand push-up.',media:'Pike push-up',
   ladder:['Hands elevated pike','Floor pike','Feet elevated pike','Deficit pike','Wall HSPU partial','Wall HSPU full'],
   cues:['Feet in, hips high, upside-down V.','Head between your arms.','Lower just in front of your hands.','Press to straight arms.'],
   bad:['Hips dropping - now it is a push-up.','Lowering behind your hands.'],
   facts:[['Rest','2 min'],['Wrist prep','2 min every session'],['Per week','6-10 sets'],['Move up','+2 reps, twice']]},
- {id:'legs',name:'Legs',kind:'Squat and hinge',cv:'--ember',blurb:'Quads, glutes, hamstrings. Skip the hinge and your knees will mention it.',media:'Squat and single-leg RDL - 50 s',
+ {id:'legs',name:'Legs',kind:'Squat and hinge',cv:'--ember',blurb:'Quads, glutes, hamstrings. Skip the hinge and your knees will mention it.',media:'Bodyweight squat',
   ladder:['Box squat','Bodyweight squat','Paused squat','Split squat','Bulgarian split squat','Assisted pistol','Pistol squat'],
   cues:['Feet shoulder width, toes slightly out.','Hips back and down.','Hip crease below the knee.','Knees track over toes.','Heels planted.'],
   bad:['Knees caving in.','Heels lifting.','Only squatting, never hinging.'],
   facts:[['Rest','2 min'],['Hinge','3 x 8-10 / side'],['Nordic','3 x 5 negatives'],['Per week','8-12 sets']]},
- {id:'core',name:'Core',kind:'Anti-motion',cv:'--aurora',blurb:'Your core resists movement. That is why planks beat sit-ups.',media:'Hollow hold - 25 s',
+ {id:'core',name:'Core',kind:'Anti-motion',cv:'--aurora',blurb:'Your core resists movement. That is why planks beat sit-ups.',media:'Hollow hold',
   ladder:['Dead bug','Tuck hollow hold','One leg extended','Both legs, arms down','Arms overhead','Hollow rock','Hanging knee raise','Hanging leg raise'],
   cues:['Lower back flat into the floor.','Lift shoulder blades and legs.','Keep breathing.','Set ends when your back lifts.'],
   bad:['Arching.','Holding your breath.','Chasing sit-up numbers.'],
@@ -1593,6 +1650,7 @@ function openDetail(id){
   $('d-icon').innerHTML=sv(p.id,cvar(p.cv),44);
   $('d-name').innerHTML=p.name+' · <span style="font-size:.7em;color:var(--ink3)">'+p.kind+'</span>';
   $('d-blurb').textContent=p.blurb;$('d-media').textContent=p.media;
+  $("d-demo").innerHTML=moveSvg(p.id,cvar(p.cv)||cvar('--aurora'));
   ladder();fill('d-cues',p.cues);fill('d-bad',p.bad);
   var ph=phase(Math.min(12,Math.max(1,wkOf(TODAY))));
   var f=$('d-facts');f.innerHTML='';
@@ -2971,5 +3029,14 @@ tickClock();setInterval(tickClock,20000);
 $('verTag').textContent='v'+VERSION;
 sizeCv();
 recording=true;syncUndo();
+
+/* Service Worker. Erst nach dem Laden registrieren, damit er dem ersten
+   Aufbau nichts wegnimmt. Ueber file:// ist er nicht erlaubt -- lokales
+   Doppelklicken auf die Datei darf deshalb keinen Fehler werfen. */
+if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
+  window.addEventListener('load',function(){
+    navigator.serviceWorker.register('valkr-sw.js').catch(function(){});
+  });
+}
 })();
 </script>
