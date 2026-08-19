@@ -33,7 +33,7 @@
 <link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1125x2436.png">
 <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1242x2688.png">
 <link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2) and (orientation:portrait)" href="valkr-splash-828x1792.png">
-<script>(function(){try{var p=JSON.parse(localStorage.getItem('vk_pack')||'"auto"');document.documentElement.setAttribute('data-pack',p);}catch(e){document.documentElement.setAttribute('data-pack','auto');}})();</script>
+<script>(function(){try{var p=JSON.parse(localStorage.getItem('vk_pack')||'"onyx"');document.documentElement.setAttribute('data-pack',p);}catch(e){document.documentElement.setAttribute('data-pack','onyx');}})();</script>
 <style>
   :root{
     --aurora:#35C39C;--ice:#7FCDE4;--ember:#E8703A;--brass:#D4A73C;
@@ -1414,7 +1414,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.3';
+var VERSION='11.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3424,16 +3424,16 @@ function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks()
 $('y-goal').addEventListener('input',function(){set('goal',this.value);});
 /* ---------- themes ---------- */
 var PACKS=[
+ {id:'onyx',n:['Onyx','Onyx'],fx:'pollen',d:['Dust','Staub'],c:['#08080C','#A78BFA','#C4B5FD']},
  {id:'auto',n:['Auto','Auto'],fx:'snow',d:['Follows your system','Folgt dem System'],c:['#35C39C','#7FCDE4','#D4A73C']},
  {id:'aurora',n:['Aurora night','Polarnacht'],fx:'snow',d:['Snow','Schnee'],c:['#08151E','#35C39C','#7FCDE4']},
  {id:'jungle',n:['Jungle','Dschungel'],fx:'fireflies',d:['Fireflies','Glühwürmchen'],c:['#07130D','#57D07C','#C9E265']},
  {id:'summer',n:['Summer','Sommer'],fx:'pollen',d:['Pollen','Pollen'],c:['#F4E7CE','#E2803B','#F0B94E']},
  {id:'ocean',n:['Ocean','Ozean'],fx:'bubbles',d:['Bubbles','Blasen'],c:['#04131F','#3FC7D8','#7EA8F0']},
  {id:'ember',n:['Ember','Glut'],fx:'sparks',d:['Embers','Funken'],c:['#120C0B','#F0913F','#E4553C']},
- {id:'stone',n:['Stone','Stein'],fx:'none',d:['Still','Ruhig'],c:['#E6E4DF','#2E7D6B','#B4552F']},
- {id:'onyx',n:['Onyx','Onyx'],fx:'pollen',d:['Dust','Staub'],c:['#08080C','#A78BFA','#C4B5FD']}
+ {id:'stone',n:['Stone','Stein'],fx:'none',d:['Still','Ruhig'],c:['#E6E4DF','#2E7D6B','#B4552F']}
 ];
-var pack=get('pack','auto');
+var pack=get('pack','onyx');
 function fxOf(){var f='snow';PACKS.forEach(function(p){if(p.id===pack)f=p.fx;});return f;}
 /* ---------- Atmosphaere statt Kulisse -----------------------------------
    Vorher standen hier gezeichnete Palmen, Tukane, Korallen und tote Baeume.
