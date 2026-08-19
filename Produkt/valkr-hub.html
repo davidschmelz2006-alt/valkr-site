@@ -603,11 +603,25 @@
   #lbTable td.demo{opacity:.55;font-style:italic}
   #lbTable td.pos{width:2.4rem;font-family:var(--fm);color:var(--ink3)}
 
-  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120%);z-index:400;background:var(--hero);color:var(--heroInk);border:1px solid var(--aurora);border-radius:6px;padding:.8rem 1.1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 16px 44px rgba(0,0,0,.45);opacity:0;visibility:hidden;pointer-events:none;transition:transform .5s cubic-bezier(.2,.9,.3,1),opacity .3s ease,visibility .3s;max-width:calc(100vw - 32px)}
-  #toast.on{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto}
-  #toast em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;color:var(--aurora)}
-  #toast b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t5)}
-  #toast span{font-size:var(--t3);opacity:.72}
+  /* Meldungen sitzen oben links, klein, und lassen sich wegwischen. Vorher
+     sassen sie gross unten in der Mitte -- genau dort, wo waehrend einer
+     Einheit der Hauptknopf liegt. Eine Meldung soll informieren, nicht im
+     Weg stehen. */
+  #toast{position:fixed;left:10px;top:calc(10px + env(safe-area-inset-top,0px));
+    transform:translateX(-118%);z-index:400;
+    background:color-mix(in srgb,var(--hero) 90%,transparent);
+    backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
+    color:var(--heroInk);border:1px solid var(--line);border-left:3px solid var(--aurora);
+    border-radius:var(--r1);padding:.5rem .65rem;display:flex;align-items:center;gap:.55rem;
+    box-shadow:0 8px 26px rgba(0,0,0,.38);opacity:0;visibility:hidden;pointer-events:none;
+    transition:transform .34s cubic-bezier(.2,.9,.3,1),opacity .24s ease,visibility .24s;
+    max-width:min(290px,calc(100vw - 20px));cursor:grab;touch-action:pan-y;user-select:none}
+  #toast.on{transform:translateX(0);opacity:1;visibility:visible;pointer-events:auto}
+  #toast.drag{transition:none;cursor:grabbing}
+  #toast svg{width:26px;height:26px;flex:none}
+  #toast em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--aurora);line-height:1.3}
+  #toast b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t3);line-height:1.25}
+  #toast span{font-size:var(--t2);opacity:.7;line-height:1.3}
 
   #toast.ctoast{border-color:var(--brass)}
   #toast.ctoast em{color:var(--brass)}
@@ -1261,7 +1275,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='10.5';
+var VERSION='10.6';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -3530,7 +3544,7 @@ function runToast(){
   var b=document.createElement('span'),d=document.createElement('div');
   if(it.kind==='ach'){
     var a=it.a;
-    b.innerHTML=badgeSvg(Math.min(8,Math.floor(a.p/25)),42);
+    b.innerHTML=badgeSvg(Math.min(8,Math.floor(a.p/25)),26);
     d.innerHTML='<em>'+(cfg.lang==='de'?'Freigeschaltet':'Unlocked')+'</em><b></b><span></span>';
     d.querySelector('b').textContent=a.n[L];
     d.querySelector('span').textContent=a.d[L]+' · +'+a.p+' XP';
@@ -3541,9 +3555,54 @@ function runToast(){
     d.querySelector('span').textContent=it.s;
   }
   el.appendChild(b);el.appendChild(d);
-  el.classList.add('on');plop();burst(window.innerWidth/2,window.innerHeight-90,10);
-  setTimeout(function(){el.classList.remove('on');setTimeout(function(){toastBusy=false;runToast();},560);},it.kind==='coach'?5200:3600);
+  el.classList.add('on');plop();burst(48,60,8);
+  armToast(it.kind==='coach'?5200:3600);
 }
+/* Wegwischen. Der Finger nimmt die Meldung mit; ab einem Drittel der Breite
+   fliegt sie raus, darunter federt sie zurueck. Ein Tipp schliesst ebenfalls.
+   Zeigt sich die naechste Meldung, laeuft die Warteschlange sofort weiter --
+   sonst muesste man auf eine Meldung warten, die man gerade weggewischt hat. */
+var toastTmr=null;
+function closeToast(){
+  var el=$('toast');
+  clearTimeout(toastTmr);
+  el.classList.remove('on','drag');
+  el.style.transform='';
+  setTimeout(function(){toastBusy=false;runToast();},260);
+}
+function armToast(ms){
+  clearTimeout(toastTmr);
+  toastTmr=setTimeout(closeToast,ms);
+}
+(function(){
+  var el=$('toast'),x0=null,dx=0,moved=false;
+  function start(x){x0=x;dx=0;moved=false;el.classList.add('drag');clearTimeout(toastTmr);}
+  function move(x){
+    if(x0===null)return;
+    dx=x-x0;
+    if(Math.abs(dx)>4)moved=true;
+    /* nach rechts darf sie nur zaeh mitgehen -- weggewischt wird nach links */
+    var v=dx<0?dx:dx*0.25;
+    el.style.transform='translateX('+v+'px)';
+    el.style.opacity=String(Math.max(0,1-Math.max(0,-dx)/220));
+  }
+  function end(){
+    if(x0===null)return;
+    var w=el.getBoundingClientRect().width||240;
+    el.classList.remove('drag');
+    if(-dx>w/3){el.style.opacity='';closeToast();}
+    else{el.style.transform='';el.style.opacity='';if(el.classList.contains('on'))armToast(2600);}
+    if(!moved&&el.classList.contains('on')){el.style.opacity='';closeToast();}
+    x0=null;
+  }
+  el.addEventListener('touchstart',function(e){start(e.touches[0].clientX);},{passive:true});
+  el.addEventListener('touchmove',function(e){move(e.touches[0].clientX);},{passive:true});
+  el.addEventListener('touchend',end);
+  el.addEventListener('touchcancel',end);
+  el.addEventListener('mousedown',function(e){e.preventDefault();start(e.clientX);});
+  window.addEventListener('mousemove',function(e){if(x0!==null)move(e.clientX);});
+  window.addEventListener('mouseup',end);
+})();
 /* Koerperkarte: jede Zone faerbt sich nach dem Rang des zugehoerigen Musters.
    Beste Zone bekommt einen pulsierenden Ring, damit sofort klar ist, wo die
    Staerke sitzt -- und im Umkehrschluss, wo nicht. */
