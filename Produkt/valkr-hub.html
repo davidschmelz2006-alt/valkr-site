@@ -1417,7 +1417,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='12.0';
+var VERSION='12.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2003,13 +2003,14 @@ var DEMOS={
    var a=(25-18*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
    var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
-   var e=_ik(H,S,6.2,6.2,1);
-   var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4+(r-rl)*2.4];
+   var e=_ik(H,S,7.4,5,1);
+   var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+   var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.4];
    return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
  pull:{dur:3,refs:['M8 8 H38'],pose:function(u){
    var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),HL=[17,8.6],HR=[29,8.6],yS=22.2-9.6*r;
    var SL=[19.9,yS],SR=[26.1,yS];
-   var eL=_ik(HL,SL,7,7,1),eR=_ik(HR,SR,7,7,-1);
+   var eL=_ik(HL,SL,7.6,6.4,1),eR=_ik(HR,SR,7.6,6.4,-1);
    var hip=[23,yS+9.4];
    return {parts:[
      [[SL,SR]],
@@ -2022,8 +2023,9 @@ var DEMOS={
    var a=(17+16*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
    var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
-   var e=_ik(H,S,6.7,6.7,-1);
-   var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4+(r-rl)*2];
+   var e=_ik(H,S,7.5,5.9,-1);
+   var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+   var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
    return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
  press:{dur:2.9,refs:['M5 38 H41'],pose:function(u){
    var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),H=[13,37.4],F=[35,37.4],Ll=23.9,Lt=13;
@@ -2031,8 +2033,8 @@ var DEMOS={
    var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
    var ps=(141-23*r)*_DG;
    var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
-   var e=_ik(H,S,7,7,1);
-   var hd=[S[0]+Math.cos(ps)*4.2,S[1]+Math.sin(ps)*4.2+(r-rl)*2.2];
+   var e=_ik(H,S,8,6.2,1);
+   var hd=[S[0]+Math.cos(ps)*4.2+Math.sin(ps)*1,S[1]+Math.sin(ps)*4.2-Math.cos(ps)*1+(r-rl)*2.2];
    return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
  legs:{dur:3.1,refs:['M5 39 H41'],pose:function(u){
    var r=_phase(u,.42,.10,.24),rl=_phase(u-.035,.42,.10,.24),K0=[21,37.5],ls=8.5,lt=9,lo=10;
