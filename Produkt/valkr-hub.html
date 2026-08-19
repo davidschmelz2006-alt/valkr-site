@@ -228,27 +228,159 @@
     #tabbar button[aria-current="true"]{color:var(--aurora)}
     #tabbar .badge{position:absolute;top:7px;right:calc(50% - 20px);min-width:15px;height:15px;line-height:15px;
       background:var(--ember);color:#fff;border-radius:8px;font-size:var(--t1);font-style:normal;text-align:center;display:none;padding:0 3px}
-    /* Die obere Reihe wird zur Schublade, die "Mehr" aufklappt. */
-    nav#nav{display:none;position:fixed;left:0;right:0;bottom:56px;z-index:59;
-      background:var(--surf);border-top:1px solid var(--line);border-bottom:none;
-      padding:.7rem .7rem calc(.7rem + env(safe-area-inset-bottom,0px));
-      box-shadow:0 -8px 24px rgba(0,0,0,.24);max-height:60vh;overflow:auto}
-    /* „Mehr" zeigte alle zwoelf Eintraege -- also auch die vier, die direkt
-       daneben in der Tableiste stehen. Doppelt und vollgepackt. Jetzt stehen
-       dort nur die acht, die es sonst nirgends gibt, in zwei ruhigen Spalten
-       statt als Knopfhaufen. */
-    nav#nav.open{display:grid;grid-template-columns:1fr 1fr;gap:.45rem}
-    nav#nav button{justify-content:flex-start;text-align:left;padding:.7rem .8rem;
-      border-radius:var(--r1);font-family:var(--fb);font-weight:600;font-size:.78rem;
-      letter-spacing:.01em;text-transform:none}
-    nav#nav::before{content:attr(data-title);grid-column:1/-1;
-      font-family:var(--fm);font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;
-      color:var(--ink3);padding:.1rem .2rem .3rem}
+    /* Die obere Reihe verschwindet auf dem Handy ganz -- ihre Aufgabe
+       uebernehmen unten die Tableiste und das Menue-Blatt. */
+    nav#nav{display:none!important}
+    /* Platz fuer die feste Tableiste, sonst liegt das letzte Element darunter. */
     body{padding-bottom:64px}
     /* Der Trainingsmodus liegt ueber allem, sonst verdeckt die Leiste den Knopf. */
     #runner{z-index:90}
   }
 
+
+
+  /* ---- Kopfleiste auf dem Handy: nur noch das Noetige ------------------
+     Vorher standen dort acht Elemente nebeneinander: Marke, Rueckgaengig,
+     Zuruecksetzen, Uhr, Serie, Woche, Theme, Einstellungen. Auf 360 Pixeln ist
+     das keine Kopfleiste mehr, sondern eine zweite Werkzeugleiste -- und vier
+     davon fuehren an Orte, die ohnehin in den Einstellungen stehen.
+     Geblieben sind Marke, Serie und Woche: Identitaet und Stand. Alles andere
+     liegt im Menue-Blatt oder in den Einstellungen, wo es hingehoert. */
+  @media (max-width:640px){
+    .bar #undoBtn,.bar #resetBtn,.bar #themeBtn,.bar #setBtn,.bar #clockNow{display:none}
+    .bar .brand small{display:none}
+    /* Serie und Woche stehen nebeneinander statt untereinander -- zwei
+       zweizeilige Bloecke am rechten Rand einer 360-Pixel-Leiste ergeben
+       einen Klumpen, den man liest statt ueberfliegt. */
+    .barR{gap:.75rem}
+    .stat{display:flex;align-items:baseline;gap:.3rem;text-align:left}
+    .stat b{display:inline}
+
+    /* Der Leitspruch stand ueber JEDEM Bereich -- also auch ueber der
+       Naehrwerttabelle und den Einstellungen. Ein Spruch, der immer da ist,
+       wird zu Tapete und kostet auf jedem Bildschirm die oberen sechzig Pixel.
+       Jetzt steht er dort, wo er hingehoert: beim Tag, den man vor sich hat. */
+    /* Die Regeln zum Leitspruch stehen weiter unten -- Medienabfragen erhoehen
+       die Spezifitaet nicht, und die allgemeinen .creed-Regeln kommen im
+       Dokument spaeter. Hier oben waeren sie wirkungslos. */
+  }
+  /* ---- Abschnittsleiste -------------------------------------------------
+     Die zweite Ebene innerhalb eines Bereichs. Bewusst als Segmentleiste und
+     nicht als weitere Reiterzeile: sie soll sichtbar UNTERGEORDNET sein,
+     sonst hat man wieder vierzehn gleichwertige Ziele, nur in zwei Reihen. */
+  #subnav{display:flex;gap:.25rem;margin:0 0 1rem;padding:.25rem;
+    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r2);
+    overflow-x:auto;scrollbar-width:none}
+  #subnav::-webkit-scrollbar{display:none}
+  #subnav[hidden]{display:none}
+  #subnav button{flex:1 0 auto;min-height:38px;padding:.4rem .85rem;border:0;
+    background:none;color:var(--ink3);cursor:pointer;white-space:nowrap;
+    border-radius:calc(var(--r2) - 3px);font-family:var(--fb);font-weight:600;
+    font-size:.8rem;letter-spacing:.01em;transition:.16s}
+  #subnav button:hover{color:var(--ink)}
+  #subnav button[aria-selected="true"]{background:var(--surf);color:var(--ink);
+    box-shadow:var(--sh)}
+  @media (max-width:640px){
+    #subnav{margin-bottom:.85rem}
+    #subnav button{font-size:.78rem;padding:.4rem .7rem}
+  }
+
+
+  /* ---- Kacheln ----------------------------------------------------------
+     Ein Muster fuer jede Zahl in der App: Bezeichnung, Zeitraum, grosser Wert,
+     kleine Grafik, Pfeil wenn es dahinter mehr gibt. Vorher standen dieselben
+     Werte mal als Tabellenzeile, mal als Aufzaehlung, mal als Kasten -- die
+     Oberflaeche wirkte dadurch zusammengesammelt statt gebaut.
+
+     Der Gewinn ist nicht Schoenheit, sondern Lesbarkeit: gleiche Dinge sehen
+     gleich aus, also muss man die Form nur einmal lernen. Und weil jede Zahl
+     ihre eigene Flaeche hat, sieht man auf einen Blick, wo eine aufhoert und
+     die naechste anfaengt. */
+  .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.6rem}
+  .cards.two{grid-template-columns:repeat(auto-fit,minmax(220px,1fr))}
+  .mcard{position:relative;display:flex;flex-direction:column;gap:.15rem;
+    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r3);
+    padding:.85rem .9rem;text-align:left;font-family:var(--fb);color:var(--ink);
+    min-height:96px;transition:border-color .16s,transform .16s,background .16s}
+  .mcard.wide{grid-column:1/-1}
+  button.mcard{cursor:pointer;width:100%}
+  button.mcard:hover,button.mcard:focus-visible{border-color:var(--aurora);background:var(--surf3)}
+  button.mcard:active{transform:scale(.985)}
+  .mcard em{font-style:normal;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink2);line-height:1.3}
+  .mcard .when{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);letter-spacing:.05em}
+  .mcard b{font-family:var(--fd);font-weight:600;font-size:clamp(1.35rem,5.4vw,1.7rem);
+    line-height:1.1;margin-top:.3rem;font-variant-numeric:tabular-nums}
+  .mcard b i{font-style:normal;font-size:.5em;font-weight:400;color:var(--ink3);margin-left:.18em}
+  .mcard .sub{font-size:var(--t2);color:var(--ink3);line-height:1.35}
+  .mcard .viz{margin-top:auto;padding-top:.5rem}
+  .mcard .viz svg{display:block;width:100%;height:34px;overflow:visible}
+  /* Der Pfeil sagt: hier steckt mehr dahinter. Ohne ihn probiert niemand,
+     auf eine Kachel zu tippen -- eine Flaeche sieht nicht nach Knopf aus. */
+  .mcard .go{position:absolute;top:.8rem;right:.75rem;width:15px;height:15px;
+    color:var(--ink3);fill:none;stroke:currentColor;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;transition:.16s}
+  button.mcard:hover .go{color:var(--aurora);transform:translateX(2px)}
+  .mcard .meter{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:.55rem}
+  .mcard .meter i{display:block;height:100%;border-radius:3px;background:var(--aurora)}
+  .mcard .dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:.55rem}
+  .mcard .dots u{width:9px;height:9px;border-radius:2px;background:var(--line);text-decoration:none}
+  .mcard .dots u.on{background:var(--aurora)}
+  .mcard .dots u.rest{background:var(--line2)}
+  @media (max-width:640px){
+    .cards{gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(138px,1fr))}
+    .mcard{padding:.75rem .8rem;min-height:88px;border-radius:var(--r2)}
+  }
+  /* ---- Menue-Blatt (Handy) --------------------------------------------
+     Zieht von unten hoch, volle Breite, Gruppen mit Ueberschrift. Die Form
+     kennen iOS und Android beide -- sie muss nicht erklaert werden.
+     Schliesst per Wisch nach unten, per Zurueck-Taste, per Tippen daneben. */
+  #sheetBg{position:fixed;inset:0;z-index:78;background:rgba(0,0,0,.42);
+    opacity:0;transition:opacity .24s ease}
+  #sheetBg.on{opacity:1}
+  #sheetBg[hidden]{display:none}
+  #sheet{position:fixed;left:0;right:0;bottom:0;z-index:79;
+    background:var(--surf);border-top:1px solid var(--line);
+    border-radius:var(--r3) var(--r3) 0 0;
+    box-shadow:0 -12px 40px rgba(0,0,0,.34);
+    padding:.5rem .9rem calc(1rem + env(safe-area-inset-bottom,0px));
+    max-height:78vh;overflow:auto;
+    transform:translateY(102%);transition:transform .28s cubic-bezier(.2,.9,.3,1);
+    touch-action:pan-y}
+  #sheet.on{transform:translateY(0)}
+  #sheet[hidden]{display:none}
+  #sheet.drag{transition:none}
+  #sheet .grip{width:38px;height:4px;border-radius:2px;background:var(--line2);
+    margin:.25rem auto .7rem}
+  #sheet h4{font-family:var(--fm);font-size:var(--t1);letter-spacing:.11em;
+    text-transform:uppercase;color:var(--ink3);margin:.9rem 0 .35rem;font-weight:400}
+  #sheet h4:first-of-type{margin-top:.1rem}
+  #sheet button{width:100%;display:flex;align-items:center;gap:.85rem;
+    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.72rem .85rem;color:var(--ink);text-align:left;cursor:pointer;
+    font-family:var(--fb);margin-bottom:.4rem;transition:.16s}
+  #sheet button:hover,#sheet button:focus-visible{border-color:var(--aurora);background:var(--surf3)}
+  #sheet button svg{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;
+    stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;color:var(--aurora)}
+  #sheet button .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:.08rem}
+  #sheet button b{font-family:var(--fd);font-weight:600;font-size:.9rem}
+  #sheet button span{font-size:.74rem;color:var(--ink3);line-height:1.3}
+  #sheet button .arw{color:var(--ink3);flex:none;width:16px;height:16px}
+  /* Inhalt eines Detailblatts. Bewusst dieselbe Flaeche wie das Menue: eine
+     Form, die man einmal versteht, statt zweier, die sich aehneln. */
+  #sheet .dsh{display:flex;flex-direction:column;gap:.7rem;padding-bottom:.3rem}
+  #sheet .dshHead{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem}
+  #sheet .dshHead b{font-family:var(--fd);font-weight:600;font-size:1.15rem}
+  #sheet .dshHead span{font-family:var(--fm);font-size:var(--t3);color:var(--aurora);font-variant-numeric:tabular-nums}
+  #sheet .dshRow{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem;
+    padding:.5rem 0;border-bottom:1px solid var(--line)}
+  #sheet .dshRow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.09em;
+    text-transform:uppercase;color:var(--ink3)}
+  #sheet .dshRow b{font-family:var(--fd);font-weight:600;font-size:.95rem;font-variant-numeric:tabular-nums}
+  #sheet .savebar{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.2rem}
+  #sheet .savebar .tbtn{flex:1 1 auto;min-height:44px}
+  #sheet .hint{margin:0;font-size:var(--t2);color:var(--ink3);line-height:1.45}
+  #sheet .field{gap:.3rem}
   .creed{display:flex;flex-direction:column;align-items:center;gap:.22rem;padding:.7rem 0 .6rem;text-align:center}
   .creed .motto{font-family:var(--fd);font-weight:600;font-size:var(--t5);margin:0;display:flex;align-items:center;gap:.7rem;justify-content:center;flex-wrap:wrap;letter-spacing:.01em}
   .creed .motto i{display:block;width:clamp(14px,4vw,30px);height:1px;background:var(--brass);opacity:.7;flex:none}
@@ -269,7 +401,11 @@
   @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
   h2.sec{font-family:var(--fd);font-weight:600;font-size:1.2rem;margin:0}
   p.sub{margin:0;color:var(--ink2);font-size:var(--t4);max-width:64ch}
-  .eyebrow{font-family:var(--fm);font-size:var(--t2);letter-spacing:.1em;text-transform:uppercase;color:var(--ember);margin:0 0 .3rem}
+  /* Die Zwischenueberschrift war in Ember gesetzt -- ein Signalton fuer eine
+     blosse Beschriftung. Bei einem Dutzend davon auf einem Bildschirm schreit
+     die Oberflaeche, ohne etwas zu sagen. Akzentfarbe bleibt dem vorbehalten,
+     was wirklich Aufmerksamkeit verdient. */
+  .eyebrow{font-family:var(--fm);font-size:var(--t2);letter-spacing:.11em;text-transform:uppercase;color:var(--ink2);margin:0 0 .45rem}
   .hint{font-family:var(--fb);font-size:var(--t3);color:var(--ink2);margin:0}
   /* Serife nur dort, wo wirklich gelesen wird: die Kapitel im Wissens-Bereich.
      Fuer Bedienelemente ist sie falsch, fuer Fliesstext richtig. */
@@ -334,12 +470,11 @@
   .tbtn.dngr{border-color:var(--ember);color:var(--ember)}
   .tbtn.dngr:hover{background:var(--ember);color:#fff}
 
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(116px,1fr));gap:.55rem}
-  .kpi{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.8rem;box-shadow:var(--sh);transition:.18s}
-  .kpi:hover{transform:translateY(-2px);border-color:var(--ice)}
-  .kpi em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
-  .kpi b{display:block;font-family:var(--fd);font-size:1.4rem;font-weight:600;margin-top:.12rem;font-variant-numeric:tabular-nums}
-  .kpi span{font-family:var(--fm);font-size:var(--t2);color:var(--ink3)}
+  /* Kennzahlen sind Kacheln wie alle anderen auch. Vorher hatten sie ein
+     eigenes, flacheres Aussehen -- dieselbe Art Information in zwei Formen,
+     was den Eindruck von "zusammengesammelt" ausmacht. Jetzt teilen sie sich
+     Raster und Kachel mit dem Rest. */
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(138px,1fr));gap:.6rem}
 
   .card{background:var(--surf);border:1px solid var(--line);padding:1rem;border-radius:4px;display:flex;flex-direction:column;gap:.6rem;box-shadow:var(--sh)}
   .card h4{font-family:var(--fd);font-weight:600;font-size:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--ink2)}
@@ -411,13 +546,16 @@
   .ctl.hasunit input{padding-right:2.3rem}
   .ctl.edited input{border-color:var(--brass);background:rgba(212,167,60,.09)}
   .out{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:.48rem}
-  .obox{background:var(--surf2);border:1px solid var(--line);padding:.62rem;border-radius:3px;transition:.18s}
-  .obox:hover{border-color:var(--ice);transform:translateY(-2px)}
+  /* Ergebniskaesten teilen sich Rundung, Flaeche und Rand mit den Kacheln --
+     sie sind nur kleiner, weil hier vier bis sechs nebeneinander stehen. */
+  .out{display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));gap:.5rem}
+  .obox{background:var(--surf2);border:1px solid var(--line);padding:.7rem .75rem;
+    border-radius:var(--r2);transition:border-color .16s,transform .16s}
+  .obox:hover{border-color:var(--aurora);transform:translateY(-1px)}
   .obox.hi{border-color:var(--aurora)}
-  .obox em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
-  .obox b{display:block;font-family:var(--fd);font-size:1.06rem;font-weight:600;margin-top:.12rem;font-variant-numeric:tabular-nums}
+  .obox em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
+  .obox b{display:block;font-family:var(--fd);font-size:1.12rem;font-weight:600;margin-top:.18rem;font-variant-numeric:tabular-nums}
   .obox b i{font-style:normal;font-size:var(--t2);color:var(--ink3);font-weight:400}
-  .macrobar{display:flex;height:16px;border:1px solid var(--line);border-radius:3px;overflow:hidden}
   .macrobar i{display:block;height:100%;transition:width .45s ease}
   .mkey{display:flex;gap:.85rem;flex-wrap:wrap;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-top:.38rem}
   .mkey span{display:flex;align-items:center;gap:.3rem}
@@ -856,7 +994,7 @@
      color-mix haelt das themenunabhaengig: jede Flaeche nimmt ihre eigene
      Themenfarbe und macht sie teildurchlaessig. Browser ohne color-mix
      ignorieren die Zeile und behalten die volle Farbe -- kein Bruch. */
-  .card,.exrow,.tile,.chartbox,.form,.kpi,.acc>div,.file,.note,.addonRow{border-radius:var(--r2)}
+  .card,.exrow,.tile,.chartbox,.form,.acc>div,.file,.note,.addonRow{border-radius:var(--r2)}
   /* Unschaerfe kostet Rechenzeit pro Flaeche. Deshalb nur auf den grossen,
      wenigen Flaechen -- nicht auf Listenzeilen, von denen es ein Dutzend gibt.
      Sonst faellt genau die Bildrate, die auf 120-Hz-Geraeten den Unterschied
@@ -868,7 +1006,7 @@
      und die auf dem Desktop niemand bemerkt. Die Karten bleiben trotzdem
      durchscheinend, sie verwischen den Hintergrund nur nicht mehr. */
   .card,.chartbox,.form,.acc>div{background:color-mix(in srgb,var(--surf) 78%,transparent)}
-  .exrow,.tile,.kpi{background:color-mix(in srgb,var(--surf) 76%,transparent)}
+  .exrow,.tile{background:color-mix(in srgb,var(--surf) 76%,transparent)}
   /* Kein will-change. Das war ein Fehler: jede so markierte Flaeche bekommt
      eine eigene Compositor-Ebene, und bei 55 Elementen frisst allein deren
      Verwaltung mehr, als die angebliche Optimierung bringt. Browser
@@ -885,17 +1023,20 @@
   .hueRow input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surf3);border:2px solid var(--ink);cursor:pointer}
   .hueDot{width:24px;height:24px;border-radius:50%;background:var(--aurora);border:1px solid var(--line);flex:none}
 
-  /* ---- Handy-Menue, ganz am Ende ------------------------------------
-     Muss hier unten stehen: Medienabfragen erhoehen die Spezifitaet nicht,
-     also gewinnt bei gleicher Staerke die spaetere Regel. Weiter oben
-     wurden diese Zeilen von den allgemeinen nav-Regeln ueberschrieben. */
+  /* Einstellungen stehen in der Kopfleiste (Rechner) und im Menue-Blatt
+     (Handy) -- nicht zusaetzlich in der oberen Reihe. */
   nav#nav button[data-view="settings"]{display:none}
-  @media (max-width:640px){
-    /* Die vier, die direkt daneben in der Tableiste stehen, gehoeren nicht
-       nochmal ins Menue -- das war das Doppelte und Vollgepackte. */
-    nav#nav button[data-view="today"],nav#nav button[data-view="train"],
-    nav#nav button[data-view="coach"],nav#nav button[data-view="you"]{display:none}
 
+  /* Leitspruch nur auf "Heute" -- steht hier unten, weil Medienabfragen die
+     Spezifitaet nicht erhoehen und die allgemeinen .creed-Regeln weiter oben
+     im Dokument stehen. Weiter oben waere diese Regel wirkungslos gewesen. */
+  @media (max-width:640px){
+    body:not([data-view="today"]) .creed{display:none}
+    .creed{padding:.4rem 0 .5rem}
+    /* Der wechselnde Merksatz entfaellt auf dem Handy: zwei Zeilen Zierat
+       ueber dem, weswegen man die App geoeffnet hat. Am Rechner ist Platz. */
+    .creed .rot{display:none}
+    .creed .motto{font-size:var(--t4)}
   }
 
   /* Tableiste als schwebende Glasleiste. Die abgerundete Oberkante und der
@@ -958,6 +1099,17 @@
     </g>
   </svg>
   <span>VALKR</span>
+</div>
+
+<!-- Menue-Blatt fuer das Handy. Ersetzt das aufklappende Zwei-Spalten-Raster:
+     volle Breite, eine Zeile je Ziel, Gruppen mit Ueberschrift. Ein Raster aus
+     acht gleich aussehenden Knoepfen zwingt zum Lesen jedes einzelnen -- eine
+     gruppierte Liste laesst sich ueberfliegen.
+     Liegt ausserhalb der Huelle, damit es ueber allem schwebt. -->
+<div id="sheetBg" hidden></div>
+<div id="sheet" role="dialog" aria-modal="true" aria-label="Menü" hidden>
+  <div class="grip" aria-hidden="true"></div>
+  <div id="sheetBody"></div>
 </div>
 <div id="scenery" aria-hidden="true"></div>
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -1050,23 +1202,17 @@
     <p class="motto"><i aria-hidden="true"></i><span id="mottoTxt">Show up. Add one rep.</span><i aria-hidden="true"></i></p>
     <div class="rot"><span id="rotq"></span></div>
   </div>
-
-  <!-- Reihenfolge = Weg des Nutzers: wer du bist, was heute ansteht, der Plan,
-       das Training, dann messen, Rang, Coach, Ernaehrung, Wissen, Kauf.
-       Einstellungen sitzen oben in der Leiste, nicht im Weg. -->
+  <!-- Oberste Ebene, sieben Ziele. Reihenfolge am Rechner nach Nutzung:
+       der Coach zuerst, weil er die Lage liest und sagt, was ansteht.
+       Skills, Beweglichkeit, Test, Raenge, Wochen und Zugang stehen nicht
+       mehr hier -- sie sind Abschnitte in ihrem Bereich. -->
   <nav id="nav" data-title="Weitere Bereiche">
-    <button data-view="you" data-i18n="nav.you">You</button>
-    <button data-view="today" data-i18n="nav.today">Today</button>
-    <button data-view="plan" data-i18n="nav.plan">Plan</button>
-    <button data-view="train" data-i18n="nav.train">Train</button>
-    <button data-view="skills" data-i18n="nav.skills">Skills</button>
-    <button data-view="mobility" data-i18n="nav.mobility">Mobility</button>
-    <button data-view="test" data-i18n="nav.test">Test</button>
-    <button data-view="ranks" data-i18n="nav.ranks">Ranks<span class="badge" id="rankBadge">0</span></button>
     <button data-view="coach" data-i18n="nav.coach">Coach<span class="badge" id="coachBadge">0</span></button>
+    <button data-view="today" data-i18n="nav.today">Today</button>
+    <button data-view="train" data-i18n="nav.train">Train</button>
     <button data-view="fuel" data-i18n="nav.fuel">Fuel</button>
+    <button data-view="you" data-i18n="nav.you">You<span class="badge" id="rankBadge">0</span></button>
     <button data-view="learn" data-i18n="nav.learn">Learn</button>
-    <button data-view="access" data-i18n="nav.access">Access</button>
   </nav>
   <!-- Auf dem Handy eine feste Leiste unten statt zwölf umbrechender Knoepfe.
        Die vier meistgenutzten Ansichten plus "Mehr" fuer den Rest. -->
@@ -1077,6 +1223,12 @@
     <button data-view="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span data-i18n="nav.you">You</span></button>
     <button id="moreBtn" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span data-i18n="nav.more">More</span></button>
   </nav>
+
+  <!-- Abschnittsleiste. Zeigt die Unterbereiche des aktuellen Bereichs und
+       steht bewusst ausserhalb der Bereiche selbst: so ist ihre Position
+       immer dieselbe, egal welcher Abschnitt gerade sichtbar ist. Bereiche
+       ohne Unterteilung blenden sie aus. -->
+  <div id="subnav" role="tablist" hidden></div>
 
   <!-- Warnung, wenn der Browser nichts dauerhaft speichert. Ohne diesen Hinweis
        sieht die App voellig normal aus und vergisst trotzdem beim Schliessen
@@ -1521,7 +1673,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.7';
+var VERSION='14.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2561,31 +2713,97 @@ var CH=[
    geoeffnet hat.
    pauseAnimations() haelt die Zeitachse einer SVG-Wurzel an; jedes Abzeichen
    ist eine eigene Wurzel, es trifft also genau die unsichtbaren. */
+/* Seit v13.x reicht "Bereich offen" als Bedingung nicht mehr: der Trainings-
+   Bereich zeigt sechs Bewegungsdemos gleichzeitig, zusammen 29 Einzelanimationen.
+   Sie laufen mit der Bildwiederholrate des Geraets -- auf einem 120-Hz-Telefon
+   also sechs Figuren 120 Mal je Sekunde. Genau die Last, ueber die schon bei
+   EINER Demo geklagt wurde.
+   Deshalb entscheidet jetzt zusaetzlich, ob das Bild wirklich im Fenster steht.
+   Ein IntersectionObserver meldet das und kostet dabei nichts: er laeuft
+   ausserhalb des Hauptablaufs und meldet sich nur bei Aenderung. */
+var svgObs=null;
+function svgDecide(s){
+  if(typeof s.pauseAnimations!=="function")return;
+  var v=s.closest(".view");
+  /* Zwei Bedingungen, beide muessen stimmen: der Bereich ist offen UND das
+     Bild steht wirklich im Fenster. Was ausserhalb der Bereiche liegt --
+     Meldung, Kulisse, Leisten -- hat kein .view und zaehlt als offen. */
+  var an=(!v||v.classList.contains("on")) && s.__vis!==false;
+  if(an){if(s.animationsPaused())s.unpauseAnimations();}
+  else if(!s.animationsPaused())s.pauseAnimations();
+}
 function pauseHiddenSvg(){
-  var a=document.querySelectorAll('animate,animateTransform'),done=[];
+  if(!svgObs&&window.IntersectionObserver){
+    svgObs=new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++){es[i].target.__vis=es[i].isIntersecting;svgDecide(es[i].target);}
+    },{rootMargin:"120px 0px"});
+  }
+  var a=document.querySelectorAll("animate,animateTransform"),done=[];
   for(var i=0;i<a.length;i++){
     var s=a[i].ownerSVGElement;
-    if(!s||typeof s.pauseAnimations!=='function'||done.indexOf(s)>=0)continue;
+    if(!s||done.indexOf(s)>=0)continue;
     done.push(s);
-    var v=s.closest('.view');
-    /* Was ausserhalb der Bereiche liegt -- Meldung, Kulisse, Leisten --
-       bleibt unangetastet. */
-    if(!v||v.classList.contains('on')){if(s.animationsPaused())s.unpauseAnimations();}
-    else if(!s.animationsPaused())s.pauseAnimations();
+    if(svgObs&&!s.__obs){s.__obs=1;svgObs.observe(s);}
+    svgDecide(s);
   }
 }
 var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',fuel:'v-fuel',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
-function show(n){
+
+/* ---------- oberste Ebene: sieben Ziele statt vierzehn -------------------
+   Vierzehn Reiter bekommt kein Design aufgeraeumt -- das ist keine Frage von
+   Abstaenden und Farben, sondern von Menge. Wer vierzehn gleichwertige Ziele
+   anbietet, hat in Wahrheit keine Ordnung, sondern eine Liste.
+
+   Was frueher ein eigener Reiter war, ist jetzt ein Abschnitt in dem Bereich,
+   zu dem er inhaltlich gehoert: Skills, Beweglichkeit und Test sind Training.
+   Raenge sind Fortschritt, gehoeren also zu "Du". Zugang ist eine Einstellung.
+   Die Wochenuebersicht ist "Heute", nur weiter herausgezoomt.
+
+   Verschoben wird dabei nichts im Dokument. Sichtbar ist immer genau EIN
+   Abschnitt; die Leiste darueber wechselt zwischen ihnen. Dadurch bleibt jeder
+   Bildschirm kurz -- ein Stapel aus vier Abschnitten waere zwar auch "ein
+   Bereich", aber eben ein sehr langer, und gewonnen waere nichts. */
+var GROUP={
+  today:   {v:['today','plan'],                     l:[['Today','Heute'],['Weeks','Wochen']]},
+  train:   {v:['train','skills','mobility','test'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Beweglichkeit'],['Test','Test']]},
+  coach:   {v:['coach']},
+  fuel:    {v:['fuel']},
+  you:     {v:['you','ranks'],                      l:[['You','Du'],['Ranks','Ränge']]},
+  learn:   {v:['learn']},
+  settings:{v:['settings','access'],                l:[['Settings','Einstellungen'],['Access','Zugang']]}
+};
+/* Rueckwaerts: welcher Abschnitt gehoert zu welchem Bereich. Damit fuehrt
+   jedes vorhandene show('test') weiterhin ans Ziel, ohne dass eine einzige
+   Aufrufstelle angefasst werden musste. */
+var PARENT={detail:'train'};
+Object.keys(GROUP).forEach(function(g){GROUP[g].v.forEach(function(x){PARENT[x]=g;});});
+
+function drawSub(g,cur){
+  var el=$('subnav');if(!el)return;
+  var G=GROUP[g];
+  if(!G||!G.l){el.hidden=true;el.innerHTML='';return;}
+  var L=cfg.lang==='de'?1:0;
+  el.hidden=false;
+  el.innerHTML=G.v.map(function(x,i){
+    return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+'</button>';
+  }).join('');
+}
+
+function show(n,fromBack){
   /* Die Bewegungsdemo aus dem Speicher nehmen, sobald man die Ansicht verlaesst.
      Eine SVG-Animation laeuft auch in einem display:none-Bereich weiter -- man
      sieht sie nicht, der Browser rechnet sie trotzdem in jedem Bild. */
   if(n!=='detail'){var dm=$('d-demo');if(dm&&dm.firstChild)dm.innerHTML='';}
   Object.keys(VS).forEach(function(k){$(VS[k]).classList.toggle('on',k===n);});
-  pauseHiddenSvg();
-  var key=(n==='detail')?'train':n;
+  var key=PARENT[n]||n;
+  /* Der aktuelle Bereich am body: gibt dem Stil einen Angriffspunkt fuer
+     Dinge, die nur in einem Bereich gelten sollen -- etwa der Leitspruch,
+     der auf dem Handy nur unter "Heute" Platz verdient. */
+  document.body.dataset.view=key;
+  drawSub(key,n);
   [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
   $('setBtn').setAttribute('aria-current',key==='settings'?'true':'false');
-  /* Die Tableiste markiert mit: liegt die Ansicht nicht in den vier Reitern,
+  /* Die Tableiste markiert mit: liegt der Bereich nicht in den vier Reitern,
      leuchtet "Mehr" -- sonst sieht es aus als waere man nirgends. */
   var inTab=false;
   [].forEach.call(document.querySelectorAll('#tabbar button[data-view]'),function(b){
@@ -2602,19 +2820,171 @@ function show(n){
   if(n==='coach')runCoach();
   if(n==='learn')buildEvidence();
   if(n==='you'){youKpis();readiness();drawBlockHist();}
+  /* Erst hier: die Zeilen darueber bauen Inhalte neu auf (Plan, Raenge, Du),
+     und frisch erzeugte SVG-Animationen starten immer laufend. */
+  pauseHiddenSvg();
+  /* Ansichts-Historie fuer die Zurueck-Taste. */
+  if(!fromBack&&vStack[vStack.length-1]!==n){
+    /* Schon besuchte Ansicht wandert nach oben statt sich zu wiederholen.
+       Sonst haette A-B-A-B-A-B neun Eintraege, und der Nutzer drueckt neunmal
+       zurueck, ohne herauszukommen. So kommt jede Ansicht in der Kette genau
+       einmal vor -- hoechstens ein Dutzend Schritte bis zum Ausgang. */
+    var vi=vStack.indexOf(n);
+    if(vi>=0)vStack.splice(vi,1);
+    vStack.push(n);
+    if(vStack.length>14)vStack.shift();
+    histArm();
+  }
   hideTip();window.scrollTo({top:0,behavior:'smooth'});
 }
-[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.addEventListener('click',function(){show(b.dataset.view);});});
-[].forEach.call(document.querySelectorAll('#tabbar button[data-view]'),function(b){b.addEventListener('click',function(){show(b.dataset.view);});});
-function closeMore(){var n=$('nav');if(n){n.classList.remove('open');$('moreBtn').setAttribute('aria-expanded','false');}}
+/* Ein Klick auf einen Reiter der obersten Ebene fuehrt immer auf dessen
+   ersten Abschnitt -- nicht dorthin, wo man beim letzten Mal aufgehoert hat.
+   Ein Reiter, der mal hier und mal da landet, kostet mehr Orientierung als er
+   an Bequemlichkeit bringt. */
+function showTop(g){show(GROUP[g]?GROUP[g].v[0]:g);}
+/* Oberste Ebene fuehrt immer auf den ersten Abschnitt des Bereichs. */
+[].forEach.call(document.querySelectorAll('#nav button'),function(b){b.addEventListener('click',function(){showTop(b.dataset.view);});});
+[].forEach.call(document.querySelectorAll('#tabbar button[data-view]'),function(b){b.addEventListener('click',function(){showTop(b.dataset.view);});});
+
+/* ---------- Zurueck-Taste des Telefons -----------------------------------
+   Bisher gab es dazu keine Zeile Code. Auf Android heisst das: die Taste
+   schliesst sofort die ganze App -- egal ob man gerade im Trainingsmodus
+   steht, einen Dialog offen hat oder drei Ansichten tief ist. Das ist auf
+   dem Telefon das haeufigste "die App ist kaputt"-Erlebnis, und es kostet
+   im Zweifel eine unfertige Einheit.
+
+   Jetzt geht sie genau eine Ebene zurueck, in der Reihenfolge, in der die
+   Ebenen uebereinander liegen: Einleitung, Trainingsmodus, Dialog, Menue,
+   dann die vorherige Ansicht. Erst wenn nichts mehr offen ist und man auf
+   der Startansicht steht, verlaesst sie die App -- so wie erwartet.
+
+   Entschieden wird bewusst am tatsaechlichen Zustand der Oberflaeche und
+   nicht an einer mitgefuehrten Liste: sobald irgendwo ein X-Knopf etwas von
+   Hand schliesst, laeuft eine solche Liste auseinander. Der Zustand nicht.
+
+   histArm() haelt genau einen Reserve-Eintrag in der Browser-Historie. Jedes
+   Zurueck verbraucht ihn, danach wird ein neuer gelegt -- ausser im
+   Grundzustand, denn dort SOLL die Taste hinausfuehren. */
+var vStack=[];
+function histArm(){try{history.pushState({vk:1},'');}catch(e){}}
+function histBackStep(){
+  var el;
+  el=$('intro');
+  if(el&&el.classList.contains('on')){
+    if(inIdx>0){inIdx--;renderIntro();}
+    return true;                    /* auf Schritt 1 bleibt die Einleitung stehen */
+  }
+  el=$('runner');
+  if(el&&el.classList.contains('on')){closeRun();return true;}
+  el=$('modal');
+  if(el&&el.classList.contains('on')){closeModal();return true;}
+  if(sheetOpen){closeSheet();return true;}
+  if(vStack.length>1){vStack.pop();show(vStack[vStack.length-1],true);return true;}
+  return false;
+}
+window.addEventListener('popstate',function(){
+  if(histBackStep())histArm();
+  /* Kein neuer Eintrag im Grundzustand: das naechste Zurueck darf hinaus. */
+});
+
+/* ---------- Menue-Blatt ---------------------------------------------------
+   Was nicht in die Tableiste passt, steht hier -- gruppiert und mit einer
+   Zeile Erklaerung. Drei Ziele statt der acht von frueher, weil die anderen
+   fuenf jetzt Abschnitte in ihrem Bereich sind.
+   Einstellungen stehen bewusst NUR hier und nicht mehr zusaetzlich in der
+   Kopfleiste: auf 360 Pixeln ist jeder Knopf oben einer zu viel, und zweimal
+   derselbe Weg war genau die Doppelung, die am Menue gestoert hat. */
+var SHEET=[
+  {h:['Areas','Bereiche'],it:[
+    {v:'fuel',n:['Fuel','Ernährung'],d:['Calories, protein, weight trend','Kalorien, Protein, Gewichtsverlauf'],
+     i:'<path d="M6 3v8a3 3 0 0 0 6 0V3M9 11v10"/><path d="M18 3c-1.5 2-2 4-2 6s.7 3 2 3 2-1 2-3-.5-4-2-6Zm0 9v9"/>'},
+    {v:'learn',n:['Learn','Wissen'],d:['Why the numbers are what they are','Warum die Zahlen so sind, wie sie sind'],
+     i:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z"/>'}
+  ]},
+  {h:['System','System'],it:[
+    {v:'settings',n:['Settings','Einstellungen'],d:['Theme, language, data, access','Design, Sprache, Daten, Zugang'],
+     i:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>'}
+  ]}
+];
+function buildSheet(){
+  var L=cfg.lang==='de'?1:0,el=$('sheetBody');if(!el)return;
+  el.innerHTML=SHEET.map(function(g){
+    return '<h4>'+g.h[L]+'</h4>'+g.it.map(function(x){
+      return '<button data-view="'+x.v+'">'+
+        '<svg viewBox="0 0 24 24" aria-hidden="true">'+x.i+'</svg>'+
+        '<span class="st"><b>'+x.n[L]+'</b><span>'+x.d[L]+'</span></span>'+
+        '<svg class="arw" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
+      '</button>';
+    }).join('');
+  }).join('');
+}
+var sheetOpen=false;
+/* Ohne Argument: das Menue. Mit HTML: ein Detailblatt (Umfaenge, spaeter mehr).
+   Dieselbe Flaeche fuer beides -- eine Form, die man einmal versteht, statt
+   zweier, die sich aehneln. */
+function openSheet(html){
+  var body=$('sheetBody');
+  if(html===undefined){delete body.dataset.meas;buildSheet();}
+  else body.innerHTML=html;
+  if(sheetOpen){body.scrollTop=0;return;}
+  var s=$('sheet'),b=$('sheetBg');
+  b.hidden=false;s.hidden=false;
+  /* Ein Bild abwarten, sonst springt das Blatt ohne Bewegung an seinen Platz:
+     der Browser fasst "eingeblendet" und "verschoben" sonst zu einem Schritt
+     zusammen und es gibt nichts zu animieren. */
+  requestAnimationFrame(function(){b.classList.add('on');s.classList.add('on');});
+  sheetOpen=true;
+  $('moreBtn').setAttribute('aria-expanded','true');
+  document.body.style.overflow='hidden';
+  histArm();
+}
+function closeSheet(){
+  if(!sheetOpen)return;
+  var s=$('sheet'),b=$('sheetBg');
+  s.classList.remove('on');b.classList.remove('on');
+  s.style.transform='';
+  sheetOpen=false;
+  $('moreBtn').setAttribute('aria-expanded','false');
+  document.body.style.overflow='';
+  setTimeout(function(){if(!sheetOpen){s.hidden=true;b.hidden=true;}},280);
+}
+/* closeMore() bleibt als Name bestehen, weil show() und die Zurueck-Taste ihn
+   aufrufen -- er schliesst jetzt das Blatt statt der alten Schublade. */
+function closeMore(){closeSheet();}
 $('moreBtn').addEventListener('click',function(e){
   e.stopPropagation();
-  var n=$('nav'),open=n.classList.toggle('open');
-  this.setAttribute('aria-expanded',open?'true':'false');
+  if(sheetOpen)closeSheet();else openSheet();
 });
-document.addEventListener('click',function(e){
-  var n=$('nav');
-  if(n&&n.classList.contains('open')&&!n.contains(e.target)&&e.target!==$('moreBtn'))closeMore();
+$('sheetBg').addEventListener('click',closeSheet);
+$('sheetBody').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-view]');if(!b)return;
+  closeSheet();showTop(b.dataset.view);
+});
+/* Wischen nach unten schliesst. Unter einem Drittel der Hoehe federt es
+   zurueck -- sonst schliesst sich das Blatt schon beim Scrollversuch. */
+(function(){
+  var s=$('sheet'),y0=null,dy=0;
+  s.addEventListener('touchstart',function(e){
+    if(s.scrollTop>0)return;                 /* erst scrollen, dann schliessen */
+    y0=e.touches[0].clientY;dy=0;s.classList.add('drag');
+  },{passive:true});
+  s.addEventListener('touchmove',function(e){
+    if(y0===null)return;
+    dy=Math.max(0,e.touches[0].clientY-y0);
+    s.style.transform='translateY('+dy+'px)';
+  },{passive:true});
+  s.addEventListener('touchend',function(){
+    if(y0===null)return;
+    s.classList.remove('drag');
+    if(dy>s.offsetHeight/3)closeSheet();else s.style.transform='';
+    y0=null;
+  });
+})();
+/* Abschnittsleiste. Ein Zuhoerer statt einer je Knopf -- die Leiste wird bei
+   jedem Wechsel neu aufgebaut, einzeln angehaengte Zuhoerer waeren nach dem
+   ersten Klick weg. */
+$('subnav').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-view]');if(b)show(b.dataset.view);
 });
 $('setBtn').addEventListener('click',function(){show('settings');});
 $('back').addEventListener('click',function(){show('train');});
@@ -2835,7 +3205,7 @@ function buildWeeks(){
     kpi(cfg.lang==='de'?'Logs':'Logs written',logged,cfg.lang==='de'?'Tage':'days')+
     kpi(cfg.lang==='de'?'Meilensteine':'Milestones',wins.length,'logged');
 }
-function kpi(l,v,s){return '<div class="kpi"><em>'+l+'</em><b>'+v+'</b><span>'+s+'</span></div>';}
+function kpi(l,v,s){return '<div class="mcard"><em>'+l+'</em><b>'+v+'</b><span class="sub">'+s+'</span></div>';}
 function renderWins(){
   var el=$('winList');el.innerHTML='';
   if(!wins.length){el.innerHTML='<p class="hint">'+(cfg.lang==='de'?'Noch nichts. Der erste ist meist der erste saubere Klimmzug.':'Nothing yet. The first one is usually your first clean pull-up.')+'</p>';return;}
@@ -3192,7 +3562,7 @@ function startRun(adj){
   saveRun();openRun();
 }
 function openRun(){
-  $('runner').classList.add('on');$('runner').setAttribute('aria-hidden','false');
+  $('runner').classList.add('on');histArm();$('runner').setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
   fxPause();
   runPaint();
@@ -3482,26 +3852,107 @@ var MEAS_DE={chest:'Brust',waist:'Taille',hip:'Hüfte',arm:'Oberarm',thigh:'Ober
 var meas=get('meas',{}),measBase=get('measBase',{});
 function mval(k){return meas[k]!==undefined?meas[k]:0;}
 function hasBase(k){return measBase[k]!==undefined;}
-function buildMeas(){
-  var g=$('measGrid');g.innerHTML='';
-  MEAS.forEach(function(m){
-    var has=meas[m[0]]!==undefined,v=mval(m[0]);
-    var diff=(has&&hasBase(m[0]))?(v-measBase[m[0]]):null;
-    var lbl=cfg.lang==='de'?MEAS_DE[m[0]]:m[1];
-    var d=document.createElement('div');d.className='field';
-    var tag=diff===null?'':' <span style="color:'+(diff>0?'var(--aurora)':'var(--ink3)')+'">'+(diff>0?'+':'')+toDisp(diff,'l').toFixed(1)+'</span>';
-    d.innerHTML='<label>'+lbl+tag+'</label><div class="ctl hasunit"><input type="number" step="0.5" placeholder="'+m[2]+'" value="'+(has?toDisp(v,'l').toFixed(1):'')+'"><span class="unit">'+ul()+'</span></div>';
-    g.appendChild(d);
-    d.querySelector('input').addEventListener('input',function(e){
-      var raw=e.target.value.trim();
-      if(raw==='')delete meas[m[0]];else meas[m[0]]=fromDisp(parseFloat(raw)||0,'l');
-      set('meas',meas);bodyFat();measNote();refresh();});
-    /* Anschlaege aus dem Platzhalter abgeleitet: ein Oberarm und eine Taille
-       brauchen offensichtlich verschiedene Bereiche, und der Platzhalter ist
-       bereits ein typischer Wert. Halb bis knapp doppelt deckt beides ab. */
-    pairSlider(d.querySelector('input'),{min:Math.round(m[2]*0.5),max:Math.round(m[2]*1.8),step:0.5,unit:'l',empty:m[2]});});
-  slRetune();bodyFat();measNote();
+/* Umfaenge als Kacheln. Vorher standen hier sieben Eingabefelder mit Reglern
+   nebeneinander -- sieben Regler auf einem Bildschirm sind kein Formular mehr,
+   sondern eine Wand. Und der wichtigste Teil, die Veraenderung zum Startwert,
+   stand als kleine Zahl neben der Beschriftung.
+   Jetzt zeigt jede Kachel das, was interessiert: den Wert gross, die
+   Veraenderung darunter. Eintragen passiert beim Antippen -- dort ist Platz
+   fuer Regler, Startwert und die Einordnung, ohne dass sie sieben Mal
+   herumsteht. */
+function measCard(m){
+  var k=m[0],has=meas[k]!==undefined,v=mval(k);
+  var diff=(has&&hasBase(k))?(v-measBase[k]):null;
+  var lbl=cfg.lang==='de'?MEAS_DE[k]:m[1],DE=cfg.lang==='de';
+  var val=has?(toDisp(v,'l').toFixed(1)+'<i>'+ul()+'</i>'):'&ndash;';
+  var sub;
+  if(diff===null)sub=has?(DE?'Kein Startwert gesetzt':'No baseline set'):(DE?'Noch nicht gemessen':'Not measured yet');
+  else if(Math.abs(diff)<0.05)sub=DE?'unverändert':'unchanged';
+  else sub='<span style="color:'+(diff>0?'var(--aurora)':'var(--brass)')+'">'+(diff>0?'+':'')+toDisp(diff,'l').toFixed(1)+' '+ul()+'</span> '+(DE?'seit Start':'since baseline');
+  return '<button class="mcard" data-meas="'+k+'">'+
+    '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
+    '<em>'+lbl+'</em>'+
+    '<b>'+val+'</b>'+
+    '<span class="sub">'+sub+'</span>'+
+  '</button>';
 }
+function buildMeas(){
+  var g=$('measGrid');if(!g)return;
+  g.className='cards';
+  g.innerHTML=MEAS.map(measCard).join('');
+  bodyFat();measNote();
+}
+function measRefresh(){
+  var g=$('measGrid');if(!g)return;
+  g.innerHTML=MEAS.map(measCard).join('');
+  bodyFat();measNote();
+}
+/* Detail eines Umfangs. Oeffnet im selben Blatt wie das Menue -- eine Form
+   weniger, die der Nutzer lernen muss. */
+function openMeas(k){
+  var m=null;MEAS.forEach(function(x){if(x[0]===k)m=x;});
+  if(!m)return;
+  var DE=cfg.lang==='de',lbl=DE?MEAS_DE[k]:m[1];
+  var has=meas[k]!==undefined,v=mval(k);
+  var base=hasBase(k)?measBase[k]:null;
+  var tips={
+    waist:[ 'Am schmalsten Punkt, entspannt ausgeatmet. Nicht einziehen — der Wert soll vergleichbar sein, nicht schmeichelhaft.',
+            'At the narrowest point, relaxed, breathed out. Do not suck in — the number should be comparable, not flattering.'],
+    chest:['Auf Brustwarzenhoehe, Arme locker hängend, nach dem Ausatmen.','At nipple height, arms hanging loose, after breathing out.'],
+    hip:['An der breitesten Stelle des Gesäßes, Füße zusammen.','At the widest point of the glutes, feet together.'],
+    arm:['Angespannt, Mitte des Oberarms, immer derselbe Arm.','Flexed, mid upper arm, always the same arm.'],
+    thigh:['Handbreit unter der Leiste, Gewicht auf beiden Beinen.','A hand width below the groin, weight on both legs.'],
+    shoulder:['Um die breiteste Stelle, Arme entspannt.','Around the widest point, arms relaxed.'],
+    neck:['Unterhalb des Kehlkopfs, Band waagerecht.','Below the larynx, tape level.']
+  };
+  var tip=(tips[k]||['',''])[DE?0:1];
+  var lo=Math.round(m[2]*0.5),hi=Math.round(m[2]*1.8);
+  var diff=(has&&base!==null)?(v-base):null;
+  var html=
+    '<h4>'+(DE?'Umfang':'Measurement')+'</h4>'+
+    '<div class="dsh">'+
+      '<div class="dshHead"><b>'+lbl+'</b>'+
+        '<span>'+(has?(toDisp(v,'l').toFixed(1)+' '+ul()):(DE?'noch offen':'not set'))+'</span></div>'+
+      '<div class="field hasSlide"><label for="msIn">'+(DE?'Wert':'Value')+'</label>'+
+        '<div class="ctl hasunit"><input id="msIn" type="number" step="0.5" placeholder="'+m[2]+'" value="'+(has?toDisp(v,'l').toFixed(1):'')+'"><span class="unit">'+ul()+'</span></div></div>'+
+      '<div class="dshRow">'+
+        '<span>'+(DE?'Startwert':'Baseline')+'</span>'+
+        '<b>'+(base!==null?(toDisp(base,'l').toFixed(1)+' '+ul()):'&ndash;')+'</b></div>'+
+      '<div class="dshRow">'+
+        '<span>'+(DE?'Änderung':'Change')+'</span>'+
+        '<b>'+(diff===null?'&ndash;':((diff>0?'+':'')+toDisp(diff,'l').toFixed(1)+' '+ul()))+'</b></div>'+
+      '<p class="hint">'+tip+'</p>'+
+      '<div class="savebar">'+
+        '<button class="tbtn" data-msact="base"'+(has?'':' disabled')+'>'+(DE?'Als Startwert setzen':'Set as baseline')+'</button>'+
+        '<button class="tbtn" data-msact="clear"'+(has?'':' disabled')+'>'+(DE?'Wert löschen':'Clear value')+'</button>'+
+      '</div>'+
+    '</div>';
+  openSheet(html);
+  var inp=$('msIn');
+  if(inp){
+    pairSlider(inp,{min:lo,max:hi,step:0.5,unit:'l',empty:m[2]});
+    inp.addEventListener('input',function(){
+      var raw=this.value.trim();
+      if(raw==='')delete meas[k];else meas[k]=fromDisp(parseFloat(raw)||0,'l');
+      set('meas',meas);measRefresh();refresh();
+    });
+  }
+  $('sheetBody').dataset.meas=k;
+}
+/* Kachel antippen -> Detail. Ein Zuhoerer auf dem Raster statt einer je
+   Kachel: das Raster wird bei jeder Aenderung neu gebaut. */
+$('measGrid').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-meas]');
+  if(b)openMeas(b.dataset.meas);
+});
+/* Knoepfe im Detailblatt. */
+$('sheetBody').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-msact]');if(!b)return;
+  var k=$('sheetBody').dataset.meas;if(!k)return;
+  if(b.dataset.msact==='base'){measBase[k]=mval(k);set('measBase',measBase);}
+  else{delete meas[k];delete measBase[k];set('meas',meas);set('measBase',measBase);}
+  measRefresh();refresh();openMeas(k);
+});
 function bodyFat(){
   var h=cmNow(),waist=mval('waist'),neck=mval('neck'),hip=mval('hip');
   var male=$('f-sex').value==='m',bf=null;
@@ -4105,7 +4556,7 @@ var mdAction=null;
 function openModal(title,body,okLabel,fn,extra){
   $('mdTitle').textContent=title;$('mdBody').textContent=body;
   $('mdOk').textContent=okLabel;$('mdExtra').innerHTML=extra||'';
-  mdAction=fn;$('modal').classList.add('on');
+  mdAction=fn;$('modal').classList.add('on');histArm();
 }
 function closeModal(){$('modal').classList.remove('on');mdAction=null;}
 $('mdCancel').addEventListener('click',closeModal);
@@ -4322,6 +4773,7 @@ var ISTEPS=['hello','goal','days','eq','avoid','exp','ready'],inIdx=0;
 function introShow(on){
   var el=$('intro');if(!el)return;
   el.classList.toggle('on',!!on);
+  if(on)histArm();
   document.body.style.overflow=on?'hidden':'';
 }
 function syncIntro(){if(!profile){inIdx=0;renderIntro();introShow(true);}else introShow(false);}
@@ -5031,8 +5483,12 @@ function renderRanks(){
   });
   $('achWrap').innerHTML=html;
   drawBody();
-  $('rankBadge').textContent=Object.keys(got).length;
-  $('rankBadge').style.display=Object.keys(got).length?'':'none';
+  /* Das Abzeichen sitzt jetzt auf "Du" -- dort liegen die Raenge seit der
+     Zusammenlegung. Absichern, weil ein fehlendes Element hier frueher den
+     ganzen Startlauf abgebrochen hat: der Startbildschirm blieb stehen und
+     der Service Worker wurde nie registriert. */
+  var rb=$('rankBadge');
+  if(rb){rb.textContent=Object.keys(got).length;rb.style.display=Object.keys(got).length?'':'none';}
   renderTierTable(t.t);renderAddons(t.t);renderBoard(avg);
 }
 
