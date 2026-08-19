@@ -12,7 +12,7 @@
    Das alte Problem „haengt fuer immer auf einer alten Version" bleibt
    trotzdem geloest: der Cache-Name traegt die Version, beim Aktivieren
    fliegt alles Aeltere raus. */
-var CACHE = 'valkr-v10.6';
+var CACHE = 'valkr-v11.0';
 var ASSETS = [
   './valkr-hub.html',
   './valkr-identity.html',
@@ -20,7 +20,8 @@ var ASSETS = [
   './valkr-icon.svg',
   './valkr-icon-180.png',
   './valkr-icon-192.png',
-  './valkr-icon-512.png'
+  './valkr-icon-512.png',
+  './valkr-icon-mask.png'
 ];
 
 self.addEventListener('install', function (e) {

@@ -10,7 +10,13 @@
      Safari einen Screenshot der Seite als App-Symbol -- das sieht billig aus. -->
 <link rel="apple-touch-icon" href="valkr-icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<!-- „black-translucent" schiebt den Seiteninhalt UNTER die Statusleiste. Das
+     sieht randlos aus, verlangt aber, dass jede Kopfzeile den Sicherheitsabstand
+     selbst zurueckholt. Genau daran ist es auf Liams iPhone zweimal gescheitert.
+     „default" laesst iOS den Bereich reservieren -- der Zusammenstoss ist damit
+     technisch unmoeglich statt nur rechnerisch vermieden. Weniger elegant,
+     dafuer verlaesslich. Der Sicherheitsabstand im CSS bleibt fuer Android. -->
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="VALKR">
 <script>(function(){try{var p=JSON.parse(localStorage.getItem('vk_pack')||'"auto"');document.documentElement.setAttribute('data-pack',p);}catch(e){document.documentElement.setAttribute('data-pack','auto');}})();</script>
 <style>
@@ -670,6 +676,26 @@
   #a2hs .a2txt b{font-family:var(--fd);font-weight:600;font-size:var(--t3)}
   #a2hs .a2txt span{font-size:var(--t2);color:var(--ink2)}
   @media (max-width:640px){#a2hs{bottom:56px}}
+  /* Startbild: erscheint sofort, zeichnet die Marke Strich fuer Strich und
+     verschwindet, sobald die App steht. Die Striche werden ueber
+     stroke-dasharray gezeichnet -- das laeuft auf der Grafikeinheit. */
+  #splash{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:1.1rem;background:var(--bg);
+    transition:opacity .45s ease,visibility .45s}
+  #splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+  #splash span{font-family:var(--fd);font-weight:600;letter-spacing:.34em;
+    text-transform:uppercase;font-size:var(--t3);color:var(--ink2);
+    opacity:0;animation:spName .5s ease .55s forwards}
+  #splash path,#splash circle{stroke-dasharray:60;stroke-dashoffset:60;animation:spDraw .5s ease forwards}
+  #splash .sp2{animation-delay:.12s}
+  #splash .sp3{animation-delay:.24s}
+  #splash .sp4{animation-delay:.36s}
+  @keyframes spDraw{to{stroke-dashoffset:0}}
+  @keyframes spName{to{opacity:1}}
+  @media (prefers-reduced-motion:reduce){
+    #splash path,#splash circle{animation:none;stroke-dashoffset:0}
+    #splash span{animation:none;opacity:1}
+  }
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.flake{display:none}#bgfx{display:none}}
   /* ---- Glasflaechen ----------------------------------------------------
@@ -716,7 +742,7 @@
        nochmal ins Menue -- das war das Doppelte und Vollgepackte. */
     nav#nav button[data-view="today"],nav#nav button[data-view="train"],
     nav#nav button[data-view="coach"],nav#nav button[data-view="you"]{display:none}
-    nav#nav button[data-view="settings"]{display:block}
+
   }
 
   /* Tableiste als schwebende Glasleiste. Die abgerundete Oberkante und der
@@ -756,6 +782,23 @@
     .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   }
 </style>
+<!-- Startbild. iOS erzeugt fuer installierte Web-Apps nur dann eines, wenn man
+     fuer jedes Geraetemass ein eigenes Bild hinterlegt -- ein Dutzend Dateien,
+     die bei jedem neuen Modell veralten. Stattdessen ein Startbild in der Seite
+     selbst: es steht vor dem Skript, ist also sofort da, und blendet weg sobald
+     die App bereit ist. Sieht auf jedem Geraet gleich aus. -->
+<div id="splash" aria-hidden="true">
+  <svg viewBox="0 0 46 46" width="86" height="86" aria-hidden="true">
+    <g fill="none" stroke="#E8C15A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 10 h32" class="sp1"/>
+      <path d="M16 10 L18 17" class="sp2"/><path d="M30 10 L28 17" class="sp2"/>
+      <circle cx="23" cy="20" r="3.2" class="sp3"/>
+      <path d="M23 23 v9" class="sp3"/>
+      <path d="M23 32 l-4.5 8" class="sp4"/><path d="M23 32 l4.5 8" class="sp4"/>
+    </g>
+  </svg>
+  <span>VALKR</span>
+</div>
 <div id="scenery" aria-hidden="true"></div>
 <canvas id="bgfx" aria-hidden="true"></canvas>
 <!-- Trainingsmodus: der Bildschirm, den man waehrend der Einheit offen hat.
@@ -849,7 +892,6 @@
     <button data-view="fuel" data-i18n="nav.fuel">Fuel</button>
     <button data-view="learn" data-i18n="nav.learn">Learn</button>
     <button data-view="access" data-i18n="nav.access">Access</button>
-    <button data-view="settings" data-i18n="nav.settings">Settings</button>
   </nav>
   <!-- Auf dem Handy eine feste Leiste unten statt zwölf umbrechender Knoepfe.
        Die vier meistgenutzten Ansichten plus "Mehr" fuer den Rest. -->
@@ -973,6 +1015,7 @@
         </div>
       </div>
     </div>
+    <div class="coach"><div id="rkIntegrity" class="cnote md"></div></div>
     <div class="bodyWrap">
       <div class="bodyFig">
         <svg id="bodySvg" viewBox="0 0 120 260" aria-hidden="true"></svg>
@@ -1062,7 +1105,7 @@
     </div>
     <div class="tblwrap">
       <div class="tblwrap"><table class="cmp">
-        <thead><tr><th data-i18n="test.tbl">Test</th><th class="c">Level 1</th><th class="c">Level 2</th><th class="c">Level 3</th></tr></thead>
+        <thead><tr><th data-i18n="test.tbl">Test</th><th class="c">L1</th><th class="c">L2</th><th class="c">L3</th><th class="c">L4</th><th class="c">L5</th><th class="c">L6</th></tr></thead>
         <tbody id="testTable"></tbody>
       </table>
     </div>
@@ -1264,6 +1307,14 @@
       <div class="savebar">
         <button class="tbtn" id="exportBtn" data-i18n="btn.export">Copy my data</button>
         <button class="tbtn" id="undoBtn2" data-i18n="btn.undo">Undo last change</button><button class="tbtn dngr" id="resetBtn2" data-i18n="btn.resetAll">Reset everything</button>
+      </div>
+      <p class="eyebrow" data-i18n="set.dev">Developer</p>
+      <div class="hueRow">
+        <input id="devCode" type="text" placeholder="Code" autocomplete="off" style="flex:1;min-width:120px">
+        <button class="tbtn" id="devBtn" data-i18n="btn.devOn">Unlock</button>
+        <span class="hint" id="devState"></span>
+      </div>
+      <div style="display:none">
         <span class="saved" id="expFlag">Copied</span>
       </div>
       <p class="hint" data-i18n="set.dataNote">Nothing is uploaded anywhere. Clearing your browser data clears this too, so copy it out before you switch device.</p>
@@ -1275,7 +1326,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='10.6';
+var VERSION='11.0';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1402,6 +1453,8 @@ var DICT={
  'you.blocksNote':['Each block is twelve weeks. Your ladder steps carry over, so block two starts where block one finished — that is where the long-term progress actually shows.','Ein Block sind zwölf Wochen. Die Leiterstufen wandern mit, Block zwei beginnt also da, wo Block eins aufgehört hat — dort wird der Fortschritt über Monate erst sichtbar.'],
  'set.theme':['Theme','Design'],
  'set.hue':['Accent colour','Akzentfarbe'],
+ 'set.dev':['Developer','Entwickler'],
+ 'btn.devOn':['Unlock','Freischalten'],
  'set.hueNote':['Overrides the accent of whichever theme is active. Backgrounds stay as they are — only the highlight colour moves.','Überschreibt den Akzent des aktiven Themes. Die Hintergründe bleiben, nur die Signalfarbe wandert.'],
  'set.motionNote':['Calm keeps the scenery quiet in the background and turns floating particles off. Full brings both back.','Ruhig laesst die Kulisse weit zuruecktreten und schaltet die schwebenden Partikel ab. Voll bringt beides zurueck.'],
  'set.themeNote':['Each theme changes the palette and the ambient effect — snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.','Jedes Design ändert Farben und Hintergrundeffekt — Schnee, Glühwürmchen, Pollen, Blasen oder Funken. Auto folgt deiner Systemeinstellung.'],
@@ -1423,6 +1476,7 @@ function applyI18n(){
     el.firstChild.nodeValue=T(el.dataset.i18nT);
   });
   var nv=$('nav');if(nv)nv.dataset.title=T('nav.moreTitle');
+  if(typeof devSync==='function')devSync();
   document.documentElement.lang=cfg.lang;
 }
 
@@ -1792,14 +1846,20 @@ var MOB=[
  {n:'Hip flexors',t:'For hinges and posture',test:'Lie on the edge of a bed, one knee to chest. Does the hanging thigh drop level?',fix:'Half-kneeling stretch, squeezing the glute of the rear leg. The squeeze is what makes it work.',dose:'30-45 s per side',sec:45},
  {n:'Wrists',t:'The one everyone skips',test:'Any pain in a push-up or plank position?',fix:'On all fours: palms down rocking, hands turned to knees rocking, fists rocking.',dose:'3 x 10 rocks',sec:60}
 ];
+/* Sechs Stufen statt drei. Vorher war bei 21 sauberen Liegestuetzen Schluss --
+   das ist ordentlich, aber weit von aussergewoehnlich entfernt, und wer dort
+   ankam hatte sofort das Maximum. Die oberen Schwellen orientieren sich an dem,
+   was mit striktem Bewegungsumfang tatsaechlich selten ist. */
+var TLBL=[['Beginner','Anfang'],['Foundation','Basis'],['Solid','Solide'],
+          ['Strong','Stark'],['Advanced','Fortgeschritten'],['Elite','Elite']];
 var TESTS=[
- {id:'pushup',n:'Push-ups',u:'reps',t:[[0,8],[9,20],[21,999]],pat:'push',
+ {id:'pushup',n:'Push-ups',u:'reps',t:[[0,4],[5,12],[13,25],[26,40],[41,60],[61,999]],pat:'push',
   how:'Chest to a fist above the floor, arms locked at the top, hips level. Stop at the first broken rep.'},
- {id:'pullup',n:'Pull-ups',u:'reps',t:[[0,0],[1,5],[6,999]],pat:'pull',
+ {id:'pullup',n:'Pull-ups',u:'reps',t:[[0,0],[1,3],[4,8],[9,14],[15,22],[23,999]],pat:'pull',
   how:'Dead hang to chin clearly over the bar, no kipping. If you cannot do one, log 0 and use rows.'},
- {id:'squat',n:'Squats',u:'reps',t:[[0,20],[21,35],[36,999]],pat:'legs',
-  how:'Hip crease below the knee, heels down, knees tracking. Past 30 clean, test split squats instead.'},
- {id:'hollow',n:'Hollow hold',u:'sec',t:[[0,20],[21,45],[46,999]],pat:'core',
+ {id:'squat',n:'Squats',u:'reps',t:[[0,15],[16,30],[31,50],[51,75],[76,110],[111,999]],pat:'legs',
+  how:'Hip crease below the knee, heels down, knees tracking. Past 50 clean, test split squats instead.'},
+ {id:'hollow',n:'Hollow hold',u:'sec',t:[[0,15],[16,30],[31,50],[51,75],[76,110],[111,999]],pat:'core',
   how:'Lower back flat on the floor. The clock stops the moment your back lifts.'}
 ];
 var CH=[
@@ -1960,7 +2020,7 @@ function renderDay(){
     var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
     var icon=it.id?sv(it.id,cvar(pid[it.id].cv),28):'';
     row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?'recovery':'easy')))+'</span></span><span class="sets">'+it.v+'</span>';
-    row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);renderDay();streak();refresh();});
+    row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);if(dn[i]&&it.id)markTrained(it.id,key);renderDay();streak();refresh();});
     if(it.id)row.querySelector('.nm').addEventListener('click',function(){openDetail(it.id);});
     list.appendChild(row);});
   /* Blockabschluss: der einzige Bildschirm, der von hier aus weiterfuehrt.
@@ -2023,7 +2083,8 @@ $('nextDay').addEventListener('click',function(){sel=add(sel,1);renderDay();});
 $('jumpToday').addEventListener('click',function(){sel=new Date(TODAY);renderDay();});
 $('markDone').addEventListener('click',function(){
   var k=iso(sel),pl=plan(sel),n=pl.kind==='train'?sessOf(pl).items.length:(pl.items||[]).length,dn={};
-  for(var i=0;i<n;i++)dn[i]=true;doneMap[k]=dn;set('done',doneMap);renderDay();streak();refresh();flash('savedFlag');});
+  for(var i=0;i<n;i++)dn[i]=true;doneMap[k]=dn;set('done',doneMap);
+  if(pl.kind==='train')sessOf(pl).items.forEach(function(x){if(x.id)markTrained(x.id,k);});renderDay();streak();refresh();flash('savedFlag');});
 function flash(id){var f=$(id);f.classList.add('show');setTimeout(function(){f.classList.remove('show');},1300);}
 function dayDone(k){var dn=doneMap[k]||{};for(var i in dn){if(dn[i])return true;}return false;}
 function streak(){
@@ -2198,16 +2259,19 @@ function buildTest(){
   }).join('');
   TESTS.forEach(function(t){$('tt-'+t.id).addEventListener('input',function(){testVals[t.id]=parseFloat(this.value)||0;set('test',testVals);testCalc();});});
   $('testTable').innerHTML=TESTS.map(function(t){
-    return '<tr><td>'+t.n+'</td><td class="c">'+t.t[0][0]+'-'+t.t[0][1]+'</td><td class="c">'+t.t[1][0]+'-'+t.t[1][1]+'</td><td class="c">'+t.t[2][0]+'+</td></tr>';
+    /* Alle Stufen ausgeben, nicht mehr fest drei. */
+    return '<tr><td>'+t.n+'</td>'+t.t.map(function(r,i){
+      return '<td class="c">'+(i===t.t.length-1?(r[0]+'+'):(r[0]+'-'+r[1]))+'</td>';}).join('')+'</tr>';
   }).join('');
   testCalc();
 }
-function lvlOf(t){var v=testVals[t.id]||0;for(var i=0;i<3;i++){if(v>=t.t[i][0]&&v<=t.t[i][1])return i+1;}return 1;}
+function lvlOf(t){var v=testVals[t.id]||0;for(var i=0;i<t.t.length;i++){if(v>=t.t[i][0]&&v<=t.t[i][1])return i+1;}return 1;}
 function testCalc(){
+  var L=cfg.lang==='de'?1:0;
   var lv=TESTS.map(lvlOf),low=Math.min.apply(null,lv);
   $('testOut').innerHTML=TESTS.map(function(t,i){return '<div class="obox'+(lv[i]===low?' hi':'')+'"><em>'+t.n+'</em><b>L'+lv[i]+' <i>'+(testVals[t.id]||0)+' '+t.u+'</i></b></div>';}).join('')+
-    '<div class="obox hi"><em>'+(cfg.lang==='de'?'Dein Level':'Your level')+'</em><b>'+low+' <i>'+['Foundation','Build','Strength'][low-1]+'</i></b></div>';
-  var names={1:cfg.lang==='de'?'Basis':'Foundation',2:cfg.lang==='de'?'Aufbau':'Build',3:cfg.lang==='de'?'Kraft':'Strength'};
+    '<div class="obox hi"><em>'+(L?'Dein Level':'Your level')+'</em><b>'+low+' <i>'+TLBL[low-1][L]+'</i></b></div>';
+  var names={};TLBL.forEach(function(n,i){names[i+1]=n[L];});
   var weak=TESTS.filter(function(t,i){return lv[i]===low;}).map(function(t){return t.n;});
   $('testNote').innerHTML=(cfg.lang==='de'
     ?'Dein schwächster Wert bestimmt das Level, nicht der Durchschnitt. Schwach: <b>'+weak.join(', ')+'</b>. Level <b>'+names[low]+'</b>.'
@@ -2216,7 +2280,10 @@ function testCalc(){
 $('testApply').addEventListener('click',function(){
   TESTS.forEach(function(t){
     var lv=lvlOf(t),p=pid[t.pat];if(!p)return;
-    var target=lv===1?0:(lv===2?Math.floor(p.ladder.length*0.35):Math.floor(p.ladder.length*0.6));
+    /* Sechs Stufen verteilen sich jetzt gleichmaessig ueber die Leiter, statt
+       ab Stufe 3 alles auf denselben Punkt zu setzen. */
+    var frac=(lv-1)/(TESTS[0].t.length-1);
+    var target=Math.round(frac*(p.ladder.length-1)*0.85);
     steps[p.id]=Math.max(0,Math.min(p.ladder.length-1,target));});
   set('steps',steps);buildTiles();flash('testFlag');refresh();});
 $('testBaseline').addEventListener('click',function(){
@@ -2378,6 +2445,7 @@ function runAfterSet(){
   if(run.set<cur.sets){run.set++;}
   else{
     var k=iso(TODAY),dn=doneMap[k]||{};dn[run.ex]=true;doneMap[k]=dn;set('done',doneMap);
+    if(cur.id)markTrained(cur.id,k);
     streak();
     if(run.ex>=it.length-1){run.ph='done';run.left=0;saveRun();runPaint();return;}
     run.ex++;run.set=1;
@@ -3227,6 +3295,26 @@ function askReset(){
     '<div class="ctl"><input id="mdConfirmIn" type="text" placeholder="RESET" autocomplete="off"></div>');
 }
 $('resetBtn').addEventListener('click',askReset);
+/* Entwicklermodus. Schaltet die Belege-Pruefung ab, damit wir Zustaende
+   herstellen koennen, die sonst zwoelf Wochen dauern wuerden. Er ist bewusst
+   nicht versteckt, sondern sichtbar markiert -- ein heimlicher Modus waere
+   genau die Hintertuer, gegen die das ganze System gebaut ist. Der Rang zeigt
+   im Entwicklermodus offen an, dass er nichts wert ist. */
+function devSync(){
+  var s=$('devState'),b=$('devBtn'),DE=cfg.lang==='de';
+  if(!s)return;
+  if(devOn()){s.textContent=DE?'aktiv — Prüfungen aus':'active — checks off';s.style.color='var(--ember)';b.textContent=DE?'Abschalten':'Disable';}
+  else{s.textContent=DE?'aus':'off';s.style.color='';b.textContent=T('btn.devOn');}
+}
+$('devBtn').addEventListener('click',function(){
+  if(devOn()){set('dev',0);$('devCode').value='';devSync();refresh();return;}
+  if(($('devCode').value||'').trim().toLowerCase()==='valkr-dev'){
+    set('dev',1);devSync();refresh();
+  }else{
+    $('devCode').style.borderColor='var(--ember)';
+    setTimeout(function(){$('devCode').style.borderColor='';},900);
+  }
+});
 $('resetBtn2').addEventListener('click',askReset);
 function askUndo(){
   if(!canRewind())return;
@@ -3437,9 +3525,64 @@ function badgeSvg(t,size){
 }
 function prFor(name){var r=0;PRS.forEach(function(p){if(p.n===name)r=Math.max(0,p.v-p.b);});return r;}
 var PRMAP={push:'Push-ups',pull:'Pull-ups',row:'Inverted rows',press:'Pike push-ups',legs:'Squats',core:'Hollow hold'};
+/* ---------- Integritaet ---------------------------------------------------
+   Das Problem: 600 der 800 Rangpunkte kamen allein aus der Leiterstufe, und
+   die setzt man mit zwei Klicks aufs Maximum. Wer will, hat in zehn Sekunden
+   den hoechsten Rang -- und damit ist der Rang wertlos, weil er nichts mehr
+   ueber die Person aussagt.
+
+   Die Loesung ist nicht Ueberwachung, sondern Beweislast: eine Stufe zaehlt
+   erst voll, wenn man an mehreren verschiedenen Tagen tatsaechlich darauf
+   trainiert hat. Man kann eine Zahl faelschen, aber nicht das Erscheinen an
+   drei Tagen -- Zeit laesst sich nicht vorspulen.
+   Niemand wird beschuldigt: unbestaetigte Stufen zaehlen anteilig und die App
+   sagt offen, was noch fehlt. */
+var vrf=get('vrf',{steps:{},clock:null,flags:[]});
+function saveVrf(){set('vrf',vrf);}
+var STEPDAYS=3;            /* so viele verschiedene Tage bestaetigen eine Stufe */
+var UNCONF=0.45;           /* Anteil, den eine voellig unbestaetigte Stufe zaehlt */
+function devOn(){return !!get('dev',0);}
+/* Wird bei jedem Abhaken aufgerufen: haelt fest, an welchen Tagen auf der
+   aktuellen Stufe wirklich trainiert wurde. Stufenwechsel setzt zurueck. */
+function markTrained(patId,dateIso){
+  var e=vrf.steps[patId];
+  var cur=steps[patId]||0;
+  if(!e||e.s!==cur){e={s:cur,d:[]};vrf.steps[patId]=e;}
+  if(e.d.indexOf(dateIso)<0){e.d.push(dateIso);if(e.d.length>12)e.d.shift();saveVrf();}
+}
+function stepConf(patId){
+  if(devOn())return 1;
+  var cur=steps[patId]||0;
+  if(cur===0)return 1;                     /* Stufe 1 muss niemand beweisen */
+  var e=vrf.steps[patId];
+  if(!e||e.s!==cur)return UNCONF;
+  var n=Math.min(STEPDAYS,e.d.length);
+  return UNCONF+(1-UNCONF)*(n/STEPDAYS);
+}
+/* Uhr zurueckgestellt? Dann stimmen alle Zeitreihen nicht mehr. Wir merken es
+   uns, statt so zu tun als waere nichts. */
+function clockCheck(){
+  var now=Date.now(),last=vrf.clock;
+  if(last&&now<last-6*3600000){
+    if(vrf.flags.indexOf('clock')<0){vrf.flags.push('clock');}
+  }
+  vrf.clock=Math.max(now,last||0);saveVrf();
+}
+function integrity(){
+  if(devOn())return{pct:100,offen:[],dev:true};
+  var offen=[];
+  PAT.forEach(function(p){
+    var c=stepConf(p.id);
+    if(c<1)offen.push({n:p.name,fehlt:Math.max(0,STEPDAYS-((vrf.steps[p.id]&&vrf.steps[p.id].s===(steps[p.id]||0))?vrf.steps[p.id].d.length:0))});
+  });
+  var sum=0;PAT.forEach(function(p){sum+=stepConf(p.id);});
+  return{pct:Math.round(sum/PAT.length*100),offen:offen,
+    clock:vrf.flags.indexOf('clock')>=0,dev:false};
+}
 function patLP(p){
   var st=steps[p.id]||0,len=Math.max(1,p.ladder.length-1);
-  var ladderPart=(st/len)*600;
+  /* Die Leiterstufe zaehlt nur so weit, wie sie belegt ist. */
+  var ladderPart=(st/len)*600*stepConf(p.id);
   var prPart=Math.min(200,prFor(PRMAP[p.id])*8);
   return Math.round(ladderPart+prPart+adherence());
 }
@@ -3676,6 +3819,31 @@ function renderRanks(){
   $('rkLp').textContent = t.t<0
     ? (cfg.lang==='de'?('Noch ohne Rang — '+Math.max(0,25-avg)+' LP bis Holz III'):('Unranked — '+Math.max(0,25-avg)+' LP to Wood III'))
     : (t.within+' LP '+(cfg.lang==='de'?'bis':'to')+' '+(t.t<8?tierOf((t.t*100)+(t.div+1)*34).label:(cfg.lang==='de'?'Maximum':'max')));
+  /* Integritaet offen ausweisen. Kein Vorwurf -- eine Auskunft darueber,
+     wie viel vom Rang durch tatsaechliches Training belegt ist. */
+  var ig=integrity(),ib=$('rkIntegrity');
+  if(ib){
+    if(ig.dev){
+      ib.className='cnote md';
+      ib.innerHTML='<span class="sev">DEV</span><div><b>'+(L?'Entwicklermodus':'Developer mode')+'</b><p>'+
+        (L?'Prüfungen sind ausgeschaltet. Dieser Stand ist kein echtes Profil.'
+          :'Checks are disabled. This profile is not a real one.')+'</p></div>';
+    }else if(ig.pct>=100&&!ig.clock){
+      ib.className='cnote ok';
+      ib.innerHTML='<span class="sev">'+(L?'Belegt':'Verified')+'</span><div><b>'+
+        (L?'Rang vollständig belegt':'Rank fully backed')+'</b><p>'+
+        (L?'Jede Leiterstufe wurde an mehreren Tagen tatsächlich trainiert.'
+          :'Every ladder step has been trained on several separate days.')+'</p></div>';
+    }else{
+      ib.className='cnote md';
+      var txt=ig.offen.map(function(o){return o.n+' ('+o.fehlt+')';}).join(', ');
+      ib.innerHTML='<span class="sev">'+ig.pct+'%</span><div><b>'+
+        (L?'Teilweise belegt':'Partly backed')+'</b><p>'+
+        (L?('Eine Stufe zählt erst voll, wenn du an '+STEPDAYS+' verschiedenen Tagen darauf trainiert hast. Offen: '+(txt||'—')+'. Bis dahin zählt sie anteilig — der Rang wird nicht kleiner, er wächst nur mit dem Nachweis.')
+          :('A step counts fully once you have trained on it across '+STEPDAYS+' separate days. Open: '+(txt||'—')+'. Until then it counts in part — the rank does not shrink, it grows with the evidence.'))+
+        (ig.clock?('<br><b style="color:var(--ember)">'+(L?'Systemzeit wurde zurückgestellt.':'The device clock was set back.')+'</b>'):'')+'</p></div>';
+    }
+  }
   var xp=xpTotal(),lv=levelOf(xp);
   $('rkLevel').textContent=' '+lv;$('rkXp').textContent=' '+xp;
   $('rkGot').textContent=' '+Object.keys(got).length+'/'+ACH.length;
@@ -3774,7 +3942,7 @@ buildLearn();buildAccess();renderWins();
 renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
-applyHue();syncHueUI();syncThemeColor();
+clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
 drawScene();rotQ(true);if(cfg.hooks!=='on')$('rotq').style.display='none';
 $('y-goal').value=get('goal','');
 tickClock();setInterval(tickClock,20000);
@@ -3784,6 +3952,20 @@ sizeCv();
    steht die Anleitung, womit anzufangen ist. Wer schon trainiert, will
    „Heute" sehen und keine Einfuehrung mehr. */
 if(totalSets()===0)show('coach');
+
+/* Startbild wegblenden, sobald alles steht. Mindestens 700 ms, damit die
+   Zeichenanimation nicht mitten im Strich abbricht -- auf einem schnellen
+   Geraet waere sie sonst ein Zucken. */
+(function(){
+  var sp=$('splash');if(!sp)return;
+  var t0=performance.now();
+  var go=function(){
+    var rest=Math.max(0,700-(performance.now()-t0));
+    setTimeout(function(){sp.classList.add('gone');
+      setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},600);},rest);
+  };
+  if(document.readyState==='complete')go();else window.addEventListener('load',go);
+})();
 
 recording=true;syncUndo();
 
