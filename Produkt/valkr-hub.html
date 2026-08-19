@@ -419,6 +419,11 @@
 <style>
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(146px,1fr));gap:.6rem}
   .tile{background:var(--surf);border:1px solid var(--line);padding:.95rem .8rem;display:flex;flex-direction:column;align-items:center;gap:.45rem;text-align:center;border-radius:4px;transition:.18s}
+  /* Die Muster-Kacheln zeigen die laufende Bewegung -- vorher war sie erst
+     in der Detail-Ansicht sichtbar und wurde schlicht nicht gefunden.
+     Ausgeblendet pausiert pauseHiddenSvg() die Kacheln wie alles andere. */
+  .tile .tdemo{display:block;width:64px;height:64px}
+  .tile .tdemo svg{width:100%;height:100%}
   .tile:hover{border-color:var(--aurora);transform:translateY(-3px);box-shadow:var(--sh)}
   .tile b{font-family:var(--fd);font-weight:600;font-size:var(--t5)}
   .tile .k{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
@@ -1417,7 +1422,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='12.1';
+var VERSION='12.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2000,30 +2005,30 @@ var DEMOS={
     exzentrisch langsam, konzentrisch schnell, Kopf laeuft leicht nach. */
  push:{dur:2.9,refs:['M5 38 H42'],pose:function(u){
    var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41,37.4],H=[12.6,37.2],L=29;
-   var a=(25-18*r)*_DG;
+   var a=(22-15*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
    var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
-   var e=_ik(H,S,7.4,5,1);
+   var e=_ik(H,S,6.8,4.6,1);
    var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
    var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.4];
    return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
  pull:{dur:3,refs:['M8 8 H38'],pose:function(u){
-   var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),HL=[17,8.6],HR=[29,8.6],yS=22.2-9.6*r;
+   var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),HL=[17,8.6],HR=[29,8.6],yS=18.5-6*r;
    var SL=[19.9,yS],SR=[26.1,yS];
-   var eL=_ik(HL,SL,7.6,6.4,1),eR=_ik(HR,SR,7.6,6.4,-1);
-   var hip=[23,yS+9.4];
+   var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+   var hip=[23,yS+10.6];
    return {parts:[
      [[SL,SR]],
      [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
      [[[23,yS],hip]],
-     [[hip,[hip[0]-1.6,hip[1]+4.9],[hip[0]-.8,hip[1]+9.7]],[hip,[hip[0]+1.6,hip[1]+4.9],[hip[0]+.8,hip[1]+9.7]]]
-   ],head:[23,(22.2-9.6*rl)-4.6]};}},
- row:{dur:2.9,refs:['M9 12 H33','M5 34 H42'],pose:function(u){
-   var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[19,12.8],L=26;
+     [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+   ],head:[23,(18.5-6*rl)-4.6]};}},
+ row:{dur:2.9,refs:['M9 15 H33','M5 34 H42'],pose:function(u){
+   var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[17.5,15.8],L=26;
    var a=(17+16*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
    var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
-   var e=_ik(H,S,7.5,5.9,-1);
+   var e=_ik(H,S,6,4.9,-1);
    var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
    var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
    return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
@@ -2031,9 +2036,9 @@ var DEMOS={
    var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),H=[13,37.4],F=[35,37.4],Ll=23.9,Lt=13;
    var g=(66.5-2.5*r)*_DG;
    var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
-   var ps=(141-23*r)*_DG;
+   var ps=(135-17*r)*_DG;
    var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
-   var e=_ik(H,S,8,6.2,1);
+   var e=_ik(H,S,7.4,5.8,1);
    var hd=[S[0]+Math.cos(ps)*4.2+Math.sin(ps)*1,S[1]+Math.sin(ps)*4.2-Math.cos(ps)*1+(r-rl)*2.2];
    return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
  legs:{dur:3.1,refs:['M5 39 H41'],pose:function(u){
@@ -2042,7 +2047,7 @@ var DEMOS={
    var K=[K0[0]-Math.sin(a1)*ls,K0[1]-Math.cos(a1)*ls];
    var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
    var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
-   var Ha=[S[0]-Math.sin(b)*7,S[1]+Math.cos(b)*7];
+   var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
    var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
    return {parts:[[[K0,K,Hp,S]],[[S,Ha]],[[K0,[K0[0]-3.6,K0[1]+1.5]]]],head:hd};}},
  core:{dur:3.4,refs:['M5 34 H41'],pose:function(u){
@@ -2521,7 +2526,7 @@ function buildTiles(){
   PAT.forEach(function(p){
     var b=document.createElement('button');b.className='tile';
     var s=steps[p.id]||0,pct=Math.round((s+1)/p.ladder.length*100);
-    b.innerHTML=sv(p.id,cvar(p.cv),42)+'<b>'+p.name+'</b><span class="k">'+p.kind+'</span><span class="lvl">'+(cfg.lang==='de'?'Stufe ':'Step ')+(s+1)+' / '+p.ladder.length+'</span><span class="prog"><i style="width:'+pct+'%"></i></span>';
+    b.innerHTML='<span class="tdemo">'+moveSvg(p.id,cvar(p.cv))+'</span><b>'+p.name+'</b><span class="k">'+p.kind+'</span><span class="lvl">'+(cfg.lang==='de'?'Stufe ':'Step ')+(s+1)+' / '+p.ladder.length+'</span><span class="prog"><i style="width:'+pct+'%"></i></span>';
     b.addEventListener('click',function(){openDetail(p.id);});
     t.appendChild(b);});
 }
