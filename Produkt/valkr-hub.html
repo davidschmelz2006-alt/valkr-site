@@ -1197,7 +1197,10 @@
       <div class="stat f" data-i18n-t="streak">Streak<b id="s-streak">0</b></div>
       <div class="stat" data-i18n-t="week">Week<b id="s-week">-</b></div>
       <button class="txtbtn" id="themeBtn" data-i18n="btn.theme" title="Switch to the next theme" aria-label="Switch to the next theme">Theme</button>
-      <button class="iconbtn" id="setBtn" data-i18n-title="nav.settings" title="Settings" aria-label="Settings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7"/></svg></button>
+      <!-- Echtes Zahnrad mit Zaehnen. Der erste Versuch war ein Kreis mit acht
+           geraden Strahlen -- das ist die Zeichnung einer Sonne, nicht die
+           eines Zahnrads. Zaehne haben eine Breite; Strahlen nicht. -->
+      <button class="iconbtn" id="setBtn" data-i18n-title="nav.settings" title="Settings" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.1 14.6a1.6 1.6 0 0 0 .32 1.77l.06.06a1.95 1.95 0 1 1-2.76 2.76l-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-.97 1.47v.16a1.95 1.95 0 0 1-3.9 0v-.08a1.6 1.6 0 0 0-1.05-1.47 1.6 1.6 0 0 0-1.77.32l-.06.06a1.95 1.95 0 1 1-2.76-2.76l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.47-.97H3.1a1.95 1.95 0 0 1 0-3.9h.08a1.6 1.6 0 0 0 1.47-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a1.95 1.95 0 1 1 2.76-2.76l.06.06a1.6 1.6 0 0 0 1.77.32h.08a1.6 1.6 0 0 0 .97-1.47V3.1a1.95 1.95 0 0 1 3.9 0v.08a1.6 1.6 0 0 0 .97 1.47 1.6 1.6 0 0 0 1.77-.32l.06-.06a1.95 1.95 0 1 1 2.76 2.76l-.06.06a1.6 1.6 0 0 0-.32 1.77v.08a1.6 1.6 0 0 0 1.47.97h.16a1.95 1.95 0 0 1 0 3.9h-.08a1.6 1.6 0 0 0-1.47.97Z"/></svg></button>
     </div>
   </div>
 
@@ -1677,7 +1680,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.1';
+var VERSION='14.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2899,13 +2902,34 @@ window.addEventListener('popstate',function(){
 
 /* ---------- Menue-Blatt ---------------------------------------------------
    Was nicht in die Tableiste passt, steht hier -- gruppiert und mit einer
-   Zeile Erklaerung. Zwei Ziele statt der acht von frueher: fuenf sind zu
-   Abschnitten in ihrem Bereich geworden, die Einstellungen sitzen oben.
+   Zeile Erklaerung.
    Die Einstellungen stehen als Zahnrad oben rechts und deshalb NICHT auch
    hier: zweimal derselbe Weg war genau die Doppelung, die am alten Menue
    gestoert hat. Ein Symbol ohne Beschriftung kostet oben fast nichts und ist
    dort, wo man Einstellungen sucht. */
+/* Das Blatt fuehrt nicht nur zu den zwei uebrigen Bereichen, sondern zu JEDEM
+   Abschnitt der App. Nach dem Umbau waeren sonst zwei Eintraege uebrig
+   geblieben -- ein Menue mit zwei Zeilen wirkt kaputt, egal wie sauber die
+   Begruendung ist.
+   Das ist keine Rueckkehr zur alten Doppelung: doppelt waren frueher die vier
+   Ziele, die direkt daneben in der Tableiste standen. Was hier steht, ist eine
+   Ebene tiefer und sonst nur ueber den Umweg "Bereich oeffnen, dann Abschnitt
+   waehlen" erreichbar. Von hier aus geht es in einem Griff. */
 var SHEET=[
+  {h:['Training','Training'],it:[
+    {v:'skills',n:['Skills','Skills'],d:['Muscle-up, handstand, front lever','Muscle-up, Handstand, Front Lever'],
+     i:'<path d="M12 3v7"/><path d="M5 10h14"/><path d="M8 10l-2 5 3 6"/><path d="M16 10l2 5-3 6"/>'},
+    {v:'mobility',n:['Mobility','Beweglichkeit'],d:['Five targets, under thirty minutes a week','Fünf Ziele, unter dreißig Minuten die Woche'],
+     i:'<circle cx="12" cy="4.5" r="2"/><path d="M12 6.5v6M12 12.5l-3.5 8M12 12.5l3.5 8M6 9l6 1.5L18 9"/>'},
+    {v:'test',n:['Test','Test'],d:['Where you stand on each ladder','Wo du auf jeder Leiter stehst'],
+     i:'<path d="M4 20V9M10 20V4M16 20v-8M22 20H2"/>'}
+  ]},
+  {h:['Progress','Fortschritt'],it:[
+    {v:'plan',n:['Weeks','Wochen'],d:['Twelve weeks at a glance','Zwölf Wochen auf einen Blick'],
+     i:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/>'},
+    {v:'ranks',n:['Ranks','Ränge'],d:['Rank, achievements, leaderboard','Rang, Erfolge, Bestenliste'],
+     i:'<path d="M7 3h10v6a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/><path d="M12 14v4M9 21h6"/>'}
+  ]},
   {h:['More areas','Weitere Bereiche'],it:[
     {v:'fuel',n:['Fuel','Ernährung'],d:['Calories, protein, weight trend','Kalorien, Protein, Gewichtsverlauf'],
      i:'<path d="M6 3v8a3 3 0 0 0 6 0V3M9 11v10"/><path d="M18 3c-1.5 2-2 4-2 6s.7 3 2 3 2-1 2-3-.5-4-2-6Zm0 9v9"/>'},
@@ -2965,7 +2989,10 @@ $('moreBtn').addEventListener('click',function(e){
 $('sheetBg').addEventListener('click',closeSheet);
 $('sheetBody').addEventListener('click',function(e){
   var b=e.target.closest('button[data-view]');if(!b)return;
-  closeSheet();showTop(b.dataset.view);
+  closeSheet();
+  /* show() statt showTop(): die Eintraege zeigen auf Abschnitte, nicht nur auf
+     Bereiche -- showTop wuerde stattdessen den ersten Abschnitt oeffnen. */
+  show(b.dataset.view);
 });
 /* Wischen nach unten schliesst. Unter einem Drittel der Hoehe federt es
    zurueck -- sonst schliesst sich das Blatt schon beim Scrollversuch. */
