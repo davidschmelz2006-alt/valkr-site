@@ -288,6 +288,9 @@
   .exrow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);padding:.58rem .72rem;border-radius:3px;transition:.18s}
   .exrow:hover{border-color:var(--aurora);transform:translateX(3px)}
   .exrow.done{background:var(--surf2);opacity:.6}
+  .exrow.locked{opacity:.55}
+  .exrow.locked .tick{cursor:default;opacity:.4}
+  .exrow.locked:hover{border-color:var(--line);transform:none}
   .tick{width:21px;height:21px;border:1.5px solid var(--line);border-radius:3px;flex:none;display:flex;align-items:center;justify-content:center;font-size:var(--t2);color:transparent;transition:.18s;cursor:pointer}
   .exrow.done .tick{background:var(--aurora);border-color:var(--aurora);color:var(--bg);transform:scale(1.06)}
   .exrow .nm{flex:1;min-width:0;cursor:pointer}
@@ -927,6 +930,7 @@
     </div>
     <div>
       
+      <p class="hint" id="lockNote" style="display:none;margin:0 0 .5rem"></p>
       <div class="exlist" id="today-list"></div>
       <div id="blockBox"></div>
     </div>
@@ -1326,7 +1330,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.0';
+var VERSION='11.1';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1502,7 +1506,11 @@ function add(d,n){var x=new Date(d);x.setDate(x.getDate()+n);return x;}
 function iso(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function monday(d){var x=sod(d);return add(x,-((x.getDay()+6)%7));}
 var TODAY=sod(new Date());
-var ST=get('start',null); if(!ST){ST=iso(monday(TODAY));set('start',ST);}
+/* Programm beginnt am heutigen Tag, nicht am Montag dieser Woche. Vorher lagen
+   bei jedem, der nicht montags anfing, schon Tage in der Vergangenheit -- und
+   die App begruesste ihn mit verpassten Einheiten, bevor er einen Finger
+   geruehrt hatte. Woche 1 laeuft jetzt einfach ab heute. */
+var ST=get('start',null); if(!ST){ST=iso(TODAY);set('start',ST);}
 var STD=new Date(ST+'T00:00:00');
 function dIdx(d){return Math.round((sod(d)-STD)/86400000);}
 function wkOf(d){return Math.floor(dIdx(d)/7)+1;}
@@ -2020,7 +2028,16 @@ function renderDay(){
     var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
     var icon=it.id?sv(it.id,cvar(pid[it.id].cv),28):'';
     row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?'recovery':'easy')))+'</span></span><span class="sets">'+it.v+'</span>';
-    row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);if(dn[i]&&it.id)markTrained(it.id,key);renderDay();streak();refresh();});
+    /* Abgehakt wird nur der heutige Tag. Das ist nicht Schikane, sondern die
+       Grundlage des Rangsystems: wer eine Woche rueckwirkend auffuellen kann,
+       kann sich Planerfuellung erfinden. Vergangene Tage bleiben lesbar,
+       zukuenftige zeigen den Plan -- beide nur ohne Haken. */
+    if(isT){
+      row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);if(dn[i]&&it.id)markTrained(it.id,key);renderDay();streak();refresh();});
+    }else{
+      row.classList.add('locked');
+      row.querySelector('.tick').setAttribute('aria-disabled','true');
+    }
     if(it.id)row.querySelector('.nm').addEventListener('click',function(){openDetail(it.id);});
     list.appendChild(row);});
   /* Blockabschluss: der einzige Bildschirm, der von hier aus weiterfuehrt.
@@ -2041,6 +2058,20 @@ function renderDay(){
   }else bb.innerHTML='';
   /* Der Startknopf steht nur an Trainingstagen und nur fuer heute --
      eine gefuehrte Einheit fuer vorgestern ergibt keinen Sinn. */
+  /* Auf fremden Tagen erklaeren, warum nichts abhakbar ist -- ein Haken, der
+     sich nicht setzen laesst, wirkt sonst wie ein Fehler. */
+  var lb=$('lockNote');
+  if(lb){
+    if(!isT&&(pl.kind==='train'||(pl.items&&pl.items.length))){
+      var past=sod(d)<TODAY;
+      lb.style.display='';
+      lb.textContent=cfg.lang==='de'
+        ?(past?'Vergangener Tag — nur zum Nachlesen. Abgehakt wird immer am Tag selbst, sonst liesse sich Planerfüllung nachträglich erfinden.'
+              :'Zukünftiger Tag — hier steht, was ansteht. Abhaken geht erst an dem Tag.')
+        :(past?'Past day — read only. Ticking happens on the day itself, otherwise adherence could be invented afterwards.'
+              :'Future day — this is what is coming. Ticking works on the day itself.');
+    }else lb.style.display='none';
+  }
   var rb=$('runBar');
   if(pl.kind==='train'&&isT){
     rb.style.display='';
@@ -2074,7 +2105,7 @@ function startNextBlock(){
         steps:JSON.parse(JSON.stringify(steps)),sets:totalSets()});
       set('blocks',hist);
       blockNo=blockNo+1;set('block',blockNo);
-      set('start',iso(monday(TODAY)));
+      set('start',iso(TODAY));
       location.reload();
     });
 }
@@ -2082,6 +2113,7 @@ $('prevDay').addEventListener('click',function(){sel=add(sel,-1);renderDay();});
 $('nextDay').addEventListener('click',function(){sel=add(sel,1);renderDay();});
 $('jumpToday').addEventListener('click',function(){sel=new Date(TODAY);renderDay();});
 $('markDone').addEventListener('click',function(){
+  if(iso(sel)!==iso(TODAY))return;
   var k=iso(sel),pl=plan(sel),n=pl.kind==='train'?sessOf(pl).items.length:(pl.items||[]).length,dn={};
   for(var i=0;i<n;i++)dn[i]=true;doneMap[k]=dn;set('done',doneMap);
   if(pl.kind==='train')sessOf(pl).items.forEach(function(x){if(x.id)markTrained(x.id,k);});renderDay();streak();refresh();flash('savedFlag');});
