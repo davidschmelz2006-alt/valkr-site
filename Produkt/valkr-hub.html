@@ -1398,6 +1398,19 @@
       <p class="hint" data-i18n="set.langNote">The interface translates fully. Chapter text and technique cues stay English in this prototype &mdash; the German edition follows with the book.</p>
     </div>
     <div class="form">
+      <p class="eyebrow" data-i18n="set.conn">Connections</p>
+      <div class="fgrid">
+        <div class="field"><label data-i18n="set.health">Apple Health</label><div class="ctl"><select id="setHealth"><option value="off" selected>Off</option><option value="on">On</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+      </div>
+      <div id="healthSetup" style="display:none">
+        <p class="hint" data-i18n="set.healthHow">One-time setup on the iPhone.</p>
+        <div class="savebar">
+          <button class="tbtn" id="healthTest" data-i18n="btn.healthTest">Send test (5 min)</button>
+        </div>
+      </div>
+      <p class="hint" data-i18n="set.connNote">Works via an iOS shortcut.</p>
+    </div>
+    <div class="form">
       <p class="eyebrow" data-i18n="set.data">Your data</p>
       <div class="out" id="dataStats"></div>
       <div class="savebar">
@@ -1422,7 +1435,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='12.4';
+var VERSION='12.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1559,7 +1572,7 @@ function storeNote(){
 }
 
 /* ---------- settings ---------- */
-var cfg=get('cfg',{lang:'en',clock:'24',units:'metric',track:'3',motion:'calm',sound:'off',hooks:'on'});
+var cfg=get('cfg',{lang:'en',clock:'24',units:'metric',track:'3',motion:'calm',sound:'off',hooks:'on',health:'off'});
 function saveCfg(){set('cfg',cfg);}
 
 /* ---------- i18n ---------- */
@@ -1664,6 +1677,11 @@ var DICT={
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],'set.hooks':['Rotating quotes','Rotierende Sprüche'],
  'set.langNote':['The interface translates fully. Chapter text and technique cues stay English in this prototype — the German edition follows with the book.','Die Oberfläche ist vollständig übersetzt. Kapiteltexte und Technikhinweise bleiben im Prototyp englisch — die deutsche Fassung kommt mit dem Buch.'],
+ 'set.conn':['Connections','Verbindungen'],
+ 'set.health':['Apple Health','Apple Health'],
+ 'set.healthHow':['One-time setup on the iPhone: open the Shortcuts app, tap plus, name the shortcut exactly "VALKR Health", add the action "Log workout", set type "Traditional Strength Training", duration: Shortcut Input, unit minutes. After every finished session the hub offers a button that sends the real duration across.','Einmalige Einrichtung am iPhone: Kurzbefehle-App öffnen, Plus antippen, den Kurzbefehl exakt „VALKR Health" nennen, Aktion „Training protokollieren" hinzufügen, Art „Traditionelles Krafttraining", Dauer: Kurzbefehl-Eingabe, Einheit Minuten. Nach jeder beendeten Einheit bietet das Hub einen Knopf an, der die echte Dauer rüberschickt.'],
+ 'set.connNote':['Works via an iOS shortcut — browsers are not allowed to write to Apple Health directly. Samsung Health and Google Fit have no such door at all: writing there requires a native app from the store. Honest answer — that connection only comes with a native version.','Läuft über einen iOS-Kurzbefehl — Browser dürfen nicht direkt in Apple Health schreiben. Samsung Health und Google Fit haben gar keine solche Tür: Schreiben geht dort nur mit einer nativen App aus dem Store. Ehrliche Ansage — diese Anbindung kommt erst mit einer nativen Version.'],
+ 'btn.healthTest':['Send test (5 min)','Test senden (5 min)'],
  'set.data':['Your data','Deine Daten'],
  'set.dataNote':['Nothing is uploaded anywhere. Clearing your browser data clears this too, so copy it out before you switch device.','Nichts wird hochgeladen. Browserdaten löschen löscht auch das hier — vor einem Gerätewechsel kopieren.'],
  'foot':['Prototype · not a live product · data stays in your browser','Prototyp · kein Live-Produkt · Daten bleiben im Browser']
@@ -2798,7 +2816,7 @@ function startRun(){
   var dn=doneMap[iso(TODAY)]||{},i=0;
   while(i<it.length&&dn[i])i++;
   if(i>=it.length)i=0;
-  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{}};
+  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{},t0:Date.now()};
   saveRun();openRun();
 }
 function openRun(){
@@ -2865,6 +2883,12 @@ function runPaint(){
     hint.textContent=DE?'Alle Blöcke abgehakt. Trag unten noch RPE und ein, zwei Sätze Notiz ein — das ist es, womit der Coach arbeitet.'
                        :'Every block ticked. Add your RPE and a line of notes below — that is what the coach works with.';
     reps.innerHTML='';
+    if(cfg.health==='on'&&isApple()){
+      var hb=document.createElement('button');hb.type='button';hb.className='tbtn';
+      hb.textContent=DE?'In Apple Health eintragen':'Log to Apple Health';
+      hb.addEventListener('click',function(){healthLog(runMinutes());});
+      reps.appendChild(hb);
+    }
     mb.textContent=DE?'Fertig':'Done';
     return;
   }
@@ -3755,9 +3779,29 @@ function dataStats(){
 }
 
 /* ---------- settings wiring ---------- */
+/* Apple-Health-Anbindung ueber einen iOS-Kurzbefehl namens "VALKR Health".
+   Browser haben keinen HealthKit-Zugriff -- der Kurzbefehl protokolliert das
+   Training und bekommt die Minutenzahl als Eingabe. Auf allem ausser
+   iPhone/iPad bleibt der Knopf weg, ein toter Knopf waere gelogen. */
+function isApple(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent)||
+    (navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+}
+function runMinutes(){
+  var m=run&&run.t0?Math.round((Date.now()-run.t0)/60000):0;
+  return Math.max(1,Math.min(240,m||30));
+}
+function healthLog(minutes){
+  location.href='shortcuts://run-shortcut?name='+encodeURIComponent('VALKR Health')+
+    '&input=text&text='+encodeURIComponent(String(minutes));
+}
+function syncHealthUI(){
+  var el=$('healthSetup');if(el)el.style.display=cfg.health==='on'?'':'none';
+}
 function syncSettings(){
   $('setLang').value=cfg.lang;$('setClock').value=cfg.clock;$('setUnits').value=cfg.units;
   $('setTrack').value=cfg.track;$('setMotion').value=cfg.motion;$('setSound').value=cfg.sound;
+  $('setHealth').value=cfg.health||'off';syncHealthUI();
   $('setHooks').value=cfg.hooks;$('setStart').value=ST;
   $('u-h').textContent=ul();$('u-w').textContent=uw();$('u-w2').textContent=uw();
 }
@@ -3770,6 +3814,8 @@ $('setUnits').addEventListener('change',function(){
   syncSettings();buildMeas();calc();drawW();refresh();});
 $('setTrack').addEventListener('change',function(){cfg.track=this.value;saveCfg();renderDay();buildWeeks();volBar();refresh();});
 $('setMotion').addEventListener('change',function(){cfg.motion=this.value;saveCfg();sizeCv();drawScene();});
+$('setHealth').addEventListener('change',function(){cfg.health=this.value;saveCfg();syncHealthUI();});
+$('healthTest').addEventListener('click',function(){healthLog(5);});
 $('setSound').addEventListener('change',function(){cfg.sound=this.value;saveCfg();if(this.value==='on')beep();});
 $('setHooks').addEventListener('change',function(){cfg.hooks=this.value;saveCfg();$('rotq').style.display=this.value==='on'?'':'none';});
 $('setStart').addEventListener('change',function(){
