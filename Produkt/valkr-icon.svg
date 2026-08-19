@@ -1,13 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <!-- App-Symbol: die Marke aus der Kopfleiste, gross gezogen.
-       Voller Rand bis zum Bildrand, damit auch der maskable-Zuschnitt sitzt. -->
-  <rect width="512" height="512" fill="#08151E"/>
-  <g fill="none" stroke="#D4A73C" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"
-     transform="translate(256 256) scale(7.2) translate(-23 -24)">
-    <path d="M7 10 h32"/>
-    <path d="M16 10 L18 17 M30 10 L28 17"/>
-    <circle cx="23" cy="20" r="3.2"/>
-    <path d="M23 23 v9"/>
-    <path d="M23 32 l-4.5 8 M23 32 l4.5 8"/>
+  <!-- App-Symbol.
+       Vorher stand hier die Strichfigur aus der Kopfleiste, gross gezogen. Auf
+       einem Startbildschirm ist ein Symbol 40 bis 60 Pixel gross -- die duennen
+       Glieder und der Ringkopf verschmolzen dort zu einem Fleck, und das Ganze
+       las sich wie ein Kleiderbuegel.
+       Jetzt traegt das Symbol den Markenbuchstaben: ein schweres V unter der
+       Klimmzugstange. Wenige, dicke Formen, die auch bei 40 Pixeln noch
+       auseinanderfallen, und ein Zeichen, das zur Marke gehoert statt zu
+       irgendeiner Fitness-App. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0D2434"/>
+      <stop offset="1" stop-color="#050D14"/>
+    </linearGradient>
+    <radialGradient id="gl" cx="50%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#D4A73C" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#D4A73C" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <rect width="512" height="512" fill="url(#gl)"/>
+  <g fill="none" stroke="#E8BE51" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M136 122 H376" stroke-width="30"/>
+    <path d="M164 190 L256 380 L348 190" stroke-width="56"/>
   </g>
 </svg>

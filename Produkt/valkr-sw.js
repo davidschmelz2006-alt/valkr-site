@@ -12,7 +12,7 @@
    Das alte Problem „haengt fuer immer auf einer alten Version" bleibt
    trotzdem geloest: der Cache-Name traegt die Version, beim Aktivieren
    fliegt alles Aeltere raus. */
-var CACHE = 'valkr-v11.1';
+var CACHE = 'valkr-v11.2';
 var ASSETS = [
   './valkr-hub.html',
   './valkr-identity.html',
@@ -23,6 +23,10 @@ var ASSETS = [
   './valkr-icon-512.png',
   './valkr-icon-mask.png'
 ];
+/* Startbilder fuer iOS bewusst NICHT in ASSETS: neun Dateien, von denen jedes
+   Geraet genau eine braucht. Sie beim Installieren alle vorzuladen kostet gut
+   190 kB fuer 180 kB Ausschuss. Die eigene Datei kommt beim ersten Start ins
+   Netz und liegt danach ueber die normale Regel unten im Cache. */
 
 self.addEventListener('install', function (e) {
   e.waitUntil(

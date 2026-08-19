@@ -18,6 +18,21 @@
      dafuer verlaesslich. Der Sicherheitsabstand im CSS bleibt fuer Android. -->
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="VALKR">
+<!-- Startbilder. Android baut sein Startbild selbst aus dem Manifest --
+     Hintergrundfarbe, Symbol, Name. iOS tut das nicht: ohne diese Zeilen zeigt
+     Safari beim Oeffnen der installierten App eine leere weisse Flaeche, bis
+     die Seite steht. Das war die "erste Ladeanimation", die keine war.
+     iOS waehlt streng nach Geraetemass, deshalb je Groesse eine Zeile.
+     Erzeugt von scripts/make-icons.ps1 aus derselben Geometrie wie das Symbol. -->
+<link rel="apple-touch-startup-image" media="(device-width:440px) and (device-height:956px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1320x2868.png">
+<link rel="apple-touch-startup-image" media="(device-width:402px) and (device-height:874px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1206x2622.png">
+<link rel="apple-touch-startup-image" media="(device-width:430px) and (device-height:932px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="(device-width:393px) and (device-height:852px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="(device-width:428px) and (device-height:926px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="(device-width:390px) and (device-height:844px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="(device-width:375px) and (device-height:812px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:3) and (orientation:portrait)" href="valkr-splash-1242x2688.png">
+<link rel="apple-touch-startup-image" media="(device-width:414px) and (device-height:896px) and (-webkit-device-pixel-ratio:2) and (orientation:portrait)" href="valkr-splash-828x1792.png">
 <script>(function(){try{var p=JSON.parse(localStorage.getItem('vk_pack')||'"auto"');document.documentElement.setAttribute('data-pack',p);}catch(e){document.documentElement.setAttribute('data-pack','auto');}})();</script>
 <style>
   :root{
@@ -329,6 +344,39 @@
 
   .form{background:var(--surf);border:1px solid var(--line);padding:1rem;border-radius:4px;display:flex;flex-direction:column;gap:.8rem;box-shadow:var(--sh)}
   .fgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.68rem}
+  /* Ein Feld mit Regler nimmt die volle Zeile. In einer 150-Pixel-Spalte blieben
+     nach dem Zahlenfeld gut vierzig Pixel Schiene uebrig -- damit laesst sich
+     nichts treffen, und der Regler waere reine Dekoration. Die Klasse setzt
+     pairSlider, damit kein Feld ohne Regler unnoetig Platz frisst. */
+  .fgrid .field.hasSlide{grid-column:1/-1}
+  .warnstrip{display:flex;gap:.55rem;align-items:flex-start;margin:0 0 .9rem;padding:.62rem .78rem;
+    border:1px solid var(--brass);border-left-width:3px;border-radius:var(--r1);
+    background:rgba(212,167,60,.10);font-size:var(--t3);line-height:1.45}
+  .warnstrip[hidden]{display:none}
+
+  /* ---- Schieberegler ------------------------------------------------------
+     Ein Regler und ein Zahlenfeld zeigen denselben Wert. Der Regler ist zum
+     Ziehen mit dem Daumen da, das Feld zum genauen Eintippen -- auf dem Handy
+     will man das eine, am Rechner oft das andere. Der Fuellstand links vom
+     Griff kommt aus --fill, weil WebKit keinen eigenen Fortschrittsteil der
+     Leiste kennt und Firefox dafuer ::-moz-range-progress hat. */
+  .slide{display:flex;align-items:center;gap:.6rem}
+  .slide .ctl{flex:none;width:6.4rem}
+  .slide .ctl input{text-align:center;padding-left:.35rem;padding-right:2rem}
+  .slide .ctl.hasunit .unit{right:.42rem}
+  input[type=range].rng{flex:1;min-width:0;-webkit-appearance:none;appearance:none;
+    height:28px;padding:0;border:0;background:transparent;cursor:pointer;touch-action:pan-y}
+  input[type=range].rng::-webkit-slider-runnable-track{height:6px;border-radius:3px;
+    background:linear-gradient(90deg,var(--aurora) var(--fill,0%),var(--line) var(--fill,0%))}
+  input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-8px;
+    border-radius:50%;background:var(--surf3);border:2px solid var(--aurora);box-shadow:var(--sh)}
+  input[type=range].rng::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
+  input[type=range].rng::-moz-range-progress{height:6px;border-radius:3px;background:var(--aurora)}
+  input[type=range].rng::-moz-range-thumb{width:20px;height:20px;border-radius:50%;
+    background:var(--surf3);border:2px solid var(--aurora);box-shadow:var(--sh)}
+  input[type=range].rng:focus-visible{outline:none}
+  input[type=range].rng:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(var(--p1),.28)}
+  input[type=range].rng:focus-visible::-moz-range-thumb{box-shadow:0 0 0 3px rgba(var(--p1),.28)}
   .field{display:flex;flex-direction:column;gap:.28rem}
   .field label{font-family:var(--fm);font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
   .ctl{position:relative;display:flex}
@@ -682,21 +730,28 @@
   /* Startbild: erscheint sofort, zeichnet die Marke Strich fuer Strich und
      verschwindet, sobald die App steht. Die Striche werden ueber
      stroke-dasharray gezeichnet -- das laeuft auf der Grafikeinheit. */
+  /* Der Grund ist fest dunkel und nicht var(--bg). Das Startbild des
+     Betriebssystems ist dunkel -- stuende hier die Themefarbe, blitzte bei
+     hellen Themes zwischen Systemstart und App ein Wechsel auf. So laeuft das
+     eine Bild in das andere, und erst danach kommt die App. */
   #splash{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:1.1rem;background:var(--bg);
+    align-items:center;justify-content:center;gap:1.2rem;
+    background:linear-gradient(160deg,#0D2434,#050D14);
     transition:opacity .45s ease,visibility .45s}
   #splash.gone{opacity:0;visibility:hidden;pointer-events:none}
   #splash span{font-family:var(--fd);font-weight:600;letter-spacing:.34em;
-    text-transform:uppercase;font-size:var(--t3);color:var(--ink2);
-    opacity:0;animation:spName .5s ease .55s forwards}
-  #splash path,#splash circle{stroke-dasharray:60;stroke-dashoffset:60;animation:spDraw .5s ease forwards}
-  #splash .sp2{animation-delay:.12s}
-  #splash .sp3{animation-delay:.24s}
-  #splash .sp4{animation-delay:.36s}
+    text-transform:uppercase;font-size:var(--t3);color:rgba(232,190,81,.8);
+    opacity:0;animation:spName .5s ease .5s forwards}
+  /* 460 liegt ueber der Laenge beider Pfade (Stange 240, V 422) -- die
+     Strichmuster-Laenge muss den Pfad ueberdecken, sonst erscheint der Rest
+     schon vor dem Zeichnen. */
+  #splash path{stroke-dasharray:460;stroke-dashoffset:460;
+    animation:spDraw .62s cubic-bezier(.3,.7,.3,1) forwards}
+  #splash .sp2{animation-delay:.16s}
   @keyframes spDraw{to{stroke-dashoffset:0}}
   @keyframes spName{to{opacity:1}}
   @media (prefers-reduced-motion:reduce){
-    #splash path,#splash circle{animation:none;stroke-dashoffset:0}
+    #splash path{animation:none;stroke-dashoffset:0}
     #splash span{animation:none;opacity:1}
   }
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
@@ -752,7 +807,14 @@
      Abstand zum Rand nehmen ihr das Klebrige -- sie sitzt auf der Seite,
      statt unten angeschraubt zu sein. */
   @media (max-width:640px){
-    #tabbar{background:color-mix(in srgb,var(--surf) 78%,transparent);
+    /* Unschaerfe kostet auf dem Telefon in JEDEM Scrollbild: Kopfleiste und
+       Tableiste stehen fest, der Bereich hinter ihnen aendert sich bei jeder
+       Bewegung und muss neu verrechnet werden. Der Aufwand waechst ungefaehr
+       mit dem Radius -- 9 statt 16 Pixel ist knapp die Haelfte davon.
+       Damit die Flaechen dabei nicht duenner wirken, sind sie unten dichter
+       gemischt. Am Rechner bleibt der volle Radius. */
+    :root{--glass:blur(9px) saturate(1.4)}
+    #tabbar{background:color-mix(in srgb,var(--surf) 84%,transparent);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
       border-radius:var(--r3) var(--r3) 0 0}
     #tabbar button[aria-current="true"]::before{content:"";position:absolute;top:6px;
@@ -761,7 +823,7 @@
     nav#nav{border-radius:var(--r3) var(--r3) 0 0;
       background:color-mix(in srgb,var(--surf) 88%,transparent);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
-    .bar{background:color-mix(in srgb,var(--bg) 82%,transparent);
+    .bar{background:color-mix(in srgb,var(--bg) 88%,transparent);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
 
     /* ---- Tabellen auf dem Handy ---------------------------------------
@@ -791,13 +853,13 @@
      selbst: es steht vor dem Skript, ist also sofort da, und blendet weg sobald
      die App bereit ist. Sieht auf jedem Geraet gleich aus. -->
 <div id="splash" aria-hidden="true">
-  <svg viewBox="0 0 46 46" width="86" height="86" aria-hidden="true">
-    <g fill="none" stroke="#E8C15A" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M7 10 h32" class="sp1"/>
-      <path d="M16 10 L18 17" class="sp2"/><path d="M30 10 L28 17" class="sp2"/>
-      <circle cx="23" cy="20" r="3.2" class="sp3"/>
-      <path d="M23 23 v9" class="sp3"/>
-      <path d="M23 32 l-4.5 8" class="sp4"/><path d="M23 32 l4.5 8" class="sp4"/>
+  <!-- Dieselbe Form wie das App-Symbol und das Startbild: erst die Stange,
+       dann das V. Wer die Form aendert, aendert sie in valkr-icon.svg,
+       scripts/make-icons.ps1 und hier. -->
+  <svg viewBox="0 0 512 512" width="104" height="104" aria-hidden="true">
+    <g fill="none" stroke="#E8BE51" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M136 122 H376" stroke-width="30" class="sp1"/>
+      <path d="M164 190 L256 380 L348 190" stroke-width="56" class="sp2"/>
     </g>
   </svg>
   <span>VALKR</span>
@@ -855,7 +917,7 @@
   <div class="bar">
     <div class="barL">
       <div class="brand">
-        <svg width="27" height="27" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass)"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg>
+        <svg width="27" height="27" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass)"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
         <div><p>Valkr</p><small>Calisthenics</small></div>
       </div>
       <button class="iconbtn" id="undoBtn" title="Undo last change" aria-label="Undo last change" disabled>
@@ -905,6 +967,11 @@
     <button data-view="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span data-i18n="nav.you">You</span></button>
     <button id="moreBtn" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span data-i18n="nav.more">More</span></button>
   </nav>
+
+  <!-- Warnung, wenn der Browser nichts dauerhaft speichert. Ohne diesen Hinweis
+       sieht die App voellig normal aus und vergisst trotzdem beim Schliessen
+       alles -- inklusive des Trainingsbeginns. -->
+  <p class="warnstrip" id="storeWarn" hidden></p>
 
   <section class="view on" id="v-today">
     <div class="dbar">
@@ -1330,9 +1397,19 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.1';
+var VERSION='11.2';
 var mem={};
-function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
+/* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
+   laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
+   Aufruf ueber file:// ohne eigene Herkunft --, dann warf setItem stumm und
+   getItem lieferte danach nichts. Jede Frage nach einem Wert kam beim Standard
+   heraus, und das Startdatum sprang bei jedem Oeffnen auf heute.
+   Jetzt haelt mem den Wert wenigstens fuer die Sitzung, und der Streifen oben
+   sagt dem Nutzer, dass nichts liegen bleibt. */
+function get(k,d){
+  try{var v=localStorage.getItem('vk_'+k);if(v!==null)return JSON.parse(v);}catch(e){}
+  return (k in mem)?mem[k]:d;
+}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
 /* undo stack — one entry per user gesture, holding the previous value of each key touched */
 var gesture=0,recording=false,undoStack=[];
@@ -1348,17 +1425,111 @@ function set(k,v){
   mem[k]=v;try{localStorage.setItem('vk_'+k,JSON.stringify(v));}catch(e){}
 }
 function del(k){delete mem[k];try{localStorage.removeItem('vk_'+k);}catch(e){}}
+/* Haelt der Speicher ueberhaupt? Einmal schreiben, zurueckzulesen, aufraeumen.
+   Ein blosses "localStorage existiert" reicht nicht: in Safaris privatem Modus
+   ist das Objekt da und wirft erst beim Schreiben. */
+var STORE_OK=(function(){
+  try{localStorage.setItem('vk_probe','1');
+      var ok=localStorage.getItem('vk_probe')==='1';
+      localStorage.removeItem('vk_probe');return ok;}
+  catch(e){return false;}
+})();
 function canRewind(){return undoStack.length>0;}
 function rewind(){
   var e=undoStack.pop();if(!e)return false;
   Object.keys(e.keys).forEach(function(k){
     var prev=e.keys[k];
+    /* Auch die Sitzungsebene zuruecknehmen -- sonst haette get() den alten
+       Wert weiter aus mem geliefert und das Rueckgaengig waere wirkungslos. */
+    if(prev===null)delete mem[k];
+    else{try{mem[k]=JSON.parse(prev);}catch(x){delete mem[k];}}
     try{if(prev===null)localStorage.removeItem('vk_'+k);else localStorage.setItem('vk_'+k,prev);}catch(x){}
   });
   return true;
 }
 function $(id){return document.getElementById(id);}
 var SYSRED=false;try{SYSRED=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+
+/* ---------- Schieberegler ------------------------------------------------
+   pairSlider haengt an ein vorhandenes Zahlenfeld einen Regler und haelt
+   beide auf demselben Wert. Bewusst in dieser Richtung: alle Auswertungen
+   lesen weiter das Zahlenfeld, es aendert sich nur die Bedienung. Der Regler
+   loest am Feld ein input-Ereignis aus, damit die bereits vorhandenen
+   Zuhoerer unveraendert weiterlaufen -- kein einziger Rechenweg musste dafuer
+   angefasst werden.
+   Das Zahlenfeld bleibt daneben stehen, weil ein Regler allein bei 78,4 kg
+   oder 41 Wiederholungen zum Geduldsspiel wird. Ziehen fuers Grobe, Tippen
+   fuers Genaue. */
+var SLIDERS=[];
+function slDec(rec){
+  if(rec.unit==='l')return cfg.units==='imperial'?1:0;
+  if(rec.unit==='w')return 1;
+  return rec.dec||0;
+}
+function slFill(r){
+  var mn=+r.min,mx=+r.max,v=parseFloat(r.value);
+  if(isNaN(v))v=mn;
+  var p=mx>mn?((v-mn)/(mx-mn))*100:0;
+  r.style.setProperty('--fill',Math.max(0,Math.min(100,p)).toFixed(2)+'%');
+}
+/* Regler dem Feld nachfuehren. Der Wert im Feld wird dabei NICHT beschnitten:
+   wer 90 Liegestuetze schafft, soll sie eintragen duerfen, auch wenn der
+   Regler bei 80 endet -- dann steht der Griff eben am Anschlag. */
+function slSync(rec){
+  var v=parseFloat(rec.num.value);
+  if(isNaN(v))v=(rec.empty!==undefined?rec.empty:+rec.r.min);
+  rec.r.value=Math.max(+rec.r.min,Math.min(+rec.r.max,v));
+  slFill(rec.r);
+}
+function pairSlider(num,opt){
+  if(typeof num==='string')num=$(num);
+  /* Abgeraeumte Felder aus fruher neu gebauten Rastern vergessen. */
+  SLIDERS=SLIDERS.filter(function(x){return document.contains(x.num);});
+  if(!num||num.dataset.slid)return null;
+  num.dataset.slid='1';
+  var ctl=num.parentNode,host=ctl.parentNode;
+  host.classList.add('hasSlide');
+  var box=document.createElement('div');box.className='slide';
+  host.insertBefore(box,ctl);
+  var r=document.createElement('input');
+  r.type='range';r.className='rng';
+  r.min=opt.min;r.max=opt.max;r.step=opt.step||1;
+  var lab=host.querySelector('label');
+  r.setAttribute('aria-label',(lab?lab.textContent.trim():'')+' — '+(cfg.lang==='de'?'Regler':'slider'));
+  box.appendChild(r);box.appendChild(ctl);
+  var rec={r:r,num:num,unit:opt.unit||null,mn:opt.min,mx:opt.max,step:opt.step||1,dec:opt.dec||0,empty:opt.empty};
+  SLIDERS.push(rec);
+  r.addEventListener('input',function(){
+    var d=slDec(rec);
+    num.value=d?(+r.value).toFixed(d):String(+r.value);
+    slFill(r);
+    num.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  num.addEventListener('input',function(){slSync(rec);});
+  slSync(rec);
+  return rec;
+}
+/* Nach einem Wechsel der Masseinheit stehen im Feld Zoll und Pfund -- dann
+   muessen die Anschlaege des Reglers mitwandern, sonst zeigt er Unsinn. */
+function slRetune(){
+  SLIDERS=SLIDERS.filter(function(x){return document.contains(x.num);});
+  SLIDERS.forEach(function(rec){
+    if(rec.unit){
+      rec.r.min=Math.floor(toDisp(rec.mn,rec.unit));
+      rec.r.max=Math.ceil(toDisp(rec.mx,rec.unit));
+      rec.r.step=slDec(rec)?0.5:1;
+    }
+    slSync(rec);
+  });
+}
+function storeNote(){
+  var el=$('storeWarn');if(!el)return;
+  if(STORE_OK){el.hidden=true;return;}
+  el.hidden=false;
+  el.textContent=cfg.lang==='de'
+    ?'Dieser Browser speichert nichts dauerhaft — vermutlich ein privates Fenster oder blockierte Website-Daten. Alles hier gilt nur für diese Sitzung: Trainingsbeginn, Haken und Werte sind nach dem Schließen weg. In einem normalen Fenster öffnen oder Website-Daten erlauben.'
+    :'This browser is not storing anything permanently — most likely a private window or blocked site data. Everything here lasts for this session only: start date, ticks and values are gone once you close it. Open it in a normal window or allow site data.';
+}
 
 /* ---------- settings ---------- */
 var cfg=get('cfg',{lang:'en',clock:'24',units:'metric',track:'3',motion:'calm',sound:'off',hooks:'on'});
@@ -1481,6 +1652,7 @@ function applyI18n(){
   });
   var nv=$('nav');if(nv)nv.dataset.title=T('nav.moreTitle');
   if(typeof devSync==='function')devSync();
+  storeNote();
   document.documentElement.lang=cfg.lang;
 }
 
@@ -1509,8 +1681,30 @@ var TODAY=sod(new Date());
 /* Programm beginnt am heutigen Tag, nicht am Montag dieser Woche. Vorher lagen
    bei jedem, der nicht montags anfing, schon Tage in der Vergangenheit -- und
    die App begruesste ihn mit verpassten Einheiten, bevor er einen Finger
-   geruehrt hatte. Woche 1 laeuft jetzt einfach ab heute. */
-var ST=get('start',null); if(!ST){ST=iso(TODAY);set('start',ST);}
+   geruehrt hatte. Woche 1 laeuft jetzt einfach ab heute.
+
+   Und es bleibt dort. Das Datum wird genau einmal gesetzt und danach nur noch
+   gelesen -- waere das anders, waere jeder Morgen wieder Tag 1 und Woche 12
+   nie erreichbar. Zwei Faelle sind eigens abgefangen:
+
+   1. Ein unbrauchbar gespeicherter Wert. new Date('kaputt') ergibt NaN, und
+      von da an ist jede Wochen- und Tagesrechnung NaN -- der Plan bliebe
+      wortlos leer, ohne dass irgendwo ein Fehler auftaucht.
+   2. Ein verlorener Wert bei vorhandenen Daten. Dann zaehlt der aelteste Tag,
+      an dem tatsaechlich etwas passiert ist, nicht der heutige. Sonst haette
+      jemand mit acht Wochen Historie wieder bei Woche 1 angefangen. */
+function isIso(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&!isNaN(new Date(s+'T00:00:00').getTime());}
+function firstTrace(){
+  var best=null;
+  function see(s){if(isIso(s)&&(!best||s<best))best=s;}
+  try{var dm=get('done',{});for(var k in dm){var dn=dm[k];for(var i in dn){if(dn[i]){see(k);break;}}}}catch(e){}
+  try{var vf=get('vrf',{}),st=(vf&&vf.steps)||{};
+      for(var p in st){(st[p].d||[]).forEach(see);}}catch(e){}
+  try{(get('wlog',[])||[]).forEach(function(x){if(x)see(x.d);});}catch(e){}
+  return best;
+}
+var ST=get('start',null);
+if(!isIso(ST)){ST=firstTrace()||iso(TODAY);set('start',ST);}
 var STD=new Date(ST+'T00:00:00');
 function dIdx(d){return Math.round((sod(d)-STD)/86400000);}
 function wkOf(d){return Math.floor(dIdx(d)/7)+1;}
@@ -1793,7 +1987,23 @@ function moveSvg(id,c){
      (SYSRED||cfg.motion==='off'?'':dAnim('cx',d.head[0],d.head[2],t)+dAnim('cy',d.head[1],d.head[3],t))+'</circle>';
   return '<svg viewBox="0 0 46 46" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+g+'</svg>';
 }
-function cvar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+/* Themefarben gemerkt statt jedes Mal neu erfragt.
+   getComputedStyle liest nicht einfach einen Wert ab -- der Browser muss dafuer
+   erst alle offenen Stilaenderungen durchrechnen. Genau das passierte hier bis
+   zu dreissig Mal pro Sekunde: pcol() fragte in jedem Bild der Partikelschleife
+   nach --part. Solange nichts anderes lief, fiel das nicht auf. Sobald aber
+   eine Figurenanimation die Stile staendig als veraltet markierte, musste der
+   Browser bei jeder dieser Abfragen den kompletten Seitenstil neu berechnen --
+   und genau dann ruckelte es.
+   Die Werte aendern sich nur beim Theme- oder Farbtonwechsel; dort wird
+   geleert. */
+var CVC={};
+function cvar(n){
+  if(n in CVC)return CVC[n];
+  var v=getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  CVC[n]=v;return v;
+}
+function cvarFlush(){CVC={};}
 var PAT=[
  {id:'push',name:'Push',kind:'Horizontal push',cv:'--aurora',blurb:'Chest, shoulders and triceps.',media:'Push-up · full range',
   ladder:['Wall push-up','Hands on a table','Hands on a chair','Full push-up','Feet elevated','Archer push-up','One-arm push-up'],
@@ -1860,14 +2070,18 @@ var MOB=[
    was mit striktem Bewegungsumfang tatsaechlich selten ist. */
 var TLBL=[['Beginner','Anfang'],['Foundation','Basis'],['Solid','Solide'],
           ['Strong','Stark'],['Advanced','Fortgeschritten'],['Elite','Elite']];
+/* sl ist nur der Anschlag des Schiebereglers, nicht die Obergrenze der
+   Wertung: das Zahlenfeld nimmt auch 90 Liegestuetze an, der Griff steht dann
+   eben rechts. Die Anschlaege liegen bewusst etwas ueber der Elite-Schwelle,
+   damit die interessanten Stufen nicht am aeussersten Rand kleben. */
 var TESTS=[
- {id:'pushup',n:'Push-ups',u:'reps',t:[[0,4],[5,12],[13,25],[26,40],[41,60],[61,999]],pat:'push',
+ {id:'pushup',n:'Push-ups',u:'reps',t:[[0,4],[5,12],[13,25],[26,40],[41,60],[61,999]],pat:'push',sl:80,ss:1,
   how:'Chest to a fist above the floor, arms locked at the top, hips level. Stop at the first broken rep.'},
- {id:'pullup',n:'Pull-ups',u:'reps',t:[[0,0],[1,3],[4,8],[9,14],[15,22],[23,999]],pat:'pull',
+ {id:'pullup',n:'Pull-ups',u:'reps',t:[[0,0],[1,3],[4,8],[9,14],[15,22],[23,999]],pat:'pull',sl:35,ss:1,
   how:'Dead hang to chin clearly over the bar, no kipping. If you cannot do one, log 0 and use rows.'},
- {id:'squat',n:'Squats',u:'reps',t:[[0,15],[16,30],[31,50],[51,75],[76,110],[111,999]],pat:'legs',
+ {id:'squat',n:'Squats',u:'reps',t:[[0,15],[16,30],[31,50],[51,75],[76,110],[111,999]],pat:'legs',sl:150,ss:1,
   how:'Hip crease below the knee, heels down, knees tracking. Past 50 clean, test split squats instead.'},
- {id:'hollow',n:'Hollow hold',u:'sec',t:[[0,15],[16,30],[31,50],[51,75],[76,110],[111,999]],pat:'core',
+ {id:'hollow',n:'Hollow hold',u:'sec',t:[[0,15],[16,30],[31,50],[51,75],[76,110],[111,999]],pat:'core',sl:150,ss:5,
   how:'Lower back flat on the floor. The clock stops the moment your back lifts.'}
 ];
 var CH=[
@@ -1911,6 +2125,10 @@ var CH=[
 /* ---------- views ---------- */
 var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',fuel:'v-fuel',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
 function show(n){
+  /* Die Bewegungsdemo aus dem Speicher nehmen, sobald man die Ansicht verlaesst.
+     Eine SVG-Animation laeuft auch in einem display:none-Bereich weiter -- man
+     sieht sie nicht, der Browser rechnet sie trotzdem in jedem Bild. */
+  if(n!=='detail'){var dm=$('d-demo');if(dm&&dm.firstChild)dm.innerHTML='';}
   Object.keys(VS).forEach(function(k){$(VS[k]).classList.toggle('on',k===n);});
   var key=(n==='detail')?'train':n;
   [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
@@ -2289,7 +2507,10 @@ function buildTest(){
   $('testGrid').innerHTML=TESTS.map(function(t){
     return '<div class="field"><label for="tt-'+t.id+'">'+t.n+'</label><div class="ctl hasunit"><input id="tt-'+t.id+'" type="number" min="0" value="'+(testVals[t.id]||0)+'"><span class="unit">'+t.u+'</span></div><span class="hint" style="font-size:var(--t3)">'+t.how+'</span></div>';
   }).join('');
-  TESTS.forEach(function(t){$('tt-'+t.id).addEventListener('input',function(){testVals[t.id]=parseFloat(this.value)||0;set('test',testVals);testCalc();});});
+  TESTS.forEach(function(t){
+    $('tt-'+t.id).addEventListener('input',function(){testVals[t.id]=parseFloat(this.value)||0;set('test',testVals);testCalc();});
+    pairSlider('tt-'+t.id,{min:0,max:t.sl,step:t.ss,empty:0});
+  });
   $('testTable').innerHTML=TESTS.map(function(t){
     /* Alle Stufen ausgeben, nicht mehr fest drei. */
     return '<tr><td>'+t.n+'</td>'+t.t.map(function(r,i){
@@ -2452,11 +2673,13 @@ function startRun(){
 function openRun(){
   $('runner').classList.add('on');$('runner').setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
+  fxPause();
   runPaint();
 }
 function closeRun(){
   $('runner').classList.remove('on');$('runner').setAttribute('aria-hidden','true');
   document.body.style.overflow='';
+  fxResume();
   runStopTi();renderDay();refresh();
 }
 function runStopTi(){if(runTi){clearInterval(runTi);runTi=null;}}
@@ -2589,6 +2812,7 @@ function calc(){
     $('mbar').innerHTML='';$('perkg').innerHTML='';$('f-note').textContent='';
     if($('mealplan'))$('mealplan').innerHTML='';
     if($('hydrOut'))$('hydrOut').innerHTML='';
+    slRetune();
     return;
   }
   var kg=kgNow(),cm=cmNow(),age=Math.max(14,nv('f-age'));
@@ -2627,6 +2851,10 @@ function calc(){
     bx(cfg.lang==='de'?'+ pro Einheit':'+ per session','0.5','L')+
     bx(cfg.lang==='de'?'Koffein max':'Caffeine max',caf,'mg')+
     bx(cfg.lang==='de'?'Letzter Kaffee':'Cut-off','8h',cfg.lang==='de'?'vor Bett':'before bed');
+  /* calc() schreibt Kalorien, Protein und Fett von Hand ins Feld -- ein
+     programmatisch gesetzter Wert loest kein input-Ereignis aus, also muessen
+     die Regler hier ausdruecklich nachgezogen werden. */
+  slRetune();
 }
 function bx(l,v,u,hi){return '<div class="obox'+(hi?' hi':'')+'"><em>'+l+'</em><b>'+v+' <i>'+u+'</i></b></div>';}
 ['f-sex','f-age','f-h','f-w','f-act','f-goal'].forEach(function(id){$(id).addEventListener('input',function(){calc();refresh();});$(id).addEventListener('change',function(){calc();refresh();});});
@@ -2709,8 +2937,12 @@ function buildMeas(){
     d.querySelector('input').addEventListener('input',function(e){
       var raw=e.target.value.trim();
       if(raw==='')delete meas[m[0]];else meas[m[0]]=fromDisp(parseFloat(raw)||0,'l');
-      set('meas',meas);bodyFat();measNote();refresh();});});
-  bodyFat();measNote();
+      set('meas',meas);bodyFat();measNote();refresh();});
+    /* Anschlaege aus dem Platzhalter abgeleitet: ein Oberarm und eine Taille
+       brauchen offensichtlich verschiedene Bereiche, und der Platzhalter ist
+       bereits ein typischer Wert. Halb bis knapp doppelt deckt beides ab. */
+    pairSlider(d.querySelector('input'),{min:Math.round(m[2]*0.5),max:Math.round(m[2]*1.8),step:0.5,unit:'l',empty:m[2]});});
+  slRetune();bodyFat();measNote();
 }
 function bodyFat(){
   var h=cmNow(),waist=mval('waist'),neck=mval('neck'),hip=mval('hip');
@@ -3198,8 +3430,15 @@ function sceneFor(id){
     '<radialGradient id="ag2" cx="50%" cy="100%" r="72%"><stop offset="0" stop-color="'+p.b+'" stop-opacity="'+(.22*q)+'"/><stop offset="1" stop-color="'+p.b+'" stop-opacity="0"/></radialGradient>'+
     '<radialGradient id="ag3" cx="50%" cy="100%" r="64%"><stop offset="0" stop-color="'+p.c+'" stop-opacity="'+(.15*q)+'"/><stop offset="1" stop-color="'+p.c+'" stop-opacity="0"/></radialGradient>'+
     '</defs>';
-  s+='<ellipse class="glowA" cx="'+r1(W*.26)+'" cy="'+(G+16)+'" rx="'+r1(W*.46)+'" ry="188" fill="url(#ag1)"/>';
-  s+='<ellipse class="glowB" cx="'+r1(W*.75)+'" cy="'+(G+26)+'" rx="'+r1(W*.42)+'" ry="166" fill="url(#ag2)"/>';
+  /* Der Puls kostet mehr, als er zeigt: zwei bildschirmgrosse Verlaufsflaechen,
+     deren Deckkraft zwischen 0,8 und 1,0 wandert. Sehen kann man das kaum,
+     neu zeichnen muss der Browser dafuer aber in jedem Bild die ganze Flaeche
+     hinter der App -- auf dem Telefon der teuerste Posten der Oberflaeche.
+     In „Ruhig" (Voreinstellung) steht die Kulisse deshalb still; wer „Voll"
+     waehlt, bekommt den Puls. */
+  var pulse=(cfg.motion==='full');
+  s+='<ellipse'+(pulse?' class="glowA"':'')+' cx="'+r1(W*.26)+'" cy="'+(G+16)+'" rx="'+r1(W*.46)+'" ry="188" fill="url(#ag1)"/>';
+  s+='<ellipse'+(pulse?' class="glowB"':'')+' cx="'+r1(W*.75)+'" cy="'+(G+26)+'" rx="'+r1(W*.42)+'" ry="166" fill="url(#ag2)"/>';
   s+='<ellipse cx="'+r1(W*.5)+'" cy="'+(G+40)+'" rx="'+r1(W*.6)+'" ry="140" fill="url(#ag3)"/>';
   s+='<path d="M0 '+(G-38)+' Q'+r1(W*.32)+' '+(G-58)+' '+r1(W*.63)+' '+(G-40)+' T'+W+' '+(G-48)+
      '" fill="none" stroke="'+p.a+'" stroke-width="1.1" opacity="'+(.22*q)+'"/>';
@@ -3236,8 +3475,9 @@ function hsl2rgb(h,s,l){
 }
 function applyHue(){
   if(!hueEl){hueEl=document.createElement('style');document.head.appendChild(hueEl);}
+  cvarFlush();
   var h=cfg.hue;
-  if(h===undefined||h===null||h===''){hueEl.textContent='';syncThemeColor();return;}
+  if(h===undefined||h===null||h===''){hueEl.textContent='';cvarFlush();syncThemeColor();return;}
   h=+h;
   var h2=(h+26)%360,h3=(h-26+360)%360;
   /* :root allein verliert gegen :root[data-pack="..."] -- gleiche Spezifitaet
@@ -3249,6 +3489,7 @@ function applyHue(){
     '--p1:'+hsl2rgb(h,62,58)+';'+
     '--p2:'+hsl2rgb(h2,58,68)+';'+
     '--part:'+hsl2rgb(h,55,62)+';}';
+  cvarFlush();
   syncThemeColor();
 }
 function syncHueUI(){
@@ -3264,6 +3505,7 @@ function syncThemeColor(){
 }
 function applyPack(id){
   pack=id;set('pack',id);document.documentElement.setAttribute('data-pack',id);
+  cvarFlush();
   seen.themes[id]=1;saveSeen();
   buildThemeGrid();buildTiles();buildSkills();volBar();renderDay();readiness();sizeCv();drawScene();refresh();
   syncThemeColor();
@@ -3437,7 +3679,14 @@ function sizeCv(){
   cx.clearRect(0,0,cv.width,cv.height);
   if(!fxOn()){cv.style.display='none';return;}
   cv.style.display='block';
-  var dpr=Math.min(2,window.devicePixelRatio||1);
+  /* Die Partikelflaeche liegt bildschirmfuellend hinter allem und wird
+     dreissig Mal je Sekunde komplett geleert und neu gezeichnet. Ihre Kosten
+     haengen an der Pixelzahl, und die steigt im Quadrat der Aufloesung: bei
+     Faktor 2 sind das auf einem heutigen Telefon rund 2,6 Millionen Pixel je
+     Bild, bei 1,5 nur noch 1,5 Millionen -- gut vierzig Prozent weniger.
+     Zu sehen ist davon nichts: gezeichnet werden weiche Punkte von ein bis
+     drei Pixeln Radius, keine Kanten, die scharf bleiben muessten. */
+  var dpr=Math.min(1.5,window.devicePixelRatio||1);
   W=window.innerWidth;H=window.innerHeight;
   cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
   var n=fxCalm()?Math.round(Math.min(30,Math.max(14,W/48))):Math.round(Math.min(64,Math.max(24,W/28)));
@@ -3498,6 +3747,14 @@ function tick(ts){
   }
   /* Der naechste Frame wird oben in tick() angefordert, nicht mehr hier -- sonst laufen zwei Schleifen. */
 }
+/* Waehrend der Trainingsmodus offen ist, liegt die Partikelflaeche vollstaendig
+   verdeckt darunter -- und zeichnet trotzdem dreissig Mal je Sekunde weiter.
+   Schlimmer: die Glasflaeche des Trainingsmodus muss dadurch in jedem dieser
+   Bilder neu verrechnet werden. Genau dann laeuft die Pausenuhr, und genau da
+   faellt ein Ruckeln auf. Sichtbar geht dabei nichts verloren -- man sieht die
+   Flaeche in diesem Moment ohnehin nicht. */
+function fxPause(){if(raf){cancelAnimationFrame(raf);raf=null;}}
+function fxResume(){if(fxOn()&&!raf){lastFx=0;raf=requestAnimationFrame(tick);}}
 function mkShot(){
   var L=Math.random()<.5;
   return{x:L?-60:W+60,y:20+Math.random()*(H*.35),vx:(L?1:-1)*(4.2+Math.random()*2.4),vy:1.5+Math.random()*1.1,life:0,max:90+Math.random()*40};
@@ -3965,6 +4222,22 @@ function renderBoard(avgLp){
     : '<b>Only your row is real.</b> The ones marked * are invented examples so you can see the layout. A genuinely shared board needs a server — this page stores everything locally in your browser. Ranked on <b>plan adherence, streak and level</b> rather than reps on purpose: self-reported strength is trivial to fake, showing up is not. "Reset everything" also clears XP, level and your row here.';
 }
 /* ---------- boot ---------- */
+/* Feste Felder bekommen ihren Regler einmal beim Start. Die Raster in Test,
+   Massen und PR bauen ihre Felder selbst und rufen pairSlider dort.
+   Kein Regler beim Wiegen und bei Kohlenhydraten: 0,1 kg auf 165 Stufen sind
+   mit dem Daumen nicht zu treffen, und die Kohlenhydrate werden gerechnet,
+   nicht eingegeben. */
+function initSliders(){
+  pairSlider('f-age',{min:14,max:90,step:1,empty:20});
+  pairSlider('f-h',{min:130,max:220,step:1,unit:'l',empty:180});
+  pairSlider('f-w',{min:35,max:200,step:0.5,unit:'w',empty:78});
+  pairSlider('m-cal',{min:1200,max:4500,step:10,empty:2200});
+  pairSlider('m-pro',{min:60,max:260,step:5,empty:130});
+  pairSlider('m-fat',{min:30,max:150,step:5,empty:70});
+  pairSlider('y-sleep',{min:3,max:12,step:0.5,dec:1,empty:7});
+  pairSlider('logDur',{min:0,max:180,step:5,empty:45});
+}
+initSliders();
 applyI18n();syncSettings();buildThemeGrid();
 buildLogUI();buildTiles();buildSkills();buildMob();buildTest();buildSup();buildMeas();buildPR();buildChips();
 buildLearn();buildAccess();renderWins();
@@ -3975,6 +4248,12 @@ renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
 clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
+/* Im Theme „Automatisch" haengen alle Farben am Systemmodus. Wechselt der,
+   aendern sich die Variablen, ohne dass jemand einen Knopf gedrueckt hat --
+   der Farbspeicher muss dann geleert werden, sonst zeichnet die App mit den
+   Farben von vorhin weiter. */
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){
+  cvarFlush();syncThemeColor();drawScene();buildTiles();buildSkills();refresh();});}catch(e){}
 drawScene();rotQ(true);if(cfg.hooks!=='on')$('rotq').style.display='none';
 $('y-goal').value=get('goal','');
 tickClock();setInterval(tickClock,20000);
