@@ -1417,7 +1417,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.5';
+var VERSION='11.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1964,49 +1964,121 @@ function themeOutfit(k){
 }
 function sv(k,c,s){s=s||34;var d=figDecor(k);return '<svg width="'+s+'" height="'+s+'" viewBox="0 0 46 46" style="overflow:visible" aria-hidden="true">'+d.pre+(IC[k]||IC.skill).replace(/\{c\}/g,c)+themeOutfit(k)+d.post+'</svg>';}
 
-/* Bewegungsdemo. Vorher sass hier eine 16:9-Box mit Play-Knopf und
-   „40 s" darunter -- ohne Video dahinter. Ein Abspielknopf, der nichts
-   abspielt, ist ein Versprechen, das die Seite nicht halten kann.
-   Jetzt laeuft die Bewegung wirklich: zwei Posen je Uebung, der Browser
-   blendet dazwischen. Beide Posen brauchen dieselbe Befehlsfolge, sonst
-   interpoliert er nicht. */
-var MOVES={
- push:{dur:2.6,ref:'M5 38 H42',head:[11,20,11.6,26.4],
-   body:['M14.6 20.8 L27 26 L39.6 31','M14.6 27.2 L27 29.4 L39.6 32.2'],
-   arm:['M15.4 22 L15.6 30 L15 37.6','M15.4 28.4 L20.8 33 L15 37.6']},
- pull:{dur:2.8,ref:'M5 8 H41',head:[23,21,23,13.6],
-   arm:['M17 9 L18.6 15.4 L21.4 24.6 M29 9 L27.4 15.4 L24.6 24.6','M17 9 L14.6 14.6 L21 17.2 M29 9 L31.4 14.6 L25 17.2'],
-   body:['M23 25 V34 M23 34 L19.6 41.4 M23 34 L26.4 41.4','M23 17.6 V26.6 M23 26.6 L19.6 34 M23 26.6 L26.4 34']},
- row:{dur:2.6,ref:'M7 9 H35 M5 34 H42',head:[16.6,20.6,16.6,16.4],
-   arm:['M20 10 L19.6 15.6 L21.6 21.4','M20 10 L17.6 13.6 L21.6 17.4'],
-   body:['M21.6 21.4 L30 25.6 L38.6 29.8','M21.6 17.4 L30 22.6 L38.6 27.8']},
- press:{dur:2.6,ref:'M5 38 H41',head:[14.6,29.4,14.2,34.4],
-   body:['M12 37.4 L17 26 L27 13.4','M12 37.4 L19.6 30.4 L27 14.6'],
-   leg:['M27 13.4 L32.8 25 L36 37.4','M27 14.6 L32.8 25.6 L36 37.4']},
- legs:{dur:3,ref:'M5 39 H41',head:[17,11,17.6,17.4],
-   body:['M17.4 14.6 L23 25','M18 21 L23.6 29'],
-   leg:['M23 25 L14 27 L14.5 38 M14.5 38 L10 38','M23.6 29 L13.6 30.6 L14.5 38 M14.5 38 L10 38'],
-   arm:['M18.6 17.6 L9.6 15.6','M19.2 24 L10.2 22']},
- core:{dur:3.2,ref:'M5 34 H41',head:[12,20.6,12.6,22.6],
-   body:['M15.4 23 Q25 33 31 27.6 L39 22','M16 25 Q25 34.4 31.4 29.6 L39.4 24.4'],
-   arm:['M15.4 23 L7 17.6','M16 25 L7.6 19.6']}
-};
-function dAnim(attr,a,b,dur){
-  return '<animate attributeName="'+attr+'" values="'+a+';'+b+';'+a+'" dur="'+dur+'s"'+
-    ' repeatCount="indefinite" calcMode="spline" keyTimes="0;0.5;1"'+
-    ' keySplines="0.42 0 0.58 1;0.42 0 0.58 1"/>';
+/* Bewegungsdemo, zweiter Anlauf. Vorher: zwei Posen, der Browser blendet
+   die Pfadpunkte linear dazwischen. Dabei werden Ober- und Unterarm mal
+   kuerzer, mal laenger -- die Figur wirkt gestaucht und gezogen statt bewegt.
+   Jetzt rechnet ein kleines Skelett mit festen Knochenlaengen die Posen:
+   Gelenkwinkel aendern sich, Knochen nie. 17 Zwischenbilder je Wiederholung,
+   mit echtem Satztempo (runter, kurz halten, hoch), ausgespielt als normale
+   SVG-Animation -- die Pausenschaltung fuer unsichtbare Bereiche greift
+   also unveraendert. */
+function _sm(t){return t*t*(3-2*t);}
+function _rep(u){u-=Math.floor(u);
+  if(u<.42)return _sm(u/.42);
+  if(u<.5)return 1;
+  if(u<.92)return 1-_sm((u-.5)/.42);
+  return 0;}
+/* Zweigelenk-Loesung: fester Punkt A (Hand/Fuss), Ziel B (Schulter/Huefte),
+   Knochenlaengen l1 und l2, s bestimmt, zu welcher Seite das Gelenk ausweicht. */
+function _ik(A,B,l1,l2,sg){
+  var dx=B[0]-A[0],dy=B[1]-A[1],d=Math.sqrt(dx*dx+dy*dy),m=l1+l2-.05;
+  if(d>m){dx*=m/d;dy*=m/d;B=[A[0]+dx,A[1]+dy];d=m;}
+  if(d<.05)d=.05;
+  var base=Math.atan2(dy,dx);
+  var q=Math.acos(Math.max(-1,Math.min(1,(l1*l1+d*d-l2*l2)/(2*l1*d))));
+  return [[A[0]+Math.cos(base+sg*q)*l1,A[1]+Math.sin(base+sg*q)*l1],B];
 }
+function _rot(p,c,a){var sn=Math.sin(a),co=Math.cos(a);
+  return [c[0]+(p[0]-c[0])*co-(p[1]-c[1])*sn,c[1]+(p[0]-c[0])*sn+(p[1]-c[1])*co];}
+var _DG=Math.PI/180;
+var DEMOS={
+ /* Liegestuetz: Zehen und Haende fest, der Koerper dreht als starres Brett
+    um die Zehen, den Ellbogen loest die Zweigelenk-Rechnung. */
+ push:{dur:2.8,refs:['M5 38 H42'],pose:function(u){
+   var r=_rep(u),F=[41,37.4],H=[12.6,37.2],L=29;
+   var a=(24-16*r)*_DG;
+   var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+   var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+   var e=_ik(H,S,6.2,6.2,1);
+   var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4];
+   return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+ /* Klimmzug: Haende an der Stange fest, die Schultern fahren hoch, die
+    Ellbogen weichen nach aussen, Rumpf und Beine haengen starr mit. */
+ pull:{dur:3,refs:['M8 8 H38'],pose:function(u){
+   var r=_rep(u),HL=[17,8.6],HR=[29,8.6],yS=22.2-9.6*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,7,7,1),eR=_ik(HR,SR,7,7,-1);
+   var hip=[23,yS+9.4];
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,[hip[0]-1.6,hip[1]+4.9],[hip[0]-.8,hip[1]+9.7]],[hip,[hip[0]+1.6,hip[1]+4.9],[hip[0]+.8,hip[1]+9.7]]]
+   ],head:[23,yS-4.6]};}},
+ /* Rudern: Fersen fest am Boden, der Koerper bleibt ein Brett und zieht
+    die Brust zur Stange. */
+ row:{dur:2.8,refs:['M9 10 H33','M5 34 H42'],pose:function(u){
+   var r=_rep(u),F=[40,33],H=[19,10.8],L=26;
+   var a=(17+24*r)*_DG;
+   var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+   var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+   var e=_ik(H,S,7.7,7.7,-1);
+   var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4];
+   return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+ /* Pike: Haende und Zehen fest, die Huefte bleibt der Gipfel, Schultern
+    und Kopf senken sich zwischen die Haende und druecken wieder hoch. */
+ press:{dur:2.8,refs:['M5 38 H41'],pose:function(u){
+   var r=_rep(u),H=[13,37.4],F=[35,37.4],Ll=23.9,Lt=13;
+   var g=(66.5-2.5*r)*_DG;
+   var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
+   var ps=(141-23*r)*_DG;
+   var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
+   var e=_ik(H,S,7,7,1);
+   var hd=[S[0]+Math.cos(ps)*4.2,S[1]+Math.sin(ps)*4.2];
+   return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
+ /* Kniebeuge: Fuss fest, das Knie schiebt nach vorn, die Huefte nach
+    hinten-unten, die Arme kommen als Gegengewicht nach vorn. */
+ legs:{dur:3.2,refs:['M5 39 H41'],pose:function(u){
+   var r=_rep(u),K0=[21,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+24*r)*_DG,a2=(7+75*r)*_DG,a3=(4+30*r)*_DG,b=(10+80*r)*_DG;
+   var K=[K0[0]-Math.sin(a1)*ls,K0[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Ha=[S[0]-Math.sin(b)*7,S[1]+Math.cos(b)*7];
+   var hd=[S[0]-Math.sin(a3)*4.2,S[1]-Math.cos(a3)*4.2];
+   return {parts:[[[K0,K,Hp,S]],[[S,Ha]],[[K0,[K0[0]-3.4,K0[1]+1.5]]]],head:hd};}},
+ /* Hollow Hold: eine Halte-Uebung. Die ganze Form wippt starr um den
+    unteren Ruecken -- nichts knickt ein, nichts dehnt sich. */
+ core:{dur:3.4,refs:['M5 34 H41'],pose:function(u){
+   var th=Math.cos(u*2*Math.PI)*6*_DG,C=[23,32.6];
+   function R(p){return _rot(p,C,th);}
+   var sh=R([16.2,29.4]);
+   return {parts:[
+     [[sh,R([23,32]),R([28.8,30.4]),R([33.6,28.4]),R([38.6,26.2])]],
+     [[sh,R([8,24.8])]]
+   ],head:R([13.4,26.4])};}}
+};
 function moveSvg(id,c){
-  var d=MOVES[id]; if(!d)return '';
-  var t=d.dur||2.6,g='';
-  g+='<path d="'+d.ref+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" opacity=".34"/>';
-  ['body','arm','leg'].forEach(function(k){
-    if(!d[k])return;
-    g+='<path d="'+d[k][0]+'" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">'+
-       (SYSRED||cfg.motion==='off'?'':dAnim('d',d[k][0],d[k][1],t))+'</path>';
+  var d=DEMOS[id];if(!d)return '';
+  var still=SYSRED||cfg.motion==='off',N=16;
+  var frames=[],n=still?1:N+1;
+  for(var k=0;k<n;k++)frames.push(d.pose(k/N));
+  function pd(part){return part.map(function(pl){
+    return pl.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+  }).join(' ');}
+  var g='';
+  d.refs.forEach(function(rp){g+='<path d="'+rp+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" opacity=".34"/>';});
+  frames[0].parts.forEach(function(_,pi){
+    g+='<path d="'+pd(frames[0].parts[pi])+'" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">';
+    if(!still)g+='<animate attributeName="d" values="'+frames.map(function(f){return pd(f.parts[pi]);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
+    g+='</path>';
   });
-  g+='<circle cx="'+d.head[0]+'" cy="'+d.head[1]+'" r="3.4" fill="'+c+'">'+
-     (SYSRED||cfg.motion==='off'?'':dAnim('cx',d.head[0],d.head[2],t)+dAnim('cy',d.head[1],d.head[3],t))+'</circle>';
+  g+='<circle cx="'+frames[0].head[0].toFixed(1)+'" cy="'+frames[0].head[1].toFixed(1)+'" r="3.4" fill="'+c+'">';
+  if(!still){
+    g+='<animate attributeName="cx" values="'+frames.map(function(f){return f.head[0].toFixed(1);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
+    g+='<animate attributeName="cy" values="'+frames.map(function(f){return f.head[1].toFixed(1);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
+  }
+  g+='</circle>';
   return '<svg viewBox="0 0 46 46" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'+g+'</svg>';
 }
 /* Themefarben gemerkt statt jedes Mal neu erfragt.
