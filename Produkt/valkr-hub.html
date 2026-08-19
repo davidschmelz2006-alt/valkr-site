@@ -304,6 +304,13 @@
 
   .exlist{display:flex;flex-direction:column;gap:.4rem}
   .exrow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);padding:.58rem .72rem;border-radius:3px;transition:.18s}
+  .exrow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);font-size:.85rem;line-height:1;transition:.16s}
+  .exrow .swp:hover{border-color:var(--aurora);color:var(--ink)}
+  .catlist{display:flex;flex-direction:column;gap:.3rem;max-height:420px;overflow:auto}
+  .catrow{background:var(--surf2);border:1px solid var(--line2);border-radius:3px;padding:.5rem .65rem}
+  .catrow b{font-family:var(--fd);font-weight:600;font-size:.84rem}
+  .catrow .ct{display:block;font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:.14rem 0 .18rem}
+  .catrow .cc{display:block;font-size:.78rem;color:var(--ink2)}
   .exrow:hover{border-color:var(--aurora);transform:translateX(3px)}
   .exrow.done{background:var(--surf2);opacity:.6}
   .exrow.locked{opacity:.55}
@@ -999,6 +1006,27 @@
   <p class="warnstrip" id="storeWarn" hidden></p>
 
   <section class="view on" id="v-today">
+    <div class="form" id="obCard" style="display:none">
+      <p class="eyebrow" data-i18n="ob.h">Your plan &mdash; five quick questions</p>
+      <p class="hint" data-i18n="ob.s">Answer once, get a plan that fits your gear and your body. Everything stays changeable later &mdash; every exercise can be swapped.</p>
+      <div class="field"><label data-i18n="ob.goal">Goal</label><div class="chips" id="obGoal"></div></div>
+      <div class="field"><label data-i18n="ob.days">Training days per week</label><div class="chips" id="obDays"></div></div>
+      <div class="field"><label data-i18n="ob.eq">What do you have? (tap all that apply)</label><div class="chips" id="obEq"></div></div>
+      <div class="field"><label data-i18n="ob.avoid">Anything to protect? (optional)</label><div class="chips" id="obAvoid"></div></div>
+      <div class="field"><label data-i18n="ob.exp">Training experience</label><div class="chips" id="obExp"></div></div>
+      <div class="savebar">
+        <button class="tbtn go" id="obSave" data-i18n="btn.obSave">Create my plan</button>
+      </div>
+      <p class="hint" data-i18n="ob.note">No gear at all is fine &mdash; wall, table and chair cover every pattern until a pull-up bar arrives.</p>
+    </div>
+    <div class="form" id="obNext" style="display:none">
+      <p class="eyebrow" data-i18n="ob.testH">One more thing: the strength test</p>
+      <p class="hint" data-i18n="ob.testS">Ten minutes, four simple moves, stop when your form breaks. Your reps are saved and set every ladder to the right step &mdash; so day one is neither too easy nor too hard.</p>
+      <div class="savebar">
+        <button class="tbtn go" id="obTest" data-i18n="btn.obTest">Take the test now</button>
+        <button class="tbtn" id="obLater" data-i18n="btn.obLater">Later</button>
+      </div>
+    </div>
     <div class="dbar">
       <button class="nb" id="prevDay">&larr;</button>
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
@@ -1077,6 +1105,16 @@
       <h4 data-i18n="train.vol">Weekly volume balance</h4>
       <div class="volbar" id="volbar"></div>
       <p class="hint" data-i18n="train.volHint">Pull should never sit below push. That imbalance is the most common cause of shoulder trouble in calisthenics.</p>
+    </div>
+    <div class="form">
+      <div class="savebar" style="justify-content:space-between">
+        <p class="eyebrow" style="margin:0" data-i18n="cat.h">Exercise library</p>
+        <span class="pill" id="catCount"></span>
+      </div>
+      <div class="ctl"><input id="catSearch" type="text" placeholder="Search"></div>
+      <div class="chips" id="catChips"></div>
+      <div id="catList" class="catlist"></div>
+      <p class="hint" data-i18n="cat.s">Every exercise the plan can draw from. Difficulty runs Beginner to Elite; the tags show what you need and which joints work hardest. Swap any plan exercise from the Today view.</p>
     </div>
   </section>
 
@@ -1435,7 +1473,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='12.5';
+var VERSION='13.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1677,6 +1715,20 @@ var DICT={
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],'set.hooks':['Rotating quotes','Rotierende Sprüche'],
  'set.langNote':['The interface translates fully. Chapter text and technique cues stay English in this prototype — the German edition follows with the book.','Die Oberfläche ist vollständig übersetzt. Kapiteltexte und Technikhinweise bleiben im Prototyp englisch — die deutsche Fassung kommt mit dem Buch.'],
+ 'ob.h':['Your plan — five quick questions','Dein Plan — fünf schnelle Fragen'],
+ 'ob.s':['Answer once, get a plan that fits your gear and your body. Everything stays changeable later — every exercise can be swapped.','Einmal beantworten, und der Plan passt zu deinem Equipment und deinem Körper. Alles bleibt später änderbar — jede Übung lässt sich tauschen.'],
+ 'ob.goal':['Goal','Ziel'],'ob.days':['Training days per week','Trainingstage pro Woche'],
+ 'ob.eq':['What do you have? (tap all that apply)','Was hast du da? (alles Zutreffende antippen)'],
+ 'ob.avoid':['Anything to protect? (optional)','Etwas zu schonen? (optional)'],
+ 'ob.exp':['Training experience','Trainingserfahrung'],
+ 'ob.note':['No gear at all is fine — wall, table and chair cover every pattern until a pull-up bar arrives.','Gar kein Equipment ist okay — Wand, Tisch und Stuhl decken jedes Muster ab, bis eine Klimmzugstange da ist.'],
+ 'ob.testH':['One more thing: the strength test','Noch eine Sache: der Krafttest'],
+ 'ob.testS':['Ten minutes, four simple moves, stop when your form breaks. Your reps are saved and set every ladder to the right step — so day one is neither too easy nor too hard.','Zehn Minuten, vier einfache Übungen, Schluss sobald die Form bricht. Deine Wiederholungen werden gespeichert und stellen jede Leiter auf die richtige Stufe — Tag eins ist damit weder zu leicht noch zu schwer.'],
+ 'btn.obSave':['Create my plan','Meinen Plan erstellen'],
+ 'btn.obTest':['Take the test now','Jetzt zum Krafttest'],
+ 'btn.obLater':['Later','Später'],
+ 'cat.h':['Exercise library','Übungskatalog'],
+ 'cat.s':['Every exercise the plan can draw from. Difficulty runs Beginner to Elite; the tags show what you need and which joints work hardest. Swap any plan exercise from the Today view.','Alle Übungen, aus denen der Plan schöpfen kann. Schwierigkeit von Anfang bis Elite; die Tags zeigen, was du brauchst und welche Gelenke am meisten arbeiten. Getauscht wird in der Heute-Ansicht.'],
  'set.conn':['Connections','Verbindungen'],
  'set.health':['Apple Health','Apple Health'],
  'set.healthHow':['One-time setup on the iPhone: open the Shortcuts app, tap plus, name the shortcut exactly "VALKR Health", add the action "Log workout", set type "Traditional Strength Training", duration: Shortcut Input, unit minutes. After every finished session the hub offers a button that sends the real duration across.','Einmalige Einrichtung am iPhone: Kurzbefehle-App öffnen, Plus antippen, den Kurzbefehl exakt „VALKR Health" nennen, Aktion „Training protokollieren" hinzufügen, Art „Traditionelles Krafttraining", Dauer: Kurzbefehl-Eingabe, Einheit Minuten. Nach jeder beendeten Einheit bietet das Hub einen Knopf an, der die echte Dauer rüberschickt.'],
@@ -1814,6 +1866,192 @@ var SESS4={
  upB:{title:'Upper B',sub:'Row / Press / Pull / Push / Core',items:[{id:'row',l:'Inverted row, harder angle'},{id:'press',l:'Pike progression'},{id:'pull',l:'Pull-up, easier step'},{id:'push',l:'Push-up, different angle'},{id:'core',l:'Hanging knee raise'}]},
  lowB:{title:'Lower B',sub:'Hinge / Split / Glute / Squat / Core',items:[{id:'legs',l:'Nordic curl progression'},{id:'legs',l:'Bulgarian split squat'},{id:'legs',l:'Single-leg glute bridge'},{id:'legs',l:'Paused squat'},{id:'core',l:'Hollow rock'}]}
 };
+/* ---------- Uebungskatalog ------------------------------------------------
+   [Name, Stufe 0-5, Equipment, Schonungs-Flags, Cue]
+   Equipment: ''=nichts noetig, wl=Wand, tb=Tisch, ch=Stuhl/Erhoehung,
+   br=Klimmzugstange, dp=Barren/Dip-Gelegenheit, rg=Ringe, an=Halt (Sofa etc.)
+   Wand/Tisch/Stuhl/Halt gelten als immer vorhanden.
+   Flags: w=handgelenklastig, s=Schulter ueber Kopf, k=knielastig. */
+var EXDB={
+ push:[
+  ['Wall push-up',0,'wl','','Hands on the wall, body one line, chest to the wall.'],
+  ['Incline push-up (table)',0,'tb','','Hands on a table edge, body straight, full range.'],
+  ['Incline push-up (chair)',1,'ch','w','Lower surface, harder angle. Lock out every rep.'],
+  ['Knee push-up',1,'','w','Knees down, hips forward in one line with the torso.'],
+  ['Push-up on fists',1,'','','Neutral wrists on soft ground - the wrist-friendly push-up.'],
+  ['Full push-up',2,'','w','Chest a fist above the floor, elbows back at 45 degrees.'],
+  ['Wide push-up',2,'','w','Hands wider, more chest, less triceps.'],
+  ['Staggered push-up',2,'','w','One hand forward, one back - uneven load, swap sides.'],
+  ['Sphinx push-up',2,'','','Forearms to hands and back - triceps, wrist-friendly start.'],
+  ['Diamond push-up',3,'','w','Hands form a triangle under the chest. Triceps day.'],
+  ['Hindu push-up',3,'','ws','Dive from pike through low arc to cobra and back.'],
+  ['Decline push-up',3,'ch','w','Feet elevated - more weight on the shoulders.'],
+  ['Pseudo planche lean',3,'','w','Push-up hold, hands by the hips, lean far forward.'],
+  ['Pseudo planche push-up',4,'','w','Push-ups with hands at the hips, body leaning forward.'],
+  ['Archer push-up',4,'','w','One arm bends, the other stays straight and wide.'],
+  ['Clap push-up',4,'','w','Explode off the floor, clap, land soft. Power work.'],
+  ['Ring push-up',4,'rg','w','Rings under the chest - every rep fights the wobble.'],
+  ['Typewriter push-up',5,'','w','Low over the floor, shift chest from hand to hand.'],
+  ['One-arm incline push-up',5,'tb','w','One hand on a table, body braced against rotation.'],
+  ['One-arm push-up',5,'','w','Feet wide, hips square. The horizontal-push summit.']
+ ],
+ pull:[
+  ['Dead hang',0,'br','','Just hang. Grip, shoulders, patience.'],
+  ['Active hang',0,'br','','Hang, then pull the shoulder blades down without bending arms.'],
+  ['Scapular pull-up',1,'br','','Small pulls from the shoulder blades only. The first inch.'],
+  ['Jumping pull-up',1,'br','','Jump to the top, lower with control.'],
+  ['Band-assisted pull-up',1,'br','','Band under the knee takes what you cannot lift yet.'],
+  ['Negative pull-up',2,'br','','Start at the top, lower for 3-5 seconds.'],
+  ['Chin-up',2,'br','','Palms toward you - more biceps, usually the first to work.'],
+  ['Pull-up',3,'br','','Dead hang to chin clearly over the bar. No kipping.'],
+  ['Close-grip chin-up',3,'br','','Hands close, elbows tight - short lever, strong pull.'],
+  ['Wide-grip pull-up',3,'br','','Wider hands, more upper back, less biceps help.'],
+  ['Commando pull-up',3,'br','','Sideways under the bar, alternating head sides.'],
+  ['L-sit pull-up',4,'br','','Legs held horizontal through every rep.'],
+  ['High pull-up',4,'br','','Pull until the chest reaches the bar. Muscle-up currency.'],
+  ['Archer pull-up',4,'br','','Chin over the bar shifted to one side, other arm long.'],
+  ['Typewriter pull-up',5,'br','','Hold at the top, travel from hand to hand.'],
+  ['Weighted pull-up',5,'br','','Backpack with books. Progress you can count in kilos.'],
+  ['One-arm assisted pull-up',5,'br','','One hand on a towel lower than the bar.'],
+  ['One-arm pull-up',5,'br','','The vertical-pull summit. Years, not weeks.']
+ ],
+ row:[
+  ['Doorframe row',0,'','','Stand in the door, hold the frame, lean back, pull in.'],
+  ['Table row',0,'tb','','Under a sturdy table, body straight, chest to the edge.'],
+  ['Bar row, chest height',1,'br','','Nearly upright - the easiest bar angle.'],
+  ['Bar row, waist height',2,'br','','The standard inverted row. Body one line.'],
+  ['Bar row, hip height',3,'br','','Nearly horizontal - close to pull-up load.'],
+  ['Ring row',3,'rg','','Rings turn with you - smooth on the shoulders, hard on form.'],
+  ['Feet-elevated row',3,'tb','','Feet on a chair under the table edge - full horizontal.'],
+  ['Pause row',4,'br','','Two seconds chest at the bar, every rep.'],
+  ['Wide row',4,'br','','Wide grip, elbows out - rear shoulder focus.'],
+  ['Archer row',4,'br','','Pull to one hand, other arm straight.'],
+  ['One-arm row',5,'tb','','One hand on the edge, body braced against twisting.'],
+  ['Tuck front-lever row',5,'br','','Row while holding a tuck lever. Core included.']
+ ],
+ press:[
+  ['Pike push-up, hands elevated',0,'tb','s','Hips high, hands on a table - the gentle entry.'],
+  ['Pike push-up',1,'','ws','Upside-down V, head lowers between the hands.'],
+  ['Bench dips',2,'ch','s','Hands on a chair behind you. Shoulders down, short range.'],
+  ['Feet-elevated pike push-up',2,'ch','ws','Feet on a chair, hips over shoulders.'],
+  ['Deficit pike push-up',3,'','ws','Hands on books - deeper range than the floor allows.'],
+  ['Wall walk',3,'wl','ws','Walk the feet up the wall, hands toward it, walk back.'],
+  ['Straight-bar dip',3,'br','s','Both hands on one bar, lean over it, dip.'],
+  ['Parallel-bar dip',3,'dp','s','Full dips - shoulders below elbows, press to lockout.'],
+  ['Wall handstand push-up, partial',4,'wl','ws','Head toward a book stack, quarter to half range.'],
+  ['Ring dip',4,'rg','s','Dips on rings - the stabilizers pay the bill.'],
+  ['Wall handstand push-up',5,'wl','ws','Head to the floor and back up, heels on the wall.'],
+  ['Korean dip',5,'br','s','Bar behind the back. Unforgiving shoulder range.'],
+  ['Freestanding handstand push-up',5,'','ws','No wall. The vertical-push summit.']
+ ],
+ legs:[
+  ['Box squat',0,'ch','','Sit back to a chair, stand up without rocking.'],
+  ['Glute bridge',0,'','','Shoulders on the floor, hips to the ceiling, squeeze.'],
+  ['Wall sit',0,'wl','k','Back on the wall, thighs level. Hold and breathe.'],
+  ['Air squat',1,'','','Hip crease below the knee, heels planted.'],
+  ['Step-up',1,'ch','k','Full foot on the surface, drive through the heel.'],
+  ['Calf raise',1,'','','Full stretch at the bottom, pause at the top.'],
+  ['Good morning',1,'','','Hands behind the head, hinge at the hip, flat back.'],
+  ['Paused squat',2,'','','Two seconds at the bottom. No bounce, all muscle.'],
+  ['Reverse lunge',2,'','k','Step back instead of forward - kinder to the knee.'],
+  ['Single-leg glute bridge',2,'','','One leg up, hips stay level.'],
+  ['Single-leg calf raise',2,'','','All bodyweight on one calf, full range.'],
+  ['Walking lunge',2,'','k','Long steps, torso tall, knee tracks the toes.'],
+  ['Split squat',3,'','k','Feet split, back knee toward the floor.'],
+  ['Lateral lunge',3,'','k','Step sideways, sit into one hip, other leg straight.'],
+  ['Single-leg RDL',3,'','','Hinge on one leg, back flat - hamstrings and balance.'],
+  ['Cossack squat',3,'','k','Weight over one heel, wide stance, other leg straight.'],
+  ['Jump squat',3,'','k','Explode up, land soft into the next rep.'],
+  ['Hip thrust',3,'ch','','Shoulders on a couch edge, hips to full lockout.'],
+  ['Sissy squat',4,'','k','Knees travel far forward, body leans back. Quad isolation.'],
+  ['Bulgarian split squat',4,'ch','k','Rear foot on a chair - the single-leg workhorse.'],
+  ['Nordic negative',4,'an','k','Heels anchored, lower forward as slowly as you can.'],
+  ['Assisted pistol',4,'','k','Hold a doorframe, one-leg squat to the bottom.'],
+  ['Box pistol',4,'ch','k','One-leg squat to a chair, stand back up.'],
+  ['Pistol squat',5,'','k','Full one-leg squat, other leg straight in front.'],
+  ['Shrimp squat',5,'','k','Rear foot held in the hand, knee to the floor.'],
+  ['Nordic curl',5,'an','k','The full negative plus the way back up. Hamstring summit.'],
+  ['Skater squat',5,'','k','One-leg squat, rear knee taps a pad behind you.']
+ ],
+ core:[
+  ['Dead bug',0,'','','Opposite arm and leg lower, back stays glued down.'],
+  ['Bird dog',0,'','','On all fours, opposite arm and leg long, hips level.'],
+  ['Forearm plank',0,'','','Elbows under shoulders, glutes on, no sag.'],
+  ['Side plank',1,'','','Straight line on one forearm, hips high.'],
+  ['Tuck hollow hold',1,'','','Lower back pressed down, knees pulled in.'],
+  ['Reverse crunch',1,'','','Knees to chest, hips peel off the floor. No pulling on the neck.'],
+  ['Mountain climbers',1,'','w','Push-up position, knees drive fast, hips stay low.'],
+  ['Hollow hold',2,'','','Arms and legs long, lower back never leaves the floor.'],
+  ['Plank shoulder taps',2,'','w','Push-up plank, tap the opposite shoulder, hips still.'],
+  ['Floor leg raise',2,'','','Legs to vertical and slowly back to a hover.'],
+  ['Superman hold',2,'','','Face down, chest and thighs off the floor.'],
+  ['Hollow rock',3,'','','The hollow hold, rocking like a banana. Shape stays.'],
+  ['V-up',3,'','','Fold from hollow - hands meet the feet over the hips.'],
+  ['Side plank dip',3,'','','Side plank, lower the hip, lift it back.'],
+  ['Copenhagen plank',3,'ch','','Top foot on a chair, side plank on the inner thigh.'],
+  ['Hanging knee raise',3,'br','','Hang, knees to the chest without swinging.'],
+  ['Reverse plank',3,'','ws','Face up, hips to a straight line, chest open.'],
+  ['Hanging leg raise',4,'br','','Straight legs to horizontal, no momentum.'],
+  ['Tuck L-sit',4,'','w','On the floor or parallettes, knees tucked, hips lifted.'],
+  ['Dragon flag negative',4,'an','','Shoulders down, body straight, lower slowly.'],
+  ['Toes-to-bar',5,'br','','Feet touch the bar, controlled both ways.'],
+  ['L-sit',5,'','w','Legs horizontal, hips floating. The core summit on the floor.'],
+  ['Windshield wipers',5,'br','','Legs up at the bar, swing side to side with control.'],
+  ['Dragon flag',5,'an','','Straight body lowers and rises from the shoulders.']
+ ]
+};
+var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Halt']};
+var FLN={w:['wrists','Handgelenke'],s:['overhead shoulder','Schulter ueber Kopf'],k:['knee-dominant','knielastig']};
+var profile=get('profile',null);
+function exAvail(e){var q=e[2];
+  if(!q||q==='wl'||q==='tb'||q==='ch'||q==='an')return true;
+  var eq=(profile&&profile.eq)||{bar:true,dip:true,rings:true};
+  if(q==='br')return !!eq.bar;
+  if(q==='dp')return !!eq.dip||!!eq.rings;
+  if(q==='rg')return !!eq.rings;
+  return true;}
+function exAllowed(e){if(!profile||!profile.avoid)return true;var f=e[3]||'';
+  if(profile.avoid.wrist&&f.indexOf('w')>-1)return false;
+  if(profile.avoid.shoulder&&f.indexOf('s')>-1)return false;
+  if(profile.avoid.knee&&f.indexOf('k')>-1)return false;
+  return true;}
+function exFind(pat,name){var L=EXDB[pat]||[];for(var i=0;i<L.length;i++)if(L[i][0]===name)return L[i];return null;}
+function exPick(pat,wantTier){var best=null,bd=99;
+  (EXDB[pat]||[]).forEach(function(e){
+    if(!exAvail(e)||!exAllowed(e))return;
+    var d=Math.abs(e[1]-wantTier);
+    if(d<bd){bd=d;best=e;}});
+  return best;}
+/* Standard-Uebung je Sitzungs-Slot (Name im Katalog). Der Generator behaelt
+   den Standard, solange Equipment und Schonungen ihn zulassen - sonst nimmt
+   er die naechstliegende machbare Alternative aus dem Katalog. */
+var SLOTDEF={
+ '3:pull':['Pull-up','Bar row, waist height','Full push-up','Air squat','Hollow hold'],
+ '3:push':['Pike push-up','Full push-up','Bar row, waist height','Glute bridge','Side plank'],
+ '3:legs':['Split squat','Nordic negative','Pull-up','Full push-up','Hanging knee raise'],
+ '4:upA':['Pull-up','Full push-up','Bar row, waist height','Pike push-up','Hollow hold'],
+ '4:lowA':['Air squat','Single-leg RDL','Split squat','Single-leg calf raise','Side plank'],
+ '4:upB':['Bar row, hip height','Feet-elevated pike push-up','Chin-up','Wide push-up','Hanging knee raise'],
+ '4:lowB':['Nordic negative','Bulgarian split squat','Single-leg glute bridge','Paused squat','Hollow rock']
+};
+function patTier(id){var p=pid&&pid[id];if(!p)return 2;var st=(steps&&steps[id])||0;return Math.round(st/Math.max(1,p.ladder.length-1)*5);}
+function applyProfile(){
+  if(!profile)return;
+  if(profile.days&&cfg.track!==profile.days){cfg.track=profile.days;saveCfg();}
+  [['3',SESS3],['4',SESS4]].forEach(function(pair){
+    Object.keys(pair[1]).forEach(function(k){
+      var defs=SLOTDEF[pair[0]+':'+k]||[];
+      pair[1][k].items.forEach(function(it,i){
+        var e=null,sw=profile.swaps&&profile.swaps[pair[0]+':'+k+':'+i];
+        if(sw)e=exFind(it.id,sw);
+        if(!e){var d=defs[i]?exFind(it.id,defs[i]):null;
+          if(d&&exAvail(d)&&exAllowed(d))e=d;
+          else e=exPick(it.id,d?d[1]:patTier(it.id))||d;}
+        if(e)it.l=e[0];
+      });
+    });
+  });
+}
 function plan(d){
   var w=wkOf(d);
   if(w<1)return{kind:'pre',title:cfg.lang==='de'?'Noch nicht gestartet':'Not started yet',sub:'',note:(cfg.lang==='de'?'Programm beginnt ':'Programme begins ')+STD.toLocaleDateString(),items:[],w:w};
@@ -2394,7 +2632,11 @@ function renderDay(){
   items.forEach(function(it,i){
     var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
     var icon=it.id?sv(it.id,cvar(pid[it.id].cv),28):'';
-    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?'recovery':'easy')))+'</span></span><span class="sets">'+it.v+'</span>';
+    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?'recovery':'easy')))+'</span></span>'+
+      ((pl.kind==='train'&&it.id)?'<button type="button" class="swp" title="Swap exercise" aria-label="Swap exercise">&#8644;</button>':'')+
+      '<span class="sets">'+it.v+'</span>';
+    var swpBtn=row.querySelector('.swp');
+    if(swpBtn)swpBtn.addEventListener('click',function(e){e.stopPropagation();openSwap(pl,i,it);});
     /* Abgehakt wird nur der heutige Tag. Das ist nicht Schikane, sondern die
        Grundlage des Rangsystems: wer eine Woche rueckwirkend auffuellen kann,
        kann sich Planerfuellung erfinden. Vergangene Tage bleiben lesbar,
@@ -3720,7 +3962,7 @@ function askReset(){
       :'This wipes your logs, records, measurements, weight history, ladder positions and settings — and with them your rank, XP, level, badges and your leaderboard row. It cannot be undone. Type RESET to confirm.',
     DE?'Alles löschen':'Wipe everything',
     function(){
-      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run']
+      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile']
         .forEach(del);
       SKILLS.forEach(function(s){del('skill_'+s.id);});
       location.reload();
@@ -3765,7 +4007,7 @@ function syncUndo(){
   ['undoBtn','undoBtn2'].forEach(function(id){var b=$(id);if(!b)return;b.disabled=!ok;b.style.opacity=ok?'':'.4';});
 }
 $('exportBtn').addEventListener('click',function(){
-  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run'].forEach(function(k){dump[k]=get(k,null);});
+  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile'].forEach(function(k){dump[k]=get(k,null);});
   var txt=JSON.stringify(dump);
   try{navigator.clipboard.writeText(txt);}catch(e){}
   flash('expFlag');
@@ -3779,6 +4021,114 @@ function dataStats(){
 }
 
 /* ---------- settings wiring ---------- */
+/* ---------- Onboarding, Tauschen, Katalog ---------- */
+var OBL={
+ goal:[['muscle',['Build muscle','Muskeln aufbauen']],['lean',['Get lean','Abnehmen und straffen']],['skills',['Learn skills','Skills lernen']],['fit',['General fitness','Allgemein fit']]],
+ days:[['3',['3 days - full body','3 Tage - Ganzkörper']],['4',['4 days - upper/lower','4 Tage - Ober/Unter']]],
+ eq:[['bar',['Pull-up bar','Klimmzugstange']],['dip',['Dip bars','Barren/Dips']],['rings',['Rings','Ringe']]],
+ avoid:[['wrist',['Wrists','Handgelenke']],['shoulder',['Overhead shoulder','Schulter über Kopf']],['knee',['Knees','Knie']]],
+ exp:[['0',['Just starting','Fange gerade an']],['1',['Under 6 months','Unter 6 Monate']],['2',['6-12 months','6-12 Monate']],['3',['1-3 years','1-3 Jahre']],['4',['Over 3 years','Über 3 Jahre']]]
+};
+var obState={goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
+function obChips(host,list,multi,stateKey){
+  var el=$(host);if(!el)return;el.innerHTML='';var L=cfg.lang==='de'?1:0;
+  list.forEach(function(o){
+    var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=o[1][L];
+    var on=multi?!!obState[stateKey][o[0]]:obState[stateKey]===o[0];
+    b.setAttribute('aria-pressed',String(on));
+    b.addEventListener('click',function(){
+      if(multi){obState[stateKey][o[0]]=!obState[stateKey][o[0]];}
+      else{obState[stateKey]=o[0];}
+      obChips(host,list,multi,stateKey);
+    });
+    el.appendChild(b);});
+}
+function syncOb(){
+  var card=$('obCard');if(!card)return;
+  card.style.display=profile?'none':'';
+  if(!profile){
+    obChips('obGoal',OBL.goal,false,'goal');
+    obChips('obDays',OBL.days,false,'days');
+    obChips('obEq',OBL.eq,true,'eq');
+    obChips('obAvoid',OBL.avoid,true,'avoid');
+    obChips('obExp',OBL.exp,false,'exp');
+  }
+  var nx=$('obNext');
+  var tested=TESTS.some(function(t){return (testVals[t.id]||0)>0;});
+  nx.style.display=(profile&&!profile.testAsked&&!tested)?'':'none';
+}
+$('obSave').addEventListener('click',function(){
+  profile={goal:obState.goal,days:obState.days,
+    eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
+    avoid:{wrist:!!obState.avoid.wrist,shoulder:!!obState.avoid.shoulder,knee:!!obState.avoid.knee},
+    exp:obState.exp,swaps:{}};
+  set('profile',profile);
+  var ye=$('y-exp');if(ye)ye.selectedIndex=parseInt(profile.exp,10)||0;
+  applyProfile();syncOb();buildCatalog();
+  renderDay();volBar();refresh();flash('savedFlag');
+});
+$('obTest').addEventListener('click',function(){
+  profile.testAsked=1;set('profile',profile);syncOb();show('test');
+});
+$('obLater').addEventListener('click',function(){
+  profile.testAsked=1;set('profile',profile);syncOb();
+});
+function openSwap(pl,idx,it){
+  var DE=cfg.lang==='de',L=DE?1:0;
+  var list=(EXDB[it.id]||[]).filter(function(e){return exAvail(e)&&exAllowed(e);});
+  var sel='<div class="ctl"><select id="swapSel">'+
+    '<option value="">'+(DE?'Standard (Plan wählt)':'Default (plan decides)')+'</option>'+
+    list.map(function(e){
+      var tag=TLBL[e[1]][L]+(e[2]&&EQN[e[2]]?' · '+EQN[e[2]][L]:'');
+      return '<option value="'+e[0].replace(/"/g,'&quot;')+'"'+(e[0]===it.l?' selected':'')+'>'+e[0]+' — '+tag+'</option>';
+    }).join('')+'</select></div>';
+  openModal(DE?'Übung tauschen':'Swap exercise',
+    DE?'Gleiche Bewegungsrichtung, andere Übung. Equipment und Schonungen sind schon rausgefiltert.'
+      :'Same movement pattern, different exercise. Gear and joint flags are already filtered out.',
+    DE?'Übernehmen':'Apply',
+    function(){
+      var v=$('swapSel')?$('swapSel').value:'';
+      if(!profile){profile={goal:'fit',days:cfg.track,eq:{bar:true,dip:true,rings:true},avoid:{},swaps:{}};}
+      profile.swaps=profile.swaps||{};
+      var key=cfg.track+':'+pl.s+':'+idx;
+      if(v)profile.swaps[key]=v;else delete profile.swaps[key];
+      set('profile',profile);applyProfile();renderDay();
+    },sel);
+}
+var catPat='all',catQ='';
+function buildCatalog(){
+  var chips=$('catChips');if(!chips)return;
+  var DE=cfg.lang==='de',L=DE?1:0;
+  chips.innerHTML='';
+  var opts=[['all',DE?'Alle':'All']].concat(PAT.map(function(p){return [p.id,p.name];}));
+  opts.forEach(function(o){
+    var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=o[1];
+    b.setAttribute('aria-pressed',String(catPat===o[0]));
+    b.addEventListener('click',function(){catPat=o[0];buildCatalog();});
+    chips.appendChild(b);});
+  var host=$('catList'),total=0,shown=0;host.innerHTML='';
+  PAT.forEach(function(p){
+    (EXDB[p.id]||[]).forEach(function(e){
+      total++;
+      if(catPat!=='all'&&catPat!==p.id)return;
+      if(catQ&&e[0].toLowerCase().indexOf(catQ)<0)return;
+      shown++;
+      var tags=[p.name,TLBL[e[1]][L]];
+      if(e[2]&&EQN[e[2]])tags.push(EQN[e[2]][L]);
+      (e[3]||'').split('').forEach(function(f){if(FLN[f])tags.push(FLN[f][L]);});
+      if(!exAvail(e)||!exAllowed(e))tags.push(DE?'für dich gefiltert':'filtered for you');
+      var d=document.createElement('div');d.className='catrow';
+      d.innerHTML='<b></b><span class="ct"></span><span class="cc"></span>';
+      d.querySelector('b').textContent=e[0];
+      d.querySelector('.ct').textContent=tags.join(' · ');
+      d.querySelector('.cc').textContent=e[4];
+      host.appendChild(d);
+    });
+  });
+  $('catCount').textContent=shown+' / '+total;
+}
+$('catSearch').addEventListener('input',function(){catQ=this.value.trim().toLowerCase();buildCatalog();});
+
 /* Apple-Health-Anbindung ueber einen iOS-Kurzbefehl namens "VALKR Health".
    Browser haben keinen HealthKit-Zugriff -- der Kurzbefehl protokolliert das
    Training und bekommt die Minutenzahl als Eingabe. Auf allem ausser
@@ -4425,6 +4775,7 @@ buildLearn();buildAccess();renderWins();
 /* buildWeeks() lief beim Start, obwohl der Plan-Bereich nicht sichtbar ist --
    und show('plan') baut ihn ohnehin beim Oeffnen. Zwoelf Wochen mit allen
    Tagen im Voraus zu bauen kostet Startzeit fuer etwas, das niemand sieht. */
+applyProfile();syncOb();buildCatalog();
 renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
