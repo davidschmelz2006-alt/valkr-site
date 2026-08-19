@@ -1422,7 +1422,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='12.2';
+var VERSION='12.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2050,14 +2050,25 @@ var DEMOS={
    var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
    var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
    return {parts:[[[K0,K,Hp,S]],[[S,Ha]],[[K0,[K0[0]-3.6,K0[1]+1.5]]]],head:hd};}},
+ /* Core: Hollow-Body-Beinheben statt reinem Wippen. Die Beine heben aus
+    der Schwebe bis fast senkrecht und senken langsam ab (exzentrisch),
+    der Oberkoerper bleibt in der Hollow-Position und atmet nur leicht mit --
+    starr um den Auflagepunkt gedreht, nichts verbiegt sich. */
  core:{dur:3.4,refs:['M5 34 H41'],pose:function(u){
-   var th=Math.cos(u*2*Math.PI)*6*_DG,C=[23,32.6];
-   function R(p){return _rot(p,C,th);}
-   var sh=R([16.2,29.4]);
+   var r=_phase(u,.30,.10,.42),rl=_phase(u-.03,.30,.10,.42);
+   var MB=[19.5,32.4],hip=[25.5,31.9];
+   var tu=-5*rl*_DG;
+   function RU(p){return _rot(p,MB,tu);}
+   var sh=RU([13.5,31.4]),ha=RU([21,30.2]);
+   var al=(8+64*r)*_DG;
+   var kn=[hip[0]+Math.cos(al)*6,hip[1]-Math.sin(al)*6];
+   var a2=al+10*_DG;
+   var ft=[kn[0]+Math.cos(a2)*5.8,kn[1]-Math.sin(a2)*5.8];
    return {parts:[
-     [[sh,R([23,32]),R([28.8,30.4]),R([33.6,28.4]),R([38.6,26.2])]],
-     [[sh,R([8,24.8])]]
-   ],head:R([13.4,26.4])};}}
+     [[sh,MB,hip]],
+     [[hip,kn,ft]],
+     [[sh,ha]]
+   ],head:RU([9.7,29.6])};}}
 };
 function moveSvg(id,c){
   var d=DEMOS[id];if(!d)return '';
@@ -2125,7 +2136,7 @@ var PAT=[
   cues:['Feet shoulder width, toes slightly out.','Hips back and down.','Hip crease below the knee.','Knees track over toes.','Heels planted.'],
   bad:['Knees caving in.','Heels lifting.','Only squatting, never hinging.'],
   facts:[['Rest','2 min'],['Hinge','3 x 8-10 / side'],['Nordic','3 x 5 negatives'],['Per week','8-12 sets']]},
- {id:'core',name:'Core',kind:'Anti-motion',cv:'--aurora',blurb:'Your core resists movement. That is why planks beat sit-ups.',media:'Hollow hold',
+ {id:'core',name:'Core',kind:'Anti-motion',cv:'--aurora',blurb:'Your core resists movement. That is why planks beat sit-ups.',media:'Hollow-body leg raise',
   ladder:['Dead bug','Tuck hollow hold','One leg extended','Both legs, arms down','Arms overhead','Hollow rock','Hanging knee raise','Hanging leg raise'],
   cues:['Lower back flat into the floor.','Lift shoulder blades and legs.','Keep breathing.','Set ends when your back lifts.'],
   bad:['Arching.','Holding your breath.','Chasing sit-up numbers.'],
