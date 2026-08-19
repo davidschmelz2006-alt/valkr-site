@@ -1211,6 +1211,8 @@
         <li data-i18n="rk.h1">Ladder position is worth the most. Moving one step up is worth more than a month of extra reps.</li>
         <li data-i18n="rk.h2">Personal records above your week-1 baseline add on top.</li>
         <li data-i18n="rk.h3">Following the plan adds the rest — and a logged rest day counts exactly like a session.</li>
+        <li data-i18n="rk.h4">Strength only sets your ceiling. What unlocks it is showing up: every active week raises your cap a little. The top rank is months of work, on purpose.</li>
+        <li data-i18n="rk.h5">Every completely empty week costs rank. Long break, lower rank — the ladder remembers, the rank has to be re-earned.</li>
       </ul>
     </div>
     <div id="achWrap"></div>
@@ -1518,7 +1520,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.4';
+var VERSION='13.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1679,6 +1681,8 @@ var DICT={
  'rk.h1':['Ladder position is worth the most. Moving one step up is worth more than a month of extra reps.','Die Leiterstufe zählt am meisten. Eine Stufe hoch ist mehr wert als ein Monat Zusatzwiederholungen.'],
  'rk.h2':['Personal records above your week-1 baseline add on top.','Rekorde über deiner Woche-1-Basis kommen obendrauf.'],
  'rk.h3':['Following the plan adds the rest — and a logged rest day counts exactly like a session.','Plan einhalten macht den Rest — und ein eingetragener Ruhetag zählt genau wie eine Einheit.'],
+ 'rk.h4':['Strength only sets your ceiling. What unlocks it is showing up: every active week raises your cap a little. The top rank is months of work, on purpose.','Stärke setzt nur deine Obergrenze. Freigeschaltet wird sie durchs Dranbleiben: Jede aktive Woche hebt dein Limit ein Stück. Der höchste Rang ist bewusst Monate an Arbeit.'],
+ 'rk.h5':['Every completely empty week costs rank. Long break, lower rank — the ladder remembers, the rank has to be re-earned.','Jede komplett leere Woche kostet Rang. Lange Pause, tieferer Rang — die Leiter merkt sich alles, der Rang will neu verdient werden.'],
  'streak':['Streak','Serie'],'week':['Week','Woche'],
  'btn.theme':['Theme','Design'],
  'btn.runStart':['Start session','Einheit starten'],
@@ -1729,10 +1733,10 @@ var DICT={
  'f.act':['Daily activity','Alltagsaktivität'],'f.goal':['Goal','Ziel'],'f.cal':['Calories','Kalorien'],
  'f.pro':['Protein','Protein'],'f.fat':['Fat','Fett'],'f.carb':['Carbs (derived)','Kohlenhydrate (abgeleitet)'],
  'you.h':['You','Du'],'you.s':['Baseline is week 1. Everything here is measured against your own start, not against anyone else.','Basis ist Woche 1. Alles hier misst gegen deinen eigenen Start, nicht gegen andere.'],
- 'you.ready':['Readiness right now','Belastbarkeit gerade'],'you.habits':['Habits — the coach reads these live','Gewohnheiten — der Coach liest sie live'],
+ 'you.ready':['Readiness right now','Tagesform'],'you.habits':['Habits — the coach reads these live','Gewohnheiten — der Coach liest sie live'],
  'you.weight':['Bodyweight trend','Gewichtsverlauf'],'you.meas':['Measurements — same time of day, relaxed','Umfänge — gleiche Tageszeit, entspannt'],
  'you.prs':['Personal records — clean reps only','Rekorde — nur saubere Wiederholungen'],'you.taking':['What you are taking','Was du nimmst'],
- 'y.exp':['Training since','Trainiere seit'],'y.sleep':['Sleep average','Schlaf im Schnitt'],'y.mood':['Motivation now','Motivation gerade'],
+ 'y.exp':['Training since','Trainiere seit'],'y.sleep':['Sleep average','Schlaf im Schnitt'],'y.mood':['Motivation now','Motivation heute'],
  'y.sore':['Soreness','Muskelkater'],'y.stress':['Life load','Belastung im Alltag'],'y.goal':['Your goal','Dein Ziel'],
  'coach.h':['Coach','Coach'],'coach.s':['Reads everything you have entered, updates the moment you change a number, and now speaks up on its own — a popup from the coach when something important shifts. Ordered by what costs you the most.','Liest alles was du eingetragen hast, aktualisiert sofort und meldet sich jetzt von selbst — eine Popup-Nachricht vom Coach, sobald etwas Wichtiges kippt. Sortiert nach dem was dich am meisten kostet.'],
  'coach.how':['How this works','Wie das funktioniert'],
@@ -2048,7 +2052,7 @@ var EXDB={
   ['Dragon flag',5,'an','','Straight body lowers and rises from the shoulders.']
  ]
 };
-var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Halt']};
+var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Sofa-Halt']};
 var FLN={w:['wrists','Handgelenke'],s:['overhead shoulder','Schulter ueber Kopf'],k:['knee-dominant','knielastig']};
 var profile=get('profile',null);
 function exAvail(e){var q=e[2];
@@ -2487,7 +2491,7 @@ var MOB=[
    das ist ordentlich, aber weit von aussergewoehnlich entfernt, und wer dort
    ankam hatte sofort das Maximum. Die oberen Schwellen orientieren sich an dem,
    was mit striktem Bewegungsumfang tatsaechlich selten ist. */
-var TLBL=[['Beginner','Anfang'],['Foundation','Basis'],['Solid','Solide'],
+var TLBL=[['Beginner','Einstieg'],['Foundation','Basis'],['Solid','Solide'],
           ['Strong','Stark'],['Advanced','Fortgeschritten'],['Elite','Elite']];
 /* sl ist nur der Anschlag des Schiebereglers, nicht die Obergrenze der
    Wertung: das Zahlenfeld nimmt auch 90 Liegestuetze an, der Griff steht dann
@@ -4637,12 +4641,35 @@ function integrity(){
   return{pct:Math.round(sum/PAT.length*100),offen:offen,
     clock:vrf.flags.indexOf('clock')>=0,dev:false};
 }
+/* Raenge sind ein Marathon, kein Wochenende. Staerke (Leiter, Rekorde,
+   Planerfuellung) setzt nur die Obergrenze -- freigeschaltet wird sie durch
+   Dranbleiben: jede aktive Woche (mindestens zwei abgehakte Tage) hebt das
+   Aufbau-Limit um 35 LP, jede komplett leere Woche senkt es um 25. Olympier
+   heisst damit rund ein halbes Jahr Arbeit, und wer laenger aussetzt, steigt
+   sichtbar ab. Alles wird aus dem Verlauf der Haken berechnet -- Haken gibt
+   es nur am jeweiligen Tag, rueckwirkend faelschen geht nicht. */
+function wkStats(){
+  var days=Object.keys(doneMap).filter(function(k){return dayDone(k);}).sort();
+  if(!days.length)return{active:0,idle:0,cap:40};
+  var wk={};
+  days.forEach(function(k){var m=iso(monday(new Date(k+'T00:00:00')));wk[m]=(wk[m]||0)+1;});
+  var w=monday(new Date(days[0]+'T00:00:00')),cur=monday(TODAY);
+  var earned=0,active=0,idle=0;
+  while(w<=cur){
+    var n=wk[iso(w)]||0,isCur=iso(w)===iso(cur);
+    if(n>=2){active++;earned+=35;}
+    else if(n===0&&!isCur){idle++;earned-=25;}
+    if(earned<0)earned=0;
+    w=add(w,7);
+  }
+  return{active:active,idle:idle,cap:40+earned};
+}
 function patLP(p){
   var st=steps[p.id]||0,len=Math.max(1,p.ladder.length-1);
   /* Die Leiterstufe zaehlt nur so weit, wie sie belegt ist. */
   var ladderPart=(st/len)*600*stepConf(p.id);
   var prPart=Math.min(200,prFor(PRMAP[p.id])*8);
-  return Math.round(ladderPart+prPart+adherence());
+  return Math.round(Math.min(ladderPart+prPart+adherence(),wkStats().cap));
 }
 function adherence(){
   var kept=0,poss=0;
@@ -4676,11 +4703,11 @@ var ACH=[
  {id:'pullup1',cat:'strength',n:['First pull-up','Erster Klimmzug'],d:['Reach the full pull-up step','Volle Klimmzug-Stufe erreichen'],p:60,f:function(){return (steps.pull||0)>=4;}},
  {id:'pullup10',cat:'strength',n:['Ten strict','Zehn strikte'],d:['10 clean pull-ups','10 saubere Klimmzüge'],p:90,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Pull-ups')r=p.v;});return r>=10;}},
  {id:'push4',cat:'strength',n:['Chest to floor','Brust zum Boden'],d:['Reach the full push-up step','Volle Liegestütz-Stufe erreichen'],p:40,f:function(){return (steps.push||0)>=3;}},
- {id:'push6',cat:'strength',n:['Archer','Bogenschütze'],d:['Reach archer push-ups','Archer-Liegestütze erreichen'],p:80,f:function(){return (steps.push||0)>=5;}},
+ {id:'push6',cat:'strength',n:['Archer','Archer'],d:['Reach archer push-ups','Archer-Liegestütze erreichen'],p:80,f:function(){return (steps.push||0)>=5;}},
  {id:'pistol',cat:'strength',n:['Pistol','Pistol'],d:['Reach the pistol squat step','Pistol-Stufe erreichen'],p:90,f:function(){return (steps.legs||0)>=6;}},
- {id:'hollow60',cat:'strength',n:['Hollow sixty','Hohlkreuz-Sechzig'],d:['60 s hollow hold','60 s Hollow Hold'],p:50,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Hollow hold')r=p.v;});return r>=60;}},
+ {id:'hollow60',cat:'strength',n:['Hollow sixty','Hollow 60'],d:['60 s hollow hold','60 s Hollow Hold'],p:50,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Hollow hold')r=p.v;});return r>=60;}},
  {id:'allsteps',cat:'strength',n:['Broad base','Breite Basis'],d:['Every pattern past step 3','Jedes Muster über Stufe 3'],p:100,f:function(){return PAT.every(function(p){return (steps[p.id]||0)>=3;});}},
- {id:'skill3',cat:'strength',n:['Skill seeker','Skill-Sucher'],d:['Advance any skill 3 steps','Einen Skill 3 Stufen weiter'],p:60,f:function(){return SKILLS.some(function(s){return get('skill_'+s.id,0)>=3;});}},
+ {id:'skill3',cat:'strength',n:['Skill seeker','Skill-Jäger'],d:['Advance any skill 3 steps','Einen Skill 3 Stufen weiter'],p:60,f:function(){return SKILLS.some(function(s){return get('skill_'+s.id,0)>=3;});}},
 
  {id:'rest',cat:'recovery',n:['Recovery respected','Regeneration respektiert'],d:['Log 5 rest days','5 Ruhetage eintragen'],p:40,f:function(){
    var n=0;for(var k in doneMap){var pl=plan(new Date(k+'T00:00:00'));if(pl.kind==='rest'&&dayDone(k))n++;}return n>=5;}},
@@ -4696,7 +4723,7 @@ var ACH=[
  {id:'nowaste',cat:'fuel',n:['No snake oil','Kein Schlangenöl'],d:['Nothing useless on your supplement list','Nichts Nutzloses auf der Supplement-Liste'],p:25,f:function(){
    var any=false,bad=false;SUPPS.forEach(function(s,i){if(taken[i]){any=true;if(BADS[s])bad=true;}});return any&&!bad;}},
 
- {id:'tested',cat:'knowledge',n:['Measured','Vermessen'],d:['Complete the level test','Level-Test ausfüllen'],p:35,f:function(){return TESTS.some(function(t){return (testVals[t.id]||0)>0;});}},
+ {id:'tested',cat:'knowledge',n:['Measured','Eingemessen'],d:['Complete the level test','Level-Test ausfüllen'],p:35,f:function(){return TESTS.some(function(t){return (testVals[t.id]||0)>0;});}},
  {id:'scholar',cat:'knowledge',n:['Scholar','Gelehrter'],d:['Open all 12 chapters','Alle 12 Kapitel öffnen'],p:60,f:function(){return Object.keys(seen.chapters||{}).length>=12;}},
  {id:'rpe10',cat:'knowledge',n:['Self aware','Selbstwahrnehmung'],d:['Log RPE 10 times','10x RPE eintragen'],p:40,f:function(){return countLogs(function(l){return !!l.rpe;})>=10;}},
  {id:'logs20',cat:'knowledge',n:['Diarist','Chronist'],d:['Write 20 session logs','20 Trainingslogs schreiben'],p:60,f:function(){return Object.keys(logs).length>=20;}},
@@ -4872,7 +4899,10 @@ function renderRanks(){
   $('rkBadge').innerHTML=badgeSvg(t.t,72);
   $('rkTier').textContent=t.label;
   $('rkTier').style.color=t.col;
-  $('rkSub').textContent=(cfg.lang==='de'?'Gesamtrang · Woche ':'Overall rank · week ')+Math.max(1,Math.min(12,wkOf(TODAY)));
+  var wks=wkStats();
+  $('rkSub').textContent=(cfg.lang==='de'
+    ?('Gesamtrang · '+wks.active+(wks.active===1?' aktive Woche':' aktive Wochen')+' · Limit '+wks.cap+' LP')
+    :('Overall rank · '+wks.active+(wks.active===1?' active week':' active weeks')+' · cap '+wks.cap+' LP'));
   $('rkBar').style.width=Math.round(t.within/100*100)+'%';
   $('rkLp').textContent = t.t<0
     ? (cfg.lang==='de'?('Noch ohne Rang — '+Math.max(0,25-avg)+' LP bis Holz III'):('Unranked — '+Math.max(0,25-avg)+' LP to Wood III'))
