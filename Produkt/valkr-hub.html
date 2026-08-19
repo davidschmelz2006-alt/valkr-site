@@ -1520,7 +1520,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.5';
+var VERSION='13.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1934,18 +1934,18 @@ var EXDB={
   ['Full push-up',2,'','w','Chest a fist above the floor, elbows back at 45 degrees.'],
   ['Wide push-up',2,'','w','Hands wider, more chest, less triceps.'],
   ['Staggered push-up',2,'','w','One hand forward, one back - uneven load, swap sides.'],
-  ['Sphinx push-up',2,'','','Forearms to hands and back - triceps, wrist-friendly start.'],
-  ['Diamond push-up',3,'','w','Hands form a triangle under the chest. Triceps day.'],
+  ['Sphinx push-up',2,'','e','Forearms to hands and back - triceps, wrist-friendly start.'],
+  ['Diamond push-up',3,'','we','Hands form a triangle under the chest. Triceps day.'],
   ['Hindu push-up',3,'','ws','Dive from pike through low arc to cobra and back.'],
   ['Decline push-up',3,'ch','w','Feet elevated - more weight on the shoulders.'],
-  ['Pseudo planche lean',3,'','w','Push-up hold, hands by the hips, lean far forward.'],
-  ['Pseudo planche push-up',4,'','w','Push-ups with hands at the hips, body leaning forward.'],
+  ['Pseudo planche lean',3,'','we','Push-up hold, hands by the hips, lean far forward.'],
+  ['Pseudo planche push-up',4,'','we','Push-ups with hands at the hips, body leaning forward.'],
   ['Archer push-up',4,'','w','One arm bends, the other stays straight and wide.'],
-  ['Clap push-up',4,'','w','Explode off the floor, clap, land soft. Power work.'],
+  ['Clap push-up',4,'','we','Explode off the floor, clap, land soft. Power work.'],
   ['Ring push-up',4,'rg','w','Rings under the chest - every rep fights the wobble.'],
-  ['Typewriter push-up',5,'','w','Low over the floor, shift chest from hand to hand.'],
-  ['One-arm incline push-up',5,'tb','w','One hand on a table, body braced against rotation.'],
-  ['One-arm push-up',5,'','w','Feet wide, hips square. The horizontal-push summit.']
+  ['Typewriter push-up',5,'','we','Low over the floor, shift chest from hand to hand.'],
+  ['One-arm incline push-up',5,'tb','we','One hand on a table, body braced against rotation.'],
+  ['One-arm push-up',5,'','we','Feet wide, hips square. The horizontal-push summit.']
  ],
  pull:[
   ['Dead hang',0,'br','','Just hang. Grip, shoulders, patience.'],
@@ -1961,11 +1961,11 @@ var EXDB={
   ['Commando pull-up',3,'br','','Sideways under the bar, alternating head sides.'],
   ['L-sit pull-up',4,'br','','Legs held horizontal through every rep.'],
   ['High pull-up',4,'br','','Pull until the chest reaches the bar. Muscle-up currency.'],
-  ['Archer pull-up',4,'br','','Chin over the bar shifted to one side, other arm long.'],
-  ['Typewriter pull-up',5,'br','','Hold at the top, travel from hand to hand.'],
+  ['Archer pull-up',4,'br','e','Chin over the bar shifted to one side, other arm long.'],
+  ['Typewriter pull-up',5,'br','e','Hold at the top, travel from hand to hand.'],
   ['Weighted pull-up',5,'br','','Backpack with books. Progress you can count in kilos.'],
-  ['One-arm assisted pull-up',5,'br','','One hand on a towel lower than the bar.'],
-  ['One-arm pull-up',5,'br','','The vertical-pull summit. Years, not weeks.']
+  ['One-arm assisted pull-up',5,'br','e','One hand on a towel lower than the bar.'],
+  ['One-arm pull-up',5,'br','e','The vertical-pull summit. Years, not weeks.']
  ],
  row:[
   ['Doorframe row',0,'','','Stand in the door, hold the frame, lean back, pull in.'],
@@ -1978,22 +1978,22 @@ var EXDB={
   ['Pause row',4,'br','','Two seconds chest at the bar, every rep.'],
   ['Wide row',4,'br','','Wide grip, elbows out - rear shoulder focus.'],
   ['Archer row',4,'br','','Pull to one hand, other arm straight.'],
-  ['One-arm row',5,'tb','','One hand on the edge, body braced against twisting.'],
+  ['One-arm row',5,'tb','e','One hand on the edge, body braced against twisting.'],
   ['Tuck front-lever row',5,'br','','Row while holding a tuck lever. Core included.']
  ],
  press:[
   ['Pike push-up, hands elevated',0,'tb','s','Hips high, hands on a table - the gentle entry.'],
   ['Pike push-up',1,'','ws','Upside-down V, head lowers between the hands.'],
-  ['Bench dips',2,'ch','s','Hands on a chair behind you. Shoulders down, short range.'],
+  ['Bench dips',2,'ch','se','Hands on a chair behind you. Shoulders down, short range.'],
   ['Feet-elevated pike push-up',2,'ch','ws','Feet on a chair, hips over shoulders.'],
   ['Deficit pike push-up',3,'','ws','Hands on books - deeper range than the floor allows.'],
   ['Wall walk',3,'wl','ws','Walk the feet up the wall, hands toward it, walk back.'],
-  ['Straight-bar dip',3,'br','s','Both hands on one bar, lean over it, dip.'],
-  ['Parallel-bar dip',3,'dp','s','Full dips - shoulders below elbows, press to lockout.'],
+  ['Straight-bar dip',3,'br','se','Both hands on one bar, lean over it, dip.'],
+  ['Parallel-bar dip',3,'dp','se','Full dips - shoulders below elbows, press to lockout.'],
   ['Wall handstand push-up, partial',4,'wl','ws','Head toward a book stack, quarter to half range.'],
-  ['Ring dip',4,'rg','s','Dips on rings - the stabilizers pay the bill.'],
+  ['Ring dip',4,'rg','se','Dips on rings - the stabilizers pay the bill.'],
   ['Wall handstand push-up',5,'wl','ws','Head to the floor and back up, heels on the wall.'],
-  ['Korean dip',5,'br','s','Bar behind the back. Unforgiving shoulder range.'],
+  ['Korean dip',5,'br','se','Bar behind the back. Unforgiving shoulder range.'],
   ['Freestanding handstand push-up',5,'','ws','No wall. The vertical-push summit.']
  ],
  legs:[
@@ -2003,27 +2003,27 @@ var EXDB={
   ['Air squat',1,'','','Hip crease below the knee, heels planted.'],
   ['Step-up',1,'ch','k','Full foot on the surface, drive through the heel.'],
   ['Calf raise',1,'','','Full stretch at the bottom, pause at the top.'],
-  ['Good morning',1,'','','Hands behind the head, hinge at the hip, flat back.'],
+  ['Good morning',1,'','l','Hands behind the head, hinge at the hip, flat back.'],
   ['Paused squat',2,'','','Two seconds at the bottom. No bounce, all muscle.'],
   ['Reverse lunge',2,'','k','Step back instead of forward - kinder to the knee.'],
   ['Single-leg glute bridge',2,'','','One leg up, hips stay level.'],
   ['Single-leg calf raise',2,'','','All bodyweight on one calf, full range.'],
   ['Walking lunge',2,'','k','Long steps, torso tall, knee tracks the toes.'],
   ['Split squat',3,'','k','Feet split, back knee toward the floor.'],
-  ['Lateral lunge',3,'','k','Step sideways, sit into one hip, other leg straight.'],
-  ['Single-leg RDL',3,'','','Hinge on one leg, back flat - hamstrings and balance.'],
-  ['Cossack squat',3,'','k','Weight over one heel, wide stance, other leg straight.'],
+  ['Lateral lunge',3,'','kh','Step sideways, sit into one hip, other leg straight.'],
+  ['Single-leg RDL',3,'','l','Hinge on one leg, back flat - hamstrings and balance.'],
+  ['Cossack squat',3,'','kh','Weight over one heel, wide stance, other leg straight.'],
   ['Jump squat',3,'','k','Explode up, land soft into the next rep.'],
   ['Hip thrust',3,'ch','','Shoulders on a couch edge, hips to full lockout.'],
   ['Sissy squat',4,'','k','Knees travel far forward, body leans back. Quad isolation.'],
-  ['Bulgarian split squat',4,'ch','k','Rear foot on a chair - the single-leg workhorse.'],
+  ['Bulgarian split squat',4,'ch','kh','Rear foot on a chair - the single-leg workhorse.'],
   ['Nordic negative',4,'an','k','Heels anchored, lower forward as slowly as you can.'],
-  ['Assisted pistol',4,'','k','Hold a doorframe, one-leg squat to the bottom.'],
-  ['Box pistol',4,'ch','k','One-leg squat to a chair, stand back up.'],
-  ['Pistol squat',5,'','k','Full one-leg squat, other leg straight in front.'],
-  ['Shrimp squat',5,'','k','Rear foot held in the hand, knee to the floor.'],
+  ['Assisted pistol',4,'','kh','Hold a doorframe, one-leg squat to the bottom.'],
+  ['Box pistol',4,'ch','kh','One-leg squat to a chair, stand back up.'],
+  ['Pistol squat',5,'','kh','Full one-leg squat, other leg straight in front.'],
+  ['Shrimp squat',5,'','kh','Rear foot held in the hand, knee to the floor.'],
   ['Nordic curl',5,'an','k','The full negative plus the way back up. Hamstring summit.'],
-  ['Skater squat',5,'','k','One-leg squat, rear knee taps a pad behind you.']
+  ['Skater squat',5,'','kh','One-leg squat, rear knee taps a pad behind you.']
  ],
  core:[
   ['Dead bug',0,'','','Opposite arm and leg lower, back stays glued down.'],
@@ -2035,25 +2035,25 @@ var EXDB={
   ['Mountain climbers',1,'','w','Push-up position, knees drive fast, hips stay low.'],
   ['Hollow hold',2,'','','Arms and legs long, lower back never leaves the floor.'],
   ['Plank shoulder taps',2,'','w','Push-up plank, tap the opposite shoulder, hips still.'],
-  ['Floor leg raise',2,'','','Legs to vertical and slowly back to a hover.'],
-  ['Superman hold',2,'','','Face down, chest and thighs off the floor.'],
+  ['Floor leg raise',2,'','l','Legs to vertical and slowly back to a hover.'],
+  ['Superman hold',2,'','l','Face down, chest and thighs off the floor.'],
   ['Hollow rock',3,'','','The hollow hold, rocking like a banana. Shape stays.'],
-  ['V-up',3,'','','Fold from hollow - hands meet the feet over the hips.'],
+  ['V-up',3,'','l','Fold from hollow - hands meet the feet over the hips.'],
   ['Side plank dip',3,'','','Side plank, lower the hip, lift it back.'],
   ['Copenhagen plank',3,'ch','','Top foot on a chair, side plank on the inner thigh.'],
   ['Hanging knee raise',3,'br','','Hang, knees to the chest without swinging.'],
-  ['Reverse plank',3,'','ws','Face up, hips to a straight line, chest open.'],
-  ['Hanging leg raise',4,'br','','Straight legs to horizontal, no momentum.'],
-  ['Tuck L-sit',4,'','w','On the floor or parallettes, knees tucked, hips lifted.'],
-  ['Dragon flag negative',4,'an','','Shoulders down, body straight, lower slowly.'],
-  ['Toes-to-bar',5,'br','','Feet touch the bar, controlled both ways.'],
-  ['L-sit',5,'','w','Legs horizontal, hips floating. The core summit on the floor.'],
-  ['Windshield wipers',5,'br','','Legs up at the bar, swing side to side with control.'],
-  ['Dragon flag',5,'an','','Straight body lowers and rises from the shoulders.']
+  ['Reverse plank',3,'','wsl','Face up, hips to a straight line, chest open.'],
+  ['Hanging leg raise',4,'br','lh','Straight legs to horizontal, no momentum.'],
+  ['Tuck L-sit',4,'','wh','On the floor or parallettes, knees tucked, hips lifted.'],
+  ['Dragon flag negative',4,'an','l','Shoulders down, body straight, lower slowly.'],
+  ['Toes-to-bar',5,'br','lh','Feet touch the bar, controlled both ways.'],
+  ['L-sit',5,'','wh','Legs horizontal, hips floating. The core summit on the floor.'],
+  ['Windshield wipers',5,'br','l','Legs up at the bar, swing side to side with control.'],
+  ['Dragon flag',5,'an','l','Straight body lowers and rises from the shoulders.']
  ]
 };
 var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Sofa-Halt']};
-var FLN={w:['wrists','Handgelenke'],s:['overhead shoulder','Schulter ueber Kopf'],k:['knee-dominant','knielastig']};
+var FLN={w:['wrists','Handgelenke'],s:['overhead shoulder','Schulter über Kopf'],k:['knee-dominant','knielastig'],e:['elbow-heavy','ellbogenlastig'],l:['lower back','unterer Rücken'],h:['hip-heavy','hüftlastig']};
 var profile=get('profile',null);
 function exAvail(e){var q=e[2];
   if(!q||q==='wl'||q==='tb'||q==='ch'||q==='an')return true;
@@ -2066,6 +2066,9 @@ function exAllowed(e){if(!profile||!profile.avoid)return true;var f=e[3]||'';
   if(profile.avoid.wrist&&f.indexOf('w')>-1)return false;
   if(profile.avoid.shoulder&&f.indexOf('s')>-1)return false;
   if(profile.avoid.knee&&f.indexOf('k')>-1)return false;
+  if(profile.avoid.elbow&&f.indexOf('e')>-1)return false;
+  if(profile.avoid.lowback&&f.indexOf('l')>-1)return false;
+  if(profile.avoid.hip&&f.indexOf('h')>-1)return false;
   return true;}
 function exFind(pat,name){var L=EXDB[pat]||[];for(var i=0;i<L.length;i++)if(L[i][0]===name)return L[i];return null;}
 function exPick(pat,wantTier,used){var best=null,bd=99;
@@ -2098,7 +2101,9 @@ function applyProfile(){
         if(sw)e=exFind(it.id,sw);
         if(!e){var d=defs[i]?exFind(it.id,defs[i]):null;
           var want=d?d[1]:patTier(it.id);
-          if(d&&exAvail(d)&&exAllowed(d))e=d;
+          /* Standard nur, wenn er nicht schon als Ersatz an anderer Stelle
+             derselben Einheit steht -- sonst gibt es doppelte Uebungen. */
+          if(d&&exAvail(d)&&exAllowed(d)&&!used[d[0]])e=d;
           else e=exPick(it.id,want,used);
           /* Ohne Stange gibt es kein vertikales Ziehen -- dann ersetzt
              Rudern den Klimmzug-Slot. Das ist die Buchregel, kein Notnagel:
@@ -4204,8 +4209,11 @@ var OBL={
   ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen']]],
  avoid:[
   ['wrist',['Wrists','Handgelenke'],null],
+  ['elbow',['Elbows','Ellbogen'],null],
   ['shoulder',['Overhead shoulder','Schulter über Kopf'],null],
-  ['knee',['Knees','Knie'],null]],
+  ['lowback',['Lower back','Unterer Rücken'],null],
+  ['knee',['Knees','Knie'],null],
+  ['hip',['Hips','Hüfte'],null]],
  exp:[
   ['0',['Just starting','Fange gerade an'],null],
   ['1',['Under 6 months','Unter 6 Monate'],null],
@@ -4226,7 +4234,7 @@ var IT={
   s:['None at all is fine — wall, table and chair cover every pattern. Tap all that apply, or nothing.','Gar keins ist okay — Wand, Tisch und Stuhl decken jedes Muster ab. Tippe an, was zutrifft — oder nichts.'],
   n:['Next','Weiter']},
  avoid:{t:['Anything to protect?','Etwas zu schonen?'],
-  s:['The plan then avoids exercises that load these joints. Skip if nothing hurts.','Der Plan meidet dann Übungen, die diese Gelenke belasten. Einfach weiter, wenn nichts zwickt.'],
+  s:['The plan then avoids exercises that load these areas. Pick as many as you need — skip if nothing hurts.','Der Plan meidet dann Übungen, die diese Stellen belasten. Wähl so viele wie nötig — einfach weiter, wenn nichts zwickt.'],
   n:['Next','Weiter']},
  exp:{t:['How long have you trained?','Wie lange trainierst du schon?'],
   s:['Sets your starting rungs — the strength test fine-tunes them next.','Setzt deine Startstufen — der Krafttest justiert gleich fein nach.']},
@@ -4242,10 +4250,10 @@ function introShow(on){
 }
 function syncIntro(){if(!profile){inIdx=0;renderIntro();introShow(true);}else introShow(false);}
 function introFinishProfile(){
+  var av={};OBL.avoid.forEach(function(o){av[o[0]]=!!obState.avoid[o[0]];});
   profile={goal:obState.goal,days:obState.days,
     eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
-    avoid:{wrist:!!obState.avoid.wrist,shoulder:!!obState.avoid.shoulder,knee:!!obState.avoid.knee},
-    exp:obState.exp,swaps:{},testAsked:1};
+    avoid:av,exp:obState.exp,swaps:{},testAsked:1};
   set('profile',profile);
   var ye=$('y-exp');if(ye)ye.selectedIndex=parseInt(profile.exp,10)||0;
   applyProfile();buildCatalog();renderDay();volBar();refresh();
