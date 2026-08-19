@@ -35,6 +35,13 @@
        das ist unter jeder Lesbarkeitsgrenze und der Hauptgrund, warum es
        gebastelt aussah. Jetzt sieben Stufen, kleinste 11 px. */
     --t1:.69rem;--t2:.75rem;--t3:.82rem;--t4:.9rem;--t5:1rem;--t6:1.15rem;--t7:1.4rem;
+    /* Radien als Skala. Eckig wirkt technisch, zu rund verspielt -- dazwischen
+       liegt der moderne Eindruck. */
+    --r1:10px;--r2:15px;--r3:22px;
+    /* Glasoptik: durchscheinende Flaechen mit Unschaerfe dahinter. Der Effekt
+       lebt davon, dass etwas durchscheint -- deshalb liegt die Atmosphaere
+       hinter der ganzen Seite und nicht nur unten. */
+    --glass:blur(16px) saturate(1.5);
     --fm:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
   }
   @media (prefers-color-scheme:dark){:root[data-pack="auto"]{
@@ -81,6 +88,17 @@
     --p1:240,145,63;--p2:228,85,60;
     --sh:0 1px 2px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.4);}
 
+  /* Onyx: fast schwarz, ein einziger Akzent in Violett. Das ist die
+     zurueckhaltendste Fassung -- gedacht fuer alle, denen jede Farbe im
+     Hintergrund zu viel ist. */
+  :root[data-pack="onyx"]{
+    --aurora:#A78BFA;--ice:#C4B5FD;--ember:#F472B6;--brass:#8B5CF6;
+    --bg:#08080C;--surf:#121218;--surf2:#0C0C11;--surf3:#191922;
+    --ink:#EDEDF2;--ink2:#9A9AA8;--ink3:#6A6A78;--line:#24242F;--line2:#1B1B24;
+    --hero:#0B0B11;--heroInk:#EDEDF2;--part:167,139,250;
+    --p1:167,139,250;--p2:196,181,253;
+    --sh:0 1px 2px rgba(0,0,0,.6),0 12px 32px rgba(0,0,0,.5);}
+
   :root[data-pack="stone"]{
     --aurora:#2E7D6B;--ice:#4A7C94;--ember:#B4552F;--brass:#8A7333;
     --bg:#E6E4DF;--surf:#F1EFEA;--surf2:#DAD7D0;--surf3:#F8F6F2;
@@ -90,7 +108,12 @@
     --sh:0 1px 2px rgba(0,0,0,.06),0 8px 20px rgba(0,0,0,.08);}
 
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  /* 100 % statt fester 16 px: damit schlaegt die Schriftgroesse durch, die der
+     Nutzer in den Systemeinstellungen gewaehlt hat. Wer schlecht sieht, stellt
+     sein Telefon groesser -- eine App, die das ignoriert, ist unhoeflich. */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);font-size:100%;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
   button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
   input,select,textarea{font:inherit}
   :focus-visible{outline:2px solid var(--ember);outline-offset:2px}
@@ -114,9 +137,16 @@
   @keyframes shimmer{0%,100%{opacity:.28}50%{opacity:.6}}
   @media (prefers-reduced-motion:reduce){.sway,.sway2,.bob,.shimmer,.glowA,.glowB{animation:none}}
   #bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
-  .shell{max-width:1120px;margin:0 auto;padding:0 clamp(.7rem,3vw,1.5rem) 4rem;position:relative;z-index:1}
+  .shell{max-width:1120px;margin:0 auto;position:relative;z-index:1;
+    padding:0 max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-right,0px)) 4rem max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px))}
 
-  .bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;padding:.85rem 0 .7rem;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:30}
+  /* viewport-fit=cover schiebt die Seite unter die Statusleiste. Ohne diesen
+     Abstand klebt die Kopfzeile auf iPhones direkt unter Uhrzeit und Akku --
+     genau der Fehler aus Liams Screenshot. Die Leiste zieht ihren Hintergrund
+     mit unter die Statusleiste, das ist das saubere Verhalten. */
+  .bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+    padding:calc(.85rem + env(safe-area-inset-top,0px)) 0 .7rem;
+    border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:30}
   .barL,.barR{display:flex;align-items:center;gap:.7rem}
   .brand{display:flex;align-items:center;gap:.6rem}
   .brand p{margin:0;font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:var(--t5)}
@@ -162,9 +192,13 @@
     #tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;
       background:var(--surf);border-top:1px solid var(--line);
       padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 14px rgba(0,0,0,.14)}
-    #tabbar button{flex:1;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:.18rem;color:var(--ink3);font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;position:relative}
-    #tabbar svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+    /* Kompakter: 52 statt 56 px, kleinere Beschriftung in normaler Schreibweise
+       statt gesperrter Versalien. Eine Tableiste soll da sein, nicht den
+       Bildschirm besetzen. */
+    #tabbar button{flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+      gap:.14rem;color:var(--ink3);font-family:var(--fb);font-weight:600;font-size:.63rem;letter-spacing:.01em;
+      text-transform:none;position:relative;transition:color .16s}
+    #tabbar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     #tabbar button[aria-current="true"]{color:var(--aurora)}
     #tabbar .badge{position:absolute;top:7px;right:calc(50% - 20px);min-width:15px;height:15px;line-height:15px;
       background:var(--ember);color:#fff;border-radius:8px;font-size:var(--t1);font-style:normal;text-align:center;display:none;padding:0 3px}
@@ -555,8 +589,8 @@
   #lbTable td.demo{opacity:.55;font-style:italic}
   #lbTable td.pos{width:2.4rem;font-family:var(--fm);color:var(--ink3)}
 
-  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120%);z-index:400;background:var(--hero);color:var(--heroInk);border:1px solid var(--aurora);border-radius:6px;padding:.8rem 1.1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 16px 44px rgba(0,0,0,.45);transition:transform .5s cubic-bezier(.2,.9,.3,1);max-width:calc(100vw - 32px)}
-  #toast.on{transform:translate(-50%,0)}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,120%);z-index:400;background:var(--hero);color:var(--heroInk);border:1px solid var(--aurora);border-radius:6px;padding:.8rem 1.1rem;display:flex;align-items:center;gap:.8rem;box-shadow:0 16px 44px rgba(0,0,0,.45);opacity:0;visibility:hidden;pointer-events:none;transition:transform .5s cubic-bezier(.2,.9,.3,1),opacity .3s ease,visibility .3s;max-width:calc(100vw - 32px)}
+  #toast.on{transform:translate(-50%,0);opacity:1;visibility:visible;pointer-events:auto}
   #toast em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;color:var(--aurora)}
   #toast b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t5)}
   #toast span{font-size:var(--t3);opacity:.72}
@@ -610,6 +644,72 @@
   @media (max-width:640px){#a2hs{bottom:56px}}
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.flake{display:none}#bgfx{display:none}}
+  /* ---- Glasflaechen ----------------------------------------------------
+     Karten, Kacheln und Leisten werden durchscheinend und unscharf hinterlegt.
+     color-mix haelt das themenunabhaengig: jede Flaeche nimmt ihre eigene
+     Themenfarbe und macht sie teildurchlaessig. Browser ohne color-mix
+     ignorieren die Zeile und behalten die volle Farbe -- kein Bruch. */
+  .card,.exrow,.tile,.chartbox,.form,.kpi,.acc>div,.file,.note,.addonRow{border-radius:var(--r2)}
+  /* Unschaerfe kostet Rechenzeit pro Flaeche. Deshalb nur auf den grossen,
+     wenigen Flaechen -- nicht auf Listenzeilen, von denen es ein Dutzend gibt.
+     Sonst faellt genau die Bildrate, die auf 120-Hz-Geraeten den Unterschied
+     macht. Die Zeilen bekommen die Durchsicht ohne Unschaerfe. */
+  .card,.chartbox,.form,.acc>div{background:color-mix(in srgb,var(--surf) 74%,transparent);
+    backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+  .exrow,.tile,.kpi{background:color-mix(in srgb,var(--surf) 72%,transparent)}
+  .hero{backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+  /* Bewegungen laufen ausschliesslich ueber transform und opacity -- die
+     rechnet die Grafikeinheit, alles andere zwingt zu neuem Layout und
+     bricht auf hohen Bildraten ein. */
+  .exrow,.tile,.tbtn,.iconbtn,.txtbtn,.nb{will-change:transform}
+  .hero{border-radius:var(--r3)}
+  .tbtn,.nb,input,select,textarea{border-radius:var(--r1)}
+  .iconbtn,.txtbtn{border-radius:var(--r1)}
+  .tick{border-radius:8px}
+  .hueRow{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:.7rem 0 .4rem}
+  .hueRow label{font-family:var(--fm);font-size:var(--t1);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3);flex:none}
+  .hueRow input[type=range]{flex:1;min-width:150px;-webkit-appearance:none;appearance:none;height:10px;border-radius:5px;border:1px solid var(--line);padding:0;
+    background:linear-gradient(90deg,hsl(0 62% 58%),hsl(60 62% 58%),hsl(120 62% 58%),hsl(180 62% 58%),hsl(240 62% 58%),hsl(300 62% 58%),hsl(360 62% 58%))}
+  .hueRow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:var(--surf3);border:2px solid var(--ink);cursor:pointer;box-shadow:var(--sh)}
+  .hueRow input[type=range]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;background:var(--surf3);border:2px solid var(--ink);cursor:pointer}
+  .hueDot{width:24px;height:24px;border-radius:50%;background:var(--aurora);border:1px solid var(--line);flex:none}
+
+  /* Tableiste als schwebende Glasleiste. Die abgerundete Oberkante und der
+     Abstand zum Rand nehmen ihr das Klebrige -- sie sitzt auf der Seite,
+     statt unten angeschraubt zu sein. */
+  @media (max-width:640px){
+    #tabbar{background:color-mix(in srgb,var(--surf) 78%,transparent);
+      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
+      border-radius:var(--r3) var(--r3) 0 0}
+    #tabbar button[aria-current="true"]::before{content:"";position:absolute;top:6px;
+      width:38px;height:30px;border-radius:var(--r1);background:color-mix(in srgb,var(--aurora) 16%,transparent)}
+    #tabbar svg,#tabbar span{position:relative}
+    nav#nav{border-radius:var(--r3) var(--r3) 0 0;
+      background:color-mix(in srgb,var(--surf) 88%,transparent);
+      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+    .bar{background:color-mix(in srgb,var(--bg) 82%,transparent);
+      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+
+    /* ---- Tabellen auf dem Handy ---------------------------------------
+       Gemessen: Bestenliste 420 px breit in einem 319-px-Container, sieben
+       Spalten. Sieben Spalten sind auf einem Telefon keine Tabelle mehr,
+       sondern eine Zumutung. Also weg mit dem, was man beim Ueberfliegen
+       nicht braucht -- Planerfuellung, Serie und Level stehen ohnehin im
+       Du-Bereich. Platz, Name, Rang und Punkte bleiben. */
+    #lbTable th:nth-child(4),#lbTable td:nth-child(4),
+    #lbTable th:nth-child(5),#lbTable td:nth-child(5),
+    #lbTable th:nth-child(6),#lbTable td:nth-child(6){display:none}
+    /* Rangverteilung: die reine Kopfzahl faellt raus, Anteil sagt mehr. */
+    #tierTable th:nth-child(2),#tierTable td:nth-child(2){display:none}
+    /* min-width:420px zwang die Tabelle breiter als jedes Telefon. Mit
+       versteckten Spalten braucht sie das nicht mehr. */
+    .cmp{min-width:0}
+    table{font-size:var(--t1)}
+    table th,table td{padding-left:.35rem;padding-right:.35rem}
+    /* Sicherheitsnetz: was trotzdem zu breit wird, scrollt in sich selbst
+       statt die ganze Seite zu verschieben. */
+    .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  }
 </style>
 <div id="scenery" aria-hidden="true"></div>
 <canvas id="bgfx" aria-hidden="true"></canvas>
@@ -738,7 +838,7 @@
       <span class="hint" id="runHintTxt" data-i18n="btn.runHint">Guided: one set at a time, rest starts by itself.</span>
     </div>
     <div>
-      <p class="hint" style="margin:0 0 .5rem" data-i18n="today.tick">Tick the box when a block is done &middot; tap the name for technique</p>
+      
       <div class="exlist" id="today-list"></div>
       <div id="blockBox"></div>
     </div>
@@ -864,7 +964,7 @@
         <span class="pill" id="lbState"></span>
       </div>
       <div class="tblwrap" style="box-shadow:none;border:none;padding:0">
-        <table class="cmp" id="lbTable"></table>
+        <div class="tblwrap"><table class="cmp" id="lbTable"></table></div>
       </div>
       <p class="hint" id="lbNote"></p>
     </div>
@@ -915,7 +1015,7 @@
       </div>
     </div>
     <div class="tblwrap">
-      <table class="cmp">
+      <div class="tblwrap"><table class="cmp">
         <thead><tr><th data-i18n="test.tbl">Test</th><th class="c">Level 1</th><th class="c">Level 2</th><th class="c">Level 3</th></tr></thead>
         <tbody id="testTable"></tbody>
       </table>
@@ -1063,7 +1163,7 @@
   <section class="view" id="v-access">
     <div><h2 class="sec" data-i18n="acc.h">Book or hub?</h2><p class="sub" data-i18n="acc.s">Same knowledge in both. The difference is whether you read it once, or use it every session.</p></div>
     <div class="tblwrap">
-      <table class="cmp">
+      <div class="tblwrap"><table class="cmp">
         <thead><tr><th data-i18n="acc.get">What you get</th><th class="c">Book</th><th class="c">Hub</th></tr></thead>
         <tbody id="cmpBody"></tbody>
       </table>
@@ -1090,6 +1190,13 @@
       <p class="eyebrow" data-i18n="set.theme">Theme</p>
       <div class="themegrid" id="themeGrid"></div>
       <p class="hint" data-i18n="set.themeNote">Each theme changes the palette and the ambient effect &mdash; snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.</p>
+      <div class="hueRow">
+        <label for="hueSlide" data-i18n="set.hue">Accent colour</label>
+        <input id="hueSlide" type="range" min="0" max="359" step="1" aria-describedby="hueNote">
+        <span class="hueDot" id="hueDot" aria-hidden="true"></span>
+        <button class="tbtn" id="hueReset" data-i18n="btn.auto">Reset to auto</button>
+      </div>
+      <p class="hint" id="hueNote" data-i18n="set.hueNote">Overrides the accent of whichever theme is active. Backgrounds stay as they are &mdash; only the highlight colour moves.</p>
     </div>
     <div class="form">
       <p class="eyebrow" data-i18n="set.display">Display and units</p>
@@ -1122,7 +1229,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='9.9';
+var VERSION='10.1';
 var mem={};
 function get(k,d){try{var v=localStorage.getItem('vk_'+k);return v===null?d:JSON.parse(v);}catch(e){return (k in mem)?mem[k]:d;}}
 function rawGet(k){try{return localStorage.getItem('vk_'+k);}catch(e){return null;}}
@@ -1248,6 +1355,8 @@ var DICT={
  'you.blocks':['Your blocks so far','Deine Blöcke bisher'],
  'you.blocksNote':['Each block is twelve weeks. Your ladder steps carry over, so block two starts where block one finished — that is where the long-term progress actually shows.','Ein Block sind zwölf Wochen. Die Leiterstufen wandern mit, Block zwei beginnt also da, wo Block eins aufgehört hat — dort wird der Fortschritt über Monate erst sichtbar.'],
  'set.theme':['Theme','Design'],
+ 'set.hue':['Accent colour','Akzentfarbe'],
+ 'set.hueNote':['Overrides the accent of whichever theme is active. Backgrounds stay as they are — only the highlight colour moves.','Überschreibt den Akzent des aktiven Themes. Die Hintergründe bleiben, nur die Signalfarbe wandert.'],
  'set.motionNote':['Calm keeps the scenery quiet in the background and turns floating particles off. Full brings both back.','Ruhig laesst die Kulisse weit zuruecktreten und schaltet die schwebenden Partikel ab. Voll bringt beides zurueck.'],
  'set.themeNote':['Each theme changes the palette and the ambient effect — snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.','Jedes Design ändert Farben und Hintergrundeffekt — Schnee, Glühwürmchen, Pollen, Blasen oder Funken. Auto folgt deiner Systemeinstellung.'],
  'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],'set.clock':['Time format','Zeitformat'],
@@ -2897,7 +3006,8 @@ var PACKS=[
  {id:'summer',n:['Summer','Sommer'],fx:'pollen',d:['Pollen','Pollen'],c:['#F4E7CE','#E2803B','#F0B94E']},
  {id:'ocean',n:['Ocean','Ozean'],fx:'bubbles',d:['Bubbles','Blasen'],c:['#04131F','#3FC7D8','#7EA8F0']},
  {id:'ember',n:['Ember','Glut'],fx:'sparks',d:['Embers','Funken'],c:['#120C0B','#F0913F','#E4553C']},
- {id:'stone',n:['Stone','Stein'],fx:'none',d:['Still','Ruhig'],c:['#E6E4DF','#2E7D6B','#B4552F']}
+ {id:'stone',n:['Stone','Stein'],fx:'none',d:['Still','Ruhig'],c:['#E6E4DF','#2E7D6B','#B4552F']},
+ {id:'onyx',n:['Onyx','Onyx'],fx:'pollen',d:['Dust','Staub'],c:['#08080C','#A78BFA','#C4B5FD']}
 ];
 var pack=get('pack','auto');
 function fxOf(){var f='snow';PACKS.forEach(function(p){if(p.id===pack)f=p.fx;});return f;}
@@ -2927,7 +3037,8 @@ var ATMO={
   summer:{a:'#E2803B',b:'#F0B94E',c:'#7FD8E8'},
   ocean:{a:'#3FC7D8',b:'#7EA8F0',c:'#2E86C9'},
   ember:{a:'#E4553C',b:'#F0913F',c:'#FFD27A'},
-  stone:{a:'#5E7A56',b:'#8A8479',c:'#B4552F'}
+  stone:{a:'#5E7A56',b:'#8A8479',c:'#B4552F'},
+  onyx:{a:'#A78BFA',b:'#8B5CF6',c:'#F472B6'}
 };
 function sceneFor(id){
   var W=sceneW(),G=SCH;
@@ -2962,10 +3073,53 @@ function drawScene(){
 /* Die Szene haengt an der Fensterbreite, also nach dem Ziehen neu bauen. */
 var sceneTmr=null;
 window.addEventListener('resize',function(){clearTimeout(sceneTmr);sceneTmr=setTimeout(drawScene,180);});
+/* Android faerbt Status- und Navigationsleiste nach theme-color. Der Wert
+   stand fest auf Dunkelblau -- in hellen Themes sah der Rahmen dadurch aus
+   wie von einer anderen App, und die Systemtasten unten klebten auf Schwarz.
+   Jetzt folgt er der Hintergrundfarbe des aktuellen Themes. */
+/* Akzentfarbe frei waehlbar. Verschoben wird nur der Akzent, nicht der
+   Hintergrund -- sonst zerlegt man die sorgfaeltig abgestimmten Themes.
+   Die Partikel brauchen RGB statt HSL, deshalb die Umrechnung. */
+var hueEl=null;
+function hsl2rgb(h,s,l){
+  s/=100;l/=100;
+  var k=function(n){return (n+h/30)%12;},a=s*Math.min(l,1-l);
+  var f=function(n){return l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1)));};
+  return [Math.round(f(0)*255),Math.round(f(8)*255),Math.round(f(4)*255)].join(',');
+}
+function applyHue(){
+  if(!hueEl){hueEl=document.createElement('style');document.head.appendChild(hueEl);}
+  var h=cfg.hue;
+  if(h===undefined||h===null||h===''){hueEl.textContent='';syncThemeColor();return;}
+  h=+h;
+  var h2=(h+26)%360,h3=(h-26+360)%360;
+  /* :root allein verliert gegen :root[data-pack="..."] -- gleiche Spezifitaet
+     und spaeter im Dokument gewinnt. */
+  hueEl.textContent=':root[data-pack]{'+
+    '--aurora:hsl('+h+' 62% 58%);'+
+    '--ice:hsl('+h2+' 58% 68%);'+
+    '--brass:hsl('+h3+' 56% 55%);'+
+    '--p1:'+hsl2rgb(h,62,58)+';'+
+    '--p2:'+hsl2rgb(h2,58,68)+';'+
+    '--part:'+hsl2rgb(h,55,62)+';}';
+  syncThemeColor();
+}
+function syncHueUI(){
+  var s=$('hueSlide'),d=$('hueDot');if(!s)return;
+  s.value=(cfg.hue===undefined||cfg.hue===null||cfg.hue==='')?210:cfg.hue;
+  if(d)d.style.background=cvar('--aurora');
+}
+function syncThemeColor(){
+  var m=document.querySelector('meta[name="theme-color"]');
+  if(!m){m=document.createElement('meta');m.name='theme-color';document.head.appendChild(m);}
+  var bg=cvar('--bg');
+  if(bg)m.setAttribute('content',bg);
+}
 function applyPack(id){
   pack=id;set('pack',id);document.documentElement.setAttribute('data-pack',id);
   seen.themes[id]=1;saveSeen();
   buildThemeGrid();buildTiles();buildSkills();volBar();renderDay();readiness();sizeCv();drawScene();refresh();
+  syncThemeColor();
 }
 function buildThemeGrid(){
   var L=cfg.lang==='de'?1:0;
@@ -2978,6 +3132,14 @@ function buildThemeGrid(){
 /* Ein Klick = naechstes Theme. Der Knopf zeigt kurz den Namen des neuen Themes
    und faellt dann auf "Theme" zurueck -- Feedback ohne extra Dialog. */
 var themeTmr=null;
+$('hueSlide').addEventListener('input',function(){
+  cfg.hue=+this.value;saveCfg();applyHue();
+  var d=$('hueDot');if(d)d.style.background=cvar('--aurora');
+});
+$('hueSlide').addEventListener('change',function(){sizeCv();drawScene();buildThemeGrid();});
+$('hueReset').addEventListener('click',function(){
+  delete cfg.hue;saveCfg();applyHue();syncHueUI();sizeCv();drawScene();buildThemeGrid();
+});
 $('themeBtn').addEventListener('click',function(){
   var i=0;PACKS.forEach(function(p,n){if(p.id===pack)i=n;});
   var nx=PACKS[(i+1)%PACKS.length],b=this;
@@ -3507,11 +3669,17 @@ buildLearn();buildAccess();renderWins();
 renderDay();streak();calc();drawW();volBar();buildWeeks();
 evalAch(true);
 refresh();paint();mobStopF();
+applyHue();syncHueUI();syncThemeColor();
 drawScene();rotQ(true);if(cfg.hooks!=='on')$('rotq').style.display='none';
 $('y-goal').value=get('goal','');
 tickClock();setInterval(tickClock,20000);
 $('verTag').textContent='v'+VERSION;
 sizeCv();
+/* Startbildschirm. Wer noch nichts abgehakt hat, landet beim Coach -- dort
+   steht die Anleitung, womit anzufangen ist. Wer schon trainiert, will
+   „Heute" sehen und keine Einfuehrung mehr. */
+if(totalSets()===0)show('coach');
+
 recording=true;syncUndo();
 
 /* Service Worker. Erst nach dem Laden registrieren, damit er dem ersten
