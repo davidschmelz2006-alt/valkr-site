@@ -1417,7 +1417,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='11.9';
+var VERSION='12.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1995,110 +1995,62 @@ function _rot(p,c,a){var sn=Math.sin(a),co=Math.cos(a);
   return [c[0]+(p[0]-c[0])*co-(p[1]-c[1])*sn,c[1]+(p[0]-c[0])*sn+(p[1]-c[1])*co];}
 var _DG=Math.PI/180;
 var DEMOS={
- /* Liegestuetz: Zehen und Haende fest, der Koerper dreht als starres Brett
-    um die Zehen. Der ferne Arm laeuft abgedunkelt hinter dem Koerper mit --
-    das gibt den Figuren Tiefe statt Drahtgestell-Optik. */
- push:{dur:2.9,refs:['M5 38 H42'],shadow:[26,38.9,14,1.1],pose:function(u){
+ /* Schlanke Strichmaennchen wie im Original -- aber die Posen kommen aus dem
+    Skelett (feste Knochenlaengen) und das Tempo aus dem Satzprofil:
+    exzentrisch langsam, konzentrisch schnell, Kopf laeuft leicht nach. */
+ push:{dur:2.9,refs:['M5 38 H42'],pose:function(u){
    var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41,37.4],H=[12.6,37.2],L=29;
    var a=(25-18*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
-   var hip=[F[0]+(S[0]-F[0])*.45,F[1]+(S[1]-F[1])*.45];
+   var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
    var e=_ik(H,S,6.2,6.2,1);
-   var hd=[S[0]+(S[0]-F[0])/L*3.8,S[1]+(S[1]-F[1])/L*3.8+(r-rl)*2.4];
-   function far(pl){return pl.map(function(p){return [p[0]+1.3,p[1]-1.1];});}
-   var arm=[H,e[0],e[1]];
-   return {parts:[
-     {p:[far(arm)],w:2.6,o:.38},
-     {p:[[F,[42.8,35.4]]],w:3,o:1},
-     {p:[[F,hip]],w:3.4,o:1},
-     {p:[[hip,S]],w:4.2,o:1},
-     {p:[arm],w:3,o:1}
-   ],head:hd};}},
- /* Klimmzug (Frontsicht): Haende fest, Schultern fahren zur Stange,
-    Ellbogen weichen nach aussen, Beine haengen mit kleinen Fuessen. */
+   var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4+(r-rl)*2.4];
+   return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
  pull:{dur:3,refs:['M8 8 H38'],pose:function(u){
    var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),HL=[17,8.6],HR=[29,8.6],yS=22.2-9.6*r;
    var SL=[19.9,yS],SR=[26.1,yS];
    var eL=_ik(HL,SL,7,7,1),eR=_ik(HR,SR,7,7,-1);
-   var hip=[23,yS+9.2];
+   var hip=[23,yS+9.4];
    return {parts:[
-     {p:[[SL,SR]],w:4,o:1},
-     {p:[[[23,yS+.6],hip]],w:4.4,o:1},
-     {p:[[hip,[21.4,hip[1]+4.9],[22.2,hip[1]+9.5],[20.9,hip[1]+10.3]],[hip,[24.6,hip[1]+4.9],[23.8,hip[1]+9.5],[25.1,hip[1]+10.3]]],w:3.2,o:1},
-     {p:[[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],w:3,o:1}
-   ],head:[23,(22.2-9.6*rl)-3.9]};}},
- /* Rudern: Fersen fest, das Brett zieht die Brust zur Stange, der Ellbogen
-    wandert hinter den Ruecken. */
- row:{dur:2.9,refs:['M9 12 H33','M5 34 H42'],shadow:[26,34.9,14,1.1],pose:function(u){
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,[hip[0]-1.6,hip[1]+4.9],[hip[0]-.8,hip[1]+9.7]],[hip,[hip[0]+1.6,hip[1]+4.9],[hip[0]+.8,hip[1]+9.7]]]
+   ],head:[23,(22.2-9.6*rl)-4.6]};}},
+ row:{dur:2.9,refs:['M9 12 H33','M5 34 H42'],pose:function(u){
    var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[19,12.8],L=26;
    var a=(17+16*r)*_DG;
    var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
    var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
    var e=_ik(H,S,6.7,6.7,-1);
-   var hd=[S[0]+(S[0]-F[0])/L*3.8,S[1]+(S[1]-F[1])/L*3.8+(r-rl)*2];
-   function far(pl){return pl.map(function(p){return [p[0]+1.2,p[1]-1.1];});}
-   var arm=[H,e[0],e[1]];
-   return {parts:[
-     {p:[far(arm)],w:2.6,o:.38},
-     {p:[[F,[42.4,31.4]]],w:3,o:1},
-     {p:[[F,hip]],w:3.4,o:1},
-     {p:[[hip,S]],w:4.2,o:1},
-     {p:[arm],w:3,o:1}
-   ],head:hd};}},
- /* Pike: Haende und Zehen fest, die Huefte bleibt der Gipfel, der Kopf
-    senkt sich zwischen die Haende. */
- press:{dur:2.9,refs:['M5 38 H41'],shadow:[24,38.9,13,1.1],pose:function(u){
+   var hd=[S[0]+(S[0]-F[0])/L*4.4,S[1]+(S[1]-F[1])/L*4.4+(r-rl)*2];
+   return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+ press:{dur:2.9,refs:['M5 38 H41'],pose:function(u){
    var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),H=[13,37.4],F=[35,37.4],Ll=23.9,Lt=13;
    var g=(66.5-2.5*r)*_DG;
    var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
    var ps=(141-23*r)*_DG;
    var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
    var e=_ik(H,S,7,7,1);
-   var hd=[S[0]+Math.cos(ps)*3.8,S[1]+Math.sin(ps)*3.8+(r-rl)*2.2];
-   function far(pl){return pl.map(function(p){return [p[0]+1.3,p[1]-1.0];});}
-   var arm=[H,e[0],e[1]];
-   return {parts:[
-     {p:[far(arm)],w:2.6,o:.38},
-     {p:[[F,[36.8,35.2]]],w:3,o:1},
-     {p:[[F,A]],w:3.4,o:1},
-     {p:[[A,S]],w:4.2,o:1},
-     {p:[arm],w:3,o:1}
-   ],head:hd};}},
- /* Kniebeuge: Knie vor, Huefte zurueck bis zur Parallelen, Arme als
-    Gegengewicht -- fernes Bein und ferner Arm laufen abgedunkelt mit. */
- legs:{dur:3.1,refs:['M5 39 H41'],shadow:[19,39.8,9,1],pose:function(u){
+   var hd=[S[0]+Math.cos(ps)*4.2,S[1]+Math.sin(ps)*4.2+(r-rl)*2.2];
+   return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
+ legs:{dur:3.1,refs:['M5 39 H41'],pose:function(u){
    var r=_phase(u,.42,.10,.24),rl=_phase(u-.035,.42,.10,.24),K0=[21,37.5],ls=8.5,lt=9,lo=10;
    var a1=(4+24*r)*_DG,a2=(7+75*r)*_DG,a3=(4+30*r)*_DG,b=(10+80*rl)*_DG,a3l=(4+30*rl)*_DG;
    var K=[K0[0]-Math.sin(a1)*ls,K0[1]-Math.cos(a1)*ls];
    var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
    var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
    var Ha=[S[0]-Math.sin(b)*7,S[1]+Math.cos(b)*7];
-   var hd=[S[0]-Math.sin(a3l)*3.8,S[1]-Math.cos(a3l)*3.8];
-   function far(pl){return pl.map(function(p){return [p[0]+1.5,p[1]-.8];});}
-   var leg=[Hp,K,K0],foot=[K0,[K0[0]-3.6,K0[1]+1.5]],arm=[S,Ha];
-   return {parts:[
-     {p:[far(leg),far(foot)],w:2.8,o:.38},
-     {p:[far(arm)],w:2.4,o:.38},
-     {p:[foot],w:3,o:1},
-     {p:[leg],w:3.6,o:1},
-     {p:[[Hp,S]],w:4.4,o:1},
-     {p:[arm],w:3,o:1}
-   ],head:hd};}},
- /* Hollow Hold: eine Haltung. Die ganze Form wippt starr um den unteren
-    Ruecken -- nichts knickt ein, nichts dehnt sich. */
- core:{dur:3.4,refs:['M5 34 H41'],shadow:[23,34.8,10,1],pose:function(u){
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[K0,K,Hp,S]],[[S,Ha]],[[K0,[K0[0]-3.6,K0[1]+1.5]]]],head:hd};}},
+ core:{dur:3.4,refs:['M5 34 H41'],pose:function(u){
    var th=Math.cos(u*2*Math.PI)*6*_DG,C=[23,32.6];
    function R(p){return _rot(p,C,th);}
-   var sh=R([16.2,29.4]),mid=R([23,32]),hip=R([28.8,30.4]);
-   var legs=[hip,R([33.6,28.4]),R([38.6,26.2])],arm=[sh,R([8,24.8])];
-   function far(pl){return pl.map(function(p){return [p[0]+1.2,p[1]-1.2];});}
+   var sh=R([16.2,29.4]);
    return {parts:[
-     {p:[far(legs)],w:2.8,o:.38},
-     {p:[far(arm)],w:2.4,o:.38},
-     {p:[[sh,mid,hip]],w:4.4,o:1},
-     {p:[legs],w:3.4,o:1},
-     {p:[arm],w:3,o:1}
-   ],head:R([13.2,26.6])};}}
+     [[sh,R([23,32]),R([28.8,30.4]),R([33.6,28.4]),R([38.6,26.2])]],
+     [[sh,R([8,24.8])]]
+   ],head:R([13.4,26.4])};}}
 };
 function moveSvg(id,c){
   var d=DEMOS[id];if(!d)return '';
@@ -2110,13 +2062,12 @@ function moveSvg(id,c){
   }).join(' ');}
   var g='';
   d.refs.forEach(function(rp){g+='<path d="'+rp+'" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round" opacity=".34"/>';});
-  if(d.shadow)g+='<ellipse cx="'+d.shadow[0]+'" cy="'+d.shadow[1]+'" rx="'+d.shadow[2]+'" ry="'+d.shadow[3]+'" fill="'+c+'" opacity=".12"/>';
-  frames[0].parts.forEach(function(pt,pi){
-    g+='<path d="'+pd(pt.p)+'" fill="none" stroke="'+c+'" stroke-width="'+pt.w+'" stroke-linecap="round" stroke-linejoin="round"'+(pt.o<1?' opacity="'+pt.o+'"':'')+'>';
-    if(!still)g+='<animate attributeName="d" values="'+frames.map(function(f){return pd(f.parts[pi].p);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
+  frames[0].parts.forEach(function(_,pi){
+    g+='<path d="'+pd(frames[0].parts[pi])+'" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">';
+    if(!still)g+='<animate attributeName="d" values="'+frames.map(function(f){return pd(f.parts[pi]);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
     g+='</path>';
   });
-  g+='<circle cx="'+frames[0].head[0].toFixed(1)+'" cy="'+frames[0].head[1].toFixed(1)+'" r="2.7" fill="'+c+'">';
+  g+='<circle cx="'+frames[0].head[0].toFixed(1)+'" cy="'+frames[0].head[1].toFixed(1)+'" r="3.4" fill="'+c+'">';
   if(!still){
     g+='<animate attributeName="cx" values="'+frames.map(function(f){return f.head[0].toFixed(1);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
     g+='<animate attributeName="cy" values="'+frames.map(function(f){return f.head[1].toFixed(1);}).join(';')+'" dur="'+d.dur+'s" repeatCount="indefinite"/>';
