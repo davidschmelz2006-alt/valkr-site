@@ -1422,7 +1422,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='12.3';
+var VERSION='12.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2062,11 +2062,14 @@ var DEMOS={
    var sh=RU([13.5,31.4]),ha=RU([21,30.2]);
    var al=(8+64*r)*_DG;
    var kn=[hip[0]+Math.cos(al)*6,hip[1]-Math.sin(al)*6];
-   var a2=al+10*_DG;
+   /* Knie beugt nach unten (Schienbein flacher als Oberschenkel) --
+      andersherum saehe das Bein ueberstreckt aus, wie gebrochen. */
+   var a2=al-8*_DG;
    var ft=[kn[0]+Math.cos(a2)*5.8,kn[1]-Math.sin(a2)*5.8];
+   var toe=[ft[0]-Math.sin(a2)*2.4,ft[1]-Math.cos(a2)*2.4];
    return {parts:[
      [[sh,MB,hip]],
-     [[hip,kn,ft]],
+     [[hip,kn,ft,toe]],
      [[sh,ha]]
    ],head:RU([9.7,29.6])};}}
 };
