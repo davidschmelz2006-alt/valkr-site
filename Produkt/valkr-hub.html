@@ -422,6 +422,35 @@
   #evList .row .t span{display:block;font-size:var(--t3);color:var(--ink2);line-height:1.55}
   .row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 
+  /* ---- Wochenstreifen ---------------------------------------------------
+     Sieben Tage nebeneinander, der ausgewaehlte hervorgehoben. Die Zustaende
+     sind absichtlich unterscheidbar OHNE Farbe allein: erledigt hat einen
+     Punkt, heute einen Ring, Ruhetag eine gedaempfte Flaeche. Wer Farben
+     schlecht unterscheidet, sieht trotzdem, wo er steht. */
+  .dstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.8rem}
+  .dstrip button{position:relative;display:flex;flex-direction:column;align-items:center;
+    gap:.1rem;padding:.5rem .1rem .62rem;border:1px solid transparent;border-radius:var(--r2);
+    background:var(--surf2);color:var(--ink3);cursor:pointer;font-family:var(--fb);
+    transition:background .16s,border-color .16s,color .16s}
+  .dstrip button em{font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.06em;text-transform:uppercase}
+  .dstrip button b{font-family:var(--fd);font-weight:600;font-size:.92rem;
+    font-variant-numeric:tabular-nums;color:var(--ink2)}
+  .dstrip button.rest{background:transparent;border-color:var(--line)}
+  .dstrip button.today{border-color:var(--aurora)}
+  .dstrip button[aria-selected="true"]{background:var(--surf3);border-color:var(--aurora);color:var(--ink)}
+  .dstrip button[aria-selected="true"] b{color:var(--ink)}
+  /* Der Punkt sagt "erledigt". Er sitzt unter der Zahl, damit er die Zahl
+     nicht verdeckt -- ein Haken im Feld waere bei sieben Feldern nebeneinander
+     zu viel Zeichen auf zu wenig Platz. */
+  .dstrip button i{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;
+    background:var(--aurora);opacity:0}
+  .dstrip button.done i{opacity:1}
+  @media (max-width:400px){
+    .dstrip{gap:.22rem}
+    .dstrip button{padding:.45rem .05rem .58rem}
+    .dstrip button b{font-size:.85rem}
+  }
   .dbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
   .dbar .now{flex:1;min-width:170px}
   .dbar .now b{display:block;font-family:var(--fd);font-weight:600;font-size:1.02rem}
@@ -1260,10 +1289,15 @@
   <p class="warnstrip" id="storeWarn" hidden></p>
 
   <section class="view on" id="v-today">
+    <!-- Wochenstreifen statt Pfeiltasten. Vorher standen hier zwei Pfeile, ein
+         zweizeiliges Datum und ein "Zurueck zu heute" in eigener Zeile -- gut
+         130 Pixel, bevor irgendein Inhalt kam, und man sah immer nur EINEN Tag.
+         Der Streifen zeigt die ganze Woche auf einen Blick: welcher Tag erledigt
+         ist, welcher Ruhetag, wo man steht. Und er springt in einem Griff hin,
+         statt in vier Pfeilklicks. -->
+    <div class="dstrip" id="dstrip" role="tablist" aria-label="Woche"></div>
     <div class="dbar">
-      <button class="nb" id="prevDay">&larr;</button>
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
-      <button class="nb" id="nextDay">&rarr;</button>
       <button class="nb hot" id="jumpToday" style="display:none" data-i18n="btn.backToday">Back to today</button>
     </div>
     <div class="hero">
@@ -1698,7 +1732,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.3';
+var VERSION='14.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3084,6 +3118,32 @@ function sessOf(pl){
   return{title:base.title,sub:base.sub,
     items:[{id:null,l:DE?'Skill-Übung':'Skill practice',k:DE?'frisch, kurz':'fresh and brief',v:'10 min'}].concat(base.items)};
 }
+/* Der Wochenstreifen. Gezeigt wird die Woche des ausgewaehlten Tages, nicht
+   starr die aktuelle -- wer zwei Wochen vorblaettert, will dort auch einen
+   Streifen sehen und nicht ins Leere tippen.
+   Beginn ist Montag, weil deutschsprachige Kalender so aussehen; der
+   Trainingsplan selbst rechnet weiterhin ab Startdatum. */
+function drawStrip(){
+  var el=$('dstrip');if(!el)return;
+  var DE=cfg.lang==='de';
+  var wd=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var mo=monday(sel),html='';
+  for(var i=0;i<7;i++){
+    var d=add(mo,i),k=iso(d);
+    var pl=plan(d);
+    var istHeute=k===iso(TODAY);
+    var gewaehlt=k===iso(sel);
+    var cls=[];
+    if(istHeute)cls.push('today');
+    if(pl.kind==='rest')cls.push('rest');
+    if(dayDone(k))cls.push('done');
+    html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+gewaehlt+'"'+
+      (cls.length?' class="'+cls.join(' ')+'"':'')+
+      ' aria-label="'+dname(d)+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
+      '<em>'+wd[i]+'</em><b>'+d.getDate()+'</b><i aria-hidden="true"></i></button>';
+  }
+  el.innerHTML=html;
+}
 function renderDay(){
   var d=sel,pl=plan(d),key=iso(d),isT=key===iso(TODAY);
   $('dayName').textContent=dname(d)+', '+d.toLocaleDateString(undefined,{day:'numeric',month:'long'});
@@ -3091,10 +3151,13 @@ function renderDay(){
   var relTxt=cfg.lang==='de'
     ?(rel===0?'Heute':(rel===-1?'Gestern':(rel===1?'Morgen':(rel<0?'vor '+(-rel)+' Tagen':'in '+rel+' Tagen'))))
     :(rel===0?'Today':(rel===-1?'Yesterday':(rel===1?'Tomorrow':(rel<0?(-rel)+' days ago':'in '+rel+' days'))));
+  /* Kurz halten: "Block 1 Basis · Woche 1/12 · Phase 1 · Basis" nannte den
+     Blocknamen zweimal und lief auf dem Handy ueber drei Zeilen. Die Phase
+     steht ohnehin gleich darunter in der Kachel. */
   $('dayMeta').textContent=relTxt+(pl.w>=1&&pl.w<=12
-    ?' · '+(cfg.lang==='de'?'Block ':'Block ')+blockNo+' '+curBlock().n[cfg.lang==='de'?1:0]+
-     ' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+pl.ph.name:'');
+    ?' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+curBlock().n[cfg.lang==='de'?1:0]:'');
   $('jumpToday').style.display=isT?'none':'';
+  drawStrip();
   $('h-tag').textContent=(pl.w>=1&&pl.w<=12)?((cfg.lang==='de'?'Tag ':'Day ')+(((dIdx(d)%7)+7)%7+1)+(cfg.lang==='de'?' der Woche':' of the week')):(pl.note||'');
   $('h-title').textContent=pl.title;$('h-sub').textContent=pl.sub||'';
   $('h-meta').innerHTML=pl.kind==='train'
@@ -3198,8 +3261,25 @@ function startNextBlock(){
       location.reload();
     });
 }
-$('prevDay').addEventListener('click',function(){sel=add(sel,-1);renderDay();});
-$('nextDay').addEventListener('click',function(){sel=add(sel,1);renderDay();});
+/* Wischen bleibt als schnelle Geste erhalten, auch ohne Pfeiltasten. */
+(function(){
+  var el=$('v-today'),x0=null,y0=null;
+  el.addEventListener('touchstart',function(e){if(e.touches.length!==1)return;x0=e.touches[0].clientX;y0=e.touches[0].clientY;},{passive:true});
+  el.addEventListener('touchend',function(e){
+    if(x0===null)return;
+    var t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;
+    x0=null;
+    /* Nur eindeutig waagerechte Gesten -- sonst blaettert jeder Scrollversuch
+       den Tag um. */
+    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*2)return;
+    sel=add(sel,dx<0?1:-1);renderDay();
+  });
+})();
+/* Ein Zuhoerer auf dem Streifen: er wird bei jedem Tageswechsel neu gebaut. */
+$('dstrip').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-d]');if(!b)return;
+  sel=new Date(b.dataset.d+'T00:00:00');renderDay();
+});
 $('jumpToday').addEventListener('click',function(){sel=new Date(TODAY);renderDay();});
 $('markDone').addEventListener('click',function(){
   if(iso(sel)!==iso(TODAY))return;
