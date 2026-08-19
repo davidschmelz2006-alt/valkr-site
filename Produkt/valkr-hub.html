@@ -474,7 +474,10 @@
   .exrow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);padding:.58rem .72rem;border-radius:3px;transition:.18s}
   .exrow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);font-size:.85rem;line-height:1;transition:.16s}
   .exrow .swp:hover{border-color:var(--aurora);color:var(--ink)}
-  .catlist{display:flex;flex-direction:column;gap:.3rem;max-height:420px;overflow:auto}
+  /* Kein max-height, kein overflow: eine scrollende Liste in einer scrollenden
+     Seite ist auf dem Telefon die haeufigste Bedienfalle. Die Laenge begrenzt
+     jetzt die Anzahl der Zeilen, nicht ein Fensterausschnitt. */
+  .catlist{display:flex;flex-direction:column;gap:.35rem}
   .catrow{background:var(--surf2);border:1px solid var(--line2);border-radius:3px;padding:.5rem .65rem}
   .catrow b{font-family:var(--fd);font-weight:600;font-size:.84rem}
   .catrow .ct{display:block;font-family:var(--fm);font-size:.5rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:.14rem 0 .18rem}
@@ -1732,7 +1735,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.4';
+var VERSION='14.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -5109,6 +5112,9 @@ function openSwap(pl,idx,it,after){
     },sel);
 }
 var catPat='all',catQ='';
+/* Schaltet der Katalog auf die volle Liste um? Wird beim Suchen und beim
+   Wechsel des Musters zurueckgesetzt -- eine neue Auswahl faengt oben an. */
+var catAll=false;
 function buildCatalog(){
   var chips=$('catChips');if(!chips)return;
   var DE=cfg.lang==='de',L=DE?1:0;
@@ -5117,15 +5123,26 @@ function buildCatalog(){
   opts.forEach(function(o){
     var b=document.createElement('button');b.className='chip';b.type='button';b.textContent=o[1];
     b.setAttribute('aria-pressed',String(catPat===o[0]));
-    b.addEventListener('click',function(){catPat=o[0];buildCatalog();});
+    b.addEventListener('click',function(){catPat=o[0];catAll=false;buildCatalog();});
     chips.appendChild(b);});
-  var host=$('catList'),total=0,shown=0;host.innerHTML='';
+  /* Der Katalog stand in einem eigenen Scrollfeld von 420 Pixeln Hoehe --
+     eine scrollende Liste INNERHALB einer scrollenden Seite. Auf dem Telefon
+     ist das die haeufigste Falle ueberhaupt: man will die Seite bewegen und
+     bewegt stattdessen die Liste, oder umgekehrt, je nachdem wo der Finger
+     zufaellig aufsetzt.
+     Jetzt gibt es kein zweites Scrollfeld. Gezeigt werden die ersten zwoelf
+     Treffer, der Rest auf Knopfdruck -- wer den Katalog wirklich durchsieht,
+     sucht ohnehin, und die Suche steht direkt darueber. */
+  var host=$('catList'),total=0,shown=0,gezeigt=0;host.innerHTML='';
+  var GRENZE=catAll?1e9:12;
   PAT.forEach(function(p){
     (EXDB[p.id]||[]).forEach(function(e){
       total++;
       if(catPat!=='all'&&catPat!==p.id)return;
       if(catQ&&e[0].toLowerCase().indexOf(catQ)<0)return;
       shown++;
+      if(gezeigt>=GRENZE)return;
+      gezeigt++;
       var tags=[p.name,TLBL[e[1]][L]];
       if(e[2]&&EQN[e[2]])tags.push(EQN[e[2]][L]);
       (e[3]||'').split('').forEach(function(f){if(FLN[f])tags.push(FLN[f][L]);});
@@ -5138,9 +5155,22 @@ function buildCatalog(){
       host.appendChild(d);
     });
   });
+  if(shown>gezeigt){
+    var mb=document.createElement('button');
+    mb.type='button';mb.className='tbtn';mb.style.marginTop='.4rem';
+    mb.textContent=(DE?'Alle '+shown+' zeigen':'Show all '+shown);
+    mb.addEventListener('click',function(){catAll=true;buildCatalog();});
+    host.appendChild(mb);
+  }else if(catAll&&shown>12){
+    var lb=document.createElement('button');
+    lb.type='button';lb.className='tbtn';lb.style.marginTop='.4rem';
+    lb.textContent=(DE?'Weniger zeigen':'Show fewer');
+    lb.addEventListener('click',function(){catAll=false;buildCatalog();window.scrollTo({top:host.getBoundingClientRect().top+window.scrollY-90,behavior:'smooth'});});
+    host.appendChild(lb);
+  }
   $('catCount').textContent=shown+' / '+total;
 }
-$('catSearch').addEventListener('input',function(){catQ=this.value.trim().toLowerCase();buildCatalog();});
+$('catSearch').addEventListener('input',function(){catQ=this.value.trim().toLowerCase();catAll=false;buildCatalog();});
 
 /* Apple-Health-Anbindung ueber einen iOS-Kurzbefehl namens "VALKR Health".
    Browser haben keinen HealthKit-Zugriff -- der Kurzbefehl protokolliert das
