@@ -247,7 +247,7 @@
      Geblieben sind Marke, Serie und Woche: Identitaet und Stand. Alles andere
      liegt im Menue-Blatt oder in den Einstellungen, wo es hingehoert. */
   @media (max-width:640px){
-    .bar #undoBtn,.bar #resetBtn,.bar #themeBtn,.bar #setBtn,.bar #clockNow{display:none}
+    .bar #undoBtn,.bar #resetBtn,.bar #themeBtn,.bar #clockNow{display:none}
     .bar .brand small{display:none}
     /* Serie und Woche stehen nebeneinander statt untereinander -- zwei
        zweizeilige Bloecke am rechten Rand einer 360-Pixel-Leiste ergeben
@@ -306,6 +306,9 @@
   button.mcard{cursor:pointer;width:100%}
   button.mcard:hover,button.mcard:focus-visible{border-color:var(--aurora);background:var(--surf3)}
   button.mcard:active{transform:scale(.985)}
+  /* Ein selbst gesetzter Wert wird markiert -- sonst raetselt man, warum die
+     Automatik ihn nicht mehr anfasst. */
+  .mcard.edited{border-color:var(--brass)}
   .mcard em{font-style:normal;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;
     text-transform:uppercase;color:var(--ink2);line-height:1.3}
   .mcard .when{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);letter-spacing:.05em}
@@ -1194,7 +1197,7 @@
       <div class="stat f" data-i18n-t="streak">Streak<b id="s-streak">0</b></div>
       <div class="stat" data-i18n-t="week">Week<b id="s-week">-</b></div>
       <button class="txtbtn" id="themeBtn" data-i18n="btn.theme" title="Switch to the next theme" aria-label="Switch to the next theme">Theme</button>
-      <button class="txtbtn" id="setBtn" data-i18n="nav.settings" title="Settings" aria-label="Settings">Settings</button>
+      <button class="iconbtn" id="setBtn" data-i18n-title="nav.settings" title="Settings" aria-label="Settings"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M12 2.2v2.4M12 19.4v2.4M2.2 12h2.4M19.4 12h2.4M5.1 5.1l1.7 1.7M17.2 17.2l1.7 1.7M18.9 5.1l-1.7 1.7M6.8 17.2l-1.7 1.7"/></svg></button>
     </div>
   </div>
 
@@ -1451,12 +1454,12 @@
     <div class="form">
       <p class="eyebrow" data-i18n="fuel.about">About you</p>
       <div class="fgrid">
-        <div class="field"><label for="f-sex" data-i18n="f.sex">Sex</label><div class="ctl"><select id="f-sex"><option value="m">Male</option><option value="f">Female</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label for="f-sex" data-i18n="f.sex">Sex</label><div class="ctl"><select id="f-sex"><option value="m" data-i18n="f.m">Male</option><option value="f" data-i18n="f.f">Female</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" placeholder="20" min="14" max="90"><span class="unit">yrs</span></div></div>
         <div class="field"><label for="f-h" data-i18n="f.height">Height</label><div class="ctl hasunit"><input id="f-h" type="number" placeholder="180" min="130" max="220"><span class="unit" id="u-h">cm</span></div></div>
         <div class="field"><label for="f-w" data-i18n="f.weight">Weight</label><div class="ctl hasunit"><input id="f-w" type="number" placeholder="78" min="35" max="200" step="0.5"><span class="unit" id="u-w">kg</span></div></div>
-        <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2">Mostly sitting</option><option value="1.375" selected>On feet some</option><option value="1.55">On feet a lot</option><option value="1.725">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected>Build muscle</option><option value="0">Maintain</option><option value="-450">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2" data-i18n="f.a1">Mostly sitting</option><option value="1.375" selected data-i18n="f.a2">On feet some</option><option value="1.55" data-i18n="f.a3">On feet a lot</option><option value="1.725" data-i18n="f.a4">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected data-i18n="f.g1">Build muscle</option><option value="0" data-i18n="f.g2">Maintain</option><option value="-450" data-i18n="f.g3">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
       <div class="out" id="est"></div>
     </div>
@@ -1465,12 +1468,13 @@
         <p class="eyebrow" style="margin:0" data-i18n="fuel.targets">Your targets &mdash; edit any of them</p>
         <button class="tbtn" id="resetMacros" data-i18n="btn.auto">Reset to auto</button>
       </div>
-      <div class="fgrid">
-        <div class="field"><label for="m-cal" data-i18n="f.cal">Calories</label><div class="ctl hasunit" id="w-cal"><input id="m-cal" type="number" step="10"><span class="unit">kcal</span></div></div>
-        <div class="field"><label for="m-pro" data-i18n="f.pro">Protein</label><div class="ctl hasunit" id="w-pro"><input id="m-pro" type="number" step="5"><span class="unit">g</span></div></div>
-        <div class="field"><label for="m-fat" data-i18n="f.fat">Fat</label><div class="ctl hasunit" id="w-fat"><input id="m-fat" type="number" step="5"><span class="unit">g</span></div></div>
-        <div class="field"><label for="m-carb" data-i18n="f.carb">Carbs (derived)</label><div class="ctl hasunit"><input id="m-carb" type="number" readonly><span class="unit">g</span></div></div>
-      </div>
+      <!-- Die Zielwerte als Kacheln. Vorher standen hier vier Zahlenfelder mit
+           Reglern -- der Wert, den man taeglich sehen will, sah damit aus wie
+           etwas, das man taeglich eintippen muss. Geaendert wird selten,
+           angeschaut oft; die Form folgt jetzt dem haeufigeren Fall.
+           Kohlenhydrate sind nicht antippbar: sie ergeben sich aus den drei
+           anderen und lassen sich gar nicht getrennt setzen. -->
+      <div class="cards" id="macroCards"></div>
       <div><div class="macrobar" id="mbar"></div>
         <div class="mkey"><span><u style="background:var(--aurora)"></u>Protein</span><span><u style="background:var(--brass)"></u>Fat</span><span><u style="background:var(--ice)"></u>Carbs</span></div></div>
       <div class="out" id="perkg"></div>
@@ -1673,7 +1677,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.0';
+var VERSION='14.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1884,6 +1888,7 @@ var DICT={
  'fuel.supps':['Supplements — hover for the detail','Supplements — für Details drüberfahren'],
  'fuel.suppNote':['Green means the evidence is decent. Amber means it works for some people or in narrow cases. Orange means save your money. None of this is medical advice — if you take medication or have a condition, ask a doctor first.','Grün heißt die Datenlage ist ordentlich. Gelb heißt es wirkt bei manchen oder in engen Fällen. Orange heißt spar dir das Geld. Keine medizinische Beratung — bei Medikamenten oder Erkrankungen vorher zum Arzt.'],
  'f.sex':['Sex','Geschlecht'],'f.age':['Age','Alter'],'f.height':['Height','Größe'],'f.weight':['Weight','Gewicht'],
+ 'f.m':['Male','Männlich'],'f.f':['Female','Weiblich'], 'f.a1':['Mostly sitting','Überwiegend sitzend'],'f.a2':['On feet some','Teils auf den Beinen'], 'f.a3':['On feet a lot','Viel auf den Beinen'],'f.a4':['Physical job','Körperliche Arbeit'], 'f.g1':['Build muscle','Muskeln aufbauen'],'f.g2':['Maintain','Halten'],'f.g3':['Lean out','Abnehmen'],
  'f.act':['Daily activity','Alltagsaktivität'],'f.goal':['Goal','Ziel'],'f.cal':['Calories','Kalorien'],
  'f.pro':['Protein','Protein'],'f.fat':['Fat','Fett'],'f.carb':['Carbs (derived)','Kohlenhydrate (abgeleitet)'],
  'you.h':['You','Du'],'you.s':['Baseline is week 1. Everything here is measured against your own start, not against anyone else.','Basis ist Woche 1. Alles hier misst gegen deinen eigenen Start, nicht gegen andere.'],
@@ -1952,6 +1957,11 @@ function applyI18n(){
   });
   [].forEach.call(document.querySelectorAll('[data-i18n-t]'),function(el){
     el.firstChild.nodeValue=T(el.dataset.i18nT);
+  });
+  /* Knoepfe ohne Beschriftung brauchen ihre Sprache im Titel und im
+     Vorlese-Namen -- sonst heisst das Zahnrad auf Deutsch weiter "Settings". */
+  [].forEach.call(document.querySelectorAll('[data-i18n-title]'),function(el){
+    var s=T(el.dataset.i18nTitle);el.title=s;el.setAttribute('aria-label',s);
   });
   var nv=$('nav');if(nv)nv.dataset.title=T('nav.moreTitle');
   if(typeof devSync==='function')devSync();
@@ -2889,21 +2899,18 @@ window.addEventListener('popstate',function(){
 
 /* ---------- Menue-Blatt ---------------------------------------------------
    Was nicht in die Tableiste passt, steht hier -- gruppiert und mit einer
-   Zeile Erklaerung. Drei Ziele statt der acht von frueher, weil die anderen
-   fuenf jetzt Abschnitte in ihrem Bereich sind.
-   Einstellungen stehen bewusst NUR hier und nicht mehr zusaetzlich in der
-   Kopfleiste: auf 360 Pixeln ist jeder Knopf oben einer zu viel, und zweimal
-   derselbe Weg war genau die Doppelung, die am Menue gestoert hat. */
+   Zeile Erklaerung. Zwei Ziele statt der acht von frueher: fuenf sind zu
+   Abschnitten in ihrem Bereich geworden, die Einstellungen sitzen oben.
+   Die Einstellungen stehen als Zahnrad oben rechts und deshalb NICHT auch
+   hier: zweimal derselbe Weg war genau die Doppelung, die am alten Menue
+   gestoert hat. Ein Symbol ohne Beschriftung kostet oben fast nichts und ist
+   dort, wo man Einstellungen sucht. */
 var SHEET=[
-  {h:['Areas','Bereiche'],it:[
+  {h:['More areas','Weitere Bereiche'],it:[
     {v:'fuel',n:['Fuel','Ernährung'],d:['Calories, protein, weight trend','Kalorien, Protein, Gewichtsverlauf'],
      i:'<path d="M6 3v8a3 3 0 0 0 6 0V3M9 11v10"/><path d="M18 3c-1.5 2-2 4-2 6s.7 3 2 3 2-1 2-3-.5-4-2-6Zm0 9v9"/>'},
     {v:'learn',n:['Learn','Wissen'],d:['Why the numbers are what they are','Warum die Zahlen so sind, wie sie sind'],
      i:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z"/>'}
-  ]},
-  {h:['System','System'],it:[
-    {v:'settings',n:['Settings','Einstellungen'],d:['Theme, language, data, access','Design, Sprache, Daten, Zugang'],
-     i:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/>'}
   ]}
 ];
 function buildSheet(){
@@ -3736,7 +3743,7 @@ function calc(){
     $('est').innerHTML='<p class="hint" style="margin:0;grid-column:1/-1">'+(cfg.lang==='de'
       ?'Trag Alter, Größe und Gewicht ein — dann rechnet das hier deine Werte. Vorher stünden hier nur fremde Zahlen.'
       :'Enter your age, height and weight — then this calculates your numbers. Anything before that would be somebody else&rsquo;s.')+'</p>';
-    ['m-cal','m-pro','m-fat','m-carb'].forEach(function(id){if(document.activeElement!==$(id))$(id).value='';});
+    drawMacros({cal:0,pro:0,fat:0,carb:0},0);
     $('mbar').innerHTML='';$('perkg').innerHTML='';$('f-note').textContent='';
     if($('mealplan'))$('mealplan').innerHTML='';
     if($('hydrOut'))$('hydrOut').innerHTML='';
@@ -3753,13 +3760,9 @@ function calc(){
   var fat=over.fat!==undefined?over.fat:autoFat;
   var carb=Math.max(0,Math.round((cal-pro*4-fat*9)/4));
   $('est').innerHTML=bx('BMR',bmr,'kcal')+bx(cfg.lang==='de'?'Verbrauch':'Burn / day',tdee,'kcal')+bx(cfg.lang==='de'?'Auto-Ziel':'Auto target',autoCal,'kcal',1)+bx(cfg.lang==='de'?'Auto-Protein':'Auto protein',autoPro,'g',1);
-  if(document.activeElement!==$('m-cal'))$('m-cal').value=cal;
-  if(document.activeElement!==$('m-pro'))$('m-pro').value=pro;
-  if(document.activeElement!==$('m-fat'))$('m-fat').value=fat;
-  $('m-carb').value=carb;
-  $('w-cal').classList.toggle('edited',over.cal!==undefined);
-  $('w-pro').classList.toggle('edited',over.pro!==undefined);
-  $('w-fat').classList.toggle('edited',over.fat!==undefined);
+  /* Die Zielwerte merken, damit das Detailblatt sie ohne Neurechnung kennt. */
+  macroNow={cal:cal,pro:pro,fat:fat,carb:carb,autoCal:autoCal,autoPro:autoPro,autoFat:autoFat};
+  drawMacros(macroNow,kg);
   var pc=pro*4,fc=fat*9,cc=carb*4,t=Math.max(1,pc+fc+cc);
   $('mbar').innerHTML='<i style="background:var(--aurora);width:'+(pc/t*100)+'%"></i><i style="background:var(--brass);width:'+(fc/t*100)+'%"></i><i style="background:var(--ice);width:'+(cc/t*100)+'%"></i>';
   $('perkg').innerHTML=bx('Protein / kg',(pro/kg).toFixed(1),'g')+bx('Fat / kg',(fat/kg).toFixed(1),'g')+bx('Carbs / kg',(carb/kg).toFixed(1),'g')+bx('Cal / kg',Math.round(cal/kg),'kcal');
@@ -3784,10 +3787,103 @@ function calc(){
      die Regler hier ausdruecklich nachgezogen werden. */
   slRetune();
 }
+/* Zielwerte als Kacheln. Der Wert steht gross, darunter die Einordnung je
+   Kilogramm -- das ist die Zahl, an der man beurteilt, ob das Ziel taugt.
+   Ein eigener Wert wird ausgewiesen, damit niemand raetselt, warum die
+   Automatik ihn nicht mehr anfasst. */
+var MACROS=[
+  {k:'cal', n:['Calories','Kalorien'], u:'kcal', c:'var(--ember)'},
+  {k:'pro', n:['Protein','Protein'],   u:'g',    c:'var(--aurora)'},
+  {k:'fat', n:['Fat','Fett'],          u:'g',    c:'var(--brass)'},
+  {k:'carb',n:['Carbs','Kohlenhydrate'],u:'g',   c:'var(--ice)'}
+];
+function drawMacros(vals,kg){
+  var el=$('macroCards');if(!el)return;
+  var L=cfg.lang==='de'?1:0,DE=L===1;
+  var t=Math.max(1,vals.pro*4+vals.fat*9+vals.carb*4);
+  var share={cal:null,pro:vals.pro*4/t*100,fat:vals.fat*9/t*100,carb:vals.carb*4/t*100};
+  el.innerHTML=MACROS.map(function(m){
+    var v=vals[m.k],eigen=over[m.k]!==undefined;
+    var tag=eigen?' <span style="color:var(--brass)">&middot; '+(DE?'eigen':'custom')+'</span>':'';
+    var sub=m.k==='cal'
+      ? (DE?'Tagesziel':'daily target')
+      : (m.k==='carb'
+          ? (DE?'ergibt sich aus dem Rest':'what is left over')
+          : (kg?((v/kg).toFixed(1)+' g/kg'):'&nbsp;'));
+    var tap=m.k!=='carb';
+    return '<'+(tap?'button':'div')+' class="mcard'+(eigen?' edited':'')+'"'+(tap?' data-macro="'+m.k+'"':'')+'>'+
+      (tap?'<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>':'')+
+      '<em>'+m.n[L]+tag+'</em>'+
+      '<b>'+(v||0)+'<i>'+m.u+'</i></b>'+
+      (share[m.k]===null?'':'<div class="meter"><i style="width:'+share[m.k].toFixed(1)+'%;background:'+m.c+'"></i></div>')+
+      '<span class="sub">'+sub+'</span>'+
+    '</'+(tap?'button':'div')+'>';
+  }).join('');
+}
+/* Detail eines Zielwerts. Hier steht der Regler -- an der Stelle, wo man
+   tatsaechlich etwas aendern will, statt vier Mal auf der Uebersicht. */
+var MACROSL={cal:[1200,4500,10],pro:[60,260,5],fat:[30,150,5]};
+function openMacro(k){
+  var m=null;MACROS.forEach(function(x){if(x.k===k)m=x;});
+  if(!m||!MACROSL[k])return;
+  var DE=cfg.lang==='de',L=DE?1:0,sl=MACROSL[k];
+  var kg=kgNow(),cur=curMacro(k);
+  var why={
+    cal:['Aus Grundumsatz, Alltag und Ziel gerechnet. Wer zunimmt, nimmt am Anfang immer auch etwas Fett zu — das gehört dazu.',
+         'From your basal rate, daily activity and goal. Gaining always means gaining some fat early on — that is part of it.'],
+    pro:['1,6 bis 2,2 g je Kilogramm. Darunter begrenzt es, was dein Training aufbauen kann; darüber bringt es nichts mehr.',
+         '1.6 to 2.2 g per kilogram. Below that it limits what your training can build; above it adds nothing.'],
+    fat:['Nicht unter 0,7 g je Kilogramm. Fett ist kein Gegner — zu wenig davon geht langfristig auf Hormone und Laune.',
+         'Not below 0.7 g per kilogram. Fat is not the enemy — too little of it costs you hormonally and in mood over time.']
+  }[k][DE?0:1];   /* diese Texte stehen als [deutsch, englisch] */
+  var html=
+    '<h4>'+(DE?'Zielwert':'Target')+'</h4>'+
+    '<div class="dsh">'+
+      '<div class="dshHead"><b>'+m.n[L]+'</b><span>'+cur+' '+m.u+'</span></div>'+
+      '<div class="field hasSlide"><label for="mcIn">'+(DE?'Wert':'Value')+'</label>'+
+        '<div class="ctl hasunit"><input id="mcIn" type="number" step="'+sl[2]+'" value="'+cur+'"><span class="unit">'+m.u+'</span></div></div>'+
+      (kg&&k!=='cal'?'<div class="dshRow"><span>'+(DE?'Je Kilogramm':'Per kilogram')+'</span><b id="mcPer">'+(cur/kg).toFixed(1)+' g/kg</b></div>':'')+
+      '<div class="dshRow"><span>'+(DE?'Automatik':'Auto')+'</span><b>'+autoMacro(k)+' '+m.u+'</b></div>'+
+      '<p class="hint">'+why+'</p>'+
+      '<div class="savebar">'+
+        '<button class="tbtn" data-mcact="auto"'+(over[k]===undefined?' disabled':'')+'>'+(DE?'Zurück auf Automatik':'Back to auto')+'</button>'+
+      '</div>'+
+    '</div>';
+  openSheet(html);
+  $('sheetBody').dataset.macro=k;
+  var inp=$('mcIn');
+  if(inp){
+    pairSlider(inp,{min:sl[0],max:sl[1],step:sl[2],empty:cur});
+    inp.addEventListener('input',function(){
+      var v=parseFloat(this.value);
+      if(!isNaN(v)&&v>0){
+        over[k]=Math.round(v);set('over',over);calc();refresh();
+        var p=$('mcPer');if(p&&kg)p.textContent=(over[k]/kg).toFixed(1)+' g/kg';
+        var h=$('sheetBody').querySelector('.dshHead span');if(h)h.textContent=over[k]+' '+m.u;
+        var b=$('sheetBody').querySelector('button[data-mcact="auto"]');if(b)b.disabled=false;
+      }
+    });
+  }
+}
 function bx(l,v,u,hi){return '<div class="obox'+(hi?' hi':'')+'"><em>'+l+'</em><b>'+v+' <i>'+u+'</i></b></div>';}
 ['f-sex','f-age','f-h','f-w','f-act','f-goal'].forEach(function(id){$(id).addEventListener('input',function(){calc();refresh();});$(id).addEventListener('change',function(){calc();refresh();});});
-[['m-cal','cal'],['m-pro','pro'],['m-fat','fat']].forEach(function(p){
-  $(p[0]).addEventListener('input',function(){var v=parseFloat(this.value);if(!isNaN(v)&&v>0){over[p[1]]=Math.round(v);set('over',over);calc();refresh();}});});
+/* Die Zielwerte werden im Detailblatt geaendert, nicht mehr hier -- das
+   Antippen der Kachel oeffnet es. Ein Zuhoerer auf dem Raster reicht, weil
+   die Kacheln bei jeder Neurechnung neu entstehen. */
+$('macroCards').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-macro]');
+  if(b)openMacro(b.dataset.macro);
+});
+$('sheetBody').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-mcact]');if(!b)return;
+  var k=$('sheetBody').dataset.macro;if(!k)return;
+  delete over[k];set('over',over);calc();refresh();openMacro(k);
+});
+/* Was die Automatik vorschlaegt, und was gerade gilt. Beides liest das
+   Detailblatt aus dem letzten Durchlauf von calc(). */
+var macroNow={};
+function curMacro(k){return over[k]!==undefined?over[k]:(macroNow[k]||0);}
+function autoMacro(k){return k==='cal'?(macroNow.autoCal||0):k==='pro'?(macroNow.autoPro||0):(macroNow.autoFat||0);}
 $('resetMacros').addEventListener('click',function(){over={};set('over',over);calc();refresh();});
 
 /* ---------- supplements + tooltip ---------- */
@@ -5562,9 +5658,6 @@ function initSliders(){
   pairSlider('f-age',{min:14,max:90,step:1,empty:20});
   pairSlider('f-h',{min:130,max:220,step:1,unit:'l',empty:180});
   pairSlider('f-w',{min:35,max:200,step:0.5,unit:'w',empty:78});
-  pairSlider('m-cal',{min:1200,max:4500,step:10,empty:2200});
-  pairSlider('m-pro',{min:60,max:260,step:5,empty:130});
-  pairSlider('m-fat',{min:30,max:150,step:5,empty:70});
   pairSlider('y-sleep',{min:3,max:12,step:0.5,dec:1,empty:7});
 }
 initSliders();
