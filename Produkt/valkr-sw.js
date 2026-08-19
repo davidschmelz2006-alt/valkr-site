@@ -10,12 +10,15 @@
 
    Der Cache-Name traegt die Hub-Version. Neue Version -> neuer Cache ->
    der alte wird beim Aktivieren geloescht. */
-var CACHE = 'valkr-v9.5';
+var CACHE = 'valkr-v9.9';
 var ASSETS = [
   './valkr-hub.html',
   './valkr-identity.html',
   './valkr-manifest.json',
-  './valkr-icon.svg'
+  './valkr-icon.svg',
+  './valkr-icon-180.png',
+  './valkr-icon-192.png',
+  './valkr-icon-512.png'
 ];
 
 self.addEventListener('install', function (e) {
