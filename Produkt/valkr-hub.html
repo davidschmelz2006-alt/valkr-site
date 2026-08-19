@@ -652,12 +652,17 @@
   #intro h2{font-family:var(--fd);font-weight:600;font-size:1.45rem;margin:0;line-height:1.2;text-align:center}
   #intro .isub{margin:0;color:var(--ink2);font-size:.92rem;text-align:center}
   #intro .iopts{display:flex;flex-direction:column;gap:.5rem}
-  #intro .iopt{text-align:left;background:var(--surf);border:1px solid var(--line);border-radius:5px;padding:.85rem 1rem;
-    font-family:var(--fd);font-weight:600;font-size:.95rem;transition:.16s;box-shadow:var(--sh)}
+  #intro .iopt{position:relative;text-align:center;background:var(--surf);border:1px solid var(--line);border-radius:5px;
+    padding:.85rem 2.2rem;font-family:var(--fd);font-weight:600;font-size:.95rem;transition:.16s;box-shadow:var(--sh)}
   #intro .iopt:hover{border-color:var(--aurora);transform:translateY(-1px)}
   #intro .iopt[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
+  #intro .iopt[aria-pressed="true"]::after{content:"✓";position:absolute;right:.85rem;top:50%;transform:translateY(-50%);
+    color:var(--aurora);font-size:1rem}
   #intro .iopt small{display:block;font-family:var(--fb);font-weight:400;font-size:.78rem;color:var(--ink3);margin-top:.15rem}
-  #intro .inav{display:flex;gap:.5rem;justify-content:space-between;align-items:center}
+  #intro .inav{display:flex;flex-direction:column;gap:.55rem;align-items:stretch}
+  #intro .inav .tbtn{width:100%;text-align:center;padding:.72rem}
+  #intro .inav #inBack{border:none;color:var(--ink3);font-size:.6rem}
+  #intro .inav #inBack:hover{color:var(--ink)}
   #intro .ilang{display:flex;gap:.4rem;justify-content:center}
   #intro .ilang button{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
     border:1px solid var(--line);border-radius:2px;padding:.3rem .6rem;color:var(--ink2)}
@@ -1488,7 +1493,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='13.1';
+var VERSION='13.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -4151,7 +4156,7 @@ function renderIntro(){
     });
   }
   var back=$('inBack'),next=$('inNext');
-  back.style.visibility=(inIdx===0||k==='ready')?'hidden':'visible';
+  back.style.display=(inIdx===0||k==='ready')?'none':'';
   back.textContent=cfg.lang==='de'?'Zurück':'Back';
   if(k==='hello'||k==='eq'||k==='avoid'){next.style.display='';next.textContent=T.n[L];}
   else if(k==='ready'){next.style.display='';next.textContent=T.n[L];}
@@ -4162,7 +4167,7 @@ function renderIntro(){
     var sk=document.createElement('button');sk.type='button';sk.className='tbtn';sk.id='inSkip';
     sk.textContent=T.n2[L];
     sk.addEventListener('click',function(){introShow(false);});
-    next.parentNode.insertBefore(sk,next);
+    next.parentNode.insertBefore(sk,next.nextSibling);
   }
 }
 $('inBack').addEventListener('click',function(){inIdx=Math.max(0,inIdx-1);renderIntro();});
