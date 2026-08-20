@@ -1918,7 +1918,6 @@
 
   <section class="view" id="v-access">
     <div><h2 class="sec" data-i18n="acc.h">Book or hub?</h2><p class="sub" data-i18n="acc.s">Same knowledge in both. The difference is whether you read it once, or use it every session.</p></div>
-    <div class="tblwrap">
       <div class="tblwrap"><table class="cmp">
         <thead><tr><th data-i18n="acc.get">What you get</th><th class="c">Book</th><th class="c">Hub</th></tr></thead>
         <tbody id="cmpBody"></tbody>
@@ -1935,10 +1934,23 @@
         <ul><li>Everything in Hub</li><li>A new training block each month</li><li>Form check by video</li><li>Cancel any time</li></ul>
         <div class="cta off" data-i18n="btn.later">Opens later</div></div>
     </div>
-    <div class="faq" id="faqList"></div>
+    <!-- Fragen und Hinweise zugeklappt. Wer auf diese Seite kommt, will
+         wissen, was es kostet und was er dafuer bekommt -- die Antworten auf
+         Fragen, die er noch gar nicht gestellt hat, standen davor offen
+         darunter und machten die Seite doppelt so lang. -->
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="acc.faq">Häufige Fragen</span><span class="fs" id="faqSum"></span></summary>
+      <div class="foldBody"><div class="faq" id="faqList"></div></div>
+    </details>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="acc.notes">Hinweise zum Stand</span></summary>
+      <div class="foldBody">
     <p class="legal"><b>Build note &mdash; access control:</b> this prototype has no sign-in on purpose. A password checked inside the page source is decoration, not protection. Real gating happens on the server before the page is delivered: purchase fires a webhook, the buyer&rsquo;s email lands on an allow-list, the host checks it with an emailed one-time code.</p>
     <p class="legal"><b>Launch note &mdash; subscriptions:</b> before the monthly plan goes live it needs a cancel button under &sect;312k BGB, clear renewal terms, and correct handling of the withdrawal right for digital content.</p>
-    </div>
+      </div>
+    </details>
   </section>
 
   <section class="view" id="v-settings">
@@ -2024,7 +2036,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.8';
+var VERSION='16.9';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2292,6 +2304,7 @@ var DICT={
  'ev.noteB':['Not medical advice.','Keine medizinische Beratung.'],
  'ev.note':['These references support the training principles, not any promise about your individual result. Persistent pain, illness or a known condition goes to a doctor, not to a checklist.','Die Quellen stützen die Trainingsprinzipien, nicht ein Versprechen über dein persönliches Ergebnis. Anhaltender Schmerz, Krankheit oder eine bekannte Vorerkrankung gehören zum Arzt, nicht auf eine Checkliste.'],
  'learn.s':['Twelve chapters, short enough to look up mid-session.','Zwölf Kapitel, kurz genug zum Nachschlagen zwischendurch.'],
+ 'acc.faq':['Common questions','Häufige Fragen'],'acc.notes':['Notes on the current state','Hinweise zum Stand'],
  'acc.h':['Book or hub?','Buch oder Hub?'],'acc.s':['Same knowledge in both. The difference is whether you read it once, or use it every session.','Gleiches Wissen in beidem. Der Unterschied ist, ob du es einmal liest oder jede Einheit benutzt.'],
  'acc.get':['What you get','Was du bekommst'],'acc.once':['one payment','einmalig'],'acc.forever':['one payment, keep forever','einmalig, für immer'],'acc.later':['not open yet','noch nicht offen'],
  'set.h':['Settings','Einstellungen'],'set.s':['Everything here is stored in your browser only.','Alles hier wird nur in deinem Browser gespeichert.'],
@@ -4143,6 +4156,7 @@ function buildAccess(){
    ['How do I get in?','You sign in with the email you bought with. A one-time code arrives in your inbox, so the link cannot be passed around.'],
    ['Is my data sent anywhere?','No. Everything you type stays in your own browser.'],
    ['What if I miss a week?','Repeat it. The hub keeps your ladder positions and the coach tells you where to restart.']];
+  var fq=$('faqSum');if(fq)fq.textContent=faq.length;
   $('faqList').innerHTML=faq.map(function(f){return '<div class="qa"><b>'+f[0]+'</b><p>'+f[1]+'</p></div>';}).join('');
 }
 
