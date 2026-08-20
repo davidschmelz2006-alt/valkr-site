@@ -2024,7 +2024,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.7';
+var VERSION='16.8';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2734,7 +2734,16 @@ function plan(d){
   var w=wkOf(d);
   if(w<1)return{kind:'pre',title:cfg.lang==='de'?'Noch nicht gestartet':'Not started yet',sub:'',note:(cfg.lang==='de'?'Programm beginnt ':'Programme begins ')+STD.toLocaleDateString(),items:[],w:w};
   if(w>12)return{kind:'post',title:cfg.lang==='de'?'Block abgeschlossen':'Block complete',sub:'',note:cfg.lang==='de'?'Nochmal laufen lassen, von deinen neuen Stufen aus.':'Run it again from your new steps.',items:[],w:w};
-  var wd=(sod(d).getDay()+6)%7,ph=phase(w);
+  /* Der Tag im Rhythmus, gezaehlt ab dem Start -- nicht der Kalenderwochentag.
+
+     Vorher lagen die Einheiten fest auf Montag, Mittwoch, Freitag. Wer
+     donnerstags anfing, bekam als Allererstes einen Ruhetag: die App
+     begruesste ihn mit "heute nichts zu tun". Das ist der schlechteste erste
+     Eindruck, den sie machen kann, und er trifft vier von sieben Neuen.
+     Ab jetzt ist der Starttag Tag 0 des Rhythmus -- also immer eine Einheit.
+     Der Abstand zwischen den Einheiten bleibt derselbe, er haengt nur nicht
+     mehr davon ab, an welchem Wochentag jemand zufaellig auf Start drueckt. */
+  var wd=((dIdx(d)%7)+7)%7,ph=phase(w);
   var S=cfg.track==='4'?SESS4:SESS3;
   var map3={0:'pull',2:'push',4:'legs'},map4={0:'upA',1:'lowA',3:'upB',4:'lowB'};
   var key=cfg.track==='4'?map4[wd]:map3[wd];
