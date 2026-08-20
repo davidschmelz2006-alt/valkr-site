@@ -1638,7 +1638,6 @@
          Sie kommt wieder, wenn es einen Server gibt, auf dem echte Zeilen von
          echten Leuten stehen. Der Code dafuer liegt in renderBoard(). -->
   </section>
-  </section>
 
   <section class="view" id="v-skills">
     <div><h2 class="sec" data-i18n="skills.h">Skills</h2><p class="sub" data-i18n="skills.s">These are why most people start calisthenics. Each one has an entry requirement &mdash; the hub checks yours against it.</p></div>
@@ -1649,7 +1648,7 @@
       <div class="foldBody">
       <ul><li data-i18n="skills.r1">Train it fresh, right after the warm-up, before anything else.</li>
       <li data-i18n="skills.r2">Stop well short of failure. Skills are coordination, and tired practice builds a sloppy pattern.</li>
-      <li data-i18n="skills.r3">Ten minutes four or five times a week beats an hour once.</li></ul></div>
+      <li data-i18n="skills.r3">Ten minutes four or five times a week beats an hour once.</li></ul></div></details>
   </section>
 
   <section class="view" id="v-mobility">
@@ -1662,7 +1661,6 @@
         <span class="clock" id="mobClock" style="font-size:1.4rem">0:45</span>
         <span class="hint" id="mobNow"></span>
       </div>
-    </details>
     </div>
     <div class="cols" id="mobList"></div>
     <details class="fold">
@@ -1673,9 +1671,9 @@
         <div class="fact"><span data-i18n="mob.d2">After two sessions</span><b style="font-weight:400">8 min</b></div>
         <div class="fact"><span data-i18n="mob.d3">Optional full sequence</span><b style="font-weight:400">20 min</b></div>
       </div>
-    </details>
       <p class="hint" data-i18n="mob.note">Static stretching before training briefly lowers force output. Save the long holds for after, or for their own slot.</p>
-    </div>
+      </div>
+    </details>
   </section>
 
   <section class="view" id="v-test">
@@ -1691,7 +1689,6 @@
         <span class="saved" id="testFlag">Saved</span>
       </div>
     </div>
-    <div class="tblwrap">
       <div class="tblwrap"><table class="cmp">
         <thead><tr><th data-i18n="test.tbl">Test</th><th class="c">L1</th><th class="c">L2</th><th class="c">L3</th><th class="c">L4</th><th class="c">L5</th><th class="c">L6</th></tr></thead>
         <tbody id="testTable"></tbody>
@@ -1701,6 +1698,7 @@
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="test.retest">Retest at week 6 and week 12</span></summary>
       <div class="foldBody">
       <p class="hint" data-i18n="test.retestP">Same warm-up, same standards, same tests. The temptation is to loosen your form so the number looks better. The only person that flatters is you.</p></div>
+    </details>
   </section>
   <section class="view" id="v-fuel">
     <div><h2 class="sec" data-i18n="fuel.h">Fuel</h2><p class="sub" data-i18n="fuel.s">Mifflin&ndash;St Jeor for the estimate. Then override anything &mdash; change calories or protein and the rest recalculates around it.</p></div>
@@ -1714,7 +1712,6 @@
         <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2" data-i18n="f.a1">Mostly sitting</option><option value="1.375" selected data-i18n="f.a2">On feet some</option><option value="1.55" data-i18n="f.a3">On feet a lot</option><option value="1.725" data-i18n="f.a4">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected data-i18n="f.g1">Build muscle</option><option value="0" data-i18n="f.g2">Maintain</option><option value="-450" data-i18n="f.g3">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
-    </details>
       <div class="out" id="est"></div>
     </div>
     <div class="form">
@@ -1885,6 +1882,7 @@
     <div class="faq" id="faqList"></div>
     <p class="legal"><b>Build note &mdash; access control:</b> this prototype has no sign-in on purpose. A password checked inside the page source is decoration, not protection. Real gating happens on the server before the page is delivered: purchase fires a webhook, the buyer&rsquo;s email lands on an allow-list, the host checks it with an emailed one-time code.</p>
     <p class="legal"><b>Launch note &mdash; subscriptions:</b> before the monthly plan goes live it needs a cancel button under &sect;312k BGB, clear renewal terms, and correct handling of the withdrawal right for digital content.</p>
+    </div>
   </section>
 
   <section class="view" id="v-settings">
@@ -1966,7 +1964,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.2';
+var VERSION='16.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
