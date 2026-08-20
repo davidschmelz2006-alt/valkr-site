@@ -929,36 +929,88 @@
   #sessov textarea,#runner textarea{width:100%;min-height:74px;background:var(--surf);border:1px solid var(--line);border-radius:4px;
     color:var(--ink);padding:.6rem .7rem;font:inherit;font-size:.88rem;resize:vertical}
   #v-today .hero.go{cursor:pointer}
-  /* Einleitung beim ersten Oeffnen: Vollbild, ein Schritt pro Bildschirm,
-     grosse Antwortkarten, ruhiger Uebergang. */
+  /* Einleitung beim ersten Oeffnen. Neu nach MCI-Vorbild: Kapitel mit
+     farbigem Chip, Segment-Fortschritt mit Haken, EINE Frage pro Bildschirm,
+     grosse Antwortkarten mit Icon und Auswahlkreis, fixe Weiter-Pille unten.
+     Dazu Zwischenseiten beim Kapitelwechsel und der Koerperfett-Schieber mit
+     Figur, die in Echtzeit mitgeht. */
   #intro{position:fixed;inset:0;z-index:95;background:var(--bg);display:none;overflow:auto;
-    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.2rem calc(1.4rem + env(safe-area-inset-bottom,0px))}
-  #intro.on{display:flex;align-items:center;justify-content:center}
-  #intro .ibox{width:100%;max-width:430px;display:flex;flex-direction:column;gap:1.1rem;justify-content:center;min-height:min(540px,84vh)}
-  #intro .idots{display:flex;gap:.4rem;justify-content:center}
-  #intro .idots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:.2s}
-  #intro .idots i.on{background:var(--aurora)}
-  #intro .istep{display:flex;flex-direction:column;gap:.9rem}
+    padding:calc(.9rem + env(safe-area-inset-top,0px)) 1.2rem calc(1rem + env(safe-area-inset-bottom,0px))}
+  #intro.on{display:flex;justify-content:center}
+  #intro .ibox{width:100%;max-width:460px;display:flex;flex-direction:column;gap:.9rem;min-height:min(660px,92vh)}
+  #intro .ihead{display:flex;align-items:center;gap:.7rem;min-height:34px}
+  #intro .ihead .iback{width:34px;height:34px;border-radius:999px;border:1px solid var(--line);background:var(--surf);
+    color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;transition:.16s}
+  #intro .ihead .iback:hover{border-color:var(--aurora);color:var(--aurora)}
+  #intro .ihead .iback[hidden]{display:none}
+  #intro .chchip{font-family:var(--fm);font-size:var(--t1);letter-spacing:.18em;text-transform:uppercase;
+    padding:.32rem .7rem;border-radius:var(--r1);border:1px solid transparent}
+  #intro .chchip.c1{color:var(--aurora);border-color:rgba(var(--p1),.45);background:rgba(var(--p1),.09)}
+  #intro .chchip.c2{color:var(--ember);border-color:color-mix(in srgb,var(--ember) 45%,transparent);background:color-mix(in srgb,var(--ember) 9%,transparent)}
+  #intro .chchip.c3{color:var(--brass);border-color:color-mix(in srgb,var(--brass) 45%,transparent);background:color-mix(in srgb,var(--brass) 9%,transparent)}
+  #intro .iprog{display:flex;align-items:center;gap:.45rem}
+  #intro .iprog .seg{flex:1;height:5px;border-radius:999px;background:var(--surf2);overflow:hidden}
+  #intro .iprog .seg i{display:block;height:100%;width:0%;border-radius:999px;background:var(--ink);transition:width .3s ease}
+  #intro .iprog .tick{width:15px;height:15px;flex:none;border-radius:50%;border:1.4px solid var(--line);color:transparent;
+    display:flex;align-items:center;justify-content:center;font-size:.55rem;transition:.2s;background:var(--surf)}
+  #intro .iprog .tick.done{border-color:var(--ink);color:var(--bg);background:var(--ink)}
+  #intro .istep{display:flex;flex-direction:column;gap:.85rem;flex:1;min-height:0}
   #intro .istep.slide{animation:inslide .3s ease}
   @keyframes inslide{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
-  #intro .brandline{display:flex;align-items:center;gap:.6rem;justify-content:center;margin-bottom:.4rem}
+  #intro .brandline{display:flex;align-items:center;gap:.6rem;justify-content:center;margin:1.6rem 0 .2rem}
   #intro .brandline b{font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:1rem}
-  #intro h2{font-family:var(--fd);font-weight:600;font-size:1.45rem;margin:0;line-height:1.2;text-align:center}
-  #intro .isub{margin:0;color:var(--ink2);font-size:.92rem;text-align:center}
-  #intro .iopts{display:flex;flex-direction:column;gap:.5rem}
-  #intro .iopt{position:relative;text-align:center;background:var(--surf);border:1px solid var(--line);border-radius:5px;
-    padding:.85rem 2.2rem;font-family:var(--fd);font-weight:600;font-size:.95rem;transition:.16s;box-shadow:var(--sh)}
+  #intro h2{font-family:var(--fd);font-weight:600;font-size:1.5rem;margin:0;line-height:1.18;text-wrap:balance}
+  #intro .isub{margin:0;color:var(--ink2);font-size:.9rem;line-height:1.5;text-wrap:pretty}
+  #intro .center h2,#intro .center .isub{text-align:center}
+  #intro .iopts{display:flex;flex-direction:column;gap:.55rem}
+  #intro .iopt{position:relative;display:flex;align-items:center;gap:.8rem;text-align:left;background:var(--surf);
+    border:1px solid var(--line);border-radius:var(--r2);padding:.85rem .95rem;transition:.16s;box-shadow:var(--sh)}
   #intro .iopt:hover{border-color:var(--aurora);transform:translateY(-1px)}
   #intro .iopt[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
-  #intro .iopt[aria-pressed="true"]::after{content:"✓";position:absolute;right:.85rem;top:50%;transform:translateY(-50%);
-    color:var(--aurora);font-size:1rem}
-  #intro .iopt small{display:block;font-family:var(--fb);font-weight:400;font-size:.78rem;color:var(--ink3);margin-top:.15rem}
-  #intro .inav{display:flex;flex-direction:column;gap:.55rem;align-items:stretch}
-  #intro .inav .tbtn{width:100%;text-align:center;padding:.72rem}
-  #intro .inav #inBack{border:none;color:var(--ink3);font-size:.6rem}
-  #intro .inav #inBack:hover{color:var(--ink)}
+  #intro .iopt .ic{width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center}
+  #intro .iopt .ic svg{width:21px;height:21px}
+  #intro .iopt .tx{flex:1;min-width:0}
+  #intro .iopt .tx b{display:block;font-family:var(--fd);font-weight:600;font-size:.95rem;line-height:1.25}
+  #intro .iopt .tx small{display:block;font-size:.78rem;color:var(--ink3);margin-top:.1rem;line-height:1.35}
+  #intro .iopt .ring{width:22px;height:22px;flex:none;border-radius:50%;border:1.6px solid var(--line2);
+    display:flex;align-items:center;justify-content:center;color:transparent;transition:.16s;font-size:.66rem}
+  #intro .iopt[aria-pressed="true"] .ring{border-color:var(--aurora);background:var(--aurora);color:var(--hero)}
+  #intro .iopt .reco{position:absolute;top:-7px;right:.8rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;
+    text-transform:uppercase;color:var(--brass);background:var(--bg);border:1px dashed color-mix(in srgb,var(--brass) 60%,transparent);
+    border-radius:3px;padding:.12rem .4rem}
+  #intro .recoleg{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
+    text-align:center;margin:0}
+  /* Zahlwert-Schritte: grosser Wert, Schieber, Feinjustage */
+  #intro .valrow{display:flex;align-items:baseline;justify-content:center;gap:.5rem;margin-top:.4rem}
+  #intro .valrow b{font-family:var(--fd);font-weight:600;font-size:2.9rem;line-height:1;font-variant-numeric:tabular-nums}
+  #intro .valrow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+  #intro .stepbtns{display:flex;align-items:center;gap:.7rem;justify-content:center}
+  #intro .stepbtns button{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:var(--surf);
+    color:var(--ink);font-size:1.15rem;line-height:1;transition:.16s;flex:none}
+  #intro .stepbtns button:hover{border-color:var(--aurora);color:var(--aurora)}
+  #intro input[type="range"].islide{width:100%;accent-color:var(--aurora);height:26px}
+  #intro .slidewrap{position:relative;padding-top:.3rem}
+  #intro .slidewrap .est{position:absolute;top:-4px;transform:translateX(-50%);font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.14em;text-transform:uppercase;color:var(--brass);white-space:nowrap}
+  #intro .slidewrap .est::after{content:"";display:block;width:1px;height:9px;background:var(--brass);margin:.15rem auto 0}
+  /* Figur-Buehne fuer Geschlecht und Koerperfett */
+  #intro .figstage{display:flex;align-items:center;justify-content:center;min-height:0;flex:1}
+  #intro .figstage svg{height:min(34vh,300px);max-width:100%}
+  #intro .fig-line{fill:rgba(var(--p1),.07);stroke:var(--ink2);stroke-width:2.1;stroke-linejoin:round;stroke-linecap:round}
+  #intro .fig-abs{stroke:var(--aurora);stroke-width:1.6;stroke-linecap:round;fill:none;transition:opacity .2s}
+  #intro .bfdesc{margin:0;color:var(--ink2);font-size:.85rem;line-height:1.5;min-height:2.6em;text-wrap:pretty}
+  /* Zwischenseiten */
+  #intro .bridge{flex:1;display:flex;flex-direction:column;justify-content:center;gap:1rem}
+  #intro .bridge .blob{align-self:flex-start}
+  #intro .bridge .lead{font-size:1.05rem;color:var(--ink);margin:0;line-height:1.5}
+  #intro .bridge .nextk{font-family:var(--fm);font-size:var(--t1);letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin:1rem 0 0}
+  #intro .bridge .nextv{font-family:var(--fd);font-weight:600;font-size:1.3rem;letter-spacing:.06em;text-transform:uppercase;margin:.15rem 0 0}
+  #intro .inav{display:flex;flex-direction:column;gap:.5rem;align-items:stretch;margin-top:auto;padding-top:.6rem}
+  #intro .inav .tbtn{width:100%;text-align:center;padding:.85rem;border-radius:999px;font-size:.95rem}
+  #intro .inav .tbtn.go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-family:var(--fd);font-weight:600}
+  #intro .inav .tbtn.go:hover{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
   #intro .ilang{display:flex;gap:.4rem;justify-content:center}
-  #intro .ilang button{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;
+  #intro .ilang button{font-family:var(--fm);font-size:var(--t1);letter-spacing:.12em;text-transform:uppercase;
     border:1px solid var(--line);border-radius:2px;padding:.3rem .6rem;color:var(--ink2)}
   #intro .ilang button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
   @media (prefers-reduced-motion:reduce){#intro .istep.slide{animation:none}}
@@ -1217,6 +1269,39 @@
        statt die ganze Seite zu verschieben. */
     .tblwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
   }
+  /* ── v16: Farbige Icon-Chips und Gruppen-Kopfzeilen (Einstellungen) ──
+     Jede Einstellungsgruppe traegt ein kleines, farbiges Symbolquadrat wie
+     eine moderne App-Einstellungsliste. Farbe kommt pro Chip inline als
+     --chip; Grundflaeche ist eine abgeschwaechte Variante derselben Farbe. */
+  .gtitle{display:flex;align-items:center;gap:.65rem;margin:0 0 .35rem}
+  .gtitle .ichip{width:34px;height:34px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
+    border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
+  .gtitle .ichip svg{width:19px;height:19px}
+  .gtitle .gt{flex:1;min-width:0}
+  .gtitle .gt b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t5);letter-spacing:.03em}
+  .gtitle .gt span{display:block;font-size:var(--t2);color:var(--ink3);margin-top:.05rem}
+  /* Profilzeilen in den Einstellungen: Wert gross, Feinjustage daneben. */
+  .profrow{display:flex;align-items:center;gap:.6rem;padding:.5rem 0;border-bottom:1px dashed var(--line2)}
+  .profrow:last-child{border-bottom:0}
+  .profrow .pk{flex:1;font-size:var(--t3);color:var(--ink2)}
+  .profrow .pv{font-family:var(--fd);font-weight:600;font-size:var(--t5);min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+  .profrow button{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--surf2);
+    color:var(--ink);line-height:1;flex:none;transition:.16s}
+  .profrow button:hover{border-color:var(--aurora);color:var(--aurora)}
+  .profrow select{background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);color:var(--ink);
+    padding:.3rem .5rem;font:inherit;font-size:var(--t3)}
+  #setBfSlide{width:130px;accent-color:var(--aurora)}
+  /* ── v16: Tabbar mit Farbe. Der aktive Bereich bekommt seine eigene
+     Kennfarbe -- Heute Aurora, Training Ember, Coach Ice, Du Gold. ── */
+  #tabbar button[data-view="today"][aria-current="true"] svg{stroke:var(--aurora)}
+  #tabbar button[data-view="today"][aria-current="true"] span{color:var(--aurora)}
+  #tabbar button[data-view="train"][aria-current="true"] svg{stroke:var(--ember)}
+  #tabbar button[data-view="train"][aria-current="true"] span{color:var(--ember)}
+  #tabbar button[data-view="coach"][aria-current="true"] svg{stroke:var(--ice)}
+  #tabbar button[data-view="coach"][aria-current="true"] span{color:var(--ice)}
+  #tabbar button[data-view="you"][aria-current="true"] svg{stroke:var(--brass)}
+  #tabbar button[data-view="you"][aria-current="true"] span{color:var(--brass)}
 </style>
 <!-- Startbild. iOS erzeugt fuer installierte Web-Apps nur dann eines, wenn man
      fuer jedes Geraetemass ein eigenes Bild hinterlegt -- ein Dutzend Dateien,
@@ -1294,10 +1379,15 @@
   <div id="soBody"></div>
 </div></div>
 <div id="intro" role="dialog" aria-modal="true" aria-label="Welcome"><div class="ibox">
-  <div class="idots" id="inDots" aria-hidden="true"></div>
+  <div class="ihead">
+    <button type="button" class="iback" id="inBack" aria-label="Back" hidden>
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 L5 8 L10 13"/></svg>
+    </button>
+    <span class="chchip" id="inChip" hidden></span>
+  </div>
+  <div class="iprog" id="inProg" aria-hidden="true" hidden></div>
   <div class="istep" id="inStep"></div>
   <div class="inav">
-    <button type="button" class="tbtn" id="inBack">Back</button>
     <button type="button" class="tbtn go" id="inNext">Next</button>
   </div>
 </div></div>
@@ -1799,8 +1889,18 @@
 
   <section class="view" id="v-settings">
     <div><h2 class="sec" data-i18n="set.h">Settings</h2><p class="sub" data-i18n="set.s">Everything here is stored in your browser only.</p></div>
+    <!-- v16: Profilgruppe. Die Werte aus der Einfuehrung sind hier sichtbar
+         und direkt nachjustierbar; die Beschriftung malt paintSetProfile in
+         der jeweiligen Sprache. -->
     <div class="form">
-      <p class="eyebrow" data-i18n="set.theme">Theme</p>
+      <div class="gtitle"><span class="ichip" style="--chip:var(--aurora)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg></span>
+        <div class="gt"><b id="setProfTitle">Profil</b><span id="setProfSub"></span></div></div>
+      <div id="setProfBody"></div>
+      <div class="savebar"><button class="tbtn" id="reOnb">Einführung erneut durchlaufen</button></div>
+    </div>
+    <div class="form">
+      <div class="gtitle"><span class="ichip" style="--chip:var(--ember)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.4"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg></span>
+        <div class="gt"><b data-i18n="set.theme">Theme</b></div></div>
       <div class="themegrid" id="themeGrid"></div>
       <p class="hint" data-i18n="set.themeNote">Each theme changes the palette and the ambient effect &mdash; snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.</p>
       <div class="hueRow">
@@ -1812,7 +1912,8 @@
       <p class="hint" id="hueNote" data-i18n="set.hueNote">Overrides the accent of whichever theme is active. Backgrounds stay as they are &mdash; only the highlight colour moves.</p>
     </div>
     <div class="form">
-      <p class="eyebrow" data-i18n="set.display">Display and units</p>
+      <div class="gtitle"><span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M3.6 12h16.8M12 3.6c2.6 2.3 3.9 5.1 3.9 8.4s-1.3 6.1-3.9 8.4c-2.6-2.3-3.9-5.1-3.9-8.4s1.3-6.1 3.9-8.4Z"/></svg></span>
+        <div class="gt"><b data-i18n="set.display">Display and units</b></div></div>
       <div class="fgrid">
         <div class="field"><label data-i18n="set.lang">Language</label><div class="ctl"><select id="setLang"><option value="en">English</option><option value="de">Deutsch</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.clock">Time format</label><div class="ctl"><select id="setClock"><option value="24">24 hour</option><option value="12">12 hour</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
@@ -1826,7 +1927,8 @@
       <p class="hint" data-i18n="set.langNote">The interface translates fully. Chapter text and technique cues stay English in this prototype &mdash; the German edition follows with the book.</p>
     </div>
     <div class="form">
-      <p class="eyebrow" data-i18n="set.conn">Connections</p>
+      <div class="gtitle"><span class="ichip" style="--chip:#5B8DEF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.7 12 20 12 20Z"/><path d="M8 12h2.4l1.3-2.2 2 4 1.3-1.8H17"/></svg></span>
+        <div class="gt"><b data-i18n="set.conn">Connections</b></div></div>
       <div class="fgrid">
         <div class="field"><label data-i18n="set.health">Apple Health</label><div class="ctl"><select id="setHealth"><option value="off" selected>Off</option><option value="on">On</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
@@ -1839,7 +1941,8 @@
       <p class="hint" data-i18n="set.connNote">Works via an iOS shortcut.</p>
     </div>
     <div class="form">
-      <p class="eyebrow" data-i18n="set.data">Your data</p>
+      <div class="gtitle"><span class="ichip" style="--chip:var(--brass)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><ellipse cx="12" cy="6" rx="7.5" ry="3"/><path d="M4.5 6v12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3V6"/><path d="M4.5 12c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3"/></svg></span>
+        <div class="gt"><b data-i18n="set.data">Your data</b></div></div>
       <div class="out" id="dataStats"></div>
       <div class="savebar">
         <button class="tbtn" id="exportBtn" data-i18n="btn.export">Copy my data</button>
@@ -1863,7 +1966,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='15.0';
+var VERSION='16.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2152,6 +2255,7 @@ function applyI18n(){
     var s=T(el.dataset.i18nTitle);el.title=s;el.setAttribute('aria-label',s);
   });
   var nv=$('nav');if(nv)nv.dataset.title=T('nav.moreTitle');
+  if(typeof paintSetProfile==='function')paintSetProfile();
   if(typeof devSync==='function')devSync();
   storeNote();
   document.documentElement.lang=cfg.lang;
@@ -5302,20 +5406,28 @@ function renderSessOv(){
   }
 }
 $('soClose').addEventListener('click',function(){soShow(false);});
-/* ---------- Einstieg: fliessende Einleitung beim ersten Oeffnen ---------- */
+/* ---------- Einstieg v16: Kapitel-Wizard ----------
+   Drei Kapitel mit farbigem Chip und Segment-Fortschritt: Profil (wer bist
+   du, inkl. Koerperfett mit Live-Figur), Ziele, Rahmen. Eine Frage pro
+   Bildschirm, Auswahl markiert nur, die Weiter-Pille schaltet. Zwischen den
+   Kapiteln eine ruhige Uebergabeseite. */
 var OBL={
+ sex:[
+  ['f',['Female','Weiblich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="9" r="4.6"/><path d="M12 13.6V21M9 18h6"/></svg>','var(--ice)'],
+  ['m',['Male','Männlich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="4.6"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg>','var(--aurora)'],
+  ['x',['Prefer not to say','Keine Angabe'],['Estimates use a middle value','Schätzwerte nehmen die Mitte'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M8.5 12h7"/></svg>','var(--brass)']],
  goal:[
-  ['muscle',['Build muscle','Muskeln aufbauen'],['Visible strength, clear progression','Sichtbare Kraft, klare Progression']],
-  ['lean',['Get lean','Abnehmen und straffen'],['Drop fat, keep the strength you build','Fett runter, aufgebaute Kraft behalten']],
-  ['skills',['Learn skills','Skills lernen'],['Muscle-up, handstand, L-sit and friends','Muscle-up, Handstand, L-Sit und Co.']],
-  ['fit',['General fitness','Allgemein fit'],['Strong for everyday life','Stark für den Alltag']]],
+  ['muscle',['Build muscle','Muskeln aufbauen'],['Visible strength, clear progression','Sichtbare Kraft, klare Progression'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 12h16M7 8v8M17 8v8M2.5 10v4M21.5 10v4"/></svg>','var(--aurora)'],
+  ['lean',['Get lean','Abnehmen und straffen'],['Drop fat, keep the strength you build','Fett runter, aufgebaute Kraft behalten'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 3.6-4.6 5-4 9a4.3 4.3 0 0 0 8.6-.4c0-3.6-3.4-5-4.6-8.6Z"/></svg>','var(--ember)'],
+  ['skills',['Learn skills','Skills lernen'],['Muscle-up, handstand, L-sit and friends','Muscle-up, Handstand, L-Sit und Co.'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 9.3l5.4-.8Z"/></svg>','var(--ice)'],
+  ['fit',['General fitness','Allgemein fit'],['Strong for everyday life','Stark für den Alltag'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.7 12 20 12 20Z"/></svg>','var(--brass)']],
  days:[
-  ['3',['3 days a week','3 Tage pro Woche'],['Full body — the classic start','Ganzkörper — der Klassiker zum Einstieg']],
-  ['4',['4 days a week','4 Tage pro Woche'],['Upper/lower split — more volume','Ober-/Unterkörper geteilt — mehr Volumen']]],
+  ['3',['3 days a week','3 Tage pro Woche'],['Full body — the classic start','Ganzkörper — der Klassiker zum Einstieg'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2"/></svg>','var(--aurora)'],
+  ['4',['4 days a week','4 Tage pro Woche'],['Upper/lower split — more volume','Ober-/Unterkörper geteilt — mehr Volumen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"/></svg>','var(--ember)']],
  eq:[
-  ['bar',['Pull-up bar','Klimmzugstange'],['A doorway bar is all it takes','Ein Türreck reicht völlig']],
-  ['dip',['Dip bars','Barren / Dip-Gelegenheit'],['Parallettes or two sturdy chairs','Parallettes oder zwei stabile Stühle']],
-  ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen']]],
+  ['bar',['Pull-up bar','Klimmzugstange'],['A doorway bar is all it takes','Ein Türreck reicht völlig'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 5h18M6 5v6M18 5v6"/><path d="M12 5v4m0 0c-2 1.6-2 4-2 6m2-6c2 1.6 2 4 2 6"/></svg>','var(--aurora)'],
+  ['dip',['Dip bars','Barren / Dip-Gelegenheit'],['Parallettes or two sturdy chairs','Parallettes oder zwei stabile Stühle'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h6M14 9h6M5.5 9v8M18.5 9v8M8.5 9v8M15.5 9v8"/></svg>','var(--ice)'],
+  ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 3v4M16 3v4"/><circle cx="8" cy="13" r="3.6"/><circle cx="16" cy="13" r="3.6"/></svg>','var(--brass)']],
  avoid:[
   ['wrist',['Wrists','Handgelenke'],null],
   ['elbow',['Elbows','Ellbogen'],null],
@@ -5324,17 +5436,34 @@ var OBL={
   ['knee',['Knees','Knie'],null],
   ['hip',['Hips','Hüfte'],null]],
  exp:[
-  ['0',['Just starting','Fange gerade an'],null],
-  ['1',['Under 6 months','Unter 6 Monate'],null],
-  ['2',['6-12 months','6-12 Monate'],null],
-  ['3',['1-3 years','1-3 Jahre'],null],
-  ['4',['Over 3 years','Über 3 Jahre'],null]]
+  ['0',['Just starting','Fange gerade an'],['First structured plan','Erster strukturierter Plan']],
+  ['1',['Under 6 months','Unter 6 Monate'],['The basics are settling in','Die Grundlagen setzen sich']],
+  ['2',['6-12 months','6-12 Monate'],['Clean reps, first ladders','Saubere Wiederholungen, erste Leitern']],
+  ['3',['1-3 years','1-3 Jahre'],['Training is a habit','Training ist Gewohnheit']],
+  ['4',['Over 3 years','Über 3 Jahre'],['You know your body well','Du kennst deinen Körper genau']]]
 };
-var obState={goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
+var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,
+  goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
 var IT={
  hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
-  s:['VALKR builds you a 12-week calisthenics plan around what you have and what you can do. Five quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Calisthenics-Plan um das, was du hast und was du kannst. Fünf schnelle Fragen — alles bleibt später änderbar.'],
+  s:['VALKR builds you a 12-week calisthenics plan around what you have and what you can do. A few quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Calisthenics-Plan um das, was du hast und was du kannst. Ein paar schnelle Fragen — alles bleibt später änderbar.'],
   n:['Let\u2019s go','Los geht\u2019s']},
+ sex:{t:['Who is training?','Wer trainiert hier?'],
+  s:['Sets the figure preview and the estimates. Nothing else hangs on it.','Bestimmt die Figur-Vorschau und die Schätzwerte. Mehr hängt nicht daran.']},
+ age:{t:['How old are you?','Wie alt bist du?'],
+  s:['Age shapes recovery and your starting volume.','Das Alter bestimmt Erholung und Startvolumen mit.']},
+ height:{t:['How tall are you?','Wie groß bist du?'],
+  s:['Height and weight give us your body-fat estimate.','Aus Größe und Gewicht entsteht deine Körperfett-Schätzung.']},
+ weight:{t:['What do you weigh?','Wie viel wiegst du?'],
+  s:['A morning value is fine. Precision comes with the weekly weigh-in.','Ein Morgenwert reicht. Genau wird es mit dem Wochen-Wiegen.']},
+ bf:{t:['Your body fat','Dein Körperfettanteil'],
+  s:['Only an estimate. Move the slider until the figure looks like you.','Nur eine Schätzung. Verschiebe den Regler, bis die Figur dir ähnelt.']},
+ b1:{t:['Profile set.','Profil steht.'],
+  s:['Now we decide where you are going.','Jetzt legen wir fest, wohin du willst.'],
+  nx:['Your goals','Deine Ziele'],n:['Continue','Weiter']},
+ b2:{t:['Goals locked.','Ziele stehen.'],
+  s:['Now we build the week around your life.','Jetzt bauen wir die Woche um dein Leben.'],
+  nx:['Your setup','Dein Rahmen'],n:['Continue','Weiter']},
  goal:{t:['What are you here for?','Wofür bist du hier?'],
   s:['Shapes how your week is built.','Bestimmt, wie deine Woche aufgebaut wird.']},
  days:{t:['How often can you train?','Wie oft kannst du trainieren?'],
@@ -5351,7 +5480,64 @@ var IT={
   s:['Today shows your session — every exercise has a swap button, and the coach reads your numbers. Your first session measures you in: three sets per exercise, you enter your reps, and every ladder starts at your level. No test before the training — the training is the test.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf, und der Coach liest deine Zahlen mit. Dein erstes Training misst dich ein: drei Sätze je Übung, du trägst deine Wiederholungen ein, und jede Leiter startet auf deinem Level. Kein Test vor dem Training — das Training ist der Test.'],
   n:['Start day one','Los mit Tag eins']}
 };
-var ISTEPS=['hello','goal','days','eq','avoid','exp','ready'],inIdx=0;
+var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','days','eq','avoid','ready'],inIdx=0;
+/* Kapitel je Schritt (1 Profil, 2 Ziele, 3 Rahmen); Hallo und Fertig laufen ohne Chip. */
+var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,days:3,eq:3,avoid:3,ready:3};
+var ICHN=[null,['Your profile','Dein Profil'],['Your goals','Deine Ziele'],['Your setup','Dein Rahmen']];
+var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['days','eq','avoid']];
+/* Koerperfett-Schaetzung nach Deurenberg: BMI, Alter, Geschlecht. */
+function bfEstimate(){
+  var h=obState.height/100,bmi=obState.weight/(h*h);
+  var sm=obState.sex==='m'?1:(obState.sex==='f'?0:0.5);
+  var e=1.2*bmi+0.23*obState.age-10.8*sm-5.4;
+  return Math.max(8,Math.min(45,Math.round(e)));
+}
+function bfDesc(v,L){
+  if(v<11)return ['Contest-level definition. Veins and every fiber visible, hard to hold for long.','Wettkampf-Definition. Adern und jede Faser sichtbar, dauerhaft kaum zu halten.'][L];
+  if(v<15)return ['Very defined: clear six-pack, sharp face.','Sehr definiert: klares Sixpack, markantes Gesicht.'][L];
+  if(v<20)return ['Athletic: abs show, arms and legs are firm.','Athletisch: Bauchmuskeln zeichnen sich ab, Arme und Beine straff.'][L];
+  if(v<26)return ['Your abs sit under a thin layer of fat. Arms and legs carry little.','Deine Bauchmuskeln liegen unter einer dünnen Fettschicht. Arme und Beine tragen wenig.'][L];
+  if(v<32)return ['Soft middle, contours blur. Recomposition works fastest from here.','Weiche Mitte, Konturen verschwimmen. Rekomposition wirkt von hier am schnellsten.'][L];
+  return ['Clear reserves around the trunk. Every training week pays in double here.','Deutliche Reserven am Rumpf. Jede Trainingswoche zahlt hier doppelt ein.'][L];
+}
+/* Die Figur: stilisierte Silhouette, deren Breiten mit dem Fettanteil
+   mitgehen. Kein Foto-Anspruch, eine ehrliche Schemazeichnung im Stil der
+   Koerperkarte. t laeuft 0..1 ueber den Schieberbereich 8..45 Prozent. */
+function bfFigure(bf,sex){
+  var t=(bf-8)/37; if(t<0)t=0; if(t>1)t=1;
+  var f=sex==='f'?1:(sex==='x'?0.5:0);
+  function mix(a,b){return a+(b-a)*t;}
+  var sh=mix(34,40)-f*4;
+  var wa=mix(17,36)+f*1;
+  var hp=mix(22,34)+f*6;
+  var aw=mix(6.5,10.5)-f*1;
+  var lw=mix(9.5,14.5)+f*1;
+  var C=100,d='';
+  d+='M'+(C-sh)+' 80 Q'+(C-sh-2)+' 84 '+(C-wa)+' 128 Q'+(C-wa-1)+' 158 '+(C-hp)+' 182 '+
+     'L'+(C+hp)+' 182 Q'+(C+wa+1)+' 158 '+(C+wa)+' 128 Q'+(C+sh+2)+' 84 '+(C+sh)+' 80 '+
+     'Q'+C+' 72 '+(C-sh)+' 80 Z ';
+  d+='M'+(C-8)+' 62 Q'+(C-6)+' 54 '+(C-11)+' 47 A13.5 13.5 0 1 1 '+(C+11)+' 47 Q'+(C+6)+' 54 '+(C+8)+' 62 '+
+     'Q'+C+' 67 '+(C-8)+' 62 Z ';
+  function arm(s){
+    var x0=C+s*(sh+1),x1=C+s*(sh+mix(8,12)),x2=C+s*(sh+mix(11,15));
+    return 'M'+x0+' 82 Q'+(x1+s*aw*0.4)+' 130 '+x2+' 176 '+
+      'L'+(x2-s*aw*0.72)+' 178 Q'+(x1-s*aw)+' 130 '+(x0-s*aw*1.15)+' 88 Z ';
+  }
+  d+=arm(1)+arm(-1);
+  function leg(s){
+    var xi=C+s*3,xo=C+s*hp,xa=C+s*mix(11,15);
+    return 'M'+xi+' 182 L'+xo+' 182 Q'+(C+s*(hp-1))+' 226 '+(xa+s*lw*0.35)+' 262 '+
+      'L'+(xa+s*lw*0.35)+' 296 L'+(xa-s*lw*0.55)+' 296 Q'+(C+s*(3+lw*0.2))+' 240 '+xi+' 196 Z ';
+  }
+  d+=leg(1)+leg(-1);
+  var absOp=bf<=15?1:(bf>=24?0:(24-bf)/9);
+  var abs='<g class="fig-abs" style="opacity:'+absOp.toFixed(2)+'">'+
+    '<path d="M'+C+' 96 V150"/>'+
+    '<path d="M'+(C-9)+' 108 H'+(C+9)+'"/><path d="M'+(C-10)+' 122 H'+(C+10)+'"/><path d="M'+(C-10)+' 136 H'+(C+10)+'"/>'+
+    '<path d="M'+(C-sh*0.62)+' 92 Q'+C+' 100 '+(C+sh*0.62)+' 92"/>'+
+    '</g>';
+  return '<svg viewBox="0 0 200 310" aria-hidden="true"><path class="fig-line" d="'+d+'"/>'+abs+'</svg>';
+}
 function introShow(on){
   var el=$('intro');if(!el)return;
   el.classList.toggle('on',!!on);
@@ -5363,30 +5549,83 @@ function introFinishProfile(){
   var av={};OBL.avoid.forEach(function(o){av[o[0]]=!!obState.avoid[o[0]];});
   profile={goal:obState.goal,days:obState.days,
     eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
-    avoid:av,exp:obState.exp,swaps:{},testAsked:1};
+    avoid:av,exp:obState.exp,swaps:{},testAsked:1,
+    sex:obState.sex,age:obState.age,height:obState.height,weight:obState.weight,bf:obState.bf};
   set('profile',profile);
   var ye=$('y-exp');if(ye)ye.selectedIndex=parseInt(profile.exp,10)||0;
   applyProfile();buildCatalog();renderDay();volBar();refresh();
+  if(typeof paintSetProfile==='function')paintSetProfile();
 }
 function inNextStep(){inIdx=Math.min(ISTEPS.length-1,inIdx+1);renderIntro();}
+var NUMS={age:{min:14,max:80,unit:['years','Jahre']},height:{min:140,max:210,unit:['cm','cm']},weight:{min:40,max:150,unit:['kg','kg']}};
+function chDone(c,k){var ch=ICH[k]||0;return ch>c||(k==='b1'&&c===1)||(k==='b2'&&c<=2)||(k==='ready');}
+function inHead(k,L){
+  var ch=ICH[k]||0,chip=$('inChip'),back=$('inBack'),prog=$('inProg');
+  back.hidden=(inIdx===0||k==='ready');
+  chip.hidden=!ch||k==='hello'||k==='ready'||k==='b1'||k==='b2';
+  prog.hidden=(k==='hello'||k==='ready');
+  if(!chip.hidden){chip.textContent=ICHN[ch][L];chip.className='chchip c'+ch;}
+  if(!prog.hidden){
+    var h='';
+    for(var c=1;c<=3;c++){
+      var fill=0;
+      if(chDone(c,k))fill=100;
+      else if(ch===c){
+        var steps=ICHSTEPS[c],i=steps.indexOf(k);
+        fill=i<0?100:Math.round((i+1)/steps.length*100);
+      }
+      h+='<span class="seg"><i style="width:'+fill+'%"></i></span>';
+      if(c<3)h+='<span class="tick'+(chDone(c,k)?' done':'')+'">✓</span>';
+    }
+    prog.innerHTML=h;
+  }
+}
+/* Antwortkarten: Icon-Chip links, Text, Auswahlkreis rechts. */
+function inOpts(k,L){
+  var opts=OBL[k],multi=(k==='eq'||k==='avoid');
+  var reco=(k==='days')?((parseInt(obState.exp,10)>=3)?'4':'3'):null;
+  return '<div class="iopts">'+opts.map(function(o,i){
+    var on=multi?!!obState[k][o[0]]:obState[k]===o[0];
+    var ic=o[3]?'<span class="ic" style="background:color-mix(in srgb,'+o[4]+' 14%,transparent);color:'+o[4]+'">'+o[3]+'</span>':'';
+    var sub=o[2]?'<small>'+o[2][L]+'</small>':'';
+    var badge=(reco===o[0])?'<span class="reco">'+(L?'Empfohlen':'Suggested')+'</span>':'';
+    return '<button type="button" class="iopt" data-i="'+i+'" aria-pressed="'+on+'">'+badge+ic+
+      '<span class="tx"><b>'+o[1][L]+'</b>'+sub+'</span><span class="ring">✓</span></button>';
+  }).join('')+'</div>'+(reco?'<p class="recoleg">'+(L?'Empfohlen für deine Erfahrung':'Suggested for your experience')+'</p>':'');
+}
 function renderIntro(){
-  var L=cfg.lang==='de'?1:0,k=ISTEPS[inIdx],T=IT[k],host=$('inStep');
-  $('inDots').innerHTML=ISTEPS.map(function(_,i){return '<i class="'+(i<=inIdx?'on':'')+'"></i>';}).join('');
+  var L=cfg.lang==='de'?1:0,DE=L===1,k=ISTEPS[inIdx],T=IT[k],host=$('inStep');
+  if(k==='bf'&&!obState.bfTouched)obState.bf=bfEstimate();
+  inHead(k,L);
+  host.className='istep'+((k==='hello'||k==='ready')?' center':'');
   var h='';
   if(k==='hello'){
     h+='<div class="brandline"><svg width="30" height="30" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg><b>Valkr</b></div>';
-  }
-  h+='<h2></h2><p class="isub"></p>';
-  if(k==='hello'){
+    h+='<h2></h2><p class="isub"></p>';
     h+='<div class="ilang"><button type="button" data-lang="de" aria-pressed="'+(L===1)+'">Deutsch</button><button type="button" data-lang="en" aria-pressed="'+(L===0)+'">English</button></div>';
+  }else if(k==='b1'||k==='b2'){
+    h+='<div class="bridge"><h2></h2><p class="isub lead"></p>'+
+       '<p class="nextk">'+(DE?'Als Nächstes':'Up next')+'</p>'+
+       '<p class="nextv" style="color:'+(k==='b1'?'var(--ember)':'var(--brass)')+'">'+T.nx[L]+'</p></div>';
+  }else{
+    h+='<h2></h2><p class="isub"></p>';
   }
-  var opts=OBL[k];
-  if(opts){
-    h+='<div class="iopts">'+opts.map(function(o,i){
-      var multi=(k==='eq'||k==='avoid');
-      var on=multi?!!obState[k][o[0]]:obState[k]===o[0];
-      return '<button type="button" class="iopt" data-i="'+i+'" aria-pressed="'+on+'">'+o[1][L]+(o[2]?'<small>'+o[2][L]+'</small>':'')+'</button>';
-    }).join('')+'</div>';
+  if(k==='sex'){
+    h+='<div class="figstage" id="figStage">'+bfFigure(obState.bf,obState.sex)+'</div>'+inOpts(k,L);
+  }else if(NUMS[k]){
+    h+='<div class="valrow"><b id="nvVal">'+obState[k]+'</b><span>'+NUMS[k].unit[L]+'</span></div>'+
+       '<div class="stepbtns"><button type="button" id="nvMinus" aria-label="-">&minus;</button>'+
+       '<input type="range" class="islide" id="nvSlide" style="flex:1" min="'+NUMS[k].min+'" max="'+NUMS[k].max+'" step="1" value="'+obState[k]+'">'+
+       '<button type="button" id="nvPlus" aria-label="+">+</button></div>';
+  }else if(k==='bf'){
+    var est=bfEstimate(),estPct=Math.round((est-8)/37*100);
+    h+='<div class="figstage" id="figStage">'+bfFigure(obState.bf,obState.sex)+'</div>'+
+       '<div class="valrow"><b id="bfVal">'+obState.bf+'</b><span>%</span></div>'+
+       '<p class="bfdesc" id="bfDesc">'+bfDesc(obState.bf,L)+'</p>'+
+       '<div class="slidewrap"><span class="est" style="left:'+estPct+'%">'+(DE?'Schätzung':'Estimate')+'</span>'+
+       '<input type="range" class="islide" id="bfSlide" min="8" max="45" step="1" value="'+obState.bf+'"></div>';
+  }else if(OBL[k]&&k!=='sex'){
+    h+=inOpts(k,L);
   }
   host.innerHTML=h;
   host.querySelector('h2').textContent=T.t[L];
@@ -5398,30 +5637,49 @@ function renderIntro(){
       b.addEventListener('click',function(){cfg.lang=b.dataset.lang;saveCfg();applyI18n();renderIntro();});
     });
   }
+  var opts=OBL[k];
   if(opts){
     [].forEach.call(host.querySelectorAll('.iopt'),function(b){
       b.addEventListener('click',function(){
         var o=opts[parseInt(b.dataset.i,10)],multi=(k==='eq'||k==='avoid');
-        if(multi){obState[k][o[0]]=!obState[k][o[0]];b.setAttribute('aria-pressed',String(!!obState[k][o[0]]));}
-        else{
+        if(multi){
+          obState[k][o[0]]=!obState[k][o[0]];
+          b.setAttribute('aria-pressed',String(!!obState[k][o[0]]));
+        }else{
           obState[k]=o[0];
-          if(k==='exp'){introFinishProfile();}
-          inNextStep();
+          [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
+          if(k==='sex'){var fs=$('figStage');if(fs)fs.innerHTML=bfFigure(obState.bf,obState.sex);}
         }
       });
     });
   }
-  var back=$('inBack'),next=$('inNext');
-  back.style.display=(inIdx===0||k==='ready')?'none':'';
-  back.textContent=cfg.lang==='de'?'Zurück':'Back';
-  if(k==='hello'||k==='eq'||k==='avoid'||k==='ready'){next.style.display='';next.textContent=T.n[L];}
-  else next.style.display='none';
-  var old=$('inSkip');if(old)old.remove();
+  if(NUMS[k]){
+    var sl=$('nvSlide'),vv=$('nvVal');
+    function nvSet(v){
+      v=Math.max(NUMS[k].min,Math.min(NUMS[k].max,v));
+      obState[k]=v;sl.value=v;vv.textContent=v;
+      if(k!=='age')obState.bfTouched=false;
+    }
+    sl.addEventListener('input',function(){nvSet(parseInt(sl.value,10));});
+    $('nvMinus').addEventListener('click',function(){nvSet(obState[k]-1);});
+    $('nvPlus').addEventListener('click',function(){nvSet(obState[k]+1);});
+  }
+  if(k==='bf'){
+    var bs=$('bfSlide');
+    bs.addEventListener('input',function(){
+      obState.bf=parseInt(bs.value,10);obState.bfTouched=true;
+      $('bfVal').textContent=obState.bf;
+      $('bfDesc').textContent=bfDesc(obState.bf,L);
+      $('figStage').innerHTML=bfFigure(obState.bf,obState.sex);
+    });
+  }
+  var next=$('inNext');
+  next.textContent=T.n?T.n[L]:(DE?'Weiter':'Next');
 }
 $('inBack').addEventListener('click',function(){inIdx=Math.max(0,inIdx-1);renderIntro();});
 $('inNext').addEventListener('click',function(){
   var k=ISTEPS[inIdx];
-  if(k==='ready'){introShow(false);return;}
+  if(k==='ready'){introFinishProfile();introShow(false);return;}
   inNextStep();
 });
 function openSwap(pl,idx,it,after){
@@ -6210,6 +6468,68 @@ renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
 clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
+/* ---------- v16: Profilgruppe in den Einstellungen ----------
+   Zeigt die Werte aus der Einfuehrung und laesst sie direkt nachjustieren.
+   Alles landet im selben profile-Objekt, das auch der Wizard schreibt. */
+function paintSetProfile(){
+  var host=$('setProfBody');if(!host)return;
+  var DE=cfg.lang==='de',L=DE?1:0;
+  var tt=$('setProfTitle'),ts=$('setProfSub'),rb=$('reOnb');
+  if(tt)tt.textContent=DE?'Profil':'Profile';
+  if(rb)rb.textContent=DE?'Einführung erneut durchlaufen':'Run the intro again';
+  if(!profile){
+    if(ts)ts.textContent=DE?'Noch nicht eingerichtet':'Not set up yet';
+    host.innerHTML='<p class="hint">'+(DE?'Die Einführung läuft beim ersten Öffnen.':'The intro runs on first open.')+'</p>';
+    return;
+  }
+  if(ts)ts.textContent=DE?'Aus der Einführung — hier änderbar':'From the intro — editable here';
+  var SEXN={f:DE?'Weiblich':'Female',m:DE?'Männlich':'Male',x:DE?'Keine Angabe':'No answer'};
+  function row(k,label,val,unit){
+    return '<div class="profrow" data-k="'+k+'"><span class="pk">'+label+'</span>'+
+      '<button type="button" data-d="-1" aria-label="-">&minus;</button>'+
+      '<span class="pv">'+val+(unit?'&nbsp;<small style="color:var(--ink3)">'+unit+'</small>':'')+'</span>'+
+      '<button type="button" data-d="1" aria-label="+">+</button></div>';
+  }
+  var h='';
+  h+='<div class="profrow"><span class="pk">'+(DE?'Geschlecht':'Sex')+'</span>'+
+     '<select id="setSex"><option value="f"'+(profile.sex==='f'?' selected':'')+'>'+SEXN.f+'</option>'+
+     '<option value="m"'+(profile.sex==='m'?' selected':'')+'>'+SEXN.m+'</option>'+
+     '<option value="x"'+(profile.sex==='x'?' selected':'')+'>'+SEXN.x+'</option></select></div>';
+  h+=row('age',DE?'Alter':'Age',profile.age||22,DE?'Jahre':'yrs');
+  h+=row('height',DE?'Größe':'Height',profile.height||180,'cm');
+  h+=row('weight',DE?'Gewicht':'Weight',profile.weight||78,'kg');
+  h+='<div class="profrow"><span class="pk">'+(DE?'Körperfett':'Body fat')+'</span>'+
+     '<input id="setBfSlide" type="range" min="8" max="45" step="1" value="'+(profile.bf||20)+'">'+
+     '<span class="pv" id="setBfVal">'+(profile.bf||20)+'&nbsp;<small style="color:var(--ink3)">%</small></span></div>';
+  host.innerHTML=h;
+  var LIM={age:[14,80],height:[140,210],weight:[40,150]};
+  [].forEach.call(host.querySelectorAll('.profrow[data-k] button'),function(b){
+    b.addEventListener('click',function(){
+      var r=b.closest('.profrow'),k=r.dataset.k,d=parseInt(b.dataset.d,10);
+      var v=(parseInt(profile[k],10)||LIM[k][0])+d;
+      v=Math.max(LIM[k][0],Math.min(LIM[k][1],v));
+      profile[k]=v;set('profile',profile);
+      r.querySelector('.pv').innerHTML=v+'&nbsp;<small style="color:var(--ink3)">'+(k==='age'?(DE?'Jahre':'yrs'):(k==='height'?'cm':'kg'))+'</small>';
+    });
+  });
+  var sx=$('setSex');if(sx)sx.addEventListener('change',function(){profile.sex=sx.value;set('profile',profile);});
+  var bs=$('setBfSlide');if(bs)bs.addEventListener('input',function(){
+    profile.bf=parseInt(bs.value,10);set('profile',profile);
+    $('setBfVal').innerHTML=profile.bf+'&nbsp;<small style="color:var(--ink3)">%</small>';
+  });
+}
+var reOnbBtn=$('reOnb');
+if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
+  if(profile){
+    obState.sex=profile.sex||'m';obState.age=profile.age||22;obState.height=profile.height||180;
+    obState.weight=profile.weight||78;obState.bf=profile.bf||20;obState.bfTouched=!!profile.bf;
+    obState.goal=profile.goal||'muscle';obState.days=profile.days||'3';obState.exp=profile.exp||'1';
+    obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings)};
+    obState.avoid={};if(profile.avoid)Object.keys(profile.avoid).forEach(function(a){if(profile.avoid[a])obState.avoid[a]=true;});
+  }
+  inIdx=0;renderIntro();introShow(true);
+});
+paintSetProfile();
 syncIntro();
 /* Im Theme „Automatisch" haengen alle Farben am Systemmodus. Wechselt der,
    aendern sich die Variablen, ohne dass jemand einen Knopf gedrueckt hat --
