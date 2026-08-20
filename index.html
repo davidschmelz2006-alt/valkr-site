@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->20.08.2026, 17:57<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->20.08.2026, 19:47<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -150,8 +150,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v16.9</span>
-        <span class="fm"><b>6.986</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v17.0</span>
+        <span class="fm"><b>7.860</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -164,11 +164,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">0628683</span><div class="t"><b>Sessionabschluss: Hub steht auf v16.9. Strukturfehler behoben (sieben von vierzehn Ansichten hingen ausserhalb der Layout-Huelle), Ernaehrungstagebuch mit eigenen Mahlzeiten, Katalog und Tagesansicht vollstaendig auf Deutsch, Tableiste repariert, Sparmodus mit gemessener Bildrate, Ausklapper enden an der echten Bewegung, Tag eins ist eine Einheit statt eines Ruhetags, Zugang aufgeraeumt. Kompaktheit belegt: minus 30 Prozent Scrollhoehe gegenueber v13.7</b></div></div>
       <div class="row"><span class="h">5cff49e</span><div class="t"><b>Hub v16.9: Zugang aufgeraeumt (Fragen und Hinweise zugeklappt, doppeltes tblwrap behoben) und die Behauptung kompakter mit Zahlen belegt - Scrollhoehe aller dreizehn Abschnitte gegen v13.7 gemessen, in Summe 30 Prozent weniger, Raenge minus 74, Wissen minus 66, Wochen minus 51 Prozent; zwei Bereiche sind gewachsen und stehen ebenfalls in der Tabelle</b></div></div>
       <div class="row"><span class="h">8eeb380</span><div class="t"><b>Hub v16.8: Tag eins ist eine Einheit statt eines Ruhetags - der Rhythmus zaehlt ab dem Starttag statt an festen Wochentagen zu haengen. Wer donnerstags anfing wurde vorher mit heute nichts zu tun begruesst, das traf vier von sieben Neuen</b></div></div>
       <div class="row"><span class="h">19353e1</span><div class="t"><b>Hub v16.7: Trainingstage, Ruhetage und alle Uebungsnamen in der Tagesansicht auf Deutsch - uebersetzt beim Anzeigen, nicht in den Daten, weil title/sub/l Schluessel sind (l wird beim Uebungstausch gegen den Katalog verglichen). Drei Stufen: Platzbezeichnung, dann Katalog, dann englisches Original</b></div></div>
       <div class="row"><span class="h">2c0ba4f</span><div class="t"><b>Hub v16.6: gemessene Bildrate in den Einstellungen unter dem Sparmodus, mit Urteil - macht die Optimierung auf dem echten Geraet im Park nachpruefbar statt behauptet</b></div></div>
-      <div class="row"><span class="h">90fd80a</span><div class="t"><b>Hub v16.5: Uebungskatalog auf Deutsch (alle 114 Uebungen, englischer Name bleibt als Schluessel damit gespeicherte Tausche nicht brechen, Suche trifft beide Sprachen); Sparmodus in den Einstellungen erzwingbar mit Hinweis was gerade gilt; Tableiste repariert - der aktive Reiter hatte einen Block in Textfarbe hinterlegt, weil die Regel fuer die obere Reihe am Rechner auch auf die Tableiste zutraf (beides nav). Dazu binda.sh zeigt die eigene Baustelle und scripts/baustelle.sh macht daraus abschickfertige Auftraege</b></div></div>
     </div>
   </div>
 
@@ -180,19 +180,14 @@
       <li class="star"><b>Impressum und Datenschutzerklärung</b> (§5 DDG, DSGVO). Pflicht, sobald echte Besucher kommen. Vor der ersten TikTok-Verlinkung.</li>
       <li class="star"><b>Preis und Zugangsschutz entscheiden.</b> Grundlage steht in <code>Produkt/ZUGANGSSCHUTZ.md</code>, fällig mit der Verkaufsseite.</li>
       <li class="star"><b>Sieben Belege fachlich gegenlesen lassen</b>, dazu Satz-Autoregulation und Einmess-Heuristiken (v13.7). Vor kommerzieller Nutzung.</li>
+      <li class="star"><b>Deutsche Buchfassung fachlich gegenlesen</b> (12 Kapitel in <code>02 Manuskript DE</code>, seit v17.0 auch komplett im Hub-Wissensbereich). Übersetzung ist durch drei Kritikerrunden, die fachliche Freigabe ist Menschensache.</li>
       <li class="big">Produkt — Liam</li>
-      <li class="star"><b>Einführung: Trainingstage selbst wählen lassen.</b> Der Rhythmus hängt seit v16.8 am Starttag statt an festen Wochentagen — Tag eins ist damit immer eine Einheit. Was noch fehlt: den Nutzer selbst sagen lassen, an welchen Tagen er kann, und den Plan darauf legen.</li>
-      <li class="star"><b>Ausklapper: das letzte Haken kurz vor dem Schließen.</b> Öffnen und das Ende der Bewegung sind seit v16.4 sauber (<code>transitionend</code> statt Stoppuhr), aber im letzten Stück des Zuklappens ruckelt es noch. Verdacht: das Umschalten von <code>open</code> fällt mit dem letzten Bild der Bewegung zusammen.</li>
-      <li class="star"><b>Einheit, Skills, Beweglichkeit und Test überarbeiten.</b> Bei Test die Stufen (L1 … L6) verständlicher und schöner darstellen — „L1" sagt niemandem etwas. Bewegungsdemos für alles, was noch keine hat, besonders die untergeordneten Skill-Stufen. Sparsam halten: die sechs Demos im Trainingsbereich laufen nur noch, wenn sie im Bild stehen (v14.0) — dieselbe Regel gilt für neue.</li>
-      <li class="star"><b>Komplette Test- und Fehlerprüfung</b> nach den Umbauten. Vorlage: alle Ansichten anfahren, auf <code>errs</code>, Überlauf bei 375 px, Schrift unter 11 px und Tag-Stapel prüfen.</li>
-      <li class="star"><b>42 MCI-Screenshots auswerten und das Design angleichen</b> (ZIP von David, <code>Downloads/drive-download-20260820T121026Z-1-001.zip</code>). Ausdrücklich Liams Baustelle mit Fable 5 Ultracode und <code>/design-loop</code>. Schwerpunkte laut David: Settings überarbeiten, mehr Farbe in den Symbolen, Liquid-Glass weiter einbringen, Ernährungsbereich optisch an die Screenshots angleichen — die Funktion dahinter (eigene Mahlzeiten, Kalorienrechnung) steht seit v16.4.</li>
-      <li class="star"><b>Deutsche Fassung des Manuskripts</b> (12 Kapitel, ~12.000 Wörter). DE-Ordner ist leer. Größter offener Posten.</li>
-      <li>Manuskript in den Wissens-Bereich holen, sobald die DE-Fassung steht — dann ist der Hub das ganze Produkt statt zwei getrennter Lieferungen.</li>
+      <li class="star"><b>EN-Manuskript angleichen:</b> Die DE-Fassung trägt den Gesundheitshinweis jetzt in allen 12 Kapiteln (bewusste DACH-Entscheidung, Protokoll im Design-Loop-Ordner); im EN-Original fehlt er in vier Kapiteln. Beim nächsten EN-Durchgang nachziehen.</li>
       <li class="big">Produkt — offen, ohne Termin</li>
-      <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16-Wizard, Körperfett-Figur, Settings).</li>
+      <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16/v17-Wizard, Körperfett-Figur, Trainingstage-Pillen, Stufenbänder, Ernährungs-Ring).</li>
       <li class="star"><b>Ersatzübungen</b> für: keine Stange, kein Platz, unterwegs, Schmerz. Häufigster Abbruchgrund bei Heim-Calisthenics.</li>
       <li class="star"><b>Datenimport.</b> Der Export in den Einstellungen kopiert JSON, es gibt aber keinen Weg zurück. Das verspricht eine Sicherung, die es nicht gibt.</li>
-      <li>Bewegungsdemos je Leiterstufe. Die sechs Muster haben welche, die ~40 einzelnen Stufen nicht.</li>
+      <li>Bewegungsdemos je Leiterstufe. Die sechs Muster und seit v17.0 alle Skill-Stufen und Beweglichkeits-Drills haben welche — die ~40 einzelnen Leiterstufen der Muster noch nicht. Das Posensystem dafür steht jetzt (SKDEMO/MOBDEMO als Vorlage).</li>
       <li>Bestenliste: aus der Oberfläche entfernt, weil neun von zehn Zeilen erfunden waren. Kommt zurück, wenn es einen Server gibt. Code liegt in <code>renderBoard()</code>.</li>
       <li class="big">Geprüft und bewusst abgelehnt</li>
       <li>KI-Coach als Freitext-Aufsatz — Begründung in <code>Produkt/KI-COACH.md</code>.</li>

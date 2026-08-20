@@ -224,7 +224,7 @@
       box-shadow:0 -2px 14px rgba(0,0,0,.14)}
     #tabbar button{flex:1;min-width:0;min-height:52px;display:flex;flex-direction:column;
       align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
-      font-family:var(--fb);font-weight:600;font-size:.6rem;letter-spacing:.01em;
+      font-family:var(--fb);font-weight:600;font-size:var(--t1);letter-spacing:.01em;
       text-transform:none;position:relative;transition:color .16s;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     #tabbar svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -834,8 +834,13 @@
   details.fold.exp>summary{border-bottom:1px solid var(--line2)}
   /* Von 0fr auf 1fr: der einzige Weg, eine Hoehe von "nichts" auf "so hoch wie
      noetig" zu animieren, ohne sie vorher zu kennen. */
-  .foldWrap{display:grid;grid-template-rows:0fr;
-    transition:grid-template-rows var(--foldms,.26s) cubic-bezier(.3,.8,.4,1)}
+  /* overflow:hidden auf der Huelle, nicht nur auf dem Koerper: der Koerper
+     behaelt beim Zuklappen sein Padding (~30px Polsterbox), und overflow am
+     Koerper schneidet nur dessen INHALT. Ohne Clip an der Huelle blieb am
+     Ende der Bewegung eine Polster-Leiste stehen, die erst mit open=false
+     schlagartig verschwand -- das war das Haken im letzten Stueck. */
+  .foldWrap{display:grid;grid-template-rows:0fr;overflow:hidden;
+    transition:grid-template-rows var(--foldms,.26s) cubic-bezier(.2,.7,.2,1)}
   details.fold.exp .foldWrap{grid-template-rows:1fr}
   .foldWrap>.foldBody{overflow:hidden;min-height:0}
   .foldBody{padding:.85rem .9rem 1rem;display:flex;flex-direction:column;gap:.7rem}
@@ -872,6 +877,10 @@
   .drill .t{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
   .drill p{margin:0;font-size:var(--t3);color:var(--ink2)}
   .drill .dose{font-family:var(--fm);font-size:var(--t2);color:var(--ice)}
+  .drill .drillHead{display:flex;align-items:flex-start;gap:.6rem}
+  .drill .drillHead .t{display:block}
+  .drill .mobdemo{width:52px;height:52px;flex:none}
+  .drill .mobdemo svg{width:100%;height:100%}
 
   .tblwrap{overflow-x:auto;background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.4rem .8rem;box-shadow:var(--sh)}
   .cmp{width:100%;border-collapse:collapse;font-size:var(--t3);min-width:420px}
@@ -991,6 +1000,26 @@
     border-radius:var(--r1);padding:.12rem .4rem}
   #intro .recoleg{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
     text-align:center;margin:0}
+  /* Wochentags-Waehler (v17): sieben Pillen wie eine Wochenleiste, gewaehlte
+     Tage tragen den farbigen Punkt ihrer Einheit, Legende darunter. */
+  #intro .daypills{display:flex;gap:.45rem;justify-content:center;margin-top:.5rem}
+  #intro .daypill{flex:1;min-width:0;max-width:54px;height:92px;border-radius:999px;border:1px solid var(--line);
+    background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    padding:.7rem .2rem .55rem;transition:.16s}
+  #intro .daypill:hover{border-color:var(--aurora)}
+  #intro .daypill b{font-family:var(--fm);text-transform:uppercase;font-size:var(--t3);color:var(--ink2)}
+  #intro .daypill .dot{width:22px;height:22px;border-radius:999px;background:var(--surf2);border:1px dashed var(--line2);transition:.16s}
+  #intro .daypill[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
+  #intro .daypill[aria-pressed="true"] b{color:var(--ink)}
+  #intro .daypill[aria-pressed="true"] .dot{border:none}
+  #intro .tdleg{display:flex;gap:.85rem .9rem;justify-content:center;flex-wrap:wrap;margin-top:.55rem}
+  #intro .tdleg span{display:inline-flex;align-items:center;gap:.4rem;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink2)}
+  #intro .tdleg i{width:10px;height:10px;border-radius:999px;display:inline-block;flex:none}
+  #intro .tdmeta{text-align:center;margin:.45rem 0 0;font-family:var(--fm);font-size:var(--t1);letter-spacing:.12em;
+    text-transform:uppercase;color:var(--ink3)}
+  #intro .tdmeta[data-warn="1"]{color:var(--ember)}
+  #intro .tdfirst{text-align:center;margin:.15rem 0 0;font-size:var(--t3);color:var(--ink2)}
   /* Zahlwert-Schritte: grosser Wert, Schieber, Feinjustage */
   #intro .valrow{display:flex;align-items:baseline;justify-content:center;gap:.5rem;margin-top:.4rem}
   #intro .valrow b{font-family:var(--fd);font-weight:600;font-size:2.9rem;line-height:1;font-variant-numeric:tabular-nums}
@@ -1236,7 +1265,9 @@
   :root[data-spar="1"] nav#nav,
   :root[data-spar="1"] #runner,
   :root[data-spar="1"] #sheet,
-  :root[data-spar="1"] #toast{backdrop-filter:none;-webkit-backdrop-filter:none}
+  :root[data-spar="1"] #toast,
+  :root[data-spar="1"] .macroCard{backdrop-filter:none;-webkit-backdrop-filter:none}
+  :root[data-spar="1"] .macroCard{background:var(--surf)}
   :root[data-spar="1"] .bar{background:var(--bg)}
   :root[data-spar="1"] #tabbar,
   :root[data-spar="1"] nav#nav{background:var(--surf)}
@@ -1336,7 +1367,73 @@
   .profrow button:hover{border-color:var(--aurora);color:var(--aurora)}
   .profrow select{background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);color:var(--ink);
     padding:.3rem .5rem;font:inherit;font-size:var(--t3)}
+  .profrow .setdays{display:flex;gap:.28rem;flex:none}
+  .profrow .setdays button{width:27px;height:27px;border-radius:999px;border:1px solid var(--line);background:var(--surf2);
+    color:var(--ink3);font-family:var(--fm);text-transform:uppercase;font-size:var(--t1);line-height:1;padding:0;transition:.16s}
+  /* Einzelbuchstaben ohne Sperrung: letter-spacing haengt HINTER jeder Glyphe
+     und wuerde das eine Zeichen im Kreis nach links ruecken. */
+  .profrow .setdays button[aria-pressed="true"]{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
   #setBfSlide{flex:1;min-width:120px;accent-color:var(--aurora)}
+  /* ── v17 (Baustelle 3): Stufenbaender im Test. Sechs benannte Segmente,
+     das eigene leuchtet; darunter Stufenname im Klartext. ── */
+  .lvlrow{margin-bottom:.8rem}
+  .lvlrow:last-child{margin-bottom:0}
+  .lvlrow .ltop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:.3rem;gap:.6rem}
+  .lvlrow .ltop b{font-family:var(--fd);font-weight:600;font-size:var(--t4)}
+  .lvlrow .ltop span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+  .lvlband{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
+  .lvlband i{display:flex;align-items:center;justify-content:center;height:26px;border-radius:var(--r1);
+    font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.02em;
+    background:var(--surf2);border:1px solid var(--line2);color:var(--ink3);min-width:0;overflow:hidden}
+  .lvlband i.on{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
+  .lvlrow .lname{margin:.3rem 0 0;font-size:var(--t3);color:var(--ink2)}
+  .lvlrow .lname b{font-family:var(--fd);font-weight:600;color:var(--ink)}
+  /* Demo-Figur an jeder Skill-Stufe: klein, links vom Index. Nur die
+     aktuelle Stufe laeuft animiert, der Rest steht als erstes Bild. */
+  .rung .rdemo{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center}
+  .rung .rdemo svg{width:100%;height:100%}
+  /* ── v17 (Baustelle 5): Ernaehrung nach App-Standard. Ring in der Mitte
+     (Uebrig), links Gegessen, rechts Ziel, darunter drei Makro-Balken.
+     Glasflaeche mit Unschaerfe -- der Sparmodus schaltet sie unten ab. ── */
+  .macroCard{background:color-mix(in srgb,var(--surf) 72%,transparent);border:1px solid var(--line);
+    border-radius:var(--r2);padding:1rem;box-shadow:var(--sh);
+    backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+  .macroRing{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
+  .macroRing .mcol{flex:1;text-align:center;min-width:0}
+  .macroRing .mcol b{font-family:var(--fd);font-weight:600;font-size:var(--t6);display:block;font-variant-numeric:tabular-nums}
+  .macroRing .mcol span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+  .macroRing .ringWrap{position:relative;width:118px;height:118px;flex:none}
+  .macroRing .ringWrap svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .macroRing .ringTxt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.05rem}
+  .macroRing .ringTxt b{font-family:var(--fd);font-weight:600;font-size:var(--t7);font-variant-numeric:tabular-nums}
+  .macroRing .ringTxt span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+  .macroRing .ringTxt b.over{color:var(--ember)}
+  .macroBars{margin-top:.95rem;display:flex;flex-direction:column;gap:.55rem}
+  .mbar .mtop{display:flex;justify-content:space-between;align-items:baseline;font-size:var(--t2);color:var(--ink2);margin-bottom:.2rem}
+  .mbar .mtop b{font-family:var(--fd);font-weight:600;color:var(--ink);font-size:var(--t3)}
+  .mbar .mtop span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .mbar .track{height:7px;border-radius:999px;background:var(--surf2);border:1px solid var(--line2);overflow:hidden}
+  .mbar .track i{display:block;height:100%;border-radius:999px;transition:width .4s cubic-bezier(.2,.7,.2,1)}
+  /* Mahlzeiten-Zeilen: farbiger Symbol-Chip wie in den Einstellungen. */
+  .prrow .prtop.hasChip{align-items:center}
+  .prrow .prtop.hasChip b{flex:1}
+  .prrow .mchip{width:30px;height:30px;border-radius:var(--r1);flex:none;display:flex;align-items:center;justify-content:center;
+    color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
+    border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
+  .prrow .mchip svg{width:17px;height:17px}
+  /* ── v17 (Baustelle 7): Buch-Typografie im Wissens-Bereich. Lesetext in
+     der Serife, begrenzte Zeilenlaenge, ruhige Abstaende -- wie ein Buch,
+     weil es das Buch IST. ── */
+  .accBody .book{font-family:var(--fr);font-size:var(--t4);line-height:1.62;max-width:62ch}
+  .accBody .book p{margin:.65em 0;text-wrap:pretty}
+  .accBody .book h4{font-family:var(--fd);font-weight:600;font-size:var(--t5);letter-spacing:.03em;margin:1.35em 0 .35em}
+  .accBody .book h5{font-family:var(--fd);font-weight:600;font-size:var(--t4);letter-spacing:.03em;margin:1.1em 0 .3em;color:var(--ink2)}
+  .accBody .book ul,.accBody .book ol{margin:.55em 0;padding-left:1.25em}
+  .accBody .book li{margin:.3em 0}
+  .accBody .book blockquote{margin:.9em 0;padding:.55em .9em;border-left:3px solid var(--aurora);
+    background:var(--surf2);border-radius:var(--r1);font-style:italic;color:var(--ink2)}
+  .accBody .book blockquote p{margin:0}
+  .accBody .book .tblwrap{margin:.8em 0;font-family:var(--fb)}
   /* ── v16: Tabbar mit Farbe. Der aktive Bereich bekommt seine eigene
      Kennfarbe -- Heute Aurora, Training Ember, Coach Ice, Du Gold. ── */
   #tabbar button[data-view="today"][aria-current="true"] svg{stroke:var(--aurora)}
@@ -1734,10 +1831,13 @@
         <span class="saved" id="testFlag">Saved</span>
       </div>
     </div>
-      <div class="tblwrap"><table class="cmp">
-        <thead><tr><th data-i18n="test.tbl">Test</th><th class="c">L1</th><th class="c">L2</th><th class="c">L3</th><th class="c">L4</th><th class="c">L5</th><th class="c">L6</th></tr></thead>
-        <tbody id="testTable"></tbody>
-      </table>
+    <!-- v17 (Baustelle 3): Stufen als benannte Baender statt nackter
+         L1-L6-Tabelle. "L1" sagt niemandem etwas -- die Namen (Einstieg bis
+         Elite) stehen jetzt direkt am Wert, das eigene Segment leuchtet. -->
+    <div class="form">
+      <p class="eyebrow" id="lvlLegT">Die sechs Stufen</p>
+      <div id="lvlBands"></div>
+      <p class="hint" id="lvlLeg"></p>
     </div>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="test.retest">Retest at week 6 and week 12</span></summary>
@@ -1748,7 +1848,8 @@
   <section class="view" id="v-fuel">
     <div><h2 class="sec" data-i18n="fuel.h">Fuel</h2><p class="sub" data-i18n="fuel.s">Mifflin&ndash;St Jeor for the estimate. Then override anything &mdash; change calories or protein and the rest recalculates around it.</p></div>
     <div class="form">
-      <p class="eyebrow" data-i18n="fuel.about">About you</p>
+      <div class="gtitle"><span class="ichip" style="--chip:var(--aurora)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg></span>
+        <div class="gt"><b data-i18n="fuel.about">About you</b></div></div>
       <div class="fgrid">
         <div class="field"><label for="f-sex" data-i18n="f.sex">Sex</label><div class="ctl"><select id="f-sex"><option value="m" data-i18n="f.m">Male</option><option value="f" data-i18n="f.f">Female</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" placeholder="20" min="14" max="90"><span class="unit">yrs</span></div></div>
@@ -1784,20 +1885,23 @@
          gerechnet statt abgefragt. Wer Protein, Fett und Kohlenhydrate kennt,
          kennt die Kalorien -- danach zu fragen waere eine Fehlerquelle mehr. -->
     <div class="form">
-      <div class="savebar" style="justify-content:space-between">
-        <p class="eyebrow" style="margin:0" data-i18n="fuel.today">Eaten today</p>
+      <div class="savebar" style="justify-content:space-between;align-items:center">
+        <div class="gtitle" style="margin:0"><span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M2.5 20h19M12 8V5.5M9.5 4h5"/></svg></span>
+          <div class="gt"><b data-i18n="fuel.today">Eaten today</b></div></div>
         <button class="tbtn go" id="mealAdd" data-i18n="btn.addMeal">Add meal</button>
       </div>
       <div class="cards" id="mealSum"></div>
       <div class="prlist" id="mealList"></div>
     </div>
     <div class="form">
-      <p class="eyebrow" data-i18n="fuel.hydr">Water and caffeine</p>
+      <div class="gtitle"><span class="ichip" style="--chip:#5B8DEF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 4.2 6 7.4 6 10.7a6 6 0 0 1-12 0c0-3.3 2.8-6.5 6-10.7Z"/></svg></span>
+        <div class="gt"><b data-i18n="fuel.hydr">Water and caffeine</b></div></div>
       <div class="out" id="hydrOut"></div>
       <p class="hint" data-i18n="fuel.hydrNote">Thirst is a decent guide for most people. The number below is a rough floor, not a quota to force down. Caffeine cut-off is eight hours before bed.</p>
     </div>
     <div>
-      <p class="eyebrow" data-i18n="fuel.supps">Supplements &mdash; hover for the detail</p>
+      <div class="gtitle"><span class="ichip" style="--chip:var(--brass)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.5 8.2l5 7.4"/></svg></span>
+        <div class="gt"><b data-i18n="fuel.supps">Supplements &mdash; hover for the detail</b></div></div>
       <div class="supgrid" id="supgrid"></div>
       <p class="hint" style="margin-top:.7rem" data-i18n="fuel.suppNote">Green means the evidence is decent. Amber means it works for some people or in narrow cases. Orange means save your money. None of this is medical advice &mdash; if you take medication or have a condition, ask a doctor first.</p>
     </div>
@@ -2036,7 +2140,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.9';
+var VERSION='17.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2721,6 +2825,7 @@ function patTier(id){var p=pid&&pid[id];if(!p)return 2;var st=(steps&&steps[id])
 function applyProfile(){
   if(!profile)return;
   if(profile.days&&cfg.track!==profile.days){cfg.track=profile.days;saveCfg();}
+  if(profile.tdays&&profile.tdays.length&&String(cfg.tdays)!==String(profile.tdays)){cfg.tdays=profile.tdays.slice();saveCfg();}
   [['3',SESS3],['4',SESS4]].forEach(function(pair){
     Object.keys(pair[1]).forEach(function(k){
       var defs=SLOTDEF[pair[0]+':'+k]||[],used={};
@@ -2758,14 +2863,62 @@ function plan(d){
      mehr davon ab, an welchem Wochentag jemand zufaellig auf Start drueckt. */
   var wd=((dIdx(d)%7)+7)%7,ph=phase(w);
   var S=cfg.track==='4'?SESS4:SESS3;
-  var map3={0:'pull',2:'push',4:'legs'},map4={0:'upA',1:'lowA',3:'upB',4:'lowB'};
-  var key=cfg.track==='4'?map4[wd]:map3[wd];
+  var key=null,ftype=null;
+  var td=tdaysValid();
+  if(td){
+    /* Der Nutzer hat echte Wochentage gewaehlt (v17): Einheiten liegen auf
+       den Kalendertagen, nicht auf einem Rhythmus-Offset. Die Reihenfolge der
+       Einheiten folgt der Wochenordnung der gewaehlten Tage. Der Starttag
+       bleibt Tag eins mit Einheit, weil die Einfuehrung den Start auf den
+       ersten gewaehlten Tag legt. */
+    var w7=(d.getDay()+6)%7;
+    var i=td.indexOf(w7);
+    var order=cfg.track==='4'?['upA','lowA','upB','lowB']:['pull','push','legs'];
+    if(i>=0){key=order[i]||order[order.length-1];}
+    else{
+      var free=[0,1,2,3,4,5,6].filter(function(x){return td.indexOf(x)<0;});
+      var fi=free.indexOf(w7);
+      if(fi===0)ftype='easy';
+      else if(fi===free.length-1)ftype='review';
+      else if(fi===1&&free.length>2)ftype='rest';
+      else ftype='opt';
+    }
+  }else{
+    /* Ohne Auswahl: Rhythmus ab Starttag (v16.8), Tag 0 ist immer Einheit. */
+    var map3={0:'pull',2:'push',4:'legs'},map4={0:'upA',1:'lowA',3:'upB',4:'lowB'};
+    key=cfg.track==='4'?map4[wd]:map3[wd];
+    if(!key){
+      if(wd===1||wd===2&&cfg.track==='4')ftype='easy';
+      else if(wd===5)ftype='opt';
+      else if(wd===3)ftype='rest';
+      else ftype='review';
+    }
+  }
   if(key)return{kind:'train',title:sessDe(S[key].title),sub:sessDe(S[key].sub),s:key,ph:ph,w:w};
   var easy=cfg.lang==='de'?'Lockerer Tag':'Easy day',opt=cfg.lang==='de'?'Optional':'Optional',rest=cfg.lang==='de'?'Ruhetag':'Rest';
-  if(wd===1||wd===2&&cfg.track==='4')return{kind:'move',title:easy,sub:(cfg.lang==='de'?'Gehen und Beweglichkeit':'Walk and mobility'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30 Min'},{l:(cfg.lang==='de'?'Handgelenke':'Wrist prep'),v:'2 min'},{l:'Mobility set',v:'8 min'}],note:cfg.lang==='de'?'Danach solltest du dich besser fühlen als vorher.':'Finish this feeling better than you started.'};
-  if(wd===5)return{kind:'move',title:opt,sub:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),v:'10 Min'},{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30-45 Min'}],note:cfg.lang==='de'?'Ohne schlechtes Gewissen streichen, wenn die Woche hart war.':'Skip it guilt-free if the week was heavy.'};
-  if(wd===3)return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung':'Recovery'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Protein-Ziel':'Protein target'),v:(cfg.lang==='de'?'treffen':'hit it')},{l:(cfg.lang==='de'?'Schlaf':'Sleep'),v:'7-9 h'}],note:cfg.lang==='de'?'Hier entsteht der Muskel.':'This is where the muscle is built.'};
+  if(ftype==='easy')return{kind:'move',title:easy,sub:(cfg.lang==='de'?'Gehen und Beweglichkeit':'Walk and mobility'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30 Min'},{l:(cfg.lang==='de'?'Handgelenke':'Wrist prep'),v:'2 min'},{l:'Mobility set',v:'8 min'}],note:cfg.lang==='de'?'Danach solltest du dich besser fühlen als vorher.':'Finish this feeling better than you started.'};
+  if(ftype==='opt')return{kind:'move',title:opt,sub:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),v:'10 Min'},{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30-45 Min'}],note:cfg.lang==='de'?'Ohne schlechtes Gewissen streichen, wenn die Woche hart war.':'Skip it guilt-free if the week was heavy.'};
+  if(ftype==='rest')return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung':'Recovery'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Protein-Ziel':'Protein target'),v:(cfg.lang==='de'?'treffen':'hit it')},{l:(cfg.lang==='de'?'Schlaf':'Sleep'),v:'7-9 h'}],note:cfg.lang==='de'?'Hier entsteht der Muskel.':'This is where the muscle is built.'};
   return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung und Rückblick':'Recovery and review'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Wiege-Schnitt':'Weigh-in average'),v:(cfg.lang==='de'?'eintragen':'write it')},{l:(cfg.lang==='de'?'Harte Sätze zählen':'Count hard sets'),v:(cfg.lang==='de'?'je Muster':'per pattern')}],note:cfg.lang==='de'?'Zwei Minuten. Das macht Woche 12 aussagekräftig.':'Two minutes. This makes week 12 mean something.'};
+}
+/* Gewaehlte Trainingstage (Mo=0..So=6), nur gueltig wenn die Anzahl zur
+   Spur passt -- sonst faellt alles auf den Start-Rhythmus zurueck. */
+function tdaysValid(){
+  var need=cfg.track==='4'?4:3;
+  if(!cfg.tdays||!cfg.tdays.length)return null;
+  var td=cfg.tdays.slice().sort(function(a,b){return a-b;});
+  if(td.length!==need)return null;
+  return td;
+}
+/* Naechster Kalendertag (heute eingeschlossen), der auf einem der gewaehlten
+   Wochentage liegt -- fuer "Tag eins ist eine Einheit". */
+function nextTrainDate(from,td){
+  var d=new Date(from.getTime());
+  for(var i=0;i<7;i++){
+    if(td.indexOf((d.getDay()+6)%7)>=0)return d;
+    d=new Date(d.getTime()+86400000);
+  }
+  return from;
 }
 /* ---------- icons + patterns ---------- */
 /* Die Maennchen. Regeln, damit jede Uebung auf den ersten Blick lesbar ist:
@@ -3029,9 +3182,465 @@ var DEMOS={
      [[sh,ha]]
    ],head:RU([9.7,29.6])};}}
 };
-function moveSvg(id,c){
-  var d=DEMOS[id];if(!d)return '';
-  var still=SYSRED||cfg.motion==='off',N=24;
+/* Bewegungsdemos je Skill-Stufe (v17, Schritt 3). Ein Eintrag je Stufe im
+   DEMOS-Format ({dur,refs,pose}) oder null = Pose der vorigen Stufe.
+   Erzeugt von fuenf Posen-Agenten, zentral integriert. */
+var SKDEMO={
+ pistol:[
+ /* Stufe 1: Box squat auf hohe Flaeche. Beidbeinig wie das legs-Demo, aber
+    mit Sitzflaeche auf Kniehoehe (y=28.6) als ref. Huefte landet bei r=1 auf
+    genau dieser Hoehe (28.19 plus Strichbreite), kurzes Aufsetzen ueber die
+    Haltephase, dann hoch. */
+ {dur:2.9,refs:['M5 39 H41','M25 28.6 H37','M31 28.6 V39'],pose:function(u){
+   var r=_phase(u,.40,.12,.26),rl=_phase(u-.03,.40,.12,.26),A=[23,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+29*r)*_DG,a2=(7+69*r)*_DG,a3=(5+30*r)*_DG,a3l=(5+30*rl)*_DG,b=(12+68*rl)*_DG;
+   var K=[A[0]-Math.sin(a1)*ls,A[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[A,K,Hp,S]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:hd};}},
+ /* Stufe 2: Single-leg box squat. Gleiche Standbein-Mechanik und gleiche
+    Boxhoehe wie Stufe 1, aber das freie Bein streckt nach vorn und hebt
+    beim Absenken bis fast waagerecht (Knie mit 4 Grad Beugung nach unten,
+    nie ueberstreckt). Arme gehen als Gegengewicht weiter vor. */
+ {dur:3,refs:['M5 39 H41','M29 28.6 H40','M34.5 28.6 V39'],pose:function(u){
+   var r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),A=[27,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+29*r)*_DG,a2=(7+69*r)*_DG,a3=(6+32*r)*_DG,a3l=(6+32*rl)*_DG,b=(18+72*rl)*_DG;
+   var K=[A[0]-Math.sin(a1)*ls,A[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
+   var f1=(62-59*r)*_DG,f2=f1+4*_DG;
+   var kf=[Hp[0]-Math.cos(f1)*lt,Hp[1]+Math.sin(f1)*lt];
+   var ff=[kf[0]-Math.cos(f2)*ls,kf[1]+Math.sin(f2)*ls];
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:hd};}},
+ /* Stufe 3: niedrigere Box. Identische Mechanik wie Stufe 2, nur tiefer --
+    die ref-Linie sitzt jetzt auf Schienbeinhoehe (y=31.9), die Huefte
+    kommt bei r=1 leicht unter Kniehoehe an, Rumpf lehnt entsprechend
+    weiter vor. */
+ {dur:3.1,refs:['M5 39 H41','M28 31.9 H40','M34 31.9 V39'],pose:function(u){
+   var r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),A=[27,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+36*r)*_DG,a2=(7+86*r)*_DG,a3=(6+38*r)*_DG,a3l=(6+38*rl)*_DG,b=(18+76*rl)*_DG;
+   var K=[A[0]-Math.sin(a1)*ls,A[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
+   var f1=(62-60*r)*_DG,f2=f1+4*_DG;
+   var kf=[Hp[0]-Math.cos(f1)*lt,Hp[1]+Math.sin(f1)*lt];
+   var ff=[kf[0]-Math.cos(f2)*ls,kf[1]+Math.sin(f2)*ls];
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:hd};}},
+ /* Stufe 4: Assisted pistol am senkrechten Rahmen (ref bei x=13). Volle
+    Pistol-Tiefe, die Hand gleitet am Rahmen mit nach unten (12 -> 22),
+    der Arm kommt per _ik: maximaler Hand-Schulter-Abstand ~11.2 bei
+    Knochenlaengen 6.8+4.6, die Klemme greift also nie, sg=1 laesst den
+    Ellbogen natuerlich nach unten ausweichen. Rumpf bleibt dank Stuetze
+    aufrechter als beim freien Pistol. */
+ {dur:3.2,refs:['M5 39 H41','M13 6 V39'],pose:function(u){
+   var r=_phase(u,.44,.12,.26),rl=_phase(u-.03,.44,.12,.26),A=[24,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+42*r)*_DG,a2=(7+103*r)*_DG,a3=(6+34*r)*_DG,a3l=(6+34*rl)*_DG;
+   var K=[A[0]-Math.sin(a1)*ls,A[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Hd=[13.4,12+10*r];
+   var e=_ik(Hd,S,6.8,4.6,1);
+   var f1=(60-58*r)*_DG,f2=f1+4*_DG;
+   var kf=[Hp[0]-Math.cos(f1)*lt,Hp[1]+Math.sin(f1)*lt];
+   var ff=[kf[0]-Math.cos(f2)*ls,kf[1]+Math.sin(f2)*ls];
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[Hd,e[0],e[1]]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:hd};}},
+ /* Stufe 5: Negative pistol. Gleiche Geometrie wie das volle Pistol, aber
+    das Satzprofil traegt die Uebung: 60 Prozent der Zeit langsames
+    Absenken, 22 Prozent Verharren unten, dann 5 Prozent -- rund zwei
+    Zwischenbilder -- als unsichtbar schneller Reset nach oben. */
+ {dur:3.4,refs:['M5 39 H41'],pose:function(u){
+   var r=_phase(u,.60,.22,.05),rl=_phase(u-.02,.60,.22,.05),A=[25,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+42*r)*_DG,a2=(7+103*r)*_DG,a3=(6+40*r)*_DG,a3l=(6+40*rl)*_DG,b=(20+72*rl)*_DG;
+   var K=[A[0]-Math.sin(a1)*ls,A[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
+   var f1=(60-58*r)*_DG,f2=f1+4*_DG;
+   var kf=[Hp[0]-Math.cos(f1)*lt,Hp[1]+Math.sin(f1)*lt];
+   var ff=[kf[0]-Math.cos(f2)*ls,kf[1]+Math.sin(f2)*ls];
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:hd};}},
+ /* Stufe 6: Full pistol. Dieselbe Geometrie wie Stufe 5 (Huefte bei r=1
+    unter Kniehoehe, freies Bein waagerecht, Arme vorgestreckt), aber
+    normales Satztempo: exzentrisch langsam runter, kurz halten,
+    konzentrisch fluessig hoch. */
+ {dur:3.3,refs:['M5 39 H41'],pose:function(u){
+   var r=_phase(u,.44,.12,.26),rl=_phase(u-.03,.44,.12,.26),A=[25,37.5],ls=8.5,lt=9,lo=10;
+   var a1=(4+42*r)*_DG,a2=(7+103*r)*_DG,a3=(6+40*r)*_DG,a3l=(6+40*rl)*_DG,b=(20+72*rl)*_DG;
+   var K=[A[0]-Math.sin(a1)*ls,A[1]-Math.cos(a1)*ls];
+   var Hp=[K[0]+Math.sin(a2)*lt,K[1]-Math.cos(a2)*lt];
+   var S=[Hp[0]-Math.sin(a3)*lo,Hp[1]-Math.cos(a3)*lo];
+   var Ha=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];
+   var f1=(60-58*r)*_DG,f2=f1+4*_DG;
+   var kf=[Hp[0]-Math.cos(f1)*lt,Hp[1]+Math.sin(f1)*lt];
+   var ff=[kf[0]-Math.cos(f2)*ls,kf[1]+Math.sin(f2)*ls];
+   var hd=[S[0]-Math.sin(a3l)*4.2,S[1]-Math.cos(a3l)*4.2];
+   return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:hd};}}
+],
+ handstand:[
+ {dur:3.2,refs:['M5 38 H42'],pose:function(u){
+   var b=Math.sin(u*2*Math.PI),bl=Math.sin(u*2*Math.PI-.7);
+   var F=[41,37.4],H=[12.6,37.2],L=29;
+   var a=(21+1.1*b)*_DG;
+   var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+   var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+   var e=_ik(H,S,6.8,4.6,1);
+   var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+   var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(b-bl)*.3];
+   return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+ {dur:3.6,refs:['M4 38 H41.4','M41.4 6 V38'],pose:function(u){
+   var r=_phase(u,.42,.14,.34),rl=_phase(u-.03,.42,.14,.34);
+   var xH=14+13*r,H=[xH,37.4],S=[xH,26.8];
+   var k=_ik(S,[40.7,35.6-19*r],12,16.5,-1),hip=k[0],F=k[1];
+   var un=[(S[0]-hip[0])/12,(S[1]-hip[1])/12];
+   var hd=[S[0]+un[0]*4.6,S[1]+un[1]*4.6+(r-rl)*1.6];
+   return {parts:[[[H,S]],[[S,hip,F]]],head:hd};}},
+ {dur:3.4,refs:['M4 38 H41.4','M41.4 6 V38'],pose:function(u){
+   var b=Math.sin(u*2*Math.PI)*_DG,bl=Math.sin(u*2*Math.PI-.7)*_DG;
+   var H=[35,37.2];
+   var S=_rot([35,26.9],H,b),hip=_rot([36.2,16.5],H,b),F=_rot([39.6,2.8],H,b);
+   var toe=[F[0]+1.1,F[1]-1.7];
+   var e=_ik(H,S,5.7,4.8,-1);
+   return {parts:[[[S,hip,F,toe]],[[H,e[0],e[1]]]],head:_rot([35.9,30.9],H,bl)};}},
+ null,
+ {dur:3,refs:['M4 38 H41.4','M41.4 6 V38'],pose:function(u){
+   var r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26);
+   var H=[35,37.2],S=[35-1.1*r,26.9+2.6*r];
+   var e=_ik(H,S,5.7,4.8,-1);
+   var k=_ik(S,[39.6,2.8+2.6*r],10.5,14.1,-1),hip=k[0],F=k[1];
+   var toe=[F[0]+1.1,F[1]-1.7];
+   var hd=[35-1.1*rl+.9,26.9+2.6*rl+3.7];
+   return {parts:[[[S,hip,F,toe]],[[H,e[0],e[1]]]],head:hd};}},
+ {dur:3.4,refs:['M4 38 H41.4','M41.4 6 V38'],pose:function(u){
+   var r=_phase(u,.44,.14,.26),rl=_phase(u-.03,.44,.14,.26);
+   var H=[35,37.2],S=[35-1.5*r,26.9+3.8*r];
+   var e=_ik(H,S,5.7,4.8,-1);
+   var k=_ik(S,[39.6,2.8+3.8*r],10.5,14.1,-1),hip=k[0],F=k[1];
+   var toe=[F[0]+1.1,F[1]-1.7];
+   var hd=[35-1.5*rl+.9,26.9+3.8*rl+3.7];
+   return {parts:[[[S,hip,F,toe]],[[H,e[0],e[1]]]],head:hd};}}
+],
+ lsit:[
+ {dur:3,refs:['M5 37.2 H42'],pose:function(u){
+   var r=_phase(u,.26,.18,.42),rl=_phase(u-.03,.26,.18,.42);
+   var H=[19,37.2],F=[37,37.2],T=[39.2,36];
+   var hip=[22.6,35.6-1.86*r];
+   var S=[hip[0]-2.22,hip[1]-6.85];
+   var e=_ik(H,S,5.8,4.8,-1);
+   var k=_ik(F,hip,7.4,7.8,1);
+   var hd=[19,(35.6-1.86*rl)-11.03];
+   return {parts:[[[S,hip,k[0],F,T]],[[H,e[0],e[1]]]],head:hd};}},
+ {dur:3.2,refs:['M5 39.5 H42','M16.5 36.4 H24'],pose:function(u){
+   var s=Math.sin(u*6.28318),sl=Math.sin((u-.06)*6.28318);
+   var H=[20.2,36.3];
+   var S=[20.9,26.2-.2*s];
+   var hip=[S[0]+2.46,S[1]+6.77];
+   var e=_ik(H,S,5.8,4.8,-1);
+   function leg(off){
+     var a=(52+2*s+off)*_DG,c=(104-2*s-off)*_DG;
+     var k=[hip[0]+Math.cos(a)*7.8,hip[1]-Math.sin(a)*7.8];
+     var f=[k[0]+Math.cos(c)*7.4,k[1]+Math.sin(c)*7.4];
+     var td=c+22*_DG;
+     return [hip,k,f,[f[0]+Math.cos(td)*1.8,f[1]+Math.sin(td)*1.8]];
+   }
+   var hd=[19.4,22.06-.25*sl];
+   return {parts:[[[S,hip]],[leg(0)],[leg(3)],[[H,e[0],e[1]]]],head:hd};}},
+ {dur:3.4,refs:['M5 39.5 H42','M16.5 36.4 H24'],pose:function(u){
+   var r=_phase(u,.38,.12,.38),rl=_phase(u-.03,.38,.12,.38);
+   var H=[20.2,36.3],S=[20.9,26.2];
+   var hip=[23.36,32.97];
+   var e=_ik(H,S,5.8,4.8,-1);
+   function leg(x,off){
+     var a=(52-46*x+off)*_DG,c=(104-105*x+off)*_DG;
+     var k=[hip[0]+Math.cos(a)*7.8,hip[1]-Math.sin(a)*7.8];
+     var f=[k[0]+Math.cos(c)*7.4,k[1]+Math.sin(c)*7.4];
+     var td=c+22*_DG;
+     return [hip,k,f,[f[0]+Math.cos(td)*1.8,f[1]+Math.sin(td)*1.8]];
+   }
+   var hd=[19.4,22.06+(r-rl)*1.4];
+   return {parts:[[[S,hip]],[leg(r,0)],[leg(1-r,3)],[[H,e[0],e[1]]]],head:hd};}},
+ {dur:3.2,refs:['M5 39.5 H42','M16.5 36.4 H24'],pose:function(u){
+   var s=Math.sin(u*6.28318),sl=Math.sin((u-.06)*6.28318);
+   var H=[20.2,36.3];
+   var S=[20.9,26.2-.2*s];
+   var hip=[S[0]+2.46,S[1]+6.77];
+   var e=_ik(H,S,5.8,4.8,-1);
+   function leg(off){
+     var a=(6.5+1.6*s+off)*_DG,c=(-1+1.6*s+off)*_DG;
+     var k=[hip[0]+Math.cos(a)*7.8,hip[1]-Math.sin(a)*7.8];
+     var f=[k[0]+Math.cos(c)*7.4,k[1]+Math.sin(c)*7.4];
+     var td=c+22*_DG;
+     return [hip,k,f,[f[0]+Math.cos(td)*1.8,f[1]+Math.sin(td)*1.8]];
+   }
+   var hd=[19.4,22.06-.25*sl];
+   return {parts:[[[S,hip]],[leg(0)],[leg(3)],[[H,e[0],e[1]]]],head:hd};}},
+ null
+],
+ muscleup:[
+ /* Stufe 1: Strikter Klimmzug -- tiefer Haenger, Kinn klar ueber die Stange,
+    Unterschenkel gekreuzt statt der gestreckten Beine von DEMOS.pull. */
+ {dur:3,refs:['M8 8.5 H38'],pose:function(u){
+   var r=_phase(u,.28,.12,.42),rl=_phase(u-.03,.28,.12,.42);
+   var HL=[17,9.1],HR=[29,9.1],yS=19.2-6.6*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+   var hip=[23,yS+10.6];
+   var kn=[hip[0]-1.4,hip[1]+5.2],ft=[kn[0]+2.2,kn[1]+3.4];
+   var kn2=[hip[0]+1.4,hip[1]+5.2],ft2=[kn2[0]-2.2,kn2[1]+3.6];
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,kn,ft],[hip,kn2,ft2]]
+   ],head:[23,(19.2-6.6*rl)-4.6]};}},
+ /* Stufe 2: Hoher Klimmzug -- Schultern enden ueber der Stange, Brustbein
+    an der Stange, Ellbogen falten nach unten an die Rippen. */
+ {dur:3,refs:['M8 11 H38'],pose:function(u){
+   var r=_phase(u,.24,.10,.44),rl=_phase(u-.03,.24,.10,.44);
+   var HL=[17,11.6],HR=[29,11.6],yS=21.6-13.4*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+   var hip=[23,yS+10.6];
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+   ],head:[23,(21.6-13.4*rl)-4.6]};}},
+ /* Stufe 3: Straight-bar dip -- Koerper komplett ueber der Stange, Beine
+    haengen darunter, Ellbogen weichen im tiefen Dip nach aussen-oben aus. */
+ {dur:3,refs:['M8 17 H38'],pose:function(u){
+   var r=_phase(u,.42,.10,.24),rl=_phase(u-.03,.42,.10,.24);
+   var HL=[17.5,17],HR=[28.5,17],yS=8.2+5.6*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.2,4.2,-1),eR=_ik(HR,SR,5.2,4.2,1);
+   var hip=[23,yS+10.2];
+   var kn=[hip[0]+.9,hip[1]+5.4],ft=[kn[0]-.5,kn[1]+5];
+   var kn2=[hip[0]-.3,hip[1]+5.5],ft2=[kn2[0]+.4,kn2[1]+5.1];
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,kn,ft],[hip,kn2,ft2]]
+   ],head:[23,(8.2+5.6*rl)-4.4]};}},
+ /* Stufe 4: Negativer Muscle-up -- oben im Stuetz starten, langsam durch
+    die Transition (Ellbogen falten am Rumpf) bis in den Haenger, zuegig
+    zurueck. Beine pendeln minimal ueber _rot, Laengen bleiben fest. */
+ {dur:3.5,refs:['M8 16.5 H38'],pose:function(u){
+   var r=_phase(u,.52,.10,.26),rl=_phase(u-.03,.52,.10,.26);
+   var HL=[17.5,16.5],HR=[28.5,16.5],yS=8+17.5*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.2,4.2,1),eR=_ik(HR,SR,5.2,4.2,-1);
+   var hip=[23,yS+9.8];
+   var sw=Math.sin(u*6.283)*4*_DG;
+   var kn=_rot([hip[0]+1.5,hip[1]+4.8],hip,sw),ft=_rot([hip[0]+1,hip[1]+8.6],hip,sw);
+   var kn2=_rot([hip[0]+.4,hip[1]+5],hip,sw*.7),ft2=_rot([hip[0]-.6,hip[1]+8.7],hip,sw*.7);
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,kn,ft],[hip,kn2,ft2]]
+   ],head:[23,(8+17.5*rl)-4.4]};}},
+ /* Stufe 5: Jumping muscle-up -- Hocke unter der Stange mit Fuessen am
+    Boden (zweite Referenzlinie), explosiver Absprung in den Stuetz,
+    Fuesse loesen sich ueber die min()-Schwelle vom Boden. */
+ {dur:3.2,refs:['M8 17 H38','M5 44 H41'],pose:function(u){
+   var r=_phase(u,.18,.22,.34),rl=_phase(u-.03,.18,.22,.34);
+   var bob=.2*Math.sin(u*6.283);
+   var HL=[17.5,17],HR=[28.5,17],yS=25.3-16.5*r+bob;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5,4,1),eR=_ik(HR,SR,5,4,-1);
+   var hip=[23,yS+9.6];
+   var fy=Math.min(44,hip[1]+9.3);
+   var FL=[20.5,fy],FR=[25.5,fy];
+   var kL=_ik(FL,hip,5.2,5,-1),kR=_ik(FR,hip,5.2,5,1);
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[FL,kL[0],kL[1]],[FR,kR[0],kR[1]]]
+   ],head:[23,(25.3-16.5*rl+bob)-4.4]};}},
+ /* Stufe 6: Voller Muscle-up -- eine durchgehende Bahn vom Haenger ueber
+    Zug und Transition in den Stuetz: konzentrisch schnell, oben halten,
+    kontrolliert zurueck. Gleiche Geometrie wie Stufe 4, Tempo gespiegelt. */
+ {dur:3.4,refs:['M8 16.5 H38'],pose:function(u){
+   var r=_phase(u,.24,.16,.42),rl=_phase(u-.03,.24,.16,.42);
+   var HL=[17.5,16.5],HR=[28.5,16.5],yS=25.5-17.5*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.2,4.2,1),eR=_ik(HR,SR,5.2,4.2,-1);
+   var hip=[23,yS+9.8];
+   var sw=Math.sin(u*6.283)*3*_DG;
+   var kn=_rot([hip[0]+.6,hip[1]+5.1],hip,sw),ft=_rot([hip[0]+.3,hip[1]+9.1],hip,sw);
+   var kn2=_rot([hip[0]-.4,hip[1]+5.2],hip,sw*.7),ft2=_rot([hip[0]-.6,hip[1]+9.2],hip,sw*.7);
+   return {parts:[
+     [[SL,SR]],
+     [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+     [[[23,yS],hip]],
+     [[hip,kn,ft],[hip,kn2,ft2]]
+   ],head:[23,(25.5-17.5*rl)-4.4]};}}
+],
+ frontlever:[
+/* Front lever: alle 5 Stufen sind Halten unter der Stange. Statische Pose wird
+   starr um den Griffpunkt gependelt (Atmung) -- Rotation um Hn laesst alle
+   Knochenlaengen unangetastet. Armneigung waechst je Stufe (18->31 Grad),
+   Pendel schrumpft (1.8->1.1 Grad): mehr Hebel, mehr Kontrolle. */
+ {dur:2.9,refs:['M5 10 H41'],pose:function(u){
+   /* Tuck hang: Ruecken rund waagerecht (Mitte haengt durch), Knie zur Brust,
+      Fersen unterm Gesaess. Kniewinkel innen 40 Grad, Huefte 48 Grad. */
+   var b=Math.sin(u*2*Math.PI)*1.8*_DG,bl=Math.sin((u-.07)*2*Math.PI)*1.8*_DG,Hn=[20,10.6];
+   function R(p){return _rot(p,Hn,b);}
+   var S=[16.6,21.1],mid=[22.5,22.4],hip=[28.3,21.1],kn=[22.7,17.2],ft=[24.3,23.2];
+   return {parts:[
+     [[Hn,R(S)]],
+     [[R(S),R(mid),R(hip)]],
+     [[R(hip),R(kn),R(ft)]]
+   ],head:_rot([12.1,20.4],Hn,bl)};}},
+ {dur:3,refs:['M5 10 H41'],pose:function(u){
+   /* Advanced tuck: Ruecken flach, Huefte auf 108 Grad geoeffnet,
+      Knie exakt 90 Grad, Schienbein zeigt in Koerperrichtung. */
+   var b=Math.sin(u*2*Math.PI)*1.5*_DG,bl=Math.sin((u-.07)*2*Math.PI)*1.5*_DG,Hn=[20,10.6];
+   function R(p){return _rot(p,Hn,b);}
+   var S=[15.5,20.7],hip=[27.5,20.7],kn=[29.6,14.2],ft=[35.5,16.1];
+   return {parts:[
+     [[Hn,R(S)]],
+     [[R(S),R(hip)]],
+     [[R(hip),R(kn),R(ft)]]
+   ],head:_rot([11,20.4],Hn,bl)};}},
+ {dur:3.1,refs:['M5 10 H41'],pose:function(u){
+   /* One leg extended: ein Bein gestreckt in der Koerperlinie,
+      das andere bleibt 90 Grad getuckt. */
+   var b=Math.sin(u*2*Math.PI)*1.5*_DG,bl=Math.sin((u-.07)*2*Math.PI)*1.5*_DG,Hn=[20,10.6];
+   function R(p){return _rot(p,Hn,b);}
+   var S=[15,20.4],hip=[27,20.4],k1=[33.8,20.4],f1=[40,20.4],k2=[29.3,14],f2=[35.2,16.1];
+   return {parts:[
+     [[Hn,R(S)]],
+     [[R(S),R(hip)]],
+     [[R(hip),R(k1),R(f1)],[R(hip),R(k2),R(f2)]]
+   ],head:_rot([10.5,20.1],Hn,bl)};}},
+ {dur:3.2,refs:['M5 10 H41'],pose:function(u){
+   /* Straddle: beide Beine gestreckt, in Seitenansicht als flaches V
+      (plus/minus 7 Grad) angedeutet -- Knochenlaengen bleiben voll. */
+   var b=Math.sin(u*2*Math.PI)*1.3*_DG,bl=Math.sin((u-.07)*2*Math.PI)*1.3*_DG,Hn=[20,10.6];
+   function R(p){return _rot(p,Hn,b);}
+   var S=[14.7,20.2],hip=[26.7,20.2];
+   var ka=[33.4,19.4],fa=[39.6,18.6],kb=[33.4,21.1],fb=[39.6,21.8];
+   return {parts:[
+     [[Hn,R(S)]],
+     [[R(S),R(hip)]],
+     [[R(hip),R(ka),R(fa)],[R(hip),R(kb),R(fb)]]
+   ],head:_rot([10.2,19.9],Hn,bl)};}},
+ {dur:3.4,refs:['M5 10 H41'],pose:function(u){
+   /* Full front lever: Kopf bis Fuss eine waagerechte Linie unter der Stange,
+      langsamster Atem, kleinstes Pendel. */
+   var b=Math.sin(u*2*Math.PI)*1.1*_DG,bl=Math.sin((u-.07)*2*Math.PI)*1.1*_DG,Hn=[20,10.6];
+   function R(p){return _rot(p,Hn,b);}
+   var S=[14.3,20],hip=[26.3,20],kn=[33.1,20],ft=[39.3,20];
+   return {parts:[
+     [[Hn,R(S)]],
+     [[R(S),R(hip)]],
+     [[R(hip),R(kn),R(ft)]]
+   ],head:_rot([9.8,19.8],Hn,bl)};}}
+]
+};
+
+/* Beweglichkeits-Demos je MOB-Drill, DEMOS-Format ({dur,refs,pose}).
+   Bewegte Ketten ueber _ik oder starre _rot -- Knochenlaengen fest. */
+var MOBDEMO=[
+ /* 1 Shoulder flexion -- Wall slides: Ruecken an der Wand (senkrechte ref),
+    Hand gleitet auf der Wandlinie von Schulterhoehe bis ueber Kopf.
+    Arm 5.2+4.2 wie im Dip-Demo, sg=-1 haelt den Ellbogen an der Wand. */
+ {dur:3,refs:['M5 39 H41','M31.8 1.2 V39'],pose:function(u){
+   var r=_phase(u,.38,.14,.38),rl=_phase(u-.03,.38,.14,.38);
+   var A=[27.6,37.5],K=[28.6,29.1],Hp=[30.4,20.5],S=[28.8,10.5];
+   var H=[31.8,10.2-8.2*r];
+   var e=_ik(H,S,5.2,4.2,-1);
+   return {parts:[
+     [[A,K,Hp,S]],
+     [[H,e[0],e[1]]],
+     [[A,[24.2,39]]]
+   ],head:[27.7,6.1-.5*rl]};}},
+ /* 2 Thoracic extension -- Rolle (Kreis-ref) unterm mittleren Ruecken,
+    Oberkoerper samt Armen starr um den Auflagepunkt MB gestreckt und
+    zurueck; Haende bleiben am Hinterkopf, Kopf sinkt fast bis zum Boden. */
+ {dur:3.5,refs:['M5 39 H41','M19.35 36.85 a2.15 2.15 0 1 0 4.3 0 a2.15 2.15 0 1 0 -4.3 0'],pose:function(u){
+   var r=_phase(u,.42,.16,.34),rl=_phase(u-.03,.42,.16,.34);
+   var MB=[21.5,34.5],a=-26*r*_DG,al=-30*rl*_DG;
+   var Hp=[25.8,36.5],K=[29.6,31.2],F=[33.2,37.8],T=[34.9,38.7];
+   var S=_rot([17,32.4],MB,a),E=_rot([17.8,28.6],MB,a),Ha=_rot([14.2,29.2],MB,a);
+   return {parts:[
+     [[Hp,MB,S]],
+     [[Hp,K,F,T]],
+     [[S,E,Ha]]
+   ],head:_rot([13.1,30.6],MB,al)};}},
+ /* 3 Ankle dorsiflexion -- Knee-to-wall: kniender Ausfallschritt vor der
+    Wand (ref x=10.8). Schienbein kippt 8->38 Grad, Knie erreicht die Wand,
+    Ferse und Fussballen bleiben fest; Huefte folgt per _ik (Oberschenkel
+    7.6 zum Standknie, 8 zum Bodenknie), Hand ruht auf dem vorderen Knie. */
+ {dur:2.8,refs:['M5 39 H41','M10.8 12 V39'],pose:function(u){
+   var r=_phase(u,.34,.16,.34),rl=_phase(u-.03,.34,.16,.34);
+   var An=[15.4,36.9],Kr=[22.5,37.6],a=(8+30*r)*_DG;
+   var Kf=[An[0]-Math.sin(a)*5.5,An[1]-Math.cos(a)*5.5];
+   var hip=_ik(Kr,Kf,8,7.6,1)[0];
+   var t=(12+4*r)*_DG,tl=(12+4*rl)*_DG;
+   var S=[hip[0]-Math.sin(t)*9,hip[1]-Math.cos(t)*9];
+   var Ha=[Kf[0]+.9,Kf[1]-2.2];
+   var e=_ik(Ha,S,5.8,4.8,1);
+   return {parts:[
+     [[An,Kf,hip,S]],
+     [[hip,Kr,[28.2,38.3],[30,38.7]]],
+     [[Ha,e[0],e[1]]],
+     [[An,[12.2,38.5]],[An,[16.4,38.6]]]
+   ],head:[S[0]-Math.sin(tl)*4.4,S[1]-Math.cos(tl)*4.4]};}},
+ /* 4 Hip flexors -- Half-kneeling stretch: Huefte schwenkt auf festem
+    Radius 8 um das Bodenknie nach vorn (10->26 Grad), vorderes Knie folgt
+    per _ik ueber dem festen Fuss; Rumpf bleibt senkrecht als starrer
+    Aufsatz auf der Huefte, Hand stuetzt in die Huefte. */
+ {dur:3.3,refs:['M5 39 H41'],pose:function(u){
+   var r=_phase(u,.40,.20,.32),rl=_phase(u-.03,.40,.20,.32);
+   var An=[14.2,36.9],Kr=[24,37.6];
+   var h=(10+16*r)*_DG,hl=(10+16*rl)*_DG;
+   var hip=[Kr[0]-Math.sin(h)*8,Kr[1]-Math.cos(h)*8];
+   var Kf=_ik(An,hip,5.5,7.6,-1)[0];
+   var S=[hip[0]+.3,hip[1]-9.2];
+   var Ha=[hip[0]+.5,hip[1]-.3];
+   var e=_ik(Ha,S,5.8,4.8,1);
+   var hipL=[Kr[0]-Math.sin(hl)*8,Kr[1]-Math.cos(hl)*8];
+   return {parts:[
+     [[An,Kf,hip,S]],
+     [[hip,Kr,[29.6,38.2],[31.4,38.6]]],
+     [[Ha,e[0],e[1]]],
+     [[An,[11.9,38.4]],[An,[16.2,38.6]]]
+   ],head:[hipL[0]+.4,hipL[1]-13.6]};}},
+ /* 5 Wrists -- Rocking im Vierfuessler: Hand und Knie fest am Boden,
+    Huefte pendelt auf festem Radius 7.8 um das Knie (-9->+15 Grad),
+    Schulter folgt per _ik (Arm 10.2 zur Hand, Rumpf 11 zur Huefte) --
+    das Gewicht rollt sichtbar ueber das Handgelenk vor und zurueck. */
+ {dur:3,refs:['M5 39 H41'],pose:function(u){
+   var r=_phase(u,.40,.08,.40),rl=_phase(u-.03,.40,.08,.40);
+   var H=[15.5,38.3],Kn=[27.5,38.2];
+   var b=(-9+24*r)*_DG,bl=(-9+24*rl)*_DG;
+   var hip=[Kn[0]-Math.sin(b)*7.8,Kn[1]-Math.cos(b)*7.8];
+   var S=_ik(H,hip,10.2,11,-1)[0];
+   var e=_ik(H,S,5.8,4.8,1);
+   var hipL=[Kn[0]-Math.sin(bl)*7.8,Kn[1]-Math.cos(bl)*7.8];
+   var SL=_ik(H,hipL,10.2,11,-1)[0];
+   return {parts:[
+     [[H,e[0],e[1]]],
+     [[S,hip]],
+     [[hip,Kn,[33,38.35],[34.6,38.8]]]
+   ],head:[SL[0]-4.2,SL[1]-1.2]};}}
+];
+
+function moveSvg(id,c,erzwungenStill){
+  var d=(typeof id==='object'&&id)?id:DEMOS[id];if(!d)return '';
+  var still=SYSRED||cfg.motion==='off'||!!erzwungenStill,N=24;
   var frames=[],n=still?1:N+1;
   for(var k=0;k<n;k++)frames.push(d.pose(k/N));
   function pd(pls){return pls.map(function(pl){
@@ -3122,6 +3731,50 @@ var SKILLS=[
   steps:['Tuck hang','Advanced tuck','One leg extended','Straddle lever','Full front lever'],
   note:'Keep the hollow position. A sagging lever is a different exercise.'}
 ];
+/* v17: Anzeige-Uebersetzungen fuer Skills, Beweglichkeit und Test -- nach
+   der v16.7-Regel uebersetzt beim Anzeigen, nicht in den Daten, weil die
+   englischen Namen Schluessel sind. */
+var SKDE={
+ pistol:{need:'15 saubere Ausfallkniebeugen je Bein, Sprunggelenk-Test bestanden',
+  steps:['Kniebeuge auf eine hohe Fläche','Einbeinige Box-Kniebeuge','Box über Wochen absenken','Gestützte Pistol, an einem Rahmen festhalten','Negative Pistol','Volle Pistol'],
+  note:'Eine leicht erhöhte Ferse ist legitim, solange die Sprunggelenks-Beweglichkeit aufbaut.'},
+ handstand:{need:'8 Pike-Liegestütze, Schulterflexions-Test bestanden',
+  steps:['Plank für die gerade Körperlinie','Wall Walk','Brust-zur-Wand-Halte 20–40 s','Wand-Handstand auf Zeit, 60 s gesamt','Teil-Handstand-Liegestütz','Voller Handstand-Liegestütz'],
+  note:'Jag nicht die freie Version, bevor 45 s Brust-zur-Wand mit gestreckter Hüfte stehen.'},
+ lsit:{need:'45 s Hollow Hold, 10 hängende Knieheben',
+  steps:['L-Sitz mit Fußstütze','Tuck-L-Sitz 15–20 s','Ein Bein gestreckt, im Wechsel','Beide Beine, 5 s','Beide Beine, 15 s'],
+  note:'Die Grenze ist meist Hüftbeuger-Kraft und Beweglichkeit der Beinrückseite, nicht der Bauch.'},
+ muscleup:{need:'10 strikte Klimmzüge, 12 Dips',
+  steps:['10 strikte Klimmzüge und 12 Dips','Hoher Klimmzug bis zum Brustbein','Dip auf der geraden Stange, 8 saubere','Negativer Muscle-up','Muscle-up mit Absprung','Voller Muscle-up'],
+  note:'Die Transition ist ein Skill, keine Kraftlücke. Negative lehren sie am schnellsten.'},
+ frontlever:{need:'10 strikte Klimmzüge, 60 s Hollow Hold',
+  steps:['Tuck-Hang','Advanced Tuck','Ein Bein gestreckt','Straddle-Lever','Voller Front Lever'],
+  note:'Halte die Hollow-Position. Ein durchhängender Lever ist eine andere Übung.'}
+};
+var MOBDE=[
+ {n:'Schulterflexion',t:'Für Klimmzüge und Handstände',
+  test:'Rückenlage, Knie gebeugt, unterer Rücken flach. Berühren deine Handgelenke über Kopf den Boden, ohne dass die Rippen aufklappen?',
+  fix:'Wall Slides. Rücken an die Wand, Arme als Torpfosten, Unterarme mit Kontakt. Hoch- und runtergleiten, Kontakt halten.',dose:'2 × 10, langsam'},
+ {n:'Brustwirbel-Streckung',t:'Für Überkopfarbeit und Haltung',
+  test:'Aufrecht sitzen, Arme verschränkt, rotieren. Kommst du auf 45 Grad je Seite?',
+  fix:'Rolle oder gerolltes Handtuch quer unter den mittleren Rücken, Hände hinter den Kopf, darüber strecken.',dose:'10 langsame Wiederholungen'},
+ {n:'Sprunggelenk-Beugung',t:'Für Kniebeugen',
+  test:'Kniend, ein Fuß flach, Knie nach vorn schieben. Kommt es über die Zehen, ohne dass die Ferse abhebt?',
+  fix:'Knie-zur-Wand. Fuß eine Handbreit vor der Wand, Knie Richtung Wand schieben, Ferse bleibt unten.',dose:'2 × 10 je Seite, dann 30 s halten'},
+ {n:'Hüftbeuger',t:'Für Hüftstreckung und Haltung',
+  test:'Auf der Bettkante liegen, ein Knie zur Brust. Sinkt der hängende Oberschenkel waagerecht ab?',
+  fix:'Halbknie-Dehnung, Gesäß des hinteren Beins anspannen. Die Spannung macht den Unterschied.',dose:'30–45 s je Seite'},
+ {n:'Handgelenke',t:'Die eine, die jeder auslässt',
+  test:'Schmerzt es in Liegestütz- oder Plank-Position?',
+  fix:'Im Vierfüßler: Handflächen unten wippen, Hände zu den Knien gedreht wippen, Fäuste wippen.',dose:'3 × 10 Wippen'}
+];
+var TESTDE={
+ pushup:{n:'Liegestütze',how:'Brust bis eine Faust über den Boden, oben Arme gestreckt, Hüfte auf Linie. Stopp bei der ersten unsauberen Wiederholung.'},
+ pullup:{n:'Klimmzüge',how:'Aus dem gestreckten Hang bis das Kinn klar über der Stange ist, kein Schwung. Wenn keiner geht: 0 eintragen und Rudern nutzen.'},
+ squat:{n:'Kniebeugen',how:'Hüftfalte unter Kniehöhe, Fersen unten, Knie in Spur. Ab 50 sauberen auf Split Squats wechseln.'},
+ hollow:{n:'Hollow Hold',how:'Unterer Rücken flach am Boden. Die Uhr stoppt, sobald der Rücken abhebt.'}
+};
+function testN(t){return cfg.lang==='de'&&TESTDE[t.id]?TESTDE[t.id].n:t.n;}
 var MOB=[
  {n:'Shoulder flexion',t:'For pull-ups and handstands',test:'On your back, knees bent, lower back flat. Can your wrists touch the floor overhead without your ribs flaring?',fix:'Wall slides. Back to a wall, arms in a goalpost, forearms touching. Slide up and down keeping contact.',dose:'2 x 10, slow',sec:45},
  {n:'Thoracic extension',t:'For overhead work and posture',test:'Sit tall, arms crossed, rotate. Do you get 45 degrees each way?',fix:'Roller or rolled towel across the mid-back, hands behind the head, extend over it.',dose:'10 slow reps',sec:45},
@@ -3292,7 +3945,16 @@ function foldClose(d,sofort){
     if(e&&e.target!==w)return;
     w.removeEventListener('transitionend',fertig);
     clearTimeout(d._ft);
-    if(!d.classList.contains('exp'))d.open=false;
+    /* open erst ein Bild NACH dem letzten Bewegungsbild fallen lassen:
+       transitionend feuert im selben Frame wie das Endbild, und display:none
+       im selben Frame kostet auf schwacher Hardware genau dieses Bild --
+       das war Davids Verdacht, und er stimmt zur Haelfte (der Rest war die
+       Polster-Leiste, siehe CSS am foldWrap). */
+    var drop=function(){if(!d.classList.contains('exp'))d.open=false;};
+    requestAnimationFrame(function(){requestAnimationFrame(drop);});
+    /* Sicherheitsnetz: in verdeckten Tabs pausiert requestAnimationFrame --
+       dann faellt open eben ueber die Uhr, unsichtbar ist es ohnehin. */
+    setTimeout(drop,90);
   };
   w.addEventListener('transitionend',fertig);
   clearTimeout(d._ft);
@@ -4000,30 +4662,65 @@ function openSkill(id){
   var s=null;SKILLS.forEach(function(x){if(x.id===id)s=x;});
   var prog=get('skill_'+s.id,0);
   var host=$('skillDetail');
-  host.innerHTML='<div class="card" style="border-left:4px solid var('+s.cv+')"><div class="row" style="flex-wrap:nowrap;align-items:flex-start;gap:.9rem">'+sv(s.id,cvar(s.cv),62)+'<div style="flex:1;min-width:0"><h4 style="margin:0 0 .3rem">'+s.name+'</h4><p class="hint"><b>'+(cfg.lang==='de'?'Voraussetzung: ':'Prerequisite: ')+'</b>'+s.need+'</p></div></div><div class="ladder" id="skLad"></div><p class="hint">'+s.note+'</p></div>';
+  var DE=cfg.lang==='de',SD=DE&&SKDE[s.id]?SKDE[s.id]:null;
+  host.innerHTML='<div class="card" style="border-left:4px solid var('+s.cv+')"><div class="row" style="flex-wrap:nowrap;align-items:flex-start;gap:.9rem">'+sv(s.id,cvar(s.cv),62)+'<div style="flex:1;min-width:0"><h4 style="margin:0 0 .3rem">'+s.name+'</h4><p class="hint"><b>'+(DE?'Voraussetzung: ':'Prerequisite: ')+'</b>'+(SD?SD.need:s.need)+'</p></div></div><div class="ladder" id="skLad"></div><p class="hint">'+(SD?SD.note:s.note)+'</p></div>';
   var l=$('skLad');
+  /* v17 (Baustelle 3): jede Stufe zeigt ihre eigene Bewegungsdemo aus dem
+     Skelett-System. Sparsam nach der v14-Regel: nur die AKTUELLE Stufe
+     laeuft animiert, alle anderen stehen als erstes Bild -- und unsichtbare
+     Bereiche pausiert ohnehin die Beobachter-Schaltung. null im SKDEMO
+     heisst: Pose der vorigen Stufe wiederverwenden (reine Dauer-Stufen). */
+  function skPose(sk,i){
+    var arr=SKDEMO[sk];if(!arr)return null;
+    for(var j=Math.min(i,arr.length-1);j>=0;j--)if(arr[j])return arr[j];
+    return null;
+  }
   s.steps.forEach(function(st,i){
     var cls=i<prog?'done':(i===prog?'cur':'');
     var w=14+(i*(58/Math.max(1,s.steps.length-1)));
     var b=document.createElement('button');b.className='rung '+cls;
-    b.innerHTML='<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+(i<prog?'Cleared':(i===prog?'You are here':'Locked'))+'</span>';
-    b.querySelector('.lb').textContent=st;
+    var pose=skPose(s.id,i);
+    var demo=pose?('<span class="rdemo">'+moveSvg(pose,cvar(s.cv),i!==prog)+'</span>'):'';
+    var stTxt=i<prog?(DE?'Geschafft':'Cleared'):(i===prog?(DE?'Du bist hier':'You are here'):(DE?'Gesperrt':'Locked'));
+    b.innerHTML=demo+'<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+stTxt+'</span>';
+    b.querySelector('.lb').textContent=(SD&&SD.steps[i])?SD.steps[i]:st;
     b.addEventListener('click',function(){set('skill_'+s.id,i);openSkill(id);buildSkills();});
     l.appendChild(b);});
+  if(typeof pauseHiddenSvg==='function')pauseHiddenSvg();
   host.scrollIntoView({behavior:'smooth',block:'nearest'});
 }
 
 /* ---------- mobility ---------- */
 function buildMob(){
+  /* v17 (Baustelle 3): jeder Drill zeigt seine Bewegungsdemo. Sparsam nach
+     der v14-Regel: still als erstes Bild, animiert nur der Drill, der in der
+     laufenden Routine gerade dran ist (mobPaint schaltet um). */
+  var DE=cfg.lang==='de';
   $('mobList').innerHTML=MOB.map(function(m,i){
-    return '<div class="drill" id="drill'+i+'"><span class="t">'+m.t+'</span><b>'+m.n+'</b><p><b>Test:</b> '+m.test+'</p><p><b>Fix:</b> '+m.fix+'</p><span class="dose">'+m.dose+'</span></div>';
+    var d=DE&&MOBDE[i]?MOBDE[i]:m;
+    var demo=(typeof MOBDEMO!=='undefined'&&MOBDEMO[i])
+      ?'<span class="mobdemo" id="mobdemo'+i+'">'+moveSvg(MOBDEMO[i],cvar('--ice'),true)+'</span>':'';
+    return '<div class="drill" id="drill'+i+'"><div class="drillHead"><div style="flex:1;min-width:0"><span class="t">'+d.t+'</span><b>'+d.n+'</b></div>'+demo+'</div><p><b>Test:</b> '+d.test+'</p><p><b>'+(DE?'Übung:':'Fix:')+'</b> '+d.fix+'</p><span class="dose">'+d.dose+'</span></div>';
   }).join('');
+  if(typeof pauseHiddenSvg==='function')pauseHiddenSvg();
 }
-var mobI=-1,mobT=null,mobLeft=0;
+var mobI=-1,mobT=null,mobLeft=0,mobLast=-1;
 function mobPaint(){
   $('mobClock').textContent=fmt(Math.max(0,mobLeft));
-  $('mobNow').textContent=mobI>=0&&mobI<MOB.length?(MOB[mobI].n+' — '+MOB[mobI].dose):'';
+  var mNow=(mobI>=0&&mobI<MOB.length)?(cfg.lang==='de'&&MOBDE[mobI]?MOBDE[mobI]:MOB[mobI]):null;
+  $('mobNow').textContent=mNow?(mNow.n+' — '+mNow.dose):'';
   MOB.forEach(function(_,i){var el=$('drill'+i);if(el)el.classList.toggle('active',i===mobI);});
+  /* Demo nur beim Drill-WECHSEL neu bauen -- jede Sekunde neu wuerde die
+     Animation staendig auf Bild eins zuruecksetzen. */
+  if(mobI!==mobLast&&typeof MOBDEMO!=='undefined'){
+    [mobLast,mobI].forEach(function(ix){
+      if(ix<0||ix>=MOB.length||!MOBDEMO[ix])return;
+      var el=$('mobdemo'+ix);
+      if(el)el.innerHTML=moveSvg(MOBDEMO[ix],cvar('--ice'),ix!==mobI);
+    });
+    mobLast=mobI;
+    if(typeof pauseHiddenSvg==='function')pauseHiddenSvg();
+  }
 }
 function mobStep(){
   mobI++;
@@ -4041,27 +4738,40 @@ $('mobStop').addEventListener('click',mobStopF);
 var testVals=get('test',{});
 function buildTest(){
   $('testGrid').innerHTML=TESTS.map(function(t){
-    return '<div class="field"><label for="tt-'+t.id+'">'+t.n+'</label><div class="ctl hasunit"><input id="tt-'+t.id+'" type="number" min="0" value="'+(testVals[t.id]||0)+'"><span class="unit">'+t.u+'</span></div><span class="hint" style="font-size:var(--t3)">'+t.how+'</span></div>';
+    var how=cfg.lang==='de'&&TESTDE[t.id]?TESTDE[t.id].how:t.how;
+    return '<div class="field"><label for="tt-'+t.id+'">'+testN(t)+'</label><div class="ctl hasunit"><input id="tt-'+t.id+'" type="number" min="0" value="'+(testVals[t.id]||0)+'"><span class="unit">'+t.u+'</span></div><span class="hint" style="font-size:var(--t3)">'+how+'</span></div>';
   }).join('');
   TESTS.forEach(function(t){
     $('tt-'+t.id).addEventListener('input',function(){testVals[t.id]=parseFloat(this.value)||0;set('test',testVals);testCalc();});
     pairSlider('tt-'+t.id,{min:0,max:t.sl,step:t.ss,empty:0});
   });
-  $('testTable').innerHTML=TESTS.map(function(t){
-    /* Alle Stufen ausgeben, nicht mehr fest drei. */
-    return '<tr><td>'+t.n+'</td>'+t.t.map(function(r,i){
-      return '<td class="c">'+(i===t.t.length-1?(r[0]+'+'):(r[0]+'-'+r[1]))+'</td>';}).join('')+'</tr>';
-  }).join('');
   testCalc();
 }
 function lvlOf(t){var v=testVals[t.id]||0;for(var i=0;i<t.t.length;i++){if(v>=t.t[i][0]&&v<=t.t[i][1])return i+1;}return 1;}
 function testCalc(){
   var L=cfg.lang==='de'?1:0;
   var lv=TESTS.map(lvlOf),low=Math.min.apply(null,lv);
-  $('testOut').innerHTML=TESTS.map(function(t,i){return '<div class="obox'+(lv[i]===low?' hi':'')+'"><em>'+t.n+'</em><b>L'+lv[i]+' <i>'+(testVals[t.id]||0)+' '+t.u+'</i></b></div>';}).join('')+
-    '<div class="obox hi"><em>'+(L?'Dein Level':'Your level')+'</em><b>'+low+' <i>'+TLBL[low-1][L]+'</i></b></div>';
+  /* Stufenname statt nacktem "L3" -- die Nummer bleibt klein daneben,
+     weil die Leiterlogik intern weiter mit ihr rechnet. */
+  $('testOut').innerHTML=TESTS.map(function(t,i){return '<div class="obox'+(lv[i]===low?' hi':'')+'"><em>'+testN(t)+'</em><b>'+TLBL[lv[i]-1][L]+' <i>L'+lv[i]+' · '+(testVals[t.id]||0)+' '+t.u+'</i></b></div>';}).join('')+
+    '<div class="obox hi"><em>'+(L?'Dein Level':'Your level')+'</em><b>'+TLBL[low-1][L]+' <i>L'+low+'</i></b></div>';
+  var bands=$('lvlBands');
+  if(bands){
+    var lt=$('lvlLegT');if(lt)lt.textContent=L?'Die sechs Stufen':'The six levels';
+    bands.innerHTML=TESTS.map(function(t,i){
+      var v=testVals[t.id]||0;
+      return '<div class="lvlrow"><div class="ltop"><b>'+testN(t)+'</b><span>'+v+' '+t.u+'</span></div>'+
+        '<div class="lvlband">'+t.t.map(function(r,j){
+          return '<i class="'+(j===lv[i]-1?'on':'')+'">'+(j===t.t.length-1?(r[0]+'+'):(r[0]+'–'+r[1]))+'</i>';
+        }).join('')+'</div>'+
+        '<p class="lname">L'+lv[i]+' · <b>'+TLBL[lv[i]-1][L]+'</b></p></div>';
+    }).join('');
+    var lg=$('lvlLeg');
+    if(lg)lg.textContent=TLBL.map(function(n,i){return 'L'+(i+1)+' '+n[L];}).join(' · ')+
+      (L?' — dein niedrigster Wert setzt dein Level.':' — your lowest score sets your level.');
+  }
   var names={};TLBL.forEach(function(n,i){names[i+1]=n[L];});
-  var weak=TESTS.filter(function(t,i){return lv[i]===low;}).map(function(t){return t.n;});
+  var weak=TESTS.filter(function(t,i){return lv[i]===low;}).map(function(t){return testN(t);});
   $('testNote').innerHTML=(cfg.lang==='de'
     ?'Dein schwächster Wert bestimmt das Level, nicht der Durchschnitt. Schwach: <b>'+weak.join(', ')+'</b>. Level <b>'+names[low]+'</b>.'
     :'Your lowest score sets the level, not your average. Weakest: <b>'+weak.join(', ')+'</b>. Level <b>'+names[low]+'</b>.');
@@ -4129,16 +4839,36 @@ function buildEvidence(){
       '</div></div>';
   }).join('');
 }
+/* Das Buch im Hub (v17, Baustelle 7): alle zwoelf Kapitel der deutschen
+   Fassung, beim Bau aus dem Manuskript erzeugt. Der Text wird erst beim
+   ersten Oeffnen eines Kapitels in den Ausklapper gesetzt (lazy), damit die
+   Seite beim Start nicht an 90 kB totem DOM traegt. */
+var BOOKDE=[{"t": "Kapitel 1 — Warum das meiste Training scheitert", "h": "<p>Wahrscheinlich hast du es schon einmal versucht.</p><p>Du hast ein Programm gefunden. Du hast drei Wochen hart trainiert. Dann kam Stress auf der Arbeit, oder du wurdest krank, und es war vorbei. Monate später hast du etwas Neues angefangen.</p><p>Das ist kein Disziplinproblem. Niemand hat dir je gesagt, was tatsächlich Muskeln aufbaut. Also konntest du einen guten Plan nicht von einem schlechten unterscheiden.</p><p>Dieses Kapitel ändert das.</p><h4>Müde sein ist nicht der Punkt</h4><p>Muskelkater ist nicht das Ziel. Schwitzen ist nicht das Ziel. Du kannst eine Einheit völlig fertig beenden und trotzdem nichts aufgebaut haben.</p><p>Muskeln wachsen durch <b>hohe Kraft über den vollen Bewegungsumfang</b>, wiederholt nahe an deiner Grenze.</p><p>Das ist das Signal. Alles andere ist Nebeneffekt.</p><p>In Calisthenics zählt das mehr als irgendwo sonst. Fünfzig schnelle Liegestütze mit durchhängendem Rücken lassen dich nach Luft schnappen und bauen fast nichts auf. Acht langsame, Brust bis zum Boden, zwei Wiederholungen in Reserve — das baut dich auf.</p><h4>Drei Hebel. Das ist alles.</h4><h5>1. Geh nah ans Muskelversagen</h5><p>Beende die meisten Sätze mit <b>1–3 Wiederholungen in Reserve</b>. Nicht mehr.</p><p>Wenn du einen Satz beendest und weißt, dass noch sechs drin gewesen wären, war dieser Satz ein Aufwärmsatz. Das ist der Fehler, den fast jeder macht, und er ist unsichtbar — die Einheit hat sich trotzdem nach Arbeit angefühlt.</p><p>Woran erkennst du das? Die letzten zwei Wiederholungen sollten spürbar langsamer werden. Dass deine Geschwindigkeit sinkt, ist das Signal. Wenn jede Wiederholung gleich aussieht, hast du zu früh aufgehört.</p><h5>2. Mach es mit der Zeit schwerer</h5><p>Dein Körper passt sich an das an, was du letzten Monat gemacht hast, und hört dann auf. Er hat keinen Grund, weiter Gewebe aufzubauen, das er nicht braucht.</p><p>Im Studio legst du Gewicht auf. In Calisthenics änderst du den Hebel — du bewegst deinen Körper weiter vom Drehpunkt weg, damit derselbe Muskel härter arbeiten muss. Deshalb müssen Liegestütze nicht bei dreißig enden, und das ist wichtig genug für ein eigenes Kapitel. Kapitel 2.</p><p>Der Kernpunkt für jetzt: <b>Alle paar Wochen muss etwas schwerer werden.</b> Wenn du nicht benennen kannst, was sich geändert hat, hat sich nichts geändert.</p><h5>3. Erhol dich</h5><p>Training gibt das Signal. Schlaf und Essen bauen das Ergebnis.</p><p>Lässt du das weg, zahlst du den ganzen Preis des Trainings und bekommst nichts davon. Du erscheinst, du arbeitest hart, und nichts passiert — genau der Moment, in dem Leute schließen, sie hätten schlechte Gene.</p><p>Die meisten, die glauben, sie hätten ein Trainingsproblem, haben ein Schlafproblem.</p><h4>Warum Programmwechsel den Fortschritt zerstören</h4><p>Fortschritt misst sich über Wochen, nicht über Tage.</p><p>Jedes Mal, wenn du das Programm wechselst, setzt du diese Messung zurück. Du verbringst dein Leben in Woche eins und erreichst nie den Teil, in dem die Zahlen steigen.</p><p>Und Wechseln <i>fühlt sich</i> produktiv an. Das ist die Falle.</p><blockquote><p>Ein mittelmäßiges Programm, das du sechs Monate durchziehst, schlägt ein perfektes Programm, das du fünf Wochen durchziehst. Jedes Mal.</p></blockquote><h4>Vier Dinge, um die du dir keine Sorgen mehr machen musst</h4><p>Jedes davon kostet Anfänger Monate.</p><p><b>Übungsvielfalt.</b> Den Muskel „verwirren“ gibt es nicht. Muskeln reagieren auf Kraft, nicht auf Überraschung. Und wer jede Woche die Übungen tauscht, kann Fortschritt nicht mehr messen, weil sich diese Woche nie mit der letzten vergleichen lässt. Sechs Muster, richtig gesteigert, schlagen vierzig zufällige Übungen.</p><p><b>Jeden Tag trainieren.</b> Zweimal pro Woche pro Muskel deckt das meiste ab, was möglich ist. Sechs Tage sind nicht doppelt so gut wie drei. Sie sind vor allem mehr Ermüdung, von der du dich nicht erholst — besonders wenn dein Schlaf ohnehin knapp ist.</p><p><b>Nahrungsergänzungsmittel.</b> Fast alle bewirken nichts Messbares. Die kurze Liste, die tatsächlich wirkt, steht in Kapitel 9, und die ganze Liste ist günstig. Nichts in diesem Buch verlangt, dass du etwas kaufst.</p><p><b>Protein-Timing.</b> Deine Tagesmenge zählt. Die genaue Uhrzeit nicht. Das „anabole Fenster“ wurde ein Jahrzehnt lang überverkauft und hat Leuten, die Shakes verkaufen, viel Geld eingebracht.</p><h4>Die Zahlen, die zählen</h4><div class=\"tblwrap\"><table class=\"cmp\"><tr><th></th><th>Ziel</th></tr><tr><td>Harte Sätze pro Muskel und Woche</td><td>10–20</td></tr><tr><td>Wiederholungen in Reserve</td><td>1–3</td></tr><tr><td>Wiederholungen pro Satz</td><td>5–30</td></tr><tr><td>Einheiten pro Muskel und Woche</td><td>2</td></tr><tr><td>Protein pro Tag</td><td>1,6–2,2 g pro kg</td></tr><tr><td>Schlaf</td><td>7–9 Stunden</td></tr></table></div><p>Nichts auf dieser Liste kostet Geld.</p><h4>Mach das vor Kapitel 2</h4><p>Schreib dir drei Zahlen auf. Auf Papier, nicht im Kopf.</p><ol><li><b>Harte Sätze letzte Woche.</b> Nur Sätze, die du nah ans Muskelversagen geführt hast. Die ehrliche Zahl ist meist deutlich niedriger, als du denkst.</li><li><b>Durchschnittliche Schlafstunden der letzten sieben Nächte.</b> Nicht dein Ziel. Was tatsächlich passiert ist.</li><li><b>Dein Gewicht vor einem Monat und heute.</b> Weißt du nicht? Das ist deine Antwort.</li></ol><p>Eine dieser drei Zahlen ist der Grund, warum du feststeckst. Es ist selten die, die du erwartest.</p><p>Kapitel 2 beantwortet die große Frage: Wie machst du eine Übung schwerer, wenn du kein Gewicht auflegen kannst?</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 2 — Schwerer werden ohne Gewichte", "h": "<p>Jedes Argument gegen Calisthenics ist dasselbe Argument: <i>Du kannst kein Gewicht auflegen, also kannst du nicht vorankommen.</i></p><p>Es ist falsch, aber es ist auf eine lehrreiche Art falsch. Wer so argumentiert, hat verstanden, dass steigende Belastung nötig ist — er hat nur angenommen, dass Last Kilogramm bedeutet. Last bedeutet <b>Kraft durch einen Muskel</b>. Gewicht aufzulegen ist ein Weg, sie zu erhöhen. Es ist nicht der einzige, und in Calisthenics nicht einmal der nützlichste.</p><p>Es gibt fünf. Lerne sie, und du hängst nie wieder bei „dreißig Liegestützen“ fest.</p><h4>Hebel 1 — Der Hebel</h4><p>Das ist der große, und er ist der Grund, warum Calisthenics weiter skaliert, als die meisten glauben.</p><p>Verlagere die Masse deines Körpers weiter weg vom Drehpunkt, und derselbe Muskel muss deutlich mehr Kraft erzeugen, obwohl sich dein Körpergewicht um kein Gramm verändert hat.</p><p>Ein Liegestütz mit den Händen auf einer hüfthohen Stange belastet deine Brust mit vielleicht 40 % des Körpergewichts. Auf dem Boden sind es rund 65 %. Mit erhöhten Füßen rund 75 %. Wechsle an die Ringe, erhöhe die Schräglage, setz die Hände enger, und du kletterst weiter. Führe es zu Ende — ein einarmiger Liegestütz — und du drückst fast deine gesamte Masse mit einem Arm.</p><p>Dieselbe Leiter gibt es überall. Rudern geht von Füßen unter der Stange über waagerecht und erhöhte Füße bis zu einem Arm. Kniebeugen gehen von zwei Beinen über Split Squat und Bulgarian Split Squat bis zum Pistol. Der Rumpf geht von angehockt über ein gestrecktes Bein bis zur vollen Streckung.</p><p><b>Der Hebel ist deine Hantelscheibe.</b> Jede Progression in Kapitel 5 baut darauf auf.</p><h4>Hebel 2 — Bewegungsumfang</h4><p>Ein Liegestütz bis zum gestreckten Arm, bei dem die Brust den Boden streift, ist eine andere Übung als ein Liegestütz, bei dem sich die Ellbogen vierzig Grad beugen. Gleicher Name, ungefähr doppelte Arbeit.</p><p>Mehr Umfang ist kostenlose Mehrbelastung, und die meisten Anfänger haben davon viel übrig. Defizit-Liegestütze (Hände auf zwei Büchern, die Brust sinkt unter Handhöhe), Klimmzüge aus dem vollen Hang statt halber Wiederholungen, Kniebeugen in echte Tiefe — all das erhöht die Anforderung, ohne sonst etwas zu verändern.</p><p>Der Umfang ist auch das Erste, das verschwindet, wenn du Wiederholungszahlen jagst. Sind deine Wiederholungen gestiegen, aber deine Tiefe gesunken, hast du keinen Fortschritt gemacht. Du hast die Messung betrogen.</p><h4>Hebel 3 — Tempo</h4><p>Zeit unter Spannung ist keine Magie, aber die Absenkphase zu verlangsamen bewirkt zwei nützliche Dinge: Es nimmt den Schwung heraus, und es zwingt den Muskel, die Kraft über den ganzen Bewegungsumfang zu kontrollieren, statt hindurchzufedern.</p><p>Eine Absenkphase von drei Sekunden macht aus einem leichten Satz einen harten, ohne die Übung zu verändern. Sie ist die zugänglichste Progression, wenn du zwischen zwei Hebelstufen steckst — zu stark für die leichte Variante, noch nicht stark genug für die schwere.</p><p>Es gibt einen zweiten Grund, warum Tempo gerade in Calisthenics zählt. Kontrolliertes Absenken (die exzentrische Phase) ist der Ort, an dem du die Kraft für Bewegungen aufbaust, die du noch gar nicht kannst. Du kannst dich aus der obersten Position eines Klimmzugs herablassen, lange bevor du dich hochziehen kannst. Kapitel 12 nutzt das gezielt für Skills.</p><h4>Hebel 4 — Unilaterale Arbeit</h4><p>Aus zwei Gliedmaßen wird eine. Dein Körpergewicht bleibt gleich; die Kraft, die jede Seite erzeugen muss, verdoppelt sich ungefähr.</p><p>So bringst du deine Beine ohne Langhantel weiter voran — Split Squats, dann Bulgarian Split Squats, dann Pistols. So werden Liegestütze irgendwann zu Archer-Liegestützen und dann zu einarmiger Arbeit. Und es behebt Seitenunterschiede, die beidseitiges Training versteckt.</p><p>Unilaterale Progressionen sind aggressiv. Behandle einarmige und einbeinige Varianten als mehrere Stufen auf einmal, nicht als eine.</p><h4>Hebel 5 — Dichte</h4><p>Gleiche Arbeit, weniger Zeit. Oder mehr Arbeit, gleiche Zeit.</p><p>Hast du letzte Woche 4 Sätze mit 10 Liegestützen bei drei Minuten Pause gemacht und machst diese Woche dieselben Sätze mit zwei Minuten Pause, ist die Einheit härter geworden. Dichte ist ein echter Progressionshebel und ein nützlicher, wenn deine Hebel-Progressionen gerade feststecken.</p><p>Eine Warnung: Dichte ist der Hebel, den Leute überstrapazieren, weil er sich am härtesten anfühlt. Die Pause auf sechzig Sekunden zu kürzen bringt dich zum Keuchen, aber es senkt auch die Kraft, die du in den späteren Sätzen erzeugen kannst — und damit die Spannung, also das, was Wachstum tatsächlich antreibt. Nutze Dichte als unterstützenden Hebel, nicht als deinen Haupthebel.</p><h4>Die Reihenfolge, in der du sie nutzt</h4><p>Nicht alle fünf sind gleich viel wert, und sie in der falschen Reihenfolge zu nutzen ist der Grund, warum Leute auf der Stelle treten.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Priorität</th><th>Hebel</th><th>Wann du ihn nutzt</th></tr><tr><td>1</td><td>Wiederholungen beim aktuellen Hebel</td><td>Bis du das obere Ende des Zielbereichs erreichst</td></tr><tr><td>2</td><td>Hebel</td><td>Wenn du das obere Ende des Bereichs mit sauberer Form schaffst</td></tr><tr><td>3</td><td>Bewegungsumfang</td><td>Immer, wenn er nicht schon maximal ist</td></tr><tr><td>4</td><td>Tempo</td><td>Zwischen Hebelstufen</td></tr><tr><td>5</td><td>Dichte</td><td>Spät und sparsam</td></tr></table></div><p>Die praktische Abfolge sieht so aus. Du startest eine Progression mit 3 Sätzen à</p><p>und 1–3 Wiederholungen in Reserve. Jetzt wechselst du zur nächsten Hebelstufe — und deine Wiederholungen fallen zurück auf 6 oder 7. Dieser Rückgang ist kein Rückschlag. Das ist das ganze System bei der Arbeit.</p><ol><li>Über ein paar Wochen arbeitest du dich hoch auf 3 Sätze à 12 mit guter Form</li></ol><p>Dieser Sägezahn aus Auf und Ab ist das, was Fortschritt in Calisthenics wirklich ausmacht. Wenn deine Wiederholungszahl immer nur steigt, machst du keinen Fortschritt. Du baust nur Ausdauer bei einer Last auf, die dich nicht mehr fordert.</p><h4>Und Calisthenics mit Zusatzgewicht?</h4><p>Irgendwann ist Zusatzgewicht für manche Bewegungen die ehrliche Antwort — ein Dip-Gürtel vor allem für Dips und Klimmzüge, wo die Hebel-Progressionen schneller ausgehen als bei Liegestützen oder Kniebeugen.</p><p>Das ist in Ordnung. Nichts hier ist Ideologie. Aber du kommst weit, bevor du es brauchst, und die Reihenfolge zählt: Meistere zuerst die Hebel-Leiter, denn Gewicht auf eine Bewegung zu legen, die du nicht sauber ausführen kannst, belastet nur ein schlechtes Muster.</p><h4>Die Regel zum Merken</h4><blockquote><p>Wenn du nicht klar sagen kannst, was seit letztem Monat schwerer geworden ist, ist nichts schwerer geworden.</p></blockquote><p>Schreib auf, welchen Hebel du wann genutzt hast. Kapitel 7 macht daraus eine Entscheidungsregel, die du anwenden kannst, ohne darüber nachzudenken.</p><p>Kapitel 3 reduziert das gesamte Universum der Übungen auf sechs Muster — damit du weißt, was du wirklich trainieren musst und was Dekoration ist.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 3 — Die sechs Muster", "h": "<p>Such nach Calisthenics-Übungen und du findest Hunderte. Diamant-Liegestütze, Pike-Liegestütze, Archer-Rudern, Sissy-Kniebeugen, Dragon Flags, Hollow Rocks, Planche Leans. Es sieht aus wie ein Fachgebiet, das man jahrelang studieren könnte.</p><p>Ist es nicht. Jede dieser Übungen ist eine Variante von sechs Dingen, die dein Körper kann. Sobald du die sechs siehst, hören die Hunderte auf, einschüchternd zu sein, und werden zu dem, was sie sind: Optionen innerhalb eines Musters, von denen du die meisten nicht brauchst.</p><h4>Die sechs</h4><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Muster</th><th>Was es tut</th><th>Grundübung</th></tr><tr><td><b>Horizontales Drücken</b></td><td>Von der Brust wegdrücken</td><td>Liegestütz</td></tr><tr><td><b>Horizontales Ziehen</b></td><td>Zur Brust hinziehen</td><td>Rudern in Rücklage</td></tr><tr><td><b>Vertikales Drücken</b></td><td>Über Kopf drücken</td><td>Pike-Liegestütz</td></tr><tr><td><b>Vertikales Ziehen</b></td><td>Von über Kopf ziehen</td><td>Klimmzug</td></tr><tr><td><b>Kniebeuge / Hüftbeuge (Hinge)</b></td><td>Mit Beinen und Hüfte arbeiten</td><td>Kniebeuge, Hüftbeuge</td></tr><tr><td><b>Rumpf / Anti-Bewegung</b></td><td>Widerstand gegen Beugen und Verdrehen</td><td>Plank, Hollow Hold</td></tr></table></div><p>Das ist der gesamte Lehrplan. Ein Programm, das alle sechs abdeckt und sauber steigert, baut einen kompletten Körper auf. Ein Programm, das eines auslässt, baut einen unvollständigen auf — und die Lücke zeigt sich irgendwann als stagnierende Übung oder als schmerzendes Gelenk.</p><h4>Warum diese Sichtweise besser ist als eine Übungsliste</h4><p>Drei Gründe, und sie sind praktisch, nicht philosophisch.</p><p><b>Du kannst intelligent ersetzen.</b> Heute keine Klimmzugstange? Du brauchst einen vertikalen Zug, also findest du einen — ein Handtuch über dem Türrahmen, ein Ast, ein Rudern mit schwerem Rucksack als Notlösung. Wenn du nur „Klimmzüge“ kennst, beendet eine fehlende Stange dein Training. Wenn du „vertikales Ziehen“ kennst, nicht.</p><p><b>Du siehst, was deinem Programm fehlt.</b> Die meisten selbstgebauten Calisthenics-Programme sind drucklastig und zugarm, weil Liegestütze nichts brauchen und Zugübungen eine Stange. Dieses Ungleichgewicht ist die häufigste einzelne Ursache für Schulterprobleme in diesem Sport. Wenn du nach Muster statt nach Übung prüfst, ist die Lücke in zehn Sekunden offensichtlich.</p><p><b>Du kannst aufhören, Übungen zu sammeln.</b> Du brauchst nicht Diamant-Liegestütze <i>und</i> breite Liegestütze <i>und</i> negative Liegestütze in derselben Woche. Sie sind dasselbe Muster. Wähl eine, steigere sie, weiter.</p><h4>Druck und Zug müssen im Gleichgewicht bleiben</h4><p>Das verdient einen eigenen Abschnitt, weil das Ignorieren echte Verletzungen verursacht.</p><p>Deine Schulter wird größtenteils von Weichgewebe zusammengehalten. Die Muskeln, die deine Schulterblätter nach hinten und unten ziehen — mittlerer Trapez, Rhomboiden, hintere Schulter — werden durch Ziehen trainiert. Die Muskeln, die sie nach vorne ziehen, durch Drücken. Trainier das eine über Monate deutlich mehr als das andere, und das Gelenk sitzt in einer Position, für die es unter Last nicht gebaut wurde.</p><p><b>Die Regel: jede Woche mindestens so viele harte Zug-Sätze wie Druck-Sätze.</b> Im Zweifel lieber mehr Zug. Fast niemand hat zu viel Rücken.</p><p>Wenn du weder Stange noch Ringe hast, ist das das Problem, das du zuerst löst — bevor du dir über Programmgestaltung Gedanken machst, bevor du dir über Skills Gedanken machst. Eine Türrahmen-Klimmzugstange kostet etwa zwanzig Euro und beseitigt den größten strukturellen Fehler im Calisthenics-Training zu Hause. Sie ist die einzige Ausrüstung, die dieses Buch wirklich empfiehlt.</p><h4>Die Hüftbeuge, und warum Calisthenics-Leute sie vernachlässigen</h4><p>Das Kniebeuge-Muster ist im Training mit dem eigenen Körpergewicht leicht zu finden. Die Hüftbeuge (Hinge) — das Beugen in der Hüfte mit ziemlich geradem Rücken, die Bewegung, die Beinbeuger und Gesäß trainiert — nicht, weil die offensichtliche Variante mit Gewicht das Kreuzheben ist.</p><p>Sie auszulassen ist ein Fehler. Schwache Beinbeuger im Verhältnis zum vorderen Oberschenkel sind ein häufiges Muster bei Leuten, die nur Kniebeugen machen, und es zeigt sich als Kniebeschwerden und schlechtes Sprinten.</p><p>Hüftbeuge-Optionen mit Körpergewicht existieren und funktionieren: einbeiniges rumänisches Kreuzheben (langsam, kontrolliert, mit langem Hebel), Beckenheben mit Steigerung zur einbeinigen Variante und Nordic-Curl-Vorstufen, bei denen ein Sofa die Füße verankert. Besonders Nordic Curls sind brutal effektiv und lassen sich über Jahre steigern.</p><p>Kapitel 5 gibt dir die Leitern für all diese Übungen.</p><h4>Rumpf heißt nicht Bauchmuskeln</h4><p>Die Aufgabe des Rumpfs in fast jeder echten Bewegung ist das <b>Widerstehen</b> von Bewegung, nicht das Erzeugen. Er hält deine Wirbelsäule stabil, während Arme und Beine arbeiten.</p><p>Deshalb übertragen sich Planks, Hollow Holds und ihre Steigerungen auf alles andere, während Sit-ups mit hohen Wiederholungen dich vor allem darin trainieren, Sit-ups zu machen. Deshalb fühlen sich Liegestütze und Klimmzüge mit starker Rumpfarbeit auch besser an — ein Körper, der nicht durchhängt, ist ein Körper, der Kraft effizient überträgt.</p><p>Ein weiterer Punkt, den du früh wissen solltest: Kein Rumpftraining der Welt macht Bauchmuskeln sichtbar. Sichtbarkeit ist eine Funktion des Körperfetts, und das ist eine Funktion dessen, was du isst. Training baut den Muskel auf; die Ernährung entscheidet, ob du ihn siehst. Kapitel 9 übernimmt die zweite Hälfte.</p><h4>Die sechs auf eine Woche verteilen</h4><p>Du musst nicht alle sechs in jeder Einheit treffen. Du musst alle sechs über eine Woche treffen, jeweils etwa zweimal.</p><p>Das Programm in Kapitel 6 macht das mit drei oder vier Einheiten pro Woche. Hier ist die Logik vorab, damit das Programm nicht willkürlich aussieht, wenn du dort ankommst:</p><ul><li><b>Drei Tage:</b> Ganzkörper in jeder Einheit, alle sechs Muster, moderates Volumen pro Einheit. Am besten, wenn dein Zeitplan unberechenbar ist.</li><li><b>Vier Tage:</b> Oberkörper-Unterkörper-Aufteilung, jedes Muster zweimal pro Woche, mehr Volumen pro Muster. Am besten, wenn du dich auf feste Tage festlegen kannst.</li></ul><p>Beides funktioniert. Eine Frequenz von etwa zweimal pro Muskel pro Woche ist, was zählt; die Anordnung ist Logistik.</p><h4>Deine Aufgabe</h4><p>Nimm, was du in deiner letzten Trainingswoche gemacht hast — oder das letzte Programm, das du versucht hast — und sortiere jede Übung in die sechs Kästchen.</p><p>Dann zähl die harten Sätze in jedem Kästchen.</p><p>Die meisten finden zwei Dinge: Ein Kästchen ist leer, und das Druck-Kästchen hat dreimal so viel Volumen wie das Zug-Kästchen. Diese Bestandsaufnahme ist mehr wert als jede neue Übung, die du hinzufügen könntest.</p><p>Kapitel 4 klärt, wo du wirklich startest — mit vier Tests, die zwanzig Minuten dauern.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 4 — Finde deinen Startpunkt", "h": "<p>Programme scheitern öfter an der ersten Einheit als an der zwölften. Jemand beginnt einen Plan, der für einen stärkeren Menschen gebaut ist, schafft ihn nicht, hält sich selbst für das Problem und gibt innerhalb von zwei Wochen auf.</p><p>Die Lösung sind zwanzig Minuten ehrliches Testen. Du willst hier niemanden beeindrucken. Du ermittelst eine Zahl, damit Kapitel 6 dir die richtige Version des Programms geben kann statt einer Vermutung.</p><h4>Bevor du testest</h4><p>Wärm dich richtig auf. Fünf Minuten leichte Bewegung — Laufen auf der Stelle, Armkreisen, zehn langsame Kniebeugen mit dem Körpergewicht, zehnmal Schulterkreisen — dann ein leichter Satz jeder Testübung mit halbem Einsatz.</p><p>Pausiere mindestens drei Minuten zwischen den Tests. Das ist ein Krafttest, keine Ausdauereinheit. Wenn du hetzt, misst du deine Ermüdung, nicht deine Kraft.</p><p>Mach alle vier Tests in einer Einheit, an einem Tag, an dem du keinen Muskelkater hast.</p><h4>Die vier Tests</h4><h5>Test 1 — Liegestütz (horizontales Drücken)</h5><p>Hände unter den Schultern, Körper in einer Linie von Kopf bis Ferse, Ellbogen zeigen in etwa 45 Grad nach hinten statt gerade zur Seite abzuspreizen.</p><p><b>Eine Wiederholung zählt</b>, wenn deine Brust bis auf eine Faustbreite an den Boden kommt und deine Arme oben durchstrecken, ohne dass deine Hüfte durchhängt oder nach oben knickt.</p><p>Mach so viele saubere Wiederholungen, wie du kannst. <b>Hör in dem Moment auf, in dem die Form bricht</b> — die erste Wiederholung, bei der deine Hüfte absinkt oder dein Bewegungsumfang kürzer wird, zählt nicht, und alles danach auch nicht. Notiere die Zahl der sauberen Wiederholungen.</p><h5>Test 2 — Rudern in Rücklage oder Klimmzug (Ziehen)</h5><p>Wenn du eine Stange hast: Mach so viele <b>volle Klimmzüge aus dem gestreckten Hang</b>, wie du kannst. Arme unten gestreckt, Kinn oben deutlich über der Stange, kein Schwungholen.</p><p>Wenn du keinen schaffst oder keine Stange hast: Mach stattdessen <b>Rudern in Rücklage</b> — leg dich unter einen stabilen Tisch oder eine Stange auf Hüfthöhe, Körper gestreckt, zieh deine Brust an die Kante. Notiere saubere Wiederholungen.</p><p>Notiere, welchen Test du gemacht hast. Sie sind nicht austauschbar.</p><h5>Test 3 — Kniebeuge (Beine)</h5><p>Kniebeuge mit dem Körpergewicht, Füße etwa schulterbreit, Zehen leicht nach außen gedreht.</p><p><b>Eine Wiederholung zählt</b>, wenn deine Hüftfalte unter die Oberkante deines Knies sinkt, deine Fersen am Boden bleiben und deine Knie über den Zehen bleiben, statt nach innen einzuknicken.</p><p>Wenn du über 30 saubere Wiederholungen kommst, brich ab und teste stattdessen <b>Split Squats</b> — ein Bein vorn, das hintere Knie senkt sich bis knapp über den Boden. Notiere Wiederholungen pro Bein.</p><h5>Test 4 — Hollow Hold (Rumpf)</h5><p>Leg dich auf den Rücken. Drück deinen unteren Rücken flach in den Boden. Heb deine Schulterblätter und deine Beine vom Boden ab, Arme an den Seiten oder über dem Kopf.</p><p><b>Starte die Uhr</b>, sobald du in Position bist, <b>stoppe sie</b> in dem Moment, in dem dein unterer Rücken vom Boden abhebt. Diese Spanne ist der ganze Test. Der erste ehrliche Versuch ist bei den meisten weit kürzer, als sie erwarten.</p><p>Notiere die Sekunden.</p><h4>Lies dein Level ab</h4><p>Finde deinen niedrigsten Wert. <b>Das ist dein Level.</b> Nicht dein Durchschnitt, nicht dein bester Wert.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th></th><th>Level 1 — Foundation</th><th>Level 2 — Build</th><th>Level 3 — Strength</th></tr><tr><td>Liegestütze</td><td>0–8</td><td>9–20</td><td>21+</td></tr><tr><td>Klimmzüge</td><td>0</td><td>1–5</td><td>6+</td></tr><tr><td><i>(oder Rudern)</i></td><td><i>0–8</i></td><td><i>9–15</i></td><td><i>16+</i></td></tr><tr><td>Kniebeugen</td><td>0–20</td><td>21–35</td><td>36+ oder Split Squats</td></tr><tr><td>Hollow Hold</td><td>0–20 s</td><td>21–45 s</td><td>46 s+</td></tr></table></div><p>Den schwächsten Wert zu nehmen klingt hart. Das ist Absicht. Auf dem Level deines stärksten Musters zu trainieren ist genau der Weg, auf dem sich Menschen die schwachen Muster verletzen.</p><h4>Was jedes Level bedeutet</h4><p><b>Level 1 — Foundation.</b> Deine Aufgabe für die nächsten zwölf Wochen ist der Aufbau der Basis: erhöhte Liegestütze, Rudern in einem angenehmen Winkel, unterstützte Kniebeugen, kurze Halteübungen. Das ist keine mindere Version des Programms. Es ist die Version, die für dich funktioniert, und wer hier startet und dranbleibt, überholt regelmäßig Leute, die auf Level 2 gestartet und ausgestiegen sind.</p><p><b>Level 2 — Build.</b> Die größte Gruppe. Du kannst die Grundbewegungen ausführen, und deine Aufgabe sind Volumen und Progression — harte Sätze sammeln und die Hebel-Leitern systematisch hochklettern.</p><p><b>Level 3 — Strength.</b> Die Standardversionen fordern dich nicht mehr. Du wirst die zwölf Wochen mit schwereren Hebelvarianten verbringen und mit der Skill-Arbeit aus Kapitel 12 beginnen.</p><h4>Zwei Dinge, die du zusätzlich festhältst</h4><p><b>Körpergewicht.</b> Jedes Mal unter gleichen Bedingungen — morgens, nach der Toilette, vor dem Essen. Ein einzelner Messwert sagt dir nichts; der Trend über vier Wochen sagt dir alles. Wieg dich mehrmals pro Woche und vergleiche Wochendurchschnitte, nicht einzelne Tage.</p><p><b>Zwei Fotos.</b> Von vorn und von der Seite, gleiches Licht, gleicher Ort, gleiche Tageszeit. Von Tag zu Tag wirst du keine Veränderung bemerken, und die Waage allein kann Muskeln nicht von Fett unterscheiden. Fotos im Abstand von zwölf Wochen sind das ehrlichste Feedback, das du bekommen wirst. Mach sie jetzt, und schau sie dann bis Woche 12 nicht wieder an.</p><h4>Teste erneut in Woche 6 und Woche 12</h4><p>Gleiche Tests, gleiches Aufwärmen, gleiche Standards. Nichts anderes.</p><p>Die Versuchung beim erneuten Testen ist, die Formstandards zu lockern, damit die Zahl besser aussieht. Widersteh ihr. Eine Liegestützzahl, die gestiegen ist, weil deine Tiefe gesunken ist, ist kein Fortschritt, und der einzige Mensch, den diese Schmeichelei etwas kostet, bist du.</p><h4>Deine Aufgabe</h4><p>Mach die vier Tests heute oder morgen. Schreib fünf Zahlen auf und mach zwei Fotos. Es dauert zwanzig Minuten und ist der Unterschied zwischen einem Programm, das zu dir passt, und einem Programm, das du im Februar aufgibst.</p><p>Kapitel 5 lehrt die Technik für jede Bewegung, zusammen mit den Progressions-Leitern, die du hochklettern wirst.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 5 — Technik: die Kern-Sechs", "h": "<p>Sechs Bewegungen decken die sechs Muster ab. Lerne sie richtig, und die Hunderte von Varianten werden zu naheliegenden Erweiterungen statt zu neuen Skills.</p><p>Jeder Abschnitt gibt dir den Ausführungsstandard, die zwei oder drei Fehler, die wirklich zählen, und die Progressionsleiter, die du in den nächsten zwölf Wochen und darüber hinaus erklimmst.</p><p><b>Eine Regel gilt für jede Leiter in diesem Kapitel:</b> Geh zur nächsten Stufe, wenn du <b>3 Sätze mit 12 sauberen Wiederholungen</b> schaffst und dabei noch 1–3 Wiederholungen in Reserve hast. Wenn du eine Stufe aufsteigst, fallen deine Wiederholungen in den Bereich von 5–8. Das ist richtig so.</p><h4>1. Liegestütz — horizontales Drücken</h4><p><b>Aufbau.</b> Hände etwas breiter als schulterbreit, Finger gespreizt, Zeigefinger zeigen nach vorn. Der Körper bildet eine gerade Linie von der Ferse bis zum Kopf. Spann Gesäß und Bauch an, bevor die erste Wiederholung beginnt — genau das verhindert, dass deine Hüfte durchhängt.</p><p><b>Ausführung.</b> Senk dich kontrolliert ab, bis deine Brust eine Faust hoch über dem Boden ist. Die Ellbogen wandern in etwa 45 Grad zum Oberkörper nach hinten, nicht gerade zur Seite. Drück dich zurück bis zur vollen Streckung. Halte den Nacken neutral; streck den Kopf nicht nach vorn, um Tiefe vorzutäuschen.</p><p><b>Die Fehler, die zählen.</b></p><ul><li><i>Durchhängende Hüfte.</i> Dein unterer Rücken übernimmt Last, die er nicht tragen sollte. Spann härter an oder geh eine Stufe zurück.</li><li><i>Abgespreizte Ellbogen.</i> Neunzig Grad zum Oberkörper bringen die Schulter in ihre verwundbarste Position. Zieh sie heran.</li><li><i>Halbe Wiederholungen.</i> Im unteren Drittel passiert der Großteil der Brustarbeit.</li></ul><p><b>Leiter.</b> Liegestütz an der Wand → erhöht am Tisch → erhöht am Stuhl → Knieliegestütz → voller Liegestütz → Füße erhöht → Defizit (Hände auf Büchern) → Archer → einarmige Negative → einarmig.</p><h4>2. Rudern in Rücklage — horizontales Ziehen</h4><p><b>Aufbau.</b> Eine Stange, eine stabile Tischkante oder Ringe auf ungefähr Hüfthöhe. Häng dich darunter, Hände etwas breiter als schulterbreit, Körper gerade, Fersen am Boden.</p><p><b>Ausführung.</b> Zieh zuerst deine Schulterblätter nach hinten und unten — das passiert, <i>bevor</i> sich deine Arme beugen. Zieh deine Brust zur Stange. Halte oben einen Moment inne. Senk dich kontrolliert ab, bis deine Arme gestreckt sind und deine Schulterblätter wieder nach vorn gewandert sind.</p><p><b>Die Fehler, die zählen.</b></p><ul><li><i>Mit den Armen anführen.</i> Wenn sich deine Schulterblätter nie bewegen, trainierst du Bizeps und lässt die Rückenarbeit aus, die deine Schultern schützt.</li><li><i>Durchhängende Hüfte.</i> Dieselbe Linienregel wie beim Liegestütz. Gesäß fest.</li><li><i>Verkürzter Weg oben.</i> Brust an die Stange, sonst hat die Wiederholung nicht stattgefunden.</li></ul><p><b>Leiter.</b> Stange auf Brusthöhe → Stange auf Taillenhöhe → Stange auf Hüfthöhe (Körper waagerecht) → Füße erhöht → Füße erhöht mit Pause → Archer-Rudern → einarmiges Rudern.</p><h4>3. Pike-Liegestütz — vertikales Drücken</h4><p><b>Aufbau.</b> Geh aus der Liegestützposition mit den Füßen nach vorn und heb die Hüfte, bis dein Körper ein umgekehrtes V bildet. Kopf zwischen den Armen, Hände schulterbreit.</p><p><b>Ausführung.</b> Senk den Scheitel deines Kopfes Richtung Boden, knapp vor deine Hände. Die Ellbogen wandern nach hinten und leicht nach außen. Drück dich zurück hoch, bis die Arme gestreckt sind.</p><p><b>Die Fehler, die zählen.</b></p><ul><li><i>Daraus einen Liegestütz machen.</i> Wenn deine Hüfte absinkt, drückst du wieder horizontal. Halte sie hoch.</li><li><i>Hinter den Händen absenken.</i> Der Kopf geht vor die Hände, nicht zwischen die Füße.</li></ul><p><b>Leiter.</b> Pike erhöht (Hände erhöht) → Pike am Boden → Pike mit erhöhten Füßen → Pike im Defizit (Hände auf Büchern) → Handstand-Liegestütz an der Wand (teilweise) → Handstand-Liegestütz an der Wand (voll).</p><h4>4. Klimmzug — vertikales Ziehen</h4><p><b>Aufbau.</b> Häng an einer Stange, Hände etwa schulterbreit, Handflächen zeigen von dir weg. Arme gestreckt. Schultern aktiv, nicht ins Gelenk gesackt.</p><p><b>Ausführung.</b> Zieh zuerst deine Schulterblätter nach unten, dann führ deine Ellbogen Richtung Rippen, bis dein Kinn über der Stange ist. Senk dich kontrolliert ganz ab, bis die Arme gestreckt sind. Kein Schwingen, kein Treten.</p><p><b>Die Fehler, die zählen.</b></p><ul><li><i>Nicht bis in den gestreckten Hang.</i> Die Hälfte des Kraftzuwachses steckt im unteren Drittel.</li><li><i>Kipping.</i> Schwung lässt die Zahl besser aussehen und die Muskeln weniger arbeiten.</li><li><i>Kinnstrecken.</i> Dein Kinn über der Stange, weil du den Kopf gekippt hast, ist keine Wiederholung.</li></ul><p><b>Leiter.</b> Gestreckter Hang auf Zeit → Schulterblattzug (Schultern nach unten ziehen, Arme gestreckt) → negativer Klimmzug (5 s Absenken) → mit Band unterstützt → voller Klimmzug → Pause oben → mit Zusatzgewicht oder Archer.</p><p>Wenn du noch keinen Klimmzug schaffst, sind Negative dein schnellster Weg. Spring oder steig in die obere Position und senk dich so langsam ab, wie du kannst. Drei bis fünf Wiederholungen, drei Sätze. Die meisten schaffen ihren ersten Klimmzug innerhalb von sechs bis acht Wochen damit.</p><h4>5. Kniebeuge und Hüftbeuge (Hinge) — Beine</h4><h5>Kniebeuge</h5><p><b>Aufbau.</b> Füße schulterbreit, Zehen leicht nach außen. Gewicht über der Fußmitte.</p><p><b>Ausführung.</b> Schieb deine Hüfte nach hinten und unten. Die Knie folgen der Linie deiner Zehen. Geh so tief, bis deine Hüftfalte unter die Oberkante deines Knies sinkt. Brust aufrecht, Fersen die ganze Zeit am Boden. Drück dich über den ganzen Fuß nach oben.</p><p><b>Die Fehler, die zählen.</b></p><ul><li><i>Nach innen einknickende Knie.</i> Drück sie aktiv nach außen.</li><li><i>Abhebende Fersen.</i> Meist die Sprunggelenksbeweglichkeit — Kapitel 8 behandelt das. Bis dahin: Fersen leicht erhöhen.</li></ul><p><b>Leiter.</b> Box-Kniebeuge → Kniebeuge mit Körpergewicht → Kniebeuge mit Pause (3 s unten) → Split Squat → Bulgarian Split Squat → unterstützter Pistol → Pistol.</p><h5>Hüftbeuge (Hinge)</h5><p>Lass das nicht aus. Quadrizeps-dominantes Training ohne Arbeit für die hintere Oberschenkelmuskulatur ist das häufigste Ungleichgewicht im Calisthenics.</p><p><b>Einbeiniges rumänisches Kreuzheben.</b> Steh auf einem Bein, beug dich mit geradem Rücken in der Hüfte und lass das freie Bein als Gegengewicht nach hinten ausstrecken. Spür die Dehnung in der Oberschenkelrückseite des Standbeins. Komm zurück, indem du die Hüfte nach vorn schiebst. Langsam. Sechs bis zehn pro Seite.</p><p><b>Nordic-Curl-Rückstufung.</b> Knie dich hin, die Füße unter einem Sofa verankert. Halte deinen Körper in einer Linie von Knie bis Kopf und senk dich so langsam wie möglich nach vorn ab; fang dich mit den Händen auf. Drück dich zurück hoch. Brutal effektiv, und es skaliert über Jahre.</p><p><b>Leiter.</b> Beckenheben → einbeiniges Beckenheben → einbeiniges rumänisches Kreuzheben → Nordic-Negative mit Händen → Nordic-Negative ohne Hilfe → voller Nordic Curl.</p><h4>6. Hollow Hold — Rumpf</h4><p><b>Aufbau.</b> Leg dich auf den Rücken und drück deinen unteren Rücken flach in den Boden. Das ist die ganze Übung — alles andere ist Hebel, der auf diese Position wirkt.</p><p><b>Ausführung.</b> Heb Schulterblätter und Beine vom Boden ab. Arme zu Beginn an den Seiten, über dem Kopf, wenn du stärker wirst. <b>In dem Moment, in dem dein unterer Rücken abhebt, ist der Satz vorbei.</b></p><p><b>Die Fehler, die zählen.</b></p><ul><li><i>Ins Hohlkreuz gehen.</i> Der eine Fehlermodus. Beug die Knie oder verkürze den Hebel, bis du flach halten kannst.</li><li><i>Luft anhalten.</i> Atme flach und durchgehend weiter.</li></ul><p><b>Leiter.</b> Dead Bug → Hollow Hold angehockt → ein Bein gestreckt → beide Beine gestreckt, Arme an den Seiten → Arme über dem Kopf → Hollow Rock → hängendes Knieheben → hängendes Beinheben.</p><p>Ergänze zweimal pro Woche eine Anti-Rotations-Bewegung: Seitstütz, gesteigert zum Seitstütz mit angehobenem oberem Bein.</p><h4>So wärmst du dich auf</h4><p>Fünf bis acht Minuten, jede Einheit, keine Ausnahmen, sobald du über Level 1 hinaus bist.</p><ol><li>Zwei Minuten allgemeine Bewegung — Laufen auf der Stelle, Hampelmänner, Seilspringen.</li><li>Zehn Armkreise vorwärts, zehn rückwärts. Zehn Schulterdurchzüge mit einem Handtuch.</li><li>Zehn langsame Kniebeugen mit Körpergewicht. Zehn Beckenheben.</li><li>Ein Satz deiner ersten Übung mit etwa halbem Einsatz.</li></ol><p>Statisches Dehnen vor dem Training ist nicht nützlich und kann die Kraftabgabe vorübergehend senken. Heb es dir für danach auf, oder für eine eigene Einheit. Kapitel 8 erklärt, welche Beweglichkeitsarbeit deine Zeit wirklich wert ist.</p><h4>Der Standard, der alles zusammenhält</h4><blockquote><p>Eine Wiederholung zählt nur, wenn du bereit wärst, sie zu filmen.</p></blockquote><p>Alles in diesem Buch hängt davon ab, dass deine Zahlen etwas bedeuten. In dem Moment, in dem du Wiederholungen zählst, die du niemandem zeigen würdest, hört der Tracker auf, Rückmeldung zu sein, und wird Dekoration.</p><p>Kapitel 6 fügt alle sechs zum Zwölf-Wochen-Programm zusammen.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 6 — Das VALKR-12-Wochen-Programm", "h": "<p>Alles bis hierher diente dazu, dass dieses Kapitel Sinn ergibt, statt wie eine beliebige Liste auszusehen. Jetzt bauen wir.</p><h4>Wähl deine Variante</h4><p><b>Drei Tage pro Woche — Ganzkörper.</b> Jede Einheit trifft alle sechs Muster. Wähl das, wenn dein Zeitplan unberechenbar ist, wenn du Level 1 bist oder wenn du nach einer Pause zurückkommst. Verpasst du eine von drei Einheiten, trainierst du jedes Muster trotzdem noch zweimal.</p><p><b>Vier Tage pro Woche — Oberkörper/Unterkörper.</b> Mehr Volumen pro Muster, mehr Raum für Skill-Arbeit. Wähl das, wenn du dich auf feste Tage festlegen kannst und Level 2 oder 3 bist.</p><p>Beides funktioniert. Mehr Tage sind nicht besser, wenn die zusätzlichen Tage dich Schlaf kosten.</p><h4>Die drei Phasen</h4><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Phase</th><th>Wochen</th><th>Fokus</th><th>Sätze × Wiederholungen</th><th>Pause</th></tr><tr><td><b>1 — Fundament</b></td><td>1–4</td><td>Technik, Volumenbasis</td><td>3 × 8–12</td><td>2 min</td></tr><tr><td><b>2 — Aufbau</b></td><td>5–8</td><td>Hebel-Progression</td><td>4 × 6–10</td><td>2–3 min</td></tr><tr><td><b>3 — Kraft</b></td><td>9–12</td><td>Härteste saubere Varianten</td><td>4 × 5–8</td><td>3 min</td></tr></table></div><p>Woche 12 endet mit einem Deload (eine bewusst leichte Woche) und einem erneuten Test. Details am Ende des Kapitels.</p><p><b>Jeder Arbeitssatz endet mit 1–3 Wiederholungen in Reserve.</b> Nicht bis zum Muskelversagen. Der letzte Satz jeder Übung darf bis zum Muskelversagen gehen, wenn die Form hält.</p><h4>Variante A — drei Tage pro Woche</h4><p>Trainiere Montag, Mittwoch, Freitag — oder in jedem Rhythmus mit einem Ruhetag dazwischen.</p><h5>Tag 1</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Muster</th><th>Übung (nach Level wählen)</th></tr><tr><td>1</td><td>Vertikaler Zug</td><td>L1 Gestreckter Hang / L2 negativer oder ganzer Klimmzug / L3 Klimmzug</td></tr><tr><td>2</td><td>Horizontaler Druck</td><td>L1 Hände erhöht / L2 ganzer Liegestütz / L3 Füße erhöht</td></tr><tr><td>3</td><td>Kniebeuge</td><td>L1 Box-Kniebeuge / L2 Kniebeuge mit Körpergewicht / L3 Split Squat</td></tr><tr><td>4</td><td>Horizontaler Zug</td><td>Rudern in Rücklage in deinem Winkel</td></tr><tr><td>5</td><td>Rumpf</td><td>Hollow Hold — 3 × maximale Zeit minus 5 s</td></tr></table></div><h5>Tag 2</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Muster</th><th>Übung</th></tr><tr><td>1</td><td>Horizontaler Zug</td><td>L1 Rudern an hoher Stange / L2 horizontales Rudern / L3 Füße erhöht</td></tr><tr><td>2</td><td>Vertikaler Druck</td><td>L1 Pike erhöht / L2 Pike am Boden / L3 Pike mit erhöhten Füßen</td></tr><tr><td>3</td><td>Hüftbeuge (Hinge)</td><td>L1 Beckenheben / L2 einbeiniges Beckenheben / L3 einbeiniges rumänisches Kreuzheben</td></tr><tr><td>4</td><td>Horizontaler Druck</td><td>Liegestütz auf deinem Level</td></tr><tr><td>5</td><td>Rumpf</td><td>Seitstütz — 3 × 30 s pro Seite</td></tr></table></div><h5>Tag 3</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Muster</th><th>Übung</th></tr><tr><td>1</td><td>Vertikaler Zug</td><td>Wie Tag 1, eine Stufe leichter</td></tr><tr><td>2</td><td>Kniebeuge</td><td>L1 Körpergewicht / L2 Kniebeuge mit Pause / L3 Bulgarian Split Squat</td></tr><tr><td>3</td><td>Horizontaler Druck</td><td>Eine Stufe härter als Tag 1, weniger Wiederholungen</td></tr><tr><td>4</td><td>Hüftbeuge (Hinge)</td><td>Negativer Nordic Curl — 3 × 5</td></tr><tr><td>5</td><td>Rumpf</td><td>Hängendes oder liegendes Knieheben — 3 × 10–15</td></tr></table></div><h4>Variante B — vier Tage pro Woche</h4><p>Oberkörper / Unterkörper / Ruhetag / Oberkörper / Unterkörper / Ruhetag / Ruhetag.</p><h5>Oberkörper A</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Übung</th><th>Sätze</th></tr><tr><td>1</td><td>Vertikaler Zug (Klimmzug-Progression)</td><td>Nach Phase</td></tr><tr><td>2</td><td>Horizontaler Druck (Liegestütz-Progression)</td><td>Nach Phase</td></tr><tr><td>3</td><td>Horizontaler Zug (Rudern in Rücklage)</td><td>Nach Phase</td></tr><tr><td>4</td><td>Vertikaler Druck (Pike-Liegestütz)</td><td>3 × 8–12</td></tr><tr><td>5</td><td>Hollow Hold</td><td>3 × Maximum minus 5 s</td></tr></table></div><h5>Unterkörper A</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Übung</th><th>Sätze</th></tr><tr><td>1</td><td>Kniebeugen-Progression</td><td>Nach Phase</td></tr><tr><td>2</td><td>Hüftbeuge (Hinge) — einbeiniges rumänisches Kreuzheben</td><td>3 × 8–10 pro Seite</td></tr><tr><td>3</td><td>Split Squat</td><td>3 × 8–12 pro Seite</td></tr><tr><td>4</td><td>Wadenheben (einbeinig, voller Bewegungsumfang)</td><td>3 × 12–20</td></tr><tr><td>5</td><td>Seitstütz</td><td>3 × 30–45 s pro Seite</td></tr></table></div><h5>Oberkörper B</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Übung</th><th>Sätze</th></tr><tr><td>1</td><td>Horizontaler Zug (härterer Winkel als Oberkörper A)</td><td>Nach Phase</td></tr><tr><td>2</td><td>Vertikaler Druck (Pike-Progression)</td><td>Nach Phase</td></tr><tr><td>3</td><td>Vertikaler Zug (eine Stufe leichter als Oberkörper A)</td><td>Nach Phase</td></tr><tr><td>4</td><td>Horizontaler Druck (anderer Winkel)</td><td>3 × 8–12</td></tr><tr><td>5</td><td>Hängendes Knie- oder Beinheben</td><td>3 × 10–15</td></tr></table></div><h5>Unterkörper B</h5><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Reihenfolge</th><th>Übung</th><th>Sätze</th></tr><tr><td>1</td><td>Nordic-Curl-Progression</td><td>4 × 5–8</td></tr><tr><td>2</td><td>Bulgarian Split Squat</td><td>3 × 8–12 pro Seite</td></tr><tr><td>3</td><td>Einbeiniges Beckenheben</td><td>3 × 12 pro Seite</td></tr><tr><td>4</td><td>Kniebeuge, 3 s Pause am tiefsten Punkt</td><td>3 × 8–12</td></tr><tr><td>5</td><td>Hollow Rock</td><td>3 × 12–20</td></tr></table></div><h4>Wöchentlicher Volumen-Check</h4><p>Zähl am Ende jeder Woche deine harten Sätze pro Muster.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Muster</th><th>Ziel: harte Sätze/Woche</th></tr><tr><td>Horizontaler Druck</td><td>8–14</td></tr><tr><td>Horizontaler Zug</td><td>8–14</td></tr><tr><td>Vertikaler Druck</td><td>6–10</td></tr><tr><td>Vertikaler Zug</td><td>8–14</td></tr><tr><td>Kniebeuge</td><td>8–12</td></tr><tr><td>Hüftbeuge (Hinge)</td><td>6–10</td></tr><tr><td>Rumpf</td><td>6–10</td></tr></table></div><p><b>Das Zugvolumen muss mindestens dem Druckvolumen entsprechen.</b> Wenn nicht, behebe das, bevor du irgendetwas anderes änderst.</p><h4>Cardio und Konditionstraining</h4><p>Zwei optionale Einheiten pro Woche, 20–30 Minuten lockere Arbeit — Gehen, Radfahren, lockeres Laufen. Halte es so locker, dass du dich dabei unterhalten kannst.</p><p>Harte Intervallarbeit ist nicht verboten, aber sie konkurriert um dieselbe Erholung, die dein Krafttraining braucht. In einem Zwölf-Wochen-Kraftblock reicht eine harte Konditionseinheit pro Woche völlig.</p><p>Wenn dein Ziel Fettabbau ist, ergänze Gehen statt Intervalle. Es kostet fast keine Erholung und ist deutlich leichter durchzuhalten.</p><h4>Verpasste Einheiten</h4><p>Du wirst Einheiten verpassen. Plane das jetzt ein, damit es nicht das Ende des Programms wird.</p><ul><li><b>Eine verpasst:</b> mach weiter. Hole nichts doppelt nach.</li><li><b>Eine Woche verpasst:</b> wiederhole die verpasste Woche, dann mach weiter.</li><li><b>Zwei oder mehr Wochen verpasst:</b> geh bei jeder Übung für eine Woche eine Hebelstufe zurück, dann setz dort fort, wo du aufgehört hast.</li></ul><p>Nichts davon setzt deinen Fortschritt zurück. Das Einzige, was deinen Fortschritt zurücksetzt, ist Aufhören.</p><h4>Wochen 11–12: Deload und erneuter Test</h4><p><b>Woche 11 — Deload.</b> Gleiche Übungen, gleicher Hebel, <b>halb so viele Sätze</b>, und beende jeden Satz mindestens 4 Wiederholungen vor dem Muskelversagen. Das ist keine verschwendete Woche. Hier baut sich die angesammelte Ermüdung ab, und die Anpassung zeigt sich.</p><p><b>Woche 12 — erneuter Test.</b> Wiederhole die vier Tests aus Kapitel 4 exakt: gleiches Aufwärmen, gleiche Standards, gleiche Form. Mach deine zwei Fotos am selben Ort und bei gleichem Licht.</p><p>Dann vergleiche. Nicht mit irgendjemand anderem — mit deinen eigenen Zahlen aus Woche 1.</p><h4>Was nach Woche 12 kommt</h4><p>Starte es noch einmal. Gleiche Struktur, beginnend bei deinen neuen Hebelstufen.</p><p>Das ist der Teil, den die meisten falsch machen. Das Programm ist nichts, was du abschließt; es ist eine Vorlage, die du wiederholst. Ein zweiter Zwölf-Wochen-Block mit derselben Struktur bei härterem Hebel baut mehr auf als der Wechsel zu etwas Neuem — aus genau dem Grund, der in Kapitel 1 dargelegt wurde.</p><p>Kapitel 7 gibt dir die Regeln, um in jeder Einheit zu entscheiden, ob du weitergehst, hältst oder zurückgehst.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 7 — Fortschritt ohne Raten", "h": "<p>Die meisten Menschen steigern sich nach Gefühl. Sie legen eine Wiederholung drauf, wenn sie sich stark fühlen, und bleiben stehen, wenn nicht. Über drei Monate ergibt das einen Zufallspfad, und ein Zufallspfad führt nirgendwohin.</p><p>Dieses Kapitel ersetzt das Gefühl durch eine Regel. Sie kostet etwa zehn Sekunden pro Übung und nimmt dir die Entscheidung komplett ab.</p><h4>Die 2-für-2-Regel</h4><blockquote><p>Wenn du das obere Ende deines Ziel-Wiederholungsbereichs um <b>zwei oder mehr Wiederholungen</b> überschreitest, und zwar in deinen <b>letzten zwei Einheiten in Folge</b>, gehst du eine Stufe hoch.</p></blockquote><p>Das ist alles.</p><p>Beispiel. Dein Zielbereich in Phase 1 ist 8–12. Du machst Liegestütze.</p><ul><li>Einheit 1: 12, 11, 10 → oberes Ende erreicht, nicht überschritten. Halten.</li><li>Einheit 2: 14, 12, 11 → im ersten Satz um zwei überschritten. Das ist eine Einheit.</li><li>Einheit 3: 14, 13, 12 → wieder überschritten. <b>Zwei in Folge. Eine Stufe hoch.</b></li><li>Einheit 4: Liegestütze mit erhöhten Füßen → 8, 7, 6. Richtig so. Von hier aus aufbauen.</li></ul><p>Die Regel funktioniert, weil sie verlangt, dass die Verbesserung wiederholbar ist. Ein einzelner guter Tag kann Koffein sein, guter Schlaf oder Ego. Zwei in Folge sind eine echte Veränderung.</p><h4>Der Entscheidungsbaum</h4><p>Geh das vor jeder Übung durch, mit den Zahlen der letzten Einheit.</p><p><b>1. Ist in der letzten Einheit in irgendeinem Arbeitssatz die Form zusammengebrochen?</b> → Ja: dieselbe Stufe wiederholen. Erst die Form in Ordnung bringen. Nichts anderes zählt.</p><p><b>2. Habe ich 2-für-2 erreicht?</b> → Ja: eine Stufe hoch. Rechne damit, dass die Wiederholungen ans untere Ende des Bereichs fallen.</p><p><b>3. Sind meine Wiederholungen seit drei Einheiten gleich oder rückläufig?</b> → Ja: das ist ein Stillstand. Geh zum Stillstand-Protokoll weiter unten.</p><p><b>4. Andernfalls:</b> Stufe wiederholen und versuchen, in irgendeinem Satz eine Wiederholung draufzulegen.</p><h4>Wenn du hochgehst und es zu schwer ist</h4><p>Du gehst eine Stufe hoch und schaffst 4 Wiederholungen, obwohl der Bereich bei 6 beginnt. Das ist normal, und es gibt drei Lösungen, in dieser Reihenfolge.</p><p><b>Nutze stattdessen Tempo.</b> Geh eine Stufe zurück und füge eine dreisekündige Absenkphase hinzu. Das liegt zwischen den beiden Hebel-Stufen und ist meist genau die Brücke, die du brauchst.</p><p><b>Mische die Stufen innerhalb der Einheit.</b> Die ersten zwei Sätze auf der schwereren Stufe, die letzten zwei auf der leichteren. Über drei bis vier Wochen übernehmen die schwereren Sätze.</p><p><b>Erweitere den Bereich langsam.</b> Mach die schwerere Stufe nur im ersten Satz und geh dann zurück. Füge jede Woche einen schwereren Satz hinzu.</p><p>Quäl dich nicht einfach durch eine Stufe, die du nicht mit sauberer Form ausführen kannst. Du baust das Muster schlecht auf, und das kostet dich später.</p><h4>Stillstand</h4><p>Ein Stillstand sind drei Einheiten ohne Verbesserung bei Wiederholungen, Form oder Kontrolle. Bevor du ein Trainingsproblem annimmst, prüfe diese Punkte der Reihe nach — denn meistens ist es keins.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Prüfpunkt</th><th>Frage</th><th>Wenn die Antwort schlecht ausfällt</th></tr><tr><td><b>Schlaf</b></td><td>Unter 7 Stunden in der letzten Woche?</td><td>Bring das zuerst in Ordnung. Es ist die häufigste Ursache.</td></tr><tr><td><b>Essen</b></td><td>Isst du genug, erreichst du dein Protein?</td><td>Siehe Kapitel 9. Zu wenig essen bremst alles aus.</td></tr><tr><td><b>Lebenslast</b></td><td>Prüfungen, Überstunden, Stressspitze?</td><td>Halte deine aktuelle Stufe. Nichts draufpacken.</td></tr><tr><td><b>Volumen</b></td><td>Hast du kürzlich Sätze hinzugefügt?</td><td>Geh für eine Woche auf das vorherige Volumen zurück.</td></tr><tr><td><b>Ermüdung</b></td><td>Wochen seit dem letzten Deload?</td><td>Wenn über 8, jetzt Deload.</td></tr></table></div><p>Sind alle fünf sauber und du steckst trotzdem fest, dann liegt es am Programm. Nimm eine Deload-Woche — dieselben Übungen, halb so viele Sätze, deutlich vor dem Muskelversagen aufhören — und mach dann weiter. Ein Stillstand, der das alles überlebt, ist selten.</p><h4>Deloads</h4><p>Nimm einen alle 8–12 Wochen, oder immer dann, wenn drei der fünf Prüfpunkte oben schlecht ausfallen.</p><p><b>Wie:</b> dieselben Übungen, dieselbe Hebel-Stufe, <b>halb so viele Sätze</b>, jeder Satz mindestens vier Wiederholungen vor dem Muskelversagen beendet. Eine Woche.</p><p><b>Warum es sich falsch anfühlt und trotzdem funktioniert:</b> du beendest die Woche mit dem Gefühl, zu wenig trainiert zu haben, und triffst dann Zahlen, an die du vorher nicht herankamst. Ermüdung verdeckt Fitness. Nimmst du die Ermüdung weg, zeigt sich, was du tatsächlich aufgebaut hast.</p><p>Lass Deloads nicht ausfallen, weil du dich gut fühlst. Dass du dich gut fühlst, ist genau das, was ein Deload schützt.</p><h4>Erfasse die richtigen Dinge</h4><p>Dein Trainingsprotokoll braucht vier Spalten pro Übung. Alles darüber hinaus, und du hörst auf, es auszufüllen.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Datum</th><th>Übung + Stufe</th><th>Sätze × Wiederholungen</th><th>Wiederholungen in Reserve im letzten Satz</th></tr><tr><td>12. März</td><td>Liegestütz, Füße erhöht</td><td>8 / 7 / 7</td><td>1</td></tr></table></div><p>Einmal pro Woche notierst du, welchen Hebel du genutzt hast — Hebel, Bewegungsumfang, Tempo, unilateral oder Dichte. Wenn eine Woche vergeht und du keinen nennen kannst, war diese Woche Erhaltung, kein Fortschritt. Zwei davon in Folge sind ein Signal, kein Verbrechen.</p><h4>Das ehrliche Maß für einen guten Monat</h4><p>Stell dir am Ende jedes Monats eine Frage:</p><blockquote><p>Kann ich mindestens eine Übung nennen, bei der ich eine Stufe hochgegangen bin, mit einer Form, die ich bereit wäre zu filmen?</p></blockquote><p>Wenn ja, hat der Monat funktioniert, egal wie du im Spiegel aussahst. Sichtbare Veränderung hinkt der Kraftveränderung um Wochen hinterher. Die Stufenaufstiege sind der Frühindikator, und sie sind der einzige, den du vollständig kontrollierst.</p><p>Kapitel 8 behandelt Beweglichkeit — genauer: den kleinen Teil davon, der deine Zeit wert ist, und den großen Teil, der es nicht ist.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 8 — Beweglichkeit, die ihren Platz verdient", "h": "<p>Beweglichkeitstraining nimmt eine seltsame Stellung in der Fitnesswelt ein. Alle sind sich einig, dass es wichtig ist, fast niemand macht es, und das meiste, was empfohlen wird, ist entweder unnötig oder zielt auf ein Problem, das die Person gar nicht hat.</p><p>Dieses Kapitel ist mit Absicht kurz. Du brauchst weniger, als man dir erzählt hat — und der Teil, den du brauchst, ist spezifisch.</p><h4>Was Beweglichkeitstraining leistet und was nicht</h4><p><b>Es erhöht</b> den Bewegungsumfang, den du aktiv kontrollieren kannst. Das erlaubt dir, Bewegungen über ihren vollen Bewegungsumfang zu trainieren — und im vollen Bewegungsumfang steckt ein großer Teil des Wachstums.</p><p><b>Es verhindert keine</b> Verletzungen auf verlässliche Weise. Diese Behauptung wird ständig wiederholt, und die Belege dahinter sind dünn. Was Gelenke tatsächlich schützt, ist Kraft über den Bewegungsumfang, schrittweise Laststeigerung und ausreichende Erholung. Dehnen ist für nichts davon ein Ersatz.</p><p><b>Es reduziert</b> Muskelkater <b>nicht</b> nennenswert, und es macht dich für sich genommen weder schneller noch stärker.</p><p>Das ist kein Argument, es wegzulassen. Es ist ein Argument, die nützliche Variante zu machen statt einer Stunde Bodendehnen, die nichts verändert.</p><h4>Zwei Arten, zwei Zwecke</h4><p><b>Dynamisch — vor dem Training.</b> Bewegung durch den Bewegungsumfang, keine langen Halteübungen. Erhöht die Gewebetemperatur und bereitet die Gelenke auf das vor, was kommt. Das ist Teil deines Aufwärmens in Kapitel 5.</p><p><b>Statisch — nach dem Training oder separat.</b> Halten für 30–60 Sekunden am Rand des angenehmen Bewegungsumfangs. Erhöht den Bewegungsumfang über Wochen tatsächlich. <b>Nicht vor dem Training</b> — lange statische Halteübungen senken vorübergehend die Kraftabgabe, und das ist genau das, was du während eines Satzes brauchst.</p><h4>Die fünf, die für Calisthenics zählen</h4><p>Diese zielen auf die fünf Einschränkungen, die Training mit dem Körpergewicht tatsächlich begrenzen. Wenn du sonst nichts machst, mach diese.</p><h5>1. Schulterflexion — für Klimmzüge und Handstände</h5><p><b>Test:</b> Leg dich auf den Rücken, Knie gebeugt, unterer Rücken flach am Boden. Führe die gestreckten Arme über den Kopf. Berühren deine Handgelenke den Boden, ohne dass die Rippen aufklappen?</p><p><b>Abhilfe:</b> Wall Slides. Stell dich mit dem Rücken an eine Wand, Arme in Torwart-Position, Unterarme an der Wand. Gleite auf und ab und halte dabei den Kontakt. 2 × 10, langsam.</p><h5>2. Brustwirbelsäulen-Streckung — für Überkopfarbeit und Haltung</h5><p><b>Test:</b> Sitz aufrecht, Arme verschränkt. Rotiere. Kommst du auf 45 Grad in jede Richtung?</p><p><b>Abhilfe:</b> Faszienrolle oder gerolltes Handtuch quer unter den mittleren Rücken, Hände hinter den Kopf, darüber strecken. Zehn langsame Wiederholungen.</p><h5>3. Sprunggelenks-Dorsalflexion — für Kniebeugen</h5><p><b>Test:</b> Knie dich hin, ein Fuß flach aufgestellt, das Knie wandert nach vorn über die Zehen. Kommt dein Knie über die Zehen, während die Ferse unten bleibt?</p><p><b>Abhilfe:</b> Knie-zur-Wand-Dehnung. Fuß eine Handbreit von der Wand entfernt, das Knie Richtung Wand schieben, ohne die Ferse zu heben. 2 × 10 pro Seite, danach 30 s halten.</p><p>Wenn deine Fersen bei Kniebeugen abheben, ist das fast immer der Grund. Erhöhe deine Fersen in der Zwischenzeit leicht und arbeite weiter daran.</p><h5>4. Hüftbeuger — für Hüftbeugen (Hinges) und Haltung</h5><p><b>Test:</b> Leg dich an die Kante eines Betts, ein Knie zur Brust gezogen, das andere Bein hängt herab. Sinkt der hängende Oberschenkel auf Betthöhe?</p><p><b>Abhilfe:</b> Hüftbeuger-Dehnung im halben Kniestand, dabei den Gesäßmuskel des hinteren Beins anspannen. 30–45 s pro Seite. Das Anspannen des Gesäßmuskels ist das, was die Übung wirksam macht.</p><h5>5. Handgelenke — die eine, die alle auslassen</h5><p>Calisthenics belastet die Handgelenke auf eine Weise, wie es sonst nichts tut. Schmerzen im Handgelenk sind der häufigste Grund, warum Leute Liegestütz- und Handstand-Progressionen aufgeben.</p><p><b>Abhilfe, vor jeder Oberkörper-Einheit:</b> im Vierfüßlerstand, Handflächen nach unten, vor und zurück wippen — 10 Wiederholungen. Hände zu den Knien drehen, sanft nach hinten wippen — 10 Wiederholungen. Fäuste auf den Boden, sanftes Wippen — 10 Wiederholungen.</p><p>Zwei Minuten. Das verhindert ein Problem, das sonst Monate kostet.</p><h4>Die Wochendosis</h4><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Wann</th><th>Was</th><th>Zeit</th></tr><tr><td>Vor jeder Einheit</td><td>Dynamisches Aufwärmen + Handgelenk-Vorbereitung</td><td>6–8 min</td></tr><tr><td>Nach 2 Einheiten pro Woche</td><td>Statische Halteübungen für deine zwei schwächsten Tests</td><td>8 min</td></tr><tr><td>Eine separate Einheit (optional)</td><td>Volle Abfolge, alle fünf</td><td>20 min</td></tr></table></div><p>Das ist alles. Unter dreißig Minuten gezielter Arbeit pro Woche, gerichtet auf Einschränkungen, die du tatsächlich getestet hast.</p><h4>Der Erholungstag</h4><p>Deine alte Trainingswoche hatte vermutlich einen „Flexibilitäts- und Mobility-Tag“. Behalte die Idee, streich die Beliebigkeit.</p><p>Ein nützlicher Erholungstag ist: 30–45 Minuten lockeres Gehen, die volle Beweglichkeitsabfolge von oben, und früh ins Bett gehen. Er ist keine heimliche dritte Trainingseinheit mit Yoga-Etikett.</p><p>Wenn du einen Erholungstag müder beendest, als du ihn begonnen hast, war es ein Trainingstag.</p><h4>Die ehrliche Zusammenfassung</h4><p>Beweglichkeit ist Instandhaltung, kein Antrieb. Zwanzig bis dreißig Minuten pro Woche, gerichtet auf getestete Einschränkungen, halten die Gelenke bereit für die Arbeit, die dich tatsächlich aufbaut. Zwei Stunden ungerichtetes Dehnen pro Woche sind ein Hobby — ein schönes, aber erwarte nicht, dass es deine Kraft verändert.</p><p>Kapitel 9 behandelt die Eingangsseite: was du essen solltest, damit aus dem Training, das du machst, etwas wird.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 9 — Essen für Wachstum", "h": "<p>Training ist das Signal. Essen ist das Material. Du kannst ein perfektes Programm fahren und trotzdem sehr wenig aufbauen, wenn das Material fehlt.</p><p>Dieses Kapitel ist bewusst unglamourös. Es gibt keinen Ernährungsplan, denn Ernährungspläne werden innerhalb von zwei Wochen von jedem aufgegeben, in dessen Leben andere Menschen vorkommen. Stattdessen bekommst du vier Zahlen und einen Weg, sie mit Essen zu erreichen, das du ohnehin schon isst.</p><h4>Die vier Zahlen</h4><h5>1. Kalorien</h5><p>Muskelaufbau braucht einen kleinen Überschuss. Fettabbau braucht ein Defizit. Du kannst nicht beides gleichzeitig optimieren, und der Versuch ist der Grund, warum so viele Leute zwei Jahre lang identisch aussehen.</p><p><b>Schätze deinen Erhaltungsbedarf:</b> Körpergewicht in kg × 33 bei einer überwiegend sitzenden Woche, × 38, wenn du viel auf den Beinen bist.</p><ul><li><b>Zum Aufbauen:</b> Erhaltungsbedarf + 250–350 kcal</li><li><b>Zum Definieren:</b> Erhaltungsbedarf − 400–500 kcal</li><li><b>Für Rekomposition</b> (nur Anfänger, und langsam): Erhaltungsbedarf</li></ul><p>Das sind Startschätzungen, keine Wahrheiten. Die Waage über vier Wochen sagt dir, ob die Zahl gestimmt hat. Passe um 200 kcal an und warte weitere drei Wochen.</p><p><b>Zielrate beim Zunehmen:</b> grob 0,25–0,5 % des Körpergewichts pro Woche. Für einen 80-kg-Mann sind das 200–400 g. Schneller, und du legst vor allem Fett zu.</p><h5>2. Protein</h5><p><b>1,6–2,2 g pro kg Körpergewicht pro Tag.</b> Für einen 80-kg-Mann 130–175 g.</p><p>Das ist die Zahl mit der stärksten Evidenz dahinter und die, die die meisten Leute mit weitem Abstand verfehlen. Über den Bereich hinauszugehen hilft nicht; darunter zu bleiben begrenzt, was dein Training hervorbringen kann.</p><p>Verteile es auf drei oder vier Mahlzeiten. Das genaue Timing ist weit weniger wichtig als die Tagessumme.</p><p><b>Wie 30 g Protein aussehen:</b> 130 g Hähnchenbrust, 150 g Quark oder Skyr, 5 Eier, 150 g Thunfisch, 200 g griechischer Joghurt, 100 g Linsen plus 50 g Haferflocken, ein Messlöffel Whey.</p><h5>3. Fett</h5><p><b>0,8–1 g pro kg</b>, als Untergrenze. Fett ist an der normalen Hormonproduktion beteiligt; es über längere Zeit sehr niedrig zu halten ist kein guter Tausch für irgendetwas, das du dadurch gewinnst.</p><h5>4. Kohlenhydrate</h5><p>Was nach Protein und Fett übrig bleibt. Kohlenhydrate liefern den Treibstoff für hartes Training — wenn sich deine Einheiten kraftlos anfühlen und Protein und Schlaf in Ordnung sind, liegt die Lücke meist hier.</p><h4>Das in einen echten Tag einbauen</h4><p>Nimm statt eines Plans eine Vorlage. Vier Slots, in jedem eine Proteinquelle.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Slot</th><th>Anker</th><th>Beispiel</th></tr><tr><td>Mahlzeit 1</td><td>30–40 g Protein</td><td>Skyr mit Haferflocken und Obst</td></tr><tr><td>Mahlzeit 2</td><td>30–40 g Protein</td><td>Hähnchen, Reis, Gemüse</td></tr><tr><td>Mahlzeit 3</td><td>30–40 g Protein</td><td>Eier, Kartoffeln, Salat</td></tr><tr><td>Mahlzeit 4</td><td>30–40 g Protein</td><td>Quark mit Nüssen, oder ein Shake</td></tr></table></div><p>Fülle den Rest mit Essen, das du ohnehin magst. Die Vorlage ist die Struktur; der Inhalt gehört dir.</p><p><b>Wenn es dir schwerfällt, genug zu essen:</b> flüssige Kalorien und kaloriendichte Ergänzungen lösen das. Vollmilch, Haferflocken in einen Shake gemixt, Olivenöl über gekochtes Essen, Nüsse und Trockenfrüchte. Zu versuchen, einen Überschuss komplett aus Hähnchen und Brokkoli zu essen, ist ein selbstgemachtes Problem.</p><p><b>Wenn es dir schwerfällt, mit dem Essen aufzuhören:</b> Volumen funktioniert. Gemüse, Kartoffeln, Suppen, mageres Protein. Gleiche Kalorien, deutlich mehr Essen.</p><h4>Tracken, und wann du damit aufhörst</h4><p>Tracke alles für <b>zwei Wochen</b>. Nicht für immer — zwei Wochen.</p><p>Der Sinn ist Kalibrierung, nicht Überwachung. Fast jeder stellt fest, dass seine Schätzung um mehrere Hundert Kalorien in eine Richtung danebenlag. Nach zwei Wochen weißt du, was dein normaler Tag tatsächlich enthält, und kannst es von da an nach Augenmaß machen — mit einer Kontrollwoche, wann immer der Fortschritt stockt.</p><p>Wiege dich mehrmals pro Woche unter denselben Bedingungen und vergleiche <b>Wochendurchschnitte</b>. Tägliche Schwankungen von 1–2 kg sind Wasser und Mageninhalt und bedeuten nichts.</p><h4>Nahrungsergänzungsmittel, ehrlich betrachtet</h4><p>Fast alle davon bewirken nichts Messbares. Die kurze Liste mit vernünftiger Evidenz:</p><p><b>Kreatin-Monohydrat.</b> 3–5 g täglich, Uhrzeit egal. Das am besten untersuchte Sport-Nahrungsergänzungsmittel überhaupt, und es ist billig. Keine Ladephase nötig.</p><p><b>Proteinpulver.</b> Keine Magie — es ist Essen in praktischer Form. Nützlich nur, wenn du dein Proteinziel über Mahlzeiten nicht erreichst.</p><p><b>Vitamin D.</b> Vor allem relevant, wenn du wenig Sonnenlicht abbekommst, zum Beispiel weil du den nördlichen Winter über drinnen arbeitest. Lieber ein Bluttest als Raterei.</p><p><b>Koffein.</b> Wirkt für die Trainingsleistung. Verschlechtert aber auch deinen Schlaf, wenn du es zu spät nimmst, und Schlaf ist mehr wert als die Einheit. Nichts nach dem frühen Nachmittag.</p><p>Das ist die Liste. Alles andere — BCAAs, Testosteron-Booster, Fatburner, Mass Gainer, Pre-Workouts jenseits von Koffein — ist entweder unnötig, unbelegt oder eine teure Version von etwas Billigem.</p><p>Wenn dir ein Produkt auf Instagram von jemandem mit sichtbaren Bauchmuskeln verkauft wird, ist das Marketing, keine Evidenz.</p><h4>Alkohol</h4><p>Er ist nicht verboten, aber sei ehrlich, was er kostet: Er verschlechtert die Schlafqualität und liefert Kalorien, die nichts für dich tun. Eine durchzechte Nacht kann eine Woche Erholung zunichtemachen.</p><p>Du musst kein Mönch sein. Du musst nur aufhören, dich zu wundern, wenn auf ein heftiges Wochenende eine schlechte Trainingswoche folgt.</p><h4>Die Reihenfolge, die zählt</h4><p>Wenn du nur eine Sache auf einmal in Ordnung bringen kannst, dann in dieser Reihenfolge:</p><ol><li><b>Protein</b> — die Zahl, die die meisten am weitesten verfehlen</li><li><b>Gesamtkalorien</b> — Richtung und Rate</li><li><b>Schlaf</b> — Kapitel 10, und er gehört vielleicht auf Platz eins</li><li>Alles andere</li></ol><p>Kapitel 10 behandelt den Hebel, der kostenlos ist, die größte Wirkung von allem in diesem Buch hat — und der der ist, den fast jeder zuerst opfert.</p><blockquote><p>Nichts in diesem Kapitel ist medizinische oder Ernährungsberatung für deine individuelle Situation. Bei Erkrankungen, Lebensmittelallergien oder -unverträglichkeiten, Medikamenteneinnahme oder Unsicherheit, ob eine Ernährungsumstellung für dich passt, sprich vor Änderungen mit einem Arzt oder einer qualifizierten Ernährungsfachkraft.</p></blockquote><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 10 — Schlaf und Erholung", "h": "<p>Wenn du alles in diesem Buch wegwerfen müsstest und nur ein Kapitel behalten dürftest, würde dich die Wahl dieses Kapitels am wenigsten kosten.</p><p>Schlaf ist gratis, braucht keine Ausrüstung, keine Disziplin im Trainingssinn und hat einen größeren Effekt darauf, wie du aussiehst und wie leistungsfähig du bist, als jedes Nahrungsergänzungsmittel, jeder Split und der Großteil deiner Übungsauswahl. Er ist auch das Erste, was fast jeder opfert — denn er ist das Einzige, das sich anfühlt wie Nichtstun.</p><h4>Was zu wenig Schlaf dich wirklich kostet</h4><p>Schon ein bis zwei Wochen verkürzter Schlaf erzeugen messbare Effekte: weniger Kraft und Ausdauer, langsamere Reaktionszeit, höhere gefühlte Anstrengung bei gleicher Belastung, schlechtere Appetitregulation und gestörte Erholung zwischen den Einheiten.</p><p>Im Klartext: Dieselbe Einheit fühlt sich härter an, du bringst weniger Kraft auf, du erholst dich langsamer davon, und du bist hungriger und kannst schlechter einschätzen, wie viel du gegessen hast.</p><p>Deshalb wird, wer fünf Stunden schläft und sechs Tage pro Woche trainiert, fast immer von dem überholt, der acht Stunden schläft und drei Tage trainiert. Der Abstand ist deutlich, und keine Anstrengung in der Einheit gleicht ihn aus.</p><h4>Das Ziel</h4><p><b>Sieben bis neun Stunden, regelmäßig.</b></p><p>Regelmäßigkeit zählt fast so viel wie die Dauer. Sechs Stunden unter der Woche und elf am Sonntag sind nicht dasselbe wie siebeneinhalb jede Nacht, weil ein schwankender Rhythmus deine innere Uhr dauerhaft aus dem Takt hält.</p><p><b>Wähl eine Aufstehzeit und halte sie — auch am Wochenende.</b> Die Schlafenszeit ergibt sich daraus. Diese eine Änderung behebt mehr Schlafprobleme als alles andere auf der Liste unten zusammen.</p><h4>Die kurze Liste, die funktioniert</h4><p>Geordnet nach Wirkung, nicht danach, wie oft sie im Netz wiederholt werden.</p><p><b>1. Feste Aufstehzeit.</b> Wie oben. Sie ist der Anker, an dem alles andere hängt.</p><p><b>2. Kein Koffein nach dem frühen Nachmittag.</b> Koffein hat eine Halbwertszeit von etwa fünf bis sechs Stunden. Von einem Kaffee um 16:00 Uhr ist um 22:00 Uhr noch spürbar Koffein in deinem System. Wenn du schlecht schläfst und nachmittags Kaffee trinkst, such den Fehler nirgendwo anders zuerst.</p><p><b>3. Dunkel und kühl.</b> Ein kühleres Zimmer und ein wirklich dunkles helfen beide. Verdunkelungsvorhänge sind günstig; ein kälteres Zimmer kostet nichts.</p><p><b>4. Bildschirme weg vor dem Schlafen.</b> Es geht weniger um blaues Licht als darum, was du auf dem Bildschirm tust. Kurzvideos sind so gebaut, dass sie dich wachhalten — das ist das Produkt. Eine halbe Stunde ohne sie vor dem Schlafengehen ist kein Moralismus, es ist der Mechanismus.</p><p><b>5. Alkohol.</b> Er verkürzt die Einschlafzeit und verschlechtert die Qualität dessen, was danach kommt. Er ist einer der zuverlässigsten Wege, nach acht Stunden im Bett müde aufzuwachen.</p><p>Beachte, was nicht auf dieser Liste steht: Schlaftracker, Nahrungsergänzungsmittel und aufwendige Routinen. Wenn deine Aufstehzeit über die Woche um drei Stunden wandert und du um 17:00 Uhr Kaffee trinkst, ist ein Gerät, das misst, wie schlecht du geschlafen hast, nicht die Maßnahme, die du brauchst.</p><h4>Ruhetage sind Trainingstage</h4><p>Anpassung passiert zwischen den Einheiten, nicht währenddessen. Ein Ruhetag ist keine Auszeit vom Programm — er ist der Teil des Programms, in dem das Ergebnis entsteht.</p><p><b>Ein guter Ruhetag:</b> ein Spaziergang, leichte Beweglichkeitsarbeit, normales Essen, früher ins Bett. Am Ende solltest du dich besser fühlen als am Anfang.</p><p><b>Ein schlechter Ruhetag:</b> eine „leichte“ Einheit, die zu einer echten wird, oder völlige Inaktivität plus eine lange Nacht.</p><p>Wenn du einen Ruhetag müder beendest, als du ihn begonnen hast, war es kein Ruhetag.</p><h4>Deine Erholung lesen — ohne Gerät</h4><p>Vier Signale, alle gratis, alle nützlicher als ein Readiness-Score.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Signal</th><th>Gute Erholung</th><th>Schlechte Erholung</th></tr><tr><td><b>Energie am Morgen</b></td><td>Wach innerhalb von 20 Minuten nach dem Aufstehen</td><td>Stundenlang benommen</td></tr><tr><td><b>Leistung in der Einheit</b></td><td>Wiederholungen stabil oder steigend</td><td>Fallend über 3+ Einheiten</td></tr><tr><td><b>Trainingsmotivation</b></td><td>Neutral bis Vorfreude</td><td>Anhaltender Widerwille</td></tr><tr><td><b>Stimmung in Ruhe</b></td><td>Normal</td><td>Gereizt, dünnhäutig</td></tr></table></div><p>Zwei oder mehr in der rechten Spalte über mehr als eine Woche heißt: Du sammelst mehr Ermüdung an, als du abbaust. Die Lösung ist nicht mehr Disziplin. Sie ist eine Deload-Woche, mehr Schlaf oder mehr Essen — meist alle drei zusammen.</p><h4>Stress ist Trainingsbelastung</h4><p>Dein Körper hat keine getrennten Erholungsbudgets für Prüfungen, Arbeitsdruck und Kniebeugen. Er hat eines.</p><p>In einer stressigen Phase gilt: <b>Halte deine aktuellen Hebelstufen und hör auf, Fortschritt zu erzwingen.</b> Einen schwierigen Monat zu halten ist ein Sieg, kein Versagen. Wer in der Prüfungszeit versucht, Stillstand mit Gewalt zu durchbrechen, trainiert ein paar Wochen später meist gar nicht mehr.</p><p>Plane das ein. Das ist keine Schwäche, das ist Rechnen.</p><h4>Wenn du trotzdem schlecht geschlafen hast</h4><p>Das wird vorkommen. Was dann zu tun ist:</p><ul><li><b>Eine schlechte Nacht:</b> Trainiere wie geplant. Die Leistung kann leicht einbrechen. Baue nichts um.</li><li><b>Drei oder mehr schlechte Nächte:</b> Halbiere deine Sätze, behalte die Übungen, bleib deutlich vor dem Muskelversagen. Erscheine, mach weniger, geh früh ins Bett.</li><li><b>Eine schlechte Woche:</b> Behandle sie als Deload und mach von dort weiter.</li></ul><p>Ganz auszusetzen ist schlimmer als eine reduzierte Einheit, weil sich die Gewohnheit schwerer wieder aufbauen lässt, als die Ermüdung sich abbaut.</p><h4>Die unbequeme Zusammenfassung</h4><p>Die meisten, die das hier lesen, brauchen kein besseres Programm. Sie müssen neunzig Minuten früher ins Bett.</p><p>Das ist nicht der Rat, den irgendjemand hören will, denn er lässt sich nicht kaufen und gibt nichts her zum Reden. Er bleibt trotzdem die Änderung mit der höchsten Rendite, die fast jedem offensteht.</p><p>Kapitel 11 behandelt, was passiert, wenn etwas schiefläuft — Plateaus, Krankheit, verpasste Wochen und den Unterschied zwischen Muskelkater und einer Verletzung.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 11 — Plateaus, Rückschläge, Verletzungen", "h": "<p>Bei niemandem laufen zwölf Wochen nach Plan. Du wirst krank werden, du wirst eine Woche verpassen, irgendetwas wird wehtun, und irgendwann werden sich die Zahlen nicht mehr bewegen.</p><p>Nichts davon heißt, dass das Programm versagt. Es ist die normale Gestalt des Trainings, und aufhalten lässt sich davon nur, wer nicht damit gerechnet hat. Dieses Kapitel ist das, zu dem du zurückkommen wirst.</p><h4>Muskelkater, Schmerz und Verletzung</h4><p>Das sind drei verschiedene Dinge, und wer sie verwechselt, zahlt entweder mit Monaten unnötiger Vorsicht oder mit einer echten Verletzung.</p><p><b>Verzögert einsetzender Muskelkater.</b> Dumpf, diffus, auf beiden Seiten gleich, erscheint 12–48 Stunden nach einer Einheit, am schlimmsten nach einer neuen Übung, lässt beim Aufwärmen nach. Das ist normal. Trainiere damit weiter, notfalls mit leicht reduziertem Volumen.</p><p><b>Trainingsschmerz als Warnsignal.</b> Scharf, punktuell, nur auf einer Seite, spürbar <i>während</i> der Bewegung, schlimmer, wenn du weitermachst, oft eher am Gelenk als am Muskelbauch. <b>Brich die Übung ab.</b> Nicht die Einheit — die Übung.</p><p><b>Verletzung.</b> Schmerz, der in Ruhe anhält, Schwellung, eingeschränkter Bewegungsumfang, plötzlich aufgetretene Schwäche, alles mit Taubheit oder Kribbeln.</p><blockquote><p>Wenn Schmerz scharf ist, einseitig, im Gelenk sitzt, in Ruhe auftritt oder von Schwellung, Taubheit oder Kraftverlust begleitet wird — trainiere diesen Bereich nicht weiter und geh zum Arzt oder Physiotherapeuten. Diagnostiziere dich nicht selbst aus einem Buch, und trainiere nicht in den Schmerz hinein, um irgendetwas zu beweisen.</p></blockquote><h4>Die drei häufigsten Beschwerden im Calisthenics</h4><p>Diesen dreien wirst du am ehesten begegnen. In jedem Fall geht es hier darum, <b>was du in deinem Training ändern kannst</b> — nicht darum, etwas zu diagnostizieren oder zu behandeln. Anhaltender Schmerz gehört in professionelle Hände.</p><p><b>Handgelenke.</b> Meist die Folge davon, zu schnell in belastete Handgelenksstreckung zu gehen. Mach die Handgelenksvorbereitung aus Kapitel 8 vor jeder Oberkörpereinheit, nutze Fäuste oder Parallettes, um das Handgelenk neutral zu halten, und kürze das Druckvolumen für eine Woche.</p><p><b>Vorderseite der Schulter.</b> Sehr oft ein Programm mit zu viel Druck und zu wenig Zug. Prüfe deine wöchentlichen Sätze nach Muster. Erhöhe das Zugvolumen, reduziere das Druckvolumen, und hör auf, im Liegestütz die Ellbogen nach außen zu klappen.</p><p><b>Ellbogen, Innenseite.</b> Häufig, wenn das Klimmzugvolumen schnell steigt. Reduziere das gesamte Zugvolumen, verzichte vorerst auf den falschen Griff und den Griff ohne Daumen, und ergänze langsame Absenkphasen statt mehr Wiederholungen.</p><p>In allen drei Fällen: Last reduzieren, alles weiterbewegen, was nicht wehtut, und wenn es sich innerhalb von zwei Wochen nicht klar gebessert hat, abklären lassen.</p><h4>Trainingspausen, und was sie wirklich kosten</h4><p>Die Angst lautet: Zwei Wochen Pause machen alles zunichte. Tun sie nicht.</p><p>Kraft schwindet weit langsamer, als die meisten annehmen, und Muskulatur, die du einmal aufgebaut hast, kommt viel schneller zurück, als sie beim ersten Mal gebraucht hat. Ein verpasster Urlaub oder eine Grippe ist über ein Trainingsjahr gerechnet ein Rundungsfehler.</p><p><b>Der Wiedereinstieg:</b></p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Pause</th><th>So startest du wieder</th></tr><tr><td>Unter 1 Woche</td><td>Mach weiter, wo du aufgehört hast</td></tr><tr><td>1–2 Wochen</td><td>Geh für eine Woche eine Hebel-Stufe zurück</td></tr><tr><td>2–4 Wochen</td><td>Eine Stufe zurück, halbes Volumen, über zwei Wochen wieder aufbauen</td></tr><tr><td>Über 4 Wochen</td><td>Wiederhole die Tests aus Kapitel 4 und starte die Phase neu</td></tr></table></div><p>Meist bist du innerhalb von zwei bis drei Wochen wieder bei deinen alten Zahlen. Rechne damit, und gerate in Woche eins nicht in Panik, wenn sich alles schwer anfühlt.</p><h4>Training bei Krankheit</h4><p><b>Oberhalb des Halses</b> — leichte Erkältung, verstopfte Nase, kein Fieber: Reduziertes Training ist meist in Ordnung. Halbiere das Volumen, bleib weit weg vom Muskelversagen.</p><p><b>Unterhalb des Halses, oder jedes Fieber</b> — Symptome in der Brust, Gliederschmerzen, erhöhte Temperatur: Trainiere nicht. Ruh dich aus, bis die Symptome seit ein bis zwei Tagen verschwunden sind, und steig dann mit reduziertem Volumen wieder ein. Mit Fieber zu trainieren ist keine Härte; es ist ein schlechter Tausch mit echtem Risiko.</p><h4>Plateaus in der Kraft und Plateaus im Spiegel</h4><p>Zwei sehr verschiedene Probleme, die als eines behandelt werden.</p><p><b>Die Zahlen stagnieren.</b> Geh die Stillstand-Checks aus Kapitel 7 durch — Schlaf, Essen, Alltagslast, Volumen, Wochen seit dem letzten Deload. Meistens ist es einer dieser fünf Punkte.</p><p><b>Die Zahlen steigen, das Aussehen bleibt gleich.</b> Das ist kein Plateau. Sichtbare Veränderung folgt der Kraftveränderung mit Wochen Verzögerung, und sie hängt stark von der Körperzusammensetzung ab — und die ist eine Ernährungsfrage. Wenn deine Stufen steigen, funktioniert das Programm. Lies Kapitel 9 nach, sei geduldig, und hör auf, tägliche Fotos zu vergleichen.</p><h4>Das Motivationsproblem, ehrlich angegangen</h4><p>Du wirst die Motivation verlieren. Das ist keine Charakterschwäche, und kein noch so kluges Buch verhindert es.</p><p>Wer zwölf Wochen durchhält, ist nicht motivierter als du. Diese Leute haben die Messlatte dafür gesenkt, was als Einheit zählt. Die Regel, die funktioniert:</p><blockquote><p>Mach an einem schlechten Tag <b>nur die erste Übung</b>. Wenn du danach immer noch gehen willst, geh.</p></blockquote><p>Meistens wirst du die Einheit zu Ende bringen, denn das Anfangen ist der schwere Teil. Gelegentlich machst du eine Übung und hörst auf — und auch das schlägt null, weil es die Gewohnheit schützt.</p><p><b>Lass nie zweimal hintereinander aus.</b> Eine verpasste Einheit ist Rauschen. Zwei werden zum Muster, und Muster sind das, was Programme wirklich beendet.</p><h4>Woran du dich festhalten kannst</h4><p>Zwölf Wochen unperfektes, unterbrochenes, gelegentlich reduziertes Training schlagen vier Wochen perfektes Training, auf die nichts folgt. Das ist das ganze Spiel.</p><p>Kapitel 12 handelt davon, was sich öffnet, sobald das Fundament steht — die Skills, die dein Interesse am Calisthenics überhaupt erst geweckt haben.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}, {"t": "Kapitel 12 — Skills und was danach kommt", "h": "<p>Der Muscle-up, der Handstand, die Pistol, der Front Lever — vermutlich sind sie der Grund, warum du dich überhaupt für Calisthenics interessiert hast.</p><p>Sie wurden bewusst aus den ersten zwölf Wochen herausgehalten. Nicht, weil sie zu fortgeschritten wären, um darüber zu reden, sondern weil Skill-Arbeit auf einer schwachen Basis langsam ist, frustrierend, und der schnellste Weg zu einer gereizten Schulter.</p><p>Die Basis hast du jetzt. Hier steht, wie du sie nutzt.</p><h4>Die Voraussetzungen, ehrlich</h4><p>Jeder Skill unten hat eine Eintrittsbedingung. Sie früher zu versuchen ist nicht mutig, es ist ineffizient — du verbringst sechs Monate mit etwas, das mit der Basis sechs Wochen gedauert hätte.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Skill</th><th>Voraussetzung</th></tr><tr><td><b>Pistol</b></td><td>15 saubere Split Squats pro Bein, Sprunggelenk-Beweglichkeitstest bestanden</td></tr><tr><td><b>Handstand (Wand)</b></td><td>8 Pike-Liegestütze, Schulterflexionstest bestanden</td></tr><tr><td><b>L-Sit</b></td><td>45 s Hollow Hold, 10 hängende Kniehebungen</td></tr><tr><td><b>Muscle-up</b></td><td>10 strikte Klimmzüge, 12 Dips</td></tr><tr><td><b>Front Lever</b></td><td>10 strikte Klimmzüge, 60 s Hollow Hold</td></tr></table></div><p>Wenn du die Voraussetzung nicht erfüllst, dann ist die Voraussetzung deine Skill-Arbeit. Das ist keine Verzögerung — das ist das Training.</p><h4>Wie sich Skill-Arbeit von Kraftarbeit unterscheidet</h4><p>Drei Regeln, und sie laufen dem entgegen, wie du bisher trainiert hast.</p><p><b>Trainiere frisch.</b> Skills stehen ganz am Anfang einer Einheit, nach dem Aufwärmen, vor allem anderen. Einen Handstand am Ende einer Einheit zu üben bringt dir bei, wie sich ein Handstand im erschöpften Zustand anfühlt.</p><p><b>Bleib weit weg vom Muskelversagen.</b> Skills sind Koordination genauso wie Kraft. Üben im ermüdeten Zustand baut ein schlampiges Muster auf, das du danach wieder verlernen musst. Hör auf, wenn die Qualität sinkt, nicht, wenn du nicht mehr kannst.</p><p><b>Übe oft, aber kurz.</b> Zehn Minuten, vier- oder fünfmal pro Woche, schlagen eine Stunde einmal. Motorisches Lernen reagiert weit stärker auf Häufigkeit als auf Dauer.</p><h4>Vier Progressionen</h4><h5>Pistol</h5><ol><li>Box Squat auf eine hohe Ablage, beidbeinig</li><li>Einbeiniger Box Squat auf eine hohe Ablage</li><li>Die Box über mehrere Wochen absenken</li><li>Assistierte Pistol — am Türrahmen festhalten</li><li>Negative Pistol — langsam absenken, mit beiden Beinen aufstehen</li><li>Volle Pistol</li></ol><p>Die Ferse leicht zu erhöhen ist legitim, solange die Beweglichkeit im Sprunggelenk besser wird.</p><h5>Handstand an der Wand</h5><ol><li>Plank, um die gestreckte Körperposition aufzubauen</li><li>Wall Walk — Füße die Wand hoch, Hände laufen näher heran</li><li>Halten mit der Brust zur Wand, 20–40 s, Fokus auf eine gerade Linie</li><li>Wandhandstand auf Zeit, 60 s gesamt über mehrere Sätze</li><li>Teilweiser Handstand-Liegestütz</li><li>Voller Handstand-Liegestütz</li></ol><p>Jag nicht dem freien Handstand hinterher, bevor du 45 Sekunden mit der Brust zur Wand und gestreckter Hüfte halten kannst.</p><h5>L-Sit</h5><ol><li>L-Sit mit aufgestützten Füßen auf Parallettes oder zwei Stühlen</li><li>Tuck L-Sit — Knie zur Brust, 15–20 s</li><li>Ein Bein gestreckt, im Wechsel</li><li>Beide Beine gestreckt, 5 s, Aufbau auf 15 s</li></ol><p>Der begrenzende Faktor ist meistens die Kraft der Hüftbeuger und die Beweglichkeit der hinteren Oberschenkel, nicht die Bauchmuskeln.</p><h5>Muscle-up</h5><ol><li>10 strikte Klimmzüge und 12 Dips — nicht verhandelbar</li><li>Hoher Klimmzug — Zug bis auf Brustbeinhöhe</li><li>Dip an der geraden Stange, 8 saubere Wiederholungen</li><li>Negativer Muscle-up — oben starten, langsam durch den Übergang absenken</li><li>Muscle-up mit Absprung, um den Übergang zu lernen</li><li>Voller Muscle-up</li></ol><p>Der Übergang ist ein Skill, keine Kraftlücke. Negative bringen ihn dir schneller bei als alles andere.</p><h4>Skills in die Woche einbauen</h4><p>Füge sie der Zwölf-Wochen-Struktur hinzu. Ersetze sie nicht.</p><div class=\"tblwrap\"><table class=\"cmp\"><tr><th>Tag</th><th>Einheit</th></tr><tr><td>Mo</td><td>Skill-Übung 10 min → Ganzkörper / Oberkörper</td></tr><tr><td>Di</td><td>Skill-Übung 10 min → Pause oder lockerer Spaziergang</td></tr><tr><td>Mi</td><td>Skill-Übung 10 min → Ganzkörper / Unterkörper</td></tr><tr><td>Do</td><td>Pause</td></tr><tr><td>Fr</td><td>Skill-Übung 10 min → Ganzkörper / Oberkörper</td></tr><tr><td>Sa</td><td>Optionale Skill-Einheit, 20 min</td></tr><tr><td>So</td><td>Pause</td></tr></table></div><p>Wähle jeweils <b>einen</b> Skill. Zwei sind langsamer als einer, weil sich die Aufmerksamkeit teilt und keiner genug Häufigkeit bekommt.</p><h4>Was nach Woche 12 kommt</h4><p>Fahre das Programm noch einmal.</p><p>Das ist wirklich die Antwort, und es ist die, die die meisten ablehnen. Dein zweiter Block startet auf jeder Bewegung von schwereren Hebel-Stufen, also ist es in jeder Hinsicht, die zählt, ein anderes Programm — und behält das eine, was Ergebnisse bringt: die Kontinuität der Messung.</p><p><b>Block zwei:</b> gleiche Struktur, neue Start-Stufen, ein Skill dazu. <b>Block drei:</b> überlege einen vierten Trainingstag, oder Zusatzgewicht bei Klimmzügen und Dips, wenn die Hebel-Progressionen zur Neige gehen. <b>Block vier:</b> du bist kein Anfänger mehr. An diesem Punkt kennst du deinen eigenen Körper gut genug, um diese Entscheidungen ohne Buch zu treffen.</p><h4>Das Letzte</h4><p>Fast alle, die daran scheitern, scheitern nicht am Training. Sie scheitern am Weitermachen — drei gute Wochen, eine Störung, und dann nichts.</p><p>Du hast jetzt die Werkzeuge, um mit einer Störung umzugehen: wie du nach einer Pause zurückkommst, was du tust, wenn du stagnierst, wie du trainierst, wenn du schlecht geschlafen hast, und wie du an einem schlechten Tag die Messlatte senkst, ohne die Gewohnheit aufzugeben.</p><p>Nutze sie. Wer zwei Jahre lang unperfekt trainiert, wird weit stärker sein als der, der zwei Monate lang perfekt trainiert — und es wird nicht knapp.</p><p>Fang am Montag an. Trage die erste Einheit ein. Dann trage die zweite ein.</p><blockquote><p><b>Deine Gesundheit.</b> Dieses Buch gibt allgemeine Informationen zu Training und Ernährung. Es ist keine medizinische Beratung. Bei Erkrankungen, Verletzungen oder Beschwerden, oder wenn du lange nicht trainiert hast, sprich zuerst mit einem Arzt. Trainiere in deinen Grenzen und hör auf, wenn etwas schmerzt.</p></blockquote>"}];
+
 function buildLearn(){
+  /* v17 (Baustelle 7): Auf Deutsch traegt jedes Kapitel den VOLLEN Buchtext
+     -- der Hub ist damit das ganze Produkt, nicht die Zusammenfassung eines
+     zweiten. Der Text kommt erst beim ersten Oeffnen in den Ausklapper
+     (BOOKDE, lazy). Englisch bleibt bei den Kurzfassungen: die EN-Fassung
+     des Buchs liegt als eigene Lieferung vor. */
+  var DE=cfg.lang==='de'&&typeof BOOKDE!=='undefined'&&BOOKDE.length===CH.length;
   $('chapters').innerHTML=CH.map(function(c,i){
-    return '<div class="accItem"><button class="accHead"><span class="cn">'+String(i+1).padStart(2,'0')+'</span><span class="ct">'+c.n+'</span><span class="cx">+</span></button>'+
-      '<div class="accBody"><p class="prem">'+c.p+'</p><ul>'+c.pts.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul>'+
-      '<div class="rule"><em>'+(cfg.lang==='de'?'Regel':'Rule')+'</em><span>'+c.rule+'</span></div></div></div>';
+    var titel=DE?BOOKDE[i].t.replace(/^Kapitel\s*\d+\s*[—–-]\s*/,''):c.n;
+    return '<div class="accItem"><button class="accHead"><span class="cn">'+String(i+1).padStart(2,'0')+'</span><span class="ct">'+titel+'</span><span class="cx">+</span></button>'+
+      '<div class="accBody">'+(DE
+        ?'<div class="book" data-ch="'+i+'"></div>'
+        :'<p class="prem">'+c.p+'</p><ul>'+c.pts.map(function(p){return '<li>'+p+'</li>';}).join('')+'</ul>'+
+         '<div class="rule"><em>Rule</em><span>'+c.rule+'</span></div>')+
+      '</div></div>';
   }).join('');
   [].forEach.call(document.querySelectorAll('.accItem'),function(it,i){
     it.querySelector('.accHead').addEventListener('click',function(){
       it.classList.toggle('open');
-      if(it.classList.contains('open')&&!seen.chapters[i]){seen.chapters[i]=1;saveSeen();refresh();}
+      if(it.classList.contains('open')){
+        var bk=it.querySelector('.book');
+        if(bk&&!bk.innerHTML)bk.innerHTML=BOOKDE[i].h;
+        if(!seen.chapters[i]){seen.chapters[i]=1;saveSeen();refresh();}
+      }
     });});
 }
 function buildAccess(){
@@ -4591,32 +5321,52 @@ function drawMeals(){
   var DE=cfg.lang==='de',k=iso(TODAY),ms=mealsOf(k);
   var kcal=0,pro=0,fat=0,carb=0;
   ms.forEach(function(m){kcal+=mealKcal(m);pro+=m.p;fat+=m.f;carb+=m.c;});
-  /* Ziel kommt aus dem Rechner darueber. Ohne Koerperdaten gibt es keins --
-     dann zeigt die Kachel nur das Gegessene, statt gegen eine erfundene Zahl
-     zu messen. */
-  var zielK=macroNow.cal||0,zielP=macroNow.pro||0;
-  function kachel(lbl,wert,einheit,ziel,farbe){
+  /* v17 (Baustelle 5): Ring in der Mitte, Gegessen links, Ziel rechts,
+     darunter die drei Makros als Balken. Ziele kommen aus dem Rechner
+     inklusive Nutzer-Overrides (curMacro) -- ohne Koerperdaten gibt es
+     keine erfundene Messlatte, dann zeigt der Ring nur das Gegessene. */
+  var zielK=curMacro('cal')||0,zielP=curMacro('pro')||0,zielF=curMacro('fat')||0,zielC=curMacro('carb')||0;
+  var R=52,U=2*Math.PI*R;
+  var frac=zielK?Math.min(1,kcal/zielK):0;
+  var rest=zielK?Math.round(zielK-kcal):null;
+  /* nicht "over" nennen -- so heisst der globale Override-Speicher */
+  var drueber=zielK&&rest<0;
+  var mitte=zielK
+    ?'<b class="'+(drueber?'over':'')+'">'+Math.abs(rest)+'</b><span>'+(drueber?(DE?'über Ziel':'over target'):(DE?'übrig':'left'))+'</span>'
+    :'<b>'+Math.round(kcal)+'</b><span>kcal</span>';
+  function mbar(lbl,wert,ziel,farbe){
     var pct=ziel?Math.min(100,wert/ziel*100):0;
-    var rest=ziel?(ziel-wert):null;
-    return '<div class="mcard"><em>'+lbl+'</em>'+
-      '<b>'+Math.round(wert)+'<i>'+einheit+'</i></b>'+
-      (ziel?'<div class="meter"><i style="width:'+pct.toFixed(0)+'%;background:'+farbe+'"></i></div>':'')+
-      '<span class="sub">'+(ziel
-        ? (rest>0?(Math.round(rest)+' '+einheit+(DE?' übrig':' left')):(DE?'Ziel erreicht':'target met'))
-        : (DE?'kein Ziel gesetzt':'no target set'))+'</span></div>';
+    return '<div class="mbar"><div class="mtop"><b>'+lbl+'</b><span>'+Math.round(wert)+(ziel?' / '+Math.round(ziel):'')+' g</span></div>'+
+      '<div class="track"><i style="width:'+pct.toFixed(0)+'%;background:'+farbe+'"></i></div></div>';
   }
-  sumEl.innerHTML=
-    kachel(DE?'Kalorien':'Calories',kcal,'kcal',zielK,'var(--ember)')+
-    kachel(DE?'Protein':'Protein',pro,'g',zielP,'var(--aurora)');
+  sumEl.innerHTML='<div class="macroCard">'+
+    '<div class="macroRing">'+
+      '<div class="mcol"><b>'+Math.round(kcal)+'</b><span>'+(DE?'Gegessen':'Eaten')+'</span></div>'+
+      '<div class="ringWrap"><svg viewBox="0 0 118 118" aria-hidden="true">'+
+        '<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="var(--surf2)" stroke-width="9"/>'+
+        (zielK?'<circle cx="59" cy="59" r="'+R+'" fill="none" stroke="'+(drueber?'var(--ember)':'var(--aurora)')+'" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(U*frac).toFixed(1)+' '+U.toFixed(1)+'"/>':'')+
+      '</svg><div class="ringTxt">'+mitte+'</div></div>'+
+      '<div class="mcol"><b>'+(zielK?Math.round(zielK):'—')+'</b><span>'+(DE?'Ziel':'Target')+'</span></div>'+
+    '</div>'+
+    '<div class="macroBars">'+
+      mbar('Protein',pro,zielP,'var(--aurora)')+
+      mbar(DE?'Kohlenhydrate':'Carbs',carb,zielC,'var(--ice)')+
+      mbar(DE?'Fett':'Fat',fat,zielF,'var(--brass)')+
+    '</div>'+
+    (zielK?'':'<p class="hint" style="margin:.6rem 0 0">'+(DE?'Kein Ziel gesetzt — oben Körperdaten eintragen.':'No target set — enter your body data above.')+'</p>')+
+  '</div>';
   if(!ms.length){
     listEl.innerHTML='<p class="hint">'+(DE
       ?'Noch nichts eingetragen. „Mahlzeit hinzufügen" — Kalorien rechnet der Hub aus den Nährwerten.'
       :'Nothing logged yet. "Add meal" — the hub works out the calories from the macros.')+'</p>';
     return;
   }
+  /* Farb-Chip je Zeile: vier Kennfarben im Wechsel, Teller-Symbol. */
+  var MCOLS=['var(--aurora)','var(--ice)','var(--brass)','var(--ember)'];
+  var MICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.4"/></svg>';
   listEl.innerHTML=ms.map(function(m,i){
     return '<button type="button" class="prrow" data-meal="'+i+'">'+
-      '<span class="prtop"><b></b><span class="prv">'+mealKcal(m)+'<i>kcal</i></span></span>'+
+      '<span class="prtop hasChip"><span class="mchip" style="--chip:'+MCOLS[i%4]+'">'+MICON+'</span><b></b><span class="prv">'+mealKcal(m)+'<i>kcal</i></span></span>'+
       '<span class="prfoot"><span class="delta flat">'+m.p+' g P · '+m.f+' g F · '+m.c+' g '+(DE?'KH':'C')+'</span>'+
       '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>'+
       '</button>';
@@ -5760,7 +6510,7 @@ var OBL={
   ['3',['1-3 years','1-3 Jahre'],['Training is a habit','Training ist Gewohnheit']],
   ['4',['Over 3 years','Über 3 Jahre'],['You know your body well','Du kennst deinen Körper genau']]]
 };
-var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,
+var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,tdays:[0,2,4],
   goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
 var IT={
  hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
@@ -5784,6 +6534,8 @@ var IT={
   nx:['Your setup','Dein Rahmen'],n:['Continue','Weiter']},
  goal:{t:['What are you here for?','Wofür bist du hier?'],
   s:['Shapes how your week is built.','Bestimmt, wie deine Woche aufgebaut wird.']},
+ tdays:{t:['Which days suit you?','An welchen Tagen kannst du?'],
+  s:['The plan puts every session on a real weekday. Day one is your first picked day.','Der Plan legt jede Einheit auf echte Wochentage. Tag eins ist dein erster gewählter Tag.']},
  days:{t:['How often can you train?','Wie oft kannst du trainieren?'],
   s:['Honest beats ambitious — three real days beat four skipped ones.','Ehrlich schlägt ehrgeizig — drei echte Tage schlagen vier ausgefallene.']},
  eq:{t:['What gear do you have?','Welches Equipment hast du?'],
@@ -5798,11 +6550,11 @@ var IT={
   s:['Today shows your session — every exercise has a swap button, and the coach reads your numbers. Your first session measures you in: three sets per exercise, you enter your reps, and every ladder starts at your level. No test before the training — the training is the test.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf, und der Coach liest deine Zahlen mit. Dein erstes Training misst dich ein: drei Sätze je Übung, du trägst deine Wiederholungen ein, und jede Leiter startet auf deinem Level. Kein Test vor dem Training — das Training ist der Test.'],
   n:['Start day one','Los mit Tag eins']}
 };
-var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','days','eq','avoid','ready'],inIdx=0;
+var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','days','tdays','eq','avoid','ready'],inIdx=0;
 /* Kapitel je Schritt (1 Profil, 2 Ziele, 3 Rahmen); Hallo und Fertig laufen ohne Chip. */
-var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,days:3,eq:3,avoid:3,ready:3};
+var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,days:3,tdays:3,eq:3,avoid:3,ready:3};
 var ICHN=[null,['Your profile','Dein Profil'],['Your goals','Deine Ziele'],['Your setup','Dein Rahmen']];
-var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['days','eq','avoid']];
+var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['days','tdays','eq','avoid']];
 /* Koerperfett-Schaetzung nach Deurenberg: BMI, Alter, Geschlecht. */
 function bfEstimate(){
   var h=obState.height/100,bmi=obState.weight/(h*h);
@@ -5868,8 +6620,20 @@ function introFinishProfile(){
   profile={goal:obState.goal,days:obState.days,
     eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
     avoid:av,exp:obState.exp,swaps:{},testAsked:1,
-    sex:obState.sex,age:obState.age,height:obState.height,weight:obState.weight,bf:obState.bf};
+    sex:obState.sex,age:obState.age,height:obState.height,weight:obState.weight,bf:obState.bf,
+    tdays:obState.tdays.slice().sort(function(a,b){return a-b;})};
   set('profile',profile);
+  cfg.tdays=profile.tdays.slice();saveCfg();
+  /* Tag eins ist eine Einheit: Start auf den ersten gewaehlten Wochentag
+     legen -- aber nur, solange noch kein Training abgeschlossen ist. Wer die
+     Einfuehrung spaeter erneut durchlaeuft, behaelt seinen Blockverlauf. */
+  var doneAny=false;
+  try{var dn=get('done',{});doneAny=!!dn&&Object.keys(dn).length>0;}catch(e){}
+  if(!doneAny&&profile.tdays.length){
+    var first=nextTrainDate(TODAY,profile.tdays);
+    ST=iso(first);set('start',ST);STD=new Date(ST+'T00:00:00');
+    var si=$('setStart');if(si)si.value=ST;
+  }
   var ye=$('y-exp');if(ye)ye.selectedIndex=parseInt(profile.exp,10)||0;
   applyProfile();buildCatalog();renderDay();volBar();refresh();
   if(typeof paintSetProfile==='function')paintSetProfile();
@@ -5911,6 +6675,52 @@ function inOpts(k,L){
       '<span class="tx"><b>'+o[1][L]+'</b>'+sub+'</span><span class="ring">✓</span></button>';
   }).join('')+'</div>'+(reco?'<p class="recoleg">'+(L?'Empfohlen für deine Erfahrung':'Suggested for your experience')+'</p>':'');
 }
+/* Wochentags-Schritt: Pillen bauen und in Ort und Stelle nachfaerben --
+   ein voller renderIntro je Klick wuerde die Einblend-Animation neu anstossen. */
+var TDLET=[['M','T','W','T','F','S','S'],['M','D','M','D','F','S','S']];
+var TDCOLS=['var(--aurora)','var(--ice)','var(--ember)','var(--brass)'];
+function tdNeed(){return obState.days==='4'?4:3;}
+function tdaysHtml(L){
+  var S=obState.days==='4'?SESS4:SESS3;
+  var order=obState.days==='4'?['upA','lowA','upB','lowB']:['pull','push','legs'];
+  var h='<div class="daypills">';
+  for(var w7=0;w7<7;w7++){
+    h+='<button type="button" class="daypill" data-d="'+w7+'" aria-pressed="false"><b>'+TDLET[L][w7]+'</b><span class="dot"></span></button>';
+  }
+  h+='</div><div class="tdleg">'+order.map(function(key,i){
+    return '<span><i style="background:'+TDCOLS[i]+'"></i>'+sessDe(S[key].title)+'</span>';
+  }).join('')+'</div>';
+  h+='<p class="tdmeta" id="tdHint"></p><p class="tdfirst" id="tdFirst"></p>';
+  return h;
+}
+function paintTdays(L,warn){
+  var host=$('inStep');if(!host)return;
+  var need=tdNeed(),sel=obState.tdays.slice().sort(function(a,b){return a-b;});
+  [].forEach.call(host.querySelectorAll('.daypill'),function(b){
+    var w7=parseInt(b.dataset.d,10),ix=sel.indexOf(w7);
+    b.setAttribute('aria-pressed',String(ix>=0));
+    b.querySelector('.dot').style.background=ix>=0?TDCOLS[ix]:'';
+  });
+  var hint=$('tdHint'),first=$('tdFirst');
+  if(hint){
+    /* Zwei Blockier-Faelle, zwei Ansagen: zu wenige Tage heisst "waehle noch",
+       volles Limit heisst "waehle erst ab" -- die alte Einheitsmeldung wies
+       bei Unterauswahl in die falsche Richtung. */
+    var fehlt=need-sel.length;
+    hint.dataset.warn=warn?'1':'';
+    hint.textContent=warn
+      ?(fehlt>0
+        ?(L?'Wähle noch '+fehlt+(fehlt===1?' Tag':' Tage')+' — genau '+need+' insgesamt.':'Pick '+fehlt+' more — exactly '+need+' total.')
+        :(L?'Erst einen Tag abwählen — genau '+need+' Tage.':'Deselect one first — exactly '+need+' days.'))
+      :(sel.length+' / '+need+(L?' Tagen gewählt':' days picked'));
+  }
+  if(first){
+    if(sel.length===need){
+      var d=nextTrainDate(TODAY,sel);
+      first.textContent=(L?'Tag eins: ':'Day one: ')+d.toLocaleDateString(L?'de-DE':'en-GB',{weekday:'long',day:'numeric',month:'long'});
+    }else first.textContent='';
+  }
+}
 function renderIntro(){
   var L=cfg.lang==='de'?1:0,DE=L===1,k=ISTEPS[inIdx],T=IT[k],host=$('inStep');
   if(k==='bf'&&!obState.bfTouched)obState.bf=bfEstimate();
@@ -5942,6 +6752,8 @@ function renderIntro(){
        '<p class="bfdesc" id="bfDesc">'+bfDesc(obState.bf,L)+'</p>'+
        '<div class="slidewrap"><span class="est" style="left:'+estPct+'%">'+(DE?'Schätzung':'Estimate')+'</span>'+
        '<input type="range" class="islide" id="bfSlide" min="8" max="45" step="1" value="'+obState.bf+'"></div>';
+  }else if(k==='tdays'){
+    h+=tdaysHtml(L);
   }else if(OBL[k]&&k!=='sex'){
     h+=inOpts(k,L);
   }
@@ -5967,6 +6779,8 @@ function renderIntro(){
           obState[k]=o[0];
           [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
           if(k==='sex'){var fs=$('figStage');if(fs)fs.innerHTML=bfFigure(obState.bf,obState.sex);}
+          /* Neue Frequenz -> sinnvolle Standard-Wochentage vorbelegen. */
+          if(k==='days'){obState.tdays=o[0]==='4'?[0,1,3,4]:[0,2,4];}
         }
       });
     });
@@ -5991,13 +6805,28 @@ function renderIntro(){
       $('figStage').innerHTML=bfFigure(obState.bf,obState.sex);
     });
   }
+  if(k==='tdays'){
+    [].forEach.call(host.querySelectorAll('.daypill'),function(b){
+      b.addEventListener('click',function(){
+        var w7=parseInt(b.dataset.d,10),ix=obState.tdays.indexOf(w7);
+        if(ix>=0)obState.tdays.splice(ix,1);
+        else if(obState.tdays.length<tdNeed())obState.tdays.push(w7);
+        else{paintTdays(L,true);return;}
+        paintTdays(L,false);
+      });
+    });
+    paintTdays(L,false);
+  }
   var next=$('inNext');
   next.textContent=T.n?T.n[L]:(DE?'Weiter':'Next');
 }
 $('inBack').addEventListener('click',function(){inIdx=Math.max(0,inIdx-1);renderIntro();});
 $('inNext').addEventListener('click',function(){
   var k=ISTEPS[inIdx];
-  if(k==='ready'){introFinishProfile();introShow(false);return;}
+  if(k==='tdays'&&obState.tdays.length!==tdNeed()){
+    paintTdays(cfg.lang==='de'?1:0,true);return;
+  }
+  if(k==='ready'){introFinishProfile();introShow(false);if(typeof show==='function')show('today');return;}
   inNextStep();
 });
 function openSwap(pl,idx,it,after){
@@ -6114,14 +6943,23 @@ function syncSettings(){
   $('setHooks').value=cfg.hooks;$('setStart').value=ST;
   $('u-h').textContent=ul();$('u-w').textContent=uw();$('u-w2').textContent=uw();
 }
-$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildThemeGrid();renderDay();buildWeeks();renderWins();calc();drawW();refresh();testCalc();});
+$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();drawW();refresh();testCalc();});
 $('setClock').addEventListener('change',function(){cfg.clock=this.value;saveCfg();tickClock();});
 $('setUnits').addEventListener('change',function(){
   var oldW=fromDisp(nv('f-w'),'w'),oldH=fromDisp(nv('f-h'),'l');
   cfg.units=this.value;saveCfg();
   $('f-w').value=toDisp(oldW,'w').toFixed(1);$('f-h').value=toDisp(oldH,'l').toFixed(1);
   syncSettings();buildMeas();calc();drawW();refresh();});
-$('setTrack').addEventListener('change',function(){cfg.track=this.value;saveCfg();renderDay();buildWeeks();volBar();refresh();});
+$('setTrack').addEventListener('change',function(){cfg.track=this.value;
+  /* Spurwechsel: gewaehlte Tage muessen zur neuen Anzahl passen, sonst
+     Standard-Tage setzen -- stiller Rueckfall auf den Rhythmus waere
+     verwirrender als eine sichtbare Neuvorgabe. */
+  if(cfg.tdays&&cfg.tdays.length&&cfg.tdays.length!==(this.value==='4'?4:3)){
+    cfg.tdays=this.value==='4'?[0,1,3,4]:[0,2,4];
+    if(profile){profile.tdays=cfg.tdays.slice();set('profile',profile);}
+  }
+  saveCfg();renderDay();buildWeeks();volBar();refresh();
+  if(typeof paintSetProfile==='function')paintSetProfile();});
 $('setMotion').addEventListener('change',function(){cfg.motion=this.value;saveCfg();sizeCv();drawScene();});
 $('setSpar').addEventListener('change',function(){
   set('spar',this.value);sparSet();sizeCv();drawScene();sparNote();
@@ -6859,6 +7697,12 @@ function paintSetProfile(){
   h+=row('age',DE?'Alter':'Age',profile.age||22,DE?'Jahre':'yrs');
   h+=row('height',DE?'Größe':'Height',profile.height||180,'cm');
   h+=row('weight',DE?'Gewicht':'Weight',profile.weight||78,'kg');
+  var tdSel=(profile.tdays&&profile.tdays.length)?profile.tdays.slice().sort(function(a,b){return a-b;}):[];
+  var tdLet=DE?['M','D','M','D','F','S','S']:['M','T','W','T','F','S','S'];
+  var tdBtns='';
+  for(var w7=0;w7<7;w7++){tdBtns+='<button type="button" data-d="'+w7+'" aria-pressed="'+(tdSel.indexOf(w7)>=0)+'">'+tdLet[w7]+'</button>';}
+  h+='<div class="profrow"><span class="pk">'+(DE?'Trainingstage':'Training days')+'</span><span class="setdays" id="setTdays">'+tdBtns+'</span></div>'+
+     '<p class="hint" id="setTdHint" style="margin:.15rem 0 0"></p>';
   h+='<div class="profrow"><span class="pk">'+(DE?'Körperfett':'Body fat')+'</span>'+
      '<input id="setBfSlide" type="range" min="8" max="45" step="1" value="'+(profile.bf||20)+'">'+
      '<span class="pv" id="setBfVal">'+(profile.bf||20)+'&nbsp;<small style="color:var(--ink3)">%</small></span></div>';
@@ -6874,6 +7718,35 @@ function paintSetProfile(){
     });
   });
   var sx=$('setSex');if(sx)sx.addEventListener('change',function(){profile.sex=sx.value;set('profile',profile);});
+  var tdHost=$('setTdays');
+  /* Unvollstaendige Auswahl faellt still auf den Start-Rhythmus zurueck --
+     das muss die Zeile darunter SAGEN, sonst wirkt der Plan kaputt. */
+  function tdHintPaint(){
+    var el=$('setTdHint');if(!el)return;
+    var need=(profile.days==='4')?4:3,n=(profile.tdays||[]).length;
+    el.textContent=(n===need)?'':(n+' / '+need+(DE
+      ?' gewählt — bis alle gewählt sind, läuft der Plan im Start-Rhythmus.'
+      :' picked — until all are picked, the plan runs on the start rhythm.'));
+  }
+  tdHintPaint();
+  if(tdHost)[].forEach.call(tdHost.querySelectorAll('button'),function(b){
+    b.addEventListener('click',function(){
+      var need=(profile.days==='4')?4:3;
+      var sel=(profile.tdays||[]).slice();
+      var w7=parseInt(b.dataset.d,10),ix=sel.indexOf(w7);
+      if(ix>=0)sel.splice(ix,1);
+      else if(sel.length<need)sel.push(w7);
+      else return;
+      sel.sort(function(a,b2){return a-b2;});
+      profile.tdays=sel;set('profile',profile);
+      cfg.tdays=sel.slice();saveCfg();
+      [].forEach.call(tdHost.querySelectorAll('button'),function(x){
+        x.setAttribute('aria-pressed',String(sel.indexOf(parseInt(x.dataset.d,10))>=0));
+      });
+      tdHintPaint();
+      renderDay();if(typeof buildWeeks==='function')buildWeeks();refresh();
+    });
+  });
   var bs=$('setBfSlide');if(bs)bs.addEventListener('input',function(){
     profile.bf=parseInt(bs.value,10);set('profile',profile);
     $('setBfVal').innerHTML=profile.bf+'&nbsp;<small style="color:var(--ink3)">%</small>';
@@ -6885,6 +7758,7 @@ if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
     obState.sex=profile.sex||'m';obState.age=profile.age||22;obState.height=profile.height||180;
     obState.weight=profile.weight||78;obState.bf=profile.bf||20;obState.bfTouched=!!profile.bf;
     obState.goal=profile.goal||'muscle';obState.days=profile.days||'3';obState.exp=profile.exp||'1';
+    obState.tdays=(profile.tdays&&profile.tdays.length)?profile.tdays.slice():(obState.days==='4'?[0,1,3,4]:[0,2,4]);
     obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings)};
     obState.avoid={};if(profile.avoid)Object.keys(profile.avoid).forEach(function(a){if(profile.avoid[a])obState.avoid[a]=true;});
   }
