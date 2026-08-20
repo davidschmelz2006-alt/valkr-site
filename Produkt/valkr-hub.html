@@ -41,6 +41,9 @@
     --ink:#12242F;--ink2:#4F6573;--ink3:#7C8B96;
     --line:#BFB4A0;--line2:#CDC3B0;
     --hero:#08151E;--heroInk:#EFEAE0;
+    /* Scan-Dunkel: Roentgenplatte der Koerperkarte und Kamera-Flaechen.
+       Absichtlich in jedem Theme gleich dunkel -- ein Scan ist immer Nacht. */
+    --night:#08131C;
     --p1:53,195,156;--p2:127,205,228;--part:120,150,170;
     --sh:0 1px 2px rgba(0,0,0,.07),0 8px 20px rgba(0,0,0,.09);
     /* Schriftsystem. Vorher lief die Oberflaeche in Georgia -- das liest sich
@@ -359,8 +362,16 @@
   #sheet.on{transform:translateY(0)}
   #sheet[hidden]{display:none}
   #sheet.drag{transition:none}
-  #sheet .grip{width:38px;height:4px;border-radius:2px;background:var(--line2);
-    margin:.25rem auto .7rem}
+  /* Der Griff ist ein echter Knopf: vorher gab es im Blatt selbst keinen
+     einzigen Ausgang -- schliessen ging nur ueber Hintergrund-Tipp oder die
+     Zurueck-Taste, per Tastatur und Vorleser gar nicht. Die sichtbare Pille
+     bleibt klein, die Trefflaeche nicht. */
+  #sheet .grip{display:block;width:64px;height:22px;padding:0;border:0;
+    background:none;margin:0 auto .35rem;cursor:pointer;position:relative}
+  #sheet .grip::before{content:"";position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);width:38px;height:4px;border-radius:999px;
+    background:var(--line2)}
+  #sheet .grip:hover::before,#sheet .grip:focus-visible::before{background:var(--ink3)}
   #sheet h4{font-family:var(--fm);font-size:var(--t1);letter-spacing:.11em;
     text-transform:uppercase;color:var(--ink3);margin:.9rem 0 .35rem;font-weight:400}
   #sheet h4:first-of-type{margin-top:.1rem}
@@ -839,9 +850,14 @@
      Koerper schneidet nur dessen INHALT. Ohne Clip an der Huelle blieb am
      Ende der Bewegung eine Polster-Leiste stehen, die erst mit open=false
      schlagartig verschwand -- das war das Haken im letzten Stueck. */
+  /* Richtungsabhaengige Kurven: Oeffnen bremst weich aus (fuehlt sich
+     wertig an), Schliessen ZIEHT DURCH bis zum Ende -- die alte Kurve
+     bremste auch beim Zuklappen, die letzten Pixel krochen, und genau das
+     las sich als Haenger kurz vor Schluss. */
   .foldWrap{display:grid;grid-template-rows:0fr;overflow:hidden;
+    transition:grid-template-rows var(--foldms,.22s) cubic-bezier(.5,0,.85,.4)}
+  details.fold.exp .foldWrap{grid-template-rows:1fr;
     transition:grid-template-rows var(--foldms,.26s) cubic-bezier(.2,.7,.2,1)}
-  details.fold.exp .foldWrap{grid-template-rows:1fr}
   .foldWrap>.foldBody{overflow:hidden;min-height:0}
   .foldBody{padding:.85rem .9rem 1rem;display:flex;flex-direction:column;gap:.7rem}
   .foldBody>p:first-child{margin-top:0}
@@ -963,11 +979,21 @@
     color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none;transition:.16s}
   #intro .ihead .iback:hover{border-color:var(--aurora);color:var(--aurora)}
   #intro .ihead .iback[hidden]{display:none}
+  /* Abbrechen gibt es nur beim erneuten Durchlaufen -- beim ersten Mal gibt
+     es kein Profil, zu dem man zurueck koennte. */
+  #intro .ihead .iclose{margin-left:auto}
+  #intro .ihead .iclose:hover{border-color:var(--ember);color:var(--ember)}
   #intro .chchip{font-family:var(--fm);font-size:var(--t1);letter-spacing:.18em;text-transform:uppercase;
     padding:.32rem .7rem;border-radius:var(--r1);border:1px solid transparent}
   #intro .chchip.c1{color:var(--aurora);border-color:rgba(var(--p1),.45);background:rgba(var(--p1),.09)}
   #intro .chchip.c2{color:var(--ember);border-color:color-mix(in srgb,var(--ember) 45%,transparent);background:color-mix(in srgb,var(--ember) 9%,transparent)}
-  #intro .chchip.c3{color:var(--brass);border-color:color-mix(in srgb,var(--brass) 45%,transparent);background:color-mix(in srgb,var(--brass) 9%,transparent)}
+  #intro .chchip.c3{color:var(--ice);border-color:color-mix(in srgb,var(--ice) 45%,transparent);background:color-mix(in srgb,var(--ice) 9%,transparent)}
+  #intro .chchip.c4{color:var(--brass);border-color:color-mix(in srgb,var(--brass) 45%,transparent);background:color-mix(in srgb,var(--brass) 9%,transparent)}
+  #intro .fuelprev{display:flex;gap:.6rem;margin-top:.6rem}
+  #intro .fuelprev>div{flex:1;background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.7rem .8rem;box-shadow:var(--sh)}
+  #intro .fuelprev b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t7);font-variant-numeric:tabular-nums}
+  #intro .fuelprev span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
   #intro .iprog{display:flex;align-items:center;gap:.45rem}
   #intro .iprog .seg{flex:1;height:5px;border-radius:999px;background:var(--surf2);overflow:hidden}
   #intro .iprog .seg i{display:block;height:100%;width:0%;border-radius:999px;background:var(--ink);transition:width .3s ease}
@@ -1421,6 +1447,47 @@
     color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
     border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
   .prrow .mchip svg{width:17px;height:17px}
+  /* ── v18: Mahlzeiten-Slots + Barcode-Scanner ── */
+  .mslot{margin-bottom:.7rem}
+  .mslot:last-child{margin-bottom:0}
+  .mslotHead{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+  .mslotHead b{flex:1;min-width:0;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
+  .mslotHead .mslotK{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;color:var(--ink3);font-variant-numeric:tabular-nums}
+  .mslotHead .mslotAdd{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--surf2);
+    color:var(--ink);font-size:var(--t5);line-height:1;flex:none;transition:.16s}
+  .mslotHead .mslotAdd:hover{border-color:var(--aurora);color:var(--aurora)}
+  .mslot .prrow{margin-bottom:.35rem}
+  #scanov{position:fixed;inset:0;z-index:320;background:color-mix(in srgb,var(--night) 78%,transparent);display:flex;align-items:center;justify-content:center;padding:1rem}
+  #scanov .scanbox{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh);
+    width:100%;max-width:380px;padding:1rem}
+  #scanov .scanhead{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.5rem}
+  #scanov .scanhead b{font-family:var(--fd);font-weight:600;font-size:var(--t5);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  #scanov .scanvid{position:relative;border-radius:var(--r1);overflow:hidden;background:var(--night);aspect-ratio:4/3}
+  #scanov video{width:100%;height:100%;object-fit:cover;display:block}
+  #scanov .scanframe{position:absolute;inset:14% 10%;border:2px solid var(--aurora);border-radius:var(--r1);opacity:.75;pointer-events:none}
+  /* ── v18: Uebungs-Tausch als Blatt-Liste. Zeilen mit Strichmaennchen-
+     Vorschau, aktuelle Wahl markiert, Suche und Filter-Chips darueber. ── */
+  .swapcur{display:flex;align-items:center;gap:.7rem;background:var(--surf3);border:1px solid var(--line);
+    border-radius:var(--r2);padding:.6rem .7rem}
+  .swaplist{display:flex;flex-direction:column;gap:.4rem;margin-top:.55rem;max-height:52vh;overflow-y:auto;
+    -webkit-overflow-scrolling:touch;padding-right:.15rem}
+  .swaprow{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;background:var(--surf2);
+    border:1px solid var(--line);border-radius:var(--r2);padding:.55rem .7rem;color:var(--ink);
+    font-family:var(--fb);cursor:pointer;transition:border-color .16s}
+  .swaprow:hover{border-color:var(--aurora)}
+  .swaprow .swnm{flex:1;min-width:0}
+  .swaprow .swnm b,.swapcur .swnm b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t4);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .swaprow .swnm span,.swapcur .swnm span{display:block;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin-top:.1rem}
+  .swaprow .swtick{width:22px;height:22px;flex:none;border-radius:999px;border:1.6px solid var(--line2);
+    display:flex;align-items:center;justify-content:center;color:transparent;font-size:var(--t1)}
+  .swaprow.cur{border-color:var(--aurora);background:var(--surf3)}
+  .swaprow.cur .swtick{border-color:var(--aurora);background:var(--aurora);color:var(--hero)}
+  .swthumb{width:44px;height:44px;flex:none;display:flex;align-items:center;justify-content:center;
+    background:var(--surf);border:1px solid var(--line2);border-radius:var(--r1);overflow:hidden}
+  .swthumb svg{width:38px;height:38px}
+  .swthumb.none{color:var(--ink3);font-size:var(--t5)}
   /* ── v17 (Baustelle 7): Buch-Typografie im Wissens-Bereich. Lesetext in
      der Serife, begrenzte Zeilenlaenge, ruhige Abstaende -- wie ein Buch,
      weil es das Buch IST. ── */
@@ -1470,7 +1537,7 @@
      Liegt ausserhalb der Huelle, damit es ueber allem schwebt. -->
 <div id="sheetBg" hidden></div>
 <div id="sheet" role="dialog" aria-modal="true" aria-label="Menü" hidden>
-  <div class="grip" aria-hidden="true"></div>
+  <button type="button" class="grip" id="sheetGrip" aria-label="Schließen"></button>
   <div id="sheetBody"></div>
 </div>
 <div id="scenery" aria-hidden="true"></div>
@@ -1526,6 +1593,9 @@
       <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3 L5 8 L10 13"/></svg>
     </button>
     <span class="chchip" id="inChip" hidden></span>
+    <button type="button" class="iback iclose" id="inClose" aria-label="Abbrechen" hidden>
+      <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4 L12 12 M12 4 L4 12"/></svg>
+    </button>
   </div>
   <div class="iprog" id="inProg" aria-hidden="true" hidden></div>
   <div class="istep" id="inStep"></div>
@@ -2140,7 +2210,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='17.0';
+var VERSION='18.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3638,6 +3708,701 @@ var MOBDEMO=[
    ],head:[SL[0]-4.2,SL[1]-1.2]};}}
 ];
 
+/* v18: Bewegungsdemos je Katalog-Uebung (Schluessel = englischer Name).
+   Alle sechs Muster vollstaendig (114 Eintraege). */
+var EXA={
+ push:{
+'Wall push-up':{dur:2.7,refs:['M6 40 H36','M36 8 V40'],pose:function(u){
+ var r=_phase(u,.40,.10,.24),rl=_phase(u-.03,.40,.10,.24),F=[22,39.4],H=[35.4,19.5],L=21;
+ var t=(8+14*r)*_DG;
+ var S=[F[0]+Math.sin(t)*L,F[1]-Math.cos(t)*L];
+ var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+ var e=_ik(H,S,6.8,4.6,-1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4-uy*1.1+(r-rl)*1.5,S[1]+uy*4.4+ux*1.1];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[F,[19.3,39.9]]]],head:hd};}},
+'Incline push-up (table)':{dur:2.8,refs:['M4 40 H42','M5 27 H16','M7 27 V40'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[36,39.4],H=[11.3,26.4],L=25.5;
+ var a=(49.5-11.5*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*1.8];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[F,[33.4,39.9]]]],head:hd};}},
+'Incline push-up (chair)':{dur:2.8,refs:['M4 40 H42','M6 31.7 H15','M7.5 31.7 V40','M13.5 31.7 V40'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[37,39.4],H=[11.6,31.1],L=22.35;
+ var a=(40.5-11.5*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*1.8];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[F,[34.4,39.9]]]],head:hd};}},
+'Knee push-up':{dur:2.8,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),K=[36,37.6],H=[13.2,37.2],L=20;
+ var a=(30-17*r)*_DG;
+ var S=[K[0]-Math.cos(a)*L,K[1]-Math.sin(a)*L];
+ var hip=[K[0]+(S[0]-K[0])*.45,K[1]+(S[1]-K[1])*.45];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-K[0])/L,uy=(S[1]-K[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2];
+ return {parts:[[[K,hip,S]],[[K,[41.6,37.4]]],[[H,e[0],e[1]]]],head:hd};}},
+'Push-up on fists':{dur:2.9,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41,37.4],H=[12.6,36],L=29;
+ var a=(23-14*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.4];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[H,[12.6,37.4]]]],head:hd};}},
+'Full push-up':{dur:2.9,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41,37.4],H=[12.6,37.2],L=29;
+ var a=(22-15*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.4];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Wide push-up':{dur:3,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41.4,37.4],H=[10.6,37.2],L=29;
+ var a=(20-11*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.2];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Staggered push-up':{dur:2.9,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41,37.4],Hf=[9.8,37.2],Hb=[16,37.2],L=29;
+ var a=(22-14*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var ef=_ik(Hf,S,6.8,4.6,1),eb=_ik(Hb,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.4];
+ return {parts:[[[F,hip,S]],[[Hf,ef[0],ef[1]]],[[Hb,eb[0],eb[1]]]],head:hd};}},
+'Sphinx push-up':{dur:3,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),F=[41.6,37.4],H=[17.6,37.2],L=30;
+ var a=(21-13*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,-1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.2];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Diamond push-up':{dur:2.9,refs:['M5 38 H42','M13.4 37.7 L14.6 36.5 L15.8 37.7'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[41,37.4],H=[14.6,36.6],L=29;
+ var a=(22-13*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.4];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Hindu push-up':{dur:3.5,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.42,.14,.30),rl=_phase(u-.03,.42,.14,.30),F=[38.5,37.4],H=[11.5,37.2];
+ var th=(66-56*r)*_DG,ta=(33-69*r)*_DG;
+ var hip=[F[0]-Math.cos(th)*15,F[1]-Math.sin(th)*15];
+ var S=[hip[0]-Math.cos(ta)*14,hip[1]+Math.sin(ta)*14];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-hip[0])/14,uy=(S[1]-hip[1])/14;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Decline push-up':{dur:3,refs:['M5 38 H36','M35 29 H44','M37 29 V38','M42 29 V38'],pose:function(u){
+ var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),F=[40,28.8],H=[11.6,37.2],L=29;
+ var b=(4-13*r)*_DG;
+ var S=[F[0]-Math.cos(b)*L,F[1]-Math.sin(b)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.2];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Pseudo planche lean':{dur:3.3,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.44,.18,.30),rl=_phase(u-.03,.44,.18,.30),F=[41,37.4],H=[21.6,37.2],L=29;
+ var a=(14-3*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,-1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1+(rl-r)*.8,S[1]+uy*4.4-ux*1.1];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Pseudo planche push-up':{dur:3.1,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.42,.10,.24),rl=_phase(u-.03,.42,.10,.24),F=[41,37.4],H=[21,37.2],L=29;
+ var a=(15-8*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.2];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Archer push-up':{dur:3.2,refs:['M2 38 H43'],pose:function(u){
+ var r=_phase(u,.42,.10,.24),rl=_phase(u-.03,.42,.10,.24),F=[42,37.4],Hb=[13.4,37.2],L=29;
+ var a=(13-6*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var dy=37.2-S[1];
+ var Hs=[S[0]-Math.sqrt(Math.max(1,125.44-dy*dy)),37.2];
+ var e=_ik(Hb,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2];
+ return {parts:[[[F,hip,S]],[[Hb,e[0],e[1]]],[[Hs,S]]],head:hd};}},
+'Clap push-up':{dur:2.8,refs:['M5 38 H42'],pose:function(u){
+ var r=_phase(u,.34,.06,.14),rl=_phase(u-.03,.34,.06,.14),F=[41,37.4],L=29;
+ var f=Math.max(0,Math.sin((u-.5)/.24*Math.PI));
+ var a=(21-13*r+5*f)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var HL=[11.4+1.8*f,37.2-4.6*f],HR=[15-1.6*f,37.2-4.6*f];
+ var eL=_ik(HL,S,6.8,4.6,1),eR=_ik(HR,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2];
+ return {parts:[[[F,hip,S]],[[HL,eL[0],eL[1]]],[[HR,eR[0],eR[1]]]],head:hd};}},
+'Ring push-up':{dur:3.1,refs:['M5 38 H42','M12.6 5 V33','M12.6 33 a1.5 1.5 0 1 0 .01 0'],pose:function(u){
+ var r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),F=[41.5,37.4],L=29.5;
+ var w=Math.sin(u*4*Math.PI)*(.35+.4*r);
+ var H=[12.6+w,34.5];
+ var a=(25.4-14*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1+w*.3,S[1]+uy*4.4-ux*1.1+(r-rl)*2.2];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Typewriter push-up':{dur:3.4,refs:['M5 38 H41'],pose:function(u){
+ var r=_phase(u,.40,.14,.40),rl=_phase(u-.03,.40,.14,.40),HL=[14,37.2],HR=[29.4,37.2];
+ var cx=16.4+10.6*r,ys=31.9+1.1*Math.sin(Math.PI*r);
+ var SL=[cx-3.1,ys],SR=[cx+3.1,ys];
+ var eL=_ik(HL,SL,6.8,4.6,-1),eR=_ik(HR,SR,6.8,4.6,1);
+ var hip=[21.7+(cx-21.7)*.2,35.3];
+ var FL=[hip[0]-2.9,37.6],FR=[hip[0]+2.9,37.6];
+ var cxl=16.4+10.6*rl,ysl=31.9+1.1*Math.sin(Math.PI*rl);
+ return {parts:[[[SL,SR]],[[HL,eL[0],eL[1]]],[[HR,eR[0],eR[1]]],[[[cx,ys],hip]],[[hip,FL]],[[hip,FR]]],head:[cxl,ysl-4.3]};}},
+'One-arm incline push-up':{dur:3.2,refs:['M4 40 H42','M5 27 H16','M7 27 V40'],pose:function(u){
+ var r=_phase(u,.42,.12,.24),rl=_phase(u-.03,.42,.12,.24),F=[36,39.4],H=[11.3,26.4],L=25.5;
+ var a=(49.5-10*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+ var e=_ik(H,S,6.8,4.6,1);
+ var fh=[S[0]+(hip[0]-S[0])*.62+Math.sin(a)*2.8,S[1]+(hip[1]-S[1])*.62-Math.cos(a)*2.8];
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*1.8];
+ return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[S,fh]],[[F,[33.4,39.9]]]],head:hd};}},
+'One-arm push-up':{dur:3.3,refs:['M5 38 H43'],pose:function(u){
+ var r=_phase(u,.44,.12,.24),rl=_phase(u-.03,.44,.12,.24),F=[42,37.4],F2=[37.2,37.4],H=[13.2,37.2],L=29;
+ var a=(21-12*r)*_DG;
+ var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+ var hip=[F[0]+(S[0]-F[0])*.48,F[1]+(S[1]-F[1])*.48];
+ var e=_ik(H,S,6.8,4.6,1);
+ var fh=[S[0]+(hip[0]-S[0])*.6+Math.sin(a)*2.8,S[1]+(hip[1]-S[1])*.6-Math.cos(a)*2.8];
+ var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+ var hd=[S[0]+ux*4.4+uy*1.1,S[1]+uy*4.4-ux*1.1+(r-rl)*2.2];
+ return {parts:[[[F,hip,S]],[[hip,F2]],[[H,e[0],e[1]]],[[S,fh]]],head:hd};}}
+},
+ pull:{
+'Dead hang':{dur:3.2,refs:['M8 8 H38'],pose:function(u){
+  var b=Math.sin(u*2*Math.PI),bl=Math.sin(u*2*Math.PI-.6);
+  var yS=18.55+.12*b,HL=[17,8.6],HR=[29,8.6],SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[22.3,hip[1]+5.7],[22.6,hip[1]+10.9]],[hip,[23.7,hip[1]+5.7],[23.4,hip[1]+10.9]]]
+  ],head:[23,18.55+.12*bl-3.9]};}},
+'Active hang':{dur:3.1,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.34,.26,.30),rl=_phase(u-.03,.34,.26,.30);
+  var yS=18.55,HL=[17,8.6],HR=[29,8.6],SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var T=[23,yS+.9-1.6*r],hip=[23,T[1]+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[T,hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,yS+.9-1.6*rl-4.4]};}},
+'Scapular pull-up':{dur:2.9,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.30,.14,.34),rl=_phase(u-.03,.30,.14,.34);
+  var yS=18.55,HL=[17,8.6],HR=[29,8.6],SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var T=[23,yS+1-2.2*r],hip=[23,T[1]+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[T,hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,yS+1-2.2*rl-4.5]};}},
+'Jumping pull-up':{dur:3,refs:['M8 8 H38','M10 40.4 H36'],pose:function(u){
+  var r=_phase(u,.16,.12,.52),rl=_phase(u-.03,.16,.12,.52);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.6-6.1*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  var a=(17+31*r)*_DG,c=(9-7*r)*_DG;
+  var kL=[hip[0]-Math.sin(a)*5.85,hip[1]+Math.cos(a)*5.85];
+  var fL=[kL[0]+Math.sin(c)*5.36,kL[1]+Math.cos(c)*5.36];
+  var kR=[hip[0]+Math.sin(a)*5.85,hip[1]+Math.cos(a)*5.85];
+  var fR=[kR[0]-Math.sin(c)*5.36,kR[1]+Math.cos(c)*5.36];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,kL,fL],[hip,kR,fR]]
+  ],head:[23,18.6-6.1*rl-4.6]};}},
+'Band-assisted pull-up':{dur:3,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.30,.12,.34),rl=_phase(u-.03,.30,.12,.34);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.5-6*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  var kB=[hip[0]+3.1,hip[1]+4.9],fB=[kB[0]+.5,kB[1]+5.3];
+  return {parts:[
+    [[[23,8.2],kB]],
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,kB,fB]]
+  ],head:[23,18.5-6*rl-4.6]};}},
+'Negative pull-up':{dur:3.5,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.08,.20,.60),rl=_phase(u-.02,.08,.20,.60);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.5-6*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,18.5-6*rl-4.6]};}},
+'Chin-up':{dur:2.9,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.24,.12,.40),rl=_phase(u-.03,.24,.12,.40);
+  var HL=[19.5,8.6],HR=[26.5,8.6],yS=18.9-6.2*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,18.9-6.2*rl-4.6]};}},
+'Pull-up':{dur:3,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.5-6*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,18.5-6*rl-4.6]};}},
+'Close-grip chin-up':{dur:3,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.26,.12,.40),rl=_phase(u-.03,.26,.12,.40);
+  var HL=[21.6,8.6],HR=[24.4,8.6],yS=18.9-6.3*r,SL=[20.6,yS],SR=[25.4,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,18.9-6.3*rl-4.6]};}},
+'Wide-grip pull-up':{dur:3,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42);
+  var HL=[14.5,8.6],HR=[31.5,8.6],yS=17.4-4.9*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,17.4-4.9*rl-4.6]};}},
+'Commando pull-up':{dur:3.1,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.28,.12,.40),rl=_phase(u-.03,.28,.12,.40);
+  var HL=[22.2,8.6],HR=[24.6,8.6],xc=23-2.9*r,yS=18.6-6*r;
+  var SL=[xc-2.7,yS],SR=[xc+2.7,yS];
+  var eL=_ik(HL,SL,5.8,4.8,-1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[xc,yS+10.6];
+  var xl=23-2.9*rl;
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[xc,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[xl,18.6-6*rl-4.6]};}},
+'L-sit pull-up':{dur:3.2,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.30,.12,.42),rl=_phase(u-.03,.30,.12,.42);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.5-6*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  var k1=[hip[0]+5.8,hip[1]-.55],f1=[k1[0]+5.33,k1[1]-.35];
+  var k2=[hip[0]+5.75,hip[1]+.45],f2=[k2[0]+5.3,k2[1]+.25];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,k1,f1],[hip,k2,f2]]
+  ],head:[23,18.5-6*rl-4.6]};}},
+'High pull-up':{dur:3,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.20,.10,.46),rl=_phase(u-.03,.20,.10,.46);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.5-9*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,18.5-9*rl-4.6]};}},
+'Archer pull-up':{dur:3.2,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.30,.12,.40),rl=_phase(u-.03,.30,.12,.40);
+  var HL=[14.5,8.6],HR=[31.5,8.6],xc=23-4.2*r,yS=17.4-5*r;
+  var SL=[xc-3.1,yS],SR=[xc+3.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[xc,yS+10.6];
+  var xl=23-4.2*rl;
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[xc,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[xl,17.4-5*rl-4.6]};}},
+'Typewriter pull-up':{dur:3.4,refs:['M8 8 H38'],pose:function(u){
+  var p=_phase(u,.38,.14,.38),pl=_phase(u-.04,.38,.14,.38);
+  var HL=[14.5,8.6],HR=[31.5,8.6],xc=18.6+8.8*p,yS=12.7;
+  var SL=[xc-3.1,yS],SR=[xc+3.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[xc,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[xc,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[18.6+8.8*pl,12.7-4.6]};}},
+'Weighted pull-up':{dur:3.5,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.32,.12,.42),rl=_phase(u-.03,.32,.12,.42);
+  var HL=[17,8.6],HR=[29,8.6],yS=18.5-5.8*r,SL=[19.9,yS],SR=[26.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[23,yS+10.6];
+  var p1=[25.7,yS+2.4],p2=[28.4,yS+2.9],p3=[27.9,yS+8.1],p4=[25.2,yS+7.6];
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[23,yS],hip]],
+    [[p1,p2,p3,p4,p1]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23,18.5-5.8*rl-4.6]};}},
+'One-arm assisted pull-up':{dur:3.4,refs:['M8 8 H38','M29 8 V14.4'],pose:function(u){
+  var r=_phase(u,.36,.12,.36),rl=_phase(u-.03,.36,.12,.36);
+  var HL=[20.5,8.6],HR=[29,14.4],xc=23-1.2*r,yS=18.4-5.6*r;
+  var SL=[xc-3.1,yS],SR=[xc+3.1,yS];
+  var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);
+  var hip=[xc,yS+10.6];
+  var xl=23-1.2*rl;
+  return {parts:[
+    [[SL,SR]],
+    [[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],
+    [[[xc,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[xl,18.4-5.6*rl-4.6]};}},
+'One-arm pull-up':{dur:3.6,refs:['M8 8 H38'],pose:function(u){
+  var r=_phase(u,.42,.10,.34),rl=_phase(u-.03,.42,.10,.34);
+  var H=[22,8.6],yS=18.6-5.4*r;
+  var SL=[20.1,yS],SR=[26.3,yS];
+  var eL=_ik(H,SL,5.8,4.8,-1);
+  var el2=[26.5,yS+4.8],hn2=[26.2-.6*r,yS+10.55];
+  var hip=[23.2,yS+10.6];
+  return {parts:[
+    [[SL,SR]],
+    [[H,eL[0],eL[1]]],
+    [[SR,el2,hn2]],
+    [[[23.2,yS],hip]],
+    [[hip,[hip[0]-1.7,hip[1]+5.6],[hip[0]-.9,hip[1]+10.9]],[hip,[hip[0]+1.7,hip[1]+5.6],[hip[0]+.9,hip[1]+10.9]]]
+  ],head:[23.2,18.6-5.4*rl-4.6]};}}
+},
+ row:{
+'Doorframe row':{dur:2.7,refs:['M17 7 V38','M5 38 H42'],pose:function(u){
+  var r=_phase(u,.30,.10,.38),rl=_phase(u-.03,.30,.10,.38),F=[22,37.5],H=[17.8,14.8],L=26;
+  var t=(13.5-11.5*r)*_DG,tl=(13.5-11.5*rl)*_DG;
+  var S=[F[0]+Math.sin(t)*L,F[1]-Math.cos(t)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,1);
+  var hd=[F[0]+Math.sin(tl)*(L+4.4),F[1]-Math.cos(tl)*(L+4.4)];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Table row':{dur:2.8,refs:['M5 15 H18','M6 15 V34','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.28,.12,.40),rl=_phase(u-.03,.28,.12,.40),F=[40,33],H=[17.5,15.9],L=26;
+  var a=(17+13*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Bar row, chest height':{dur:2.8,refs:['M7 11 H26','M5 38 H42'],pose:function(u){
+  var r=_phase(u,.28,.12,.40),rl=_phase(u-.03,.28,.12,.40),F=[26.7,37.5],H=[13,11.7],L=26;
+  var a=(43+16*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Bar row, waist height':{dur:2.9,refs:['M9 15 H33','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[17.5,15.8],L=26;
+  var a=(17+16*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Bar row, hip height':{dur:3,refs:['M9 22 H33','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[17.5,22.8],L=26;
+  var a=(3+15*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Ring row':{dur:3,refs:['M17.5 6 V13.8','M17.5 13.8 L16.5 15 L17.5 16.2 L18.5 15 Z','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[17.5,15.3],L=26;
+  var a=(17+16*r+.7*Math.sin(u*12.566))*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Feet-elevated row':{dur:3,refs:['M5 15 H18','M6 15 V34','M35 27 H44','M39.5 27 V34','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.28,.12,.40),rl=_phase(u-.03,.28,.12,.40),F=[40,26.5],H=[17.5,15.9],L=26;
+  var a=(3+13*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Pause row':{dur:3.4,refs:['M9 15 H33','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.24,.44,.24),rl=_phase(u-.03,.24,.44,.24),F=[40,33],H=[17.5,15.8],L=26;
+  var a=(17+16*r+.5*Math.sin(u*6.283))*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Wide row':{dur:2.9,refs:['M7 15 H35','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.26,.12,.42),rl=_phase(u-.03,.26,.12,.42),F=[40,33],H=[17.5,15.8],L=26;
+  var a=(17+14*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,1);
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]]],head:hd};}},
+'Archer row':{dur:3.1,refs:['M8 15 H36','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.30,.12,.40),rl=_phase(u-.03,.30,.12,.40),F=[40,33],H=[15.5,15.8],L=26;
+  var a=(20+11*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var dy2=S[1]-15.8;
+  var H2=[S[0]+Math.sqrt(Math.max(9,112.36-dy2*dy2)),15.8];
+  var ux=(S[0]-F[0])/L,uy=(S[1]-F[1])/L;
+  var hd=[S[0]+ux*4.4-uy*1.1,S[1]+uy*4.4+ux*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[S,H2]]],head:hd};}},
+'One-arm row':{dur:3.3,refs:['M5 15 H18','M6 15 V34','M5 34 H42'],pose:function(u){
+  var r=_phase(u,.34,.10,.42),rl=_phase(u-.03,.34,.10,.42),F=[40,33],H=[17.5,15.9],L=26;
+  var a=(17+13*r)*_DG;
+  var S=[F[0]-Math.cos(a)*L,F[1]-Math.sin(a)*L];
+  var hip=[F[0]+(S[0]-F[0])*.5,F[1]+(S[1]-F[1])*.5];
+  var e=_ik(H,S,6,4.9,-1);
+  var bx=(F[0]-S[0])/L,by=(F[1]-S[1])/L;
+  var fh=[S[0]+bx*10.3+by*1.2,S[1]+by*10.3-bx*1.2];
+  var hd=[S[0]-bx*4.4+by*1.1,S[1]-by*4.4-bx*1.1+(r-rl)*2];
+  return {parts:[[[F,hip,S]],[[H,e[0],e[1]]],[[S,fh]]],head:hd};}},
+'Tuck front-lever row':{dur:3.3,refs:['M8 10 H36'],pose:function(u){
+  var r=_phase(u,.32,.14,.38),rl=_phase(u-.03,.32,.14,.38),H=[20,10.8];
+  var S=[20.6,20.4-5.6*r];
+  var t=(9-4*r)*_DG,tl=(9-4*rl)*_DG;
+  var hip=[S[0]+Math.cos(t)*10.4,S[1]+Math.sin(t)*10.4];
+  var kn=[hip[0]-3.4,hip[1]-4.4];
+  var ft=[kn[0]+2,kn[1]+4.6];
+  var e=_ik(H,S,5.8,4.8,-1);
+  var hd=[20.6-Math.cos(tl)*4.5,(20.4-5.6*rl)-Math.sin(tl)*4.5];
+  return {parts:[[[S,hip]],[[hip,kn,ft]],[[H,e[0],e[1]]]],head:hd};}}
+},
+ press:{
+ 'Pike push-up, hands elevated':{dur:2.8,refs:['M5 38 H42','M6 30.2 H17','M11.5 30.2 V38'],pose:function(u){
+   var r=_phase(u,.40,.10,.24),rl=_phase(u-.03,.40,.10,.24),H=[12,29.8],F=[38,37.6],Ll=23,Lt=11.4;
+   var g=(69.7-2.7*r)*_DG;
+   var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
+   var ps=(157-15*r)*_DG;
+   var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
+   var e=_ik(H,S,7.4,5.8,1);
+   var hd=[S[0]+Math.cos(ps)*4.2+Math.sin(ps)*1,S[1]+Math.sin(ps)*4.2-Math.cos(ps)*1+(r-rl)*2.2];
+   return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
+ 'Pike push-up':{dur:2.9,refs:['M5 38 H41'],pose:function(u){
+   var r=_phase(u,.40,.10,.22),rl=_phase(u-.03,.40,.10,.22),H=[13,37.4],F=[35,37.4],Ll=23.9,Lt=13;
+   var g=(66.5-2.5*r)*_DG;
+   var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
+   var ps=(135-17*r)*_DG;
+   var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
+   var e=_ik(H,S,7.4,5.8,1);
+   var hd=[S[0]+Math.cos(ps)*4.2+Math.sin(ps)*1,S[1]+Math.sin(ps)*4.2-Math.cos(ps)*1+(r-rl)*2.2];
+   return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
+ 'Bench dips':{dur:2.9,refs:['M5 39 H41','M8 24.5 H17','M12.5 24.5 V39'],pose:function(u){
+   var r=_phase(u,.38,.12,.30),rl=_phase(u-.03,.38,.12,.30),H=[15,24.2],F=[33.8,38.2];
+   var S=[16.6,16.6+5.2*r];
+   var e=_ik(H,S,5.2,4.2,-1);
+   var hip=[S[0]+3.9,S[1]+8.5];
+   var k=_ik(F,hip,9.5,9.4,1);
+   return {parts:[[[S,hip]],[[F,k[0],k[1]]],[[F,[35.6,37.2]]],[[H,e[0],e[1]]]],head:[16.1,12.1+5.2*rl]};}},
+ 'Feet-elevated pike push-up':{dur:3,refs:['M5 38 H42','M28.5 28.6 H40','M34 28.6 V38'],pose:function(u){
+   var r=_phase(u,.40,.10,.24),rl=_phase(u-.03,.40,.10,.24),H=[13.5,37.2],F=[33.5,28.2],Ll=16.4,Lt=12.2;
+   var g=(56.7-2.7*r)*_DG;
+   var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
+   var ps=(137-15*r)*_DG;
+   var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
+   var e=_ik(H,S,8.2,6.6,1);
+   var hd=[S[0]+Math.cos(ps)*4.2+Math.sin(ps)*1,S[1]+Math.sin(ps)*4.2-Math.cos(ps)*1+(r-rl)*2.2];
+   return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
+ 'Deficit pike push-up':{dur:3,refs:['M5 38 H41','M10 35.6 H17'],pose:function(u){
+   var r=_phase(u,.40,.12,.22),rl=_phase(u-.03,.40,.12,.22),H=[13.4,35.2],F=[35,37.4],Ll=23.9,Lt=13;
+   var g=(66.5-2.5*r)*_DG;
+   var A=[F[0]-Math.cos(g)*Ll,F[1]-Math.sin(g)*Ll];
+   var ps=(135-21*r)*_DG;
+   var S=[A[0]+Math.cos(ps)*Lt,A[1]+Math.sin(ps)*Lt];
+   var e=_ik(H,S,6.6,5.2,1);
+   var hd=[S[0]+Math.cos(ps)*4.2+Math.sin(ps)*1,S[1]+Math.sin(ps)*4.2-Math.cos(ps)*1+(r-rl)*2.2];
+   return {parts:[[[F,A]],[[A,S]],[[H,e[0],e[1]]]],head:hd};}},
+ 'Wall walk':{dur:3.5,refs:['M5 38 H41','M41 5 V38'],pose:function(u){
+   var r=_phase(u,.42,.14,.34),rl=_phase(u-.03,.42,.14,.34);
+   var H=[13.5+9.5*r,37.4],S=[H[0]+1,27.3];
+   var e=_ik(H,S,5.7,4.8,-1);
+   var k=_ik(S,[40.6,36-29*r],12,16.5,-1),hip=k[0],F=k[1];
+   var un=[(S[0]-hip[0])/12,(S[1]-hip[1])/12];
+   var hd=[S[0]+un[0]*4.4,S[1]+un[1]*4.4+(r-rl)*1.8];
+   return {parts:[[[H,e[0],e[1]]],[[S,hip,F]]],head:hd};}},
+ 'Straight-bar dip':{dur:3,refs:['M8 17 H38'],pose:function(u){
+   var r=_phase(u,.42,.10,.24),rl=_phase(u-.03,.42,.10,.24);
+   var HL=[17.5,17],HR=[28.5,17],yS=8.2+5.6*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.2,4.2,-1),eR=_ik(HR,SR,5.2,4.2,1);
+   var hip=[23,yS+10.2];
+   var kn=[hip[0]+.9,hip[1]+5.4],ft=[kn[0]-.5,kn[1]+5];
+   var kn2=[hip[0]-.3,hip[1]+5.5],ft2=[kn2[0]+.4,kn2[1]+5.1];
+   return {parts:[[[SL,SR]],[[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],[[[23,yS],hip]],[[hip,kn,ft],[hip,kn2,ft2]]],head:[23,(8.2+5.6*rl)-4.4]};}},
+ 'Parallel-bar dip':{dur:3.1,refs:['M10 17 H20','M26 17 H36','M15 17 V40','M31 17 V40'],pose:function(u){
+   var r=_phase(u,.44,.10,.26),rl=_phase(u-.03,.44,.10,.26);
+   var HL=[16,16.8],HR=[30,16.8],yS=8+7*r;
+   var SL=[19.9,yS],SR=[26.1,yS];
+   var eL=_ik(HL,SL,5.8,4.8,-1),eR=_ik(HR,SR,5.8,4.8,1);
+   var hip=[23,yS+10.3];
+   var kn=[hip[0]+.8,hip[1]+5.3],ft=[kn[0]-.4,kn[1]+5.2];
+   var kn2=[hip[0]-.3,hip[1]+5.4],ft2=[kn2[0]+.3,kn2[1]+5.1];
+   return {parts:[[[SL,SR]],[[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],[[[23,yS],hip]],[[hip,kn,ft],[hip,kn2,ft2]]],head:[23,(8+7*rl)-4.4]};}},
+ 'Wall handstand push-up, partial':{dur:3.1,refs:['M4 38 H41.4','M41.4 6 V38','M30.6 36.4 H36.6','M31.4 37.2 H35.8'],pose:function(u){
+   var r=_phase(u,.44,.12,.26),rl=_phase(u-.03,.44,.12,.26);
+   var H=[35,37.2],S=[35-1*r,26.9+2.2*r];
+   var e=_ik(H,S,5.7,4.8,-1);
+   var k=_ik(S,[39.6,2.8+2.2*r],10.5,14.1,-1),hip=k[0],F=k[1];
+   var toe=[F[0]+1.1,F[1]-1.7];
+   var hd=[35-1*rl+.9,26.9+2.2*rl+3.7];
+   return {parts:[[[S,hip,F,toe]],[[H,e[0],e[1]]]],head:hd};}},
+ 'Ring dip':{dur:3.2,refs:['M16.6 3 V13.6','M29.9 3 V13.6','M15.1 15.1 a1.5 1.5 0 1 0 3 0 a1.5 1.5 0 1 0 -3 0','M28.4 15.1 a1.5 1.5 0 1 0 3 0 a1.5 1.5 0 1 0 -3 0'],pose:function(u){
+   var r=_phase(u,.44,.10,.28),rl=_phase(u-.03,.44,.10,.28),w=Math.sin(u*12.566)*.35;
+   var HL=[16.6,15.6],HR=[29.9,15.6],yS=7+7.2*r;
+   var SL=[19.9+w,yS],SR=[26.1+w,yS];
+   var eL=_ik(HL,SL,5.8,4.8,-1),eR=_ik(HR,SR,5.8,4.8,1);
+   var hip=[23+w*1.4,yS+10.3];
+   var kn=[hip[0]+.8,hip[1]+5.3],ft=[kn[0]-.4,kn[1]+5.2];
+   var kn2=[hip[0]-.4,hip[1]+5.4],ft2=[kn2[0]+.3,kn2[1]+5.1];
+   return {parts:[[[SL,SR]],[[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],[[[23+w,yS],hip]],[[hip,kn,ft],[hip,kn2,ft2]]],head:[23+w,(7+7.2*rl)-4.4]};}},
+ 'Wall handstand push-up':{dur:3.3,refs:['M4 38 H41.4','M41.4 6 V38'],pose:function(u){
+   var r=_phase(u,.44,.14,.26),rl=_phase(u-.03,.44,.14,.26);
+   var H=[35,37.2],S=[35-1.5*r,26.9+3.8*r];
+   var e=_ik(H,S,5.7,4.8,-1);
+   var k=_ik(S,[39.6,2.8+3.8*r],10.5,14.1,-1),hip=k[0],F=k[1];
+   var toe=[F[0]+1.1,F[1]-1.7];
+   var hd=[35-1.5*rl+.9,26.9+3.8*rl+3.7];
+   return {parts:[[[S,hip,F,toe]],[[H,e[0],e[1]]]],head:hd};}},
+ 'Korean dip':{dur:3.2,refs:['M5 40 H41','M22.5 20.1 V40','M20.9 18.5 a1.6 1.6 0 1 0 3.2 0 a1.6 1.6 0 1 0 -3.2 0'],pose:function(u){
+   var r=_phase(u,.42,.12,.28),rl=_phase(u-.03,.42,.12,.28),H=[22.5,17.2];
+   var S=[17.6,8.8+5.6*r];
+   var e=_ik(H,S,5.6,4.6,1);
+   var hip=[16.4,S[1]+9.3];
+   var kn=[14.9,hip[1]+6.4],ft=[14.1,kn[1]+6.6];
+   var kn2=[15.7,hip[1]+6.3],ft2=[15.1,kn2[1]+6.6];
+   return {parts:[[[S,hip]],[[hip,kn,ft],[hip,kn2,ft2]],[[H,e[0],e[1]]]],head:[16.7,4.5+5.6*rl]};}},
+ 'Freestanding handstand push-up':{dur:3.4,refs:['M5 38 H41'],pose:function(u){
+   var r=_phase(u,.46,.12,.26),rl=_phase(u-.03,.46,.12,.26);
+   var H=[24,37.2],S=[24-1.2*r,26.9+3.6*r];
+   var e=_ik(H,S,5.7,4.8,-1);
+   var k=_ik(S,[27.5,2.9+3.6*r],10.5,14.1,-1),hip=k[0],F=k[1];
+   var toe=[F[0]+1.1,F[1]-1.7];
+   var hd=[24-1.2*rl+.9,26.9+3.6*rl+3.7];
+   return {parts:[[[S,hip,F,toe]],[[H,e[0],e[1]]]],head:hd};}}
+}
+,legs:{
+'Box squat':{dur:2.9,refs:['M5 39 H41','M25 28.6 H37','M31 28.6 V39'],pose:function(u){var r=_phase(u,.40,.12,.26),rl=_phase(u-.03,.40,.12,.26),A=[23,37.5],a1=(4+29*r)*_DG,a2=(7+69*r)*_DG,a3=(5+30*r)*_DG,a4=(5+30*rl)*_DG,b=(12+68*rl)*_DG;var K=[A[0]-Math.sin(a1)*8.5,A[1]-Math.cos(a1)*8.5],P=[K[0]+Math.sin(a2)*9,K[1]-Math.cos(a2)*9],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[A,K,P,S]],[[S,H]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Glute bridge':{dur:3,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.32,.18,.32),rl=_phase(u-.03,.32,.18,.32),S=[13.5,37.6],A=[28.8,37.4],t=(4+22*r)*_DG;var P=[S[0]+Math.cos(t)*10,S[1]-Math.sin(t)*10],K=_ik(A,P,8.5,9,1)[0];return{parts:[[[S,P,K,A]],[[A,[25.9,38.6]]],[[S,[21.5,38.2]]]],head:[9.7,36.3+(r-rl)*.8]};}},
+'Wall sit':{dur:3.3,refs:['M5 39 H41','M31.3 8 V39'],pose:function(u){var b=Math.sin(u*6.283),bl=Math.sin(u*6.283-.7),P=[29.9,28.6],K=[20.9,28.6],A=[20.9,37.1],t=1.6*b*_DG,tl=1.6*bl*_DG;var S=[P[0]-Math.sin(t)*10,P[1]-Math.cos(t)*10],w=(13+2.6*bl)*_DG,H=[S[0]-Math.sin(w)*8.4,S[1]+Math.cos(w)*8.4];return{parts:[[[A,K,P,S]],[[S,H]],[[A,[17.5,38.5]]]],head:[P[0]-Math.sin(tl)*14.2,P[1]-Math.cos(tl)*14.2]};}},
+'Air squat':{dur:3,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.40,.10,.26),rl=_phase(u-.03,.40,.10,.26),A=[22,37.5],a1=(4+31*r)*_DG,a2=(7+96*r)*_DG,a3=(5+36*r)*_DG,a4=(5+36*rl)*_DG,b=(10+82*rl)*_DG;var K=[A[0]-Math.sin(a1)*8.5,A[1]-Math.cos(a1)*8.5],P=[K[0]+Math.sin(a2)*9,K[1]-Math.cos(a2)*9],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[A,K,P,S]],[[S,H]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Step-up':{dur:3.1,refs:['M5 39 H41','M8 34 H20','M20 34 V39'],pose:function(u){var r=_phase(u,.36,.14,.30),rl=_phase(u-.03,.36,.14,.30),F=[16,33.3],P=[26.6-8.6*r,20.6-2.6*r],E=[27.6-6*r,37.3-2.7*r],a3=(18-8*r)*_DG,a4=(18-8*rl)*_DG,b=(14+18*rl)*_DG;var Kf=_ik(F,P,8.5,9,-1)[0],Kr=_ik(E,P,8.5,9,-1)[0],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[F,Kf,P,S]],[[P,Kr,E]],[[S,H]],[[F,[12.8,34.3]]],[[E,[E[0]-3,E[1]+1.5]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Calf raise':{dur:2.8,refs:['M5 39.4 H41'],pose:function(u){var r=_phase(u,.34,.20,.28),rl=_phase(u-.03,.34,.20,.28),T=[19,39],w=26*r*_DG,A=_rot([22.3,37.7],T,-w),G=_rot([23.4,38.8],T,-w),a3=(3+5*r)*_DG,a4=(3+5*rl)*_DG;var K=[A[0]-.59,A[1]-8.48],P=[K[0]+.78,K[1]-8.97],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],b=(9+3*rl)*_DG,H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[T,G,A]],[[A,K,P,S]],[[S,H]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2+(r-rl)*1.1]};}},
+'Good morning':{dur:3.1,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.40,.10,.26),rl=_phase(u-.03,.40,.10,.26),A=[24,37.5],a1=(3+7*r)*_DG,a2=(6+18*r)*_DG,a3=(8+70*r)*_DG,a4=(8+70*rl)*_DG;var K=[A[0]-Math.sin(a1)*8.5,A[1]-Math.cos(a1)*8.5],P=[K[0]+Math.sin(a2)*9,K[1]-Math.cos(a2)*9],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],E=[S[0]-Math.cos(a3)*4.6,S[1]+Math.sin(a3)*4.6],N=[S[0]-Math.sin(a3)*2.4,S[1]-Math.cos(a3)*2.4];return{parts:[[[A,K,P,S]],[[S,E,N]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-Math.sin(a4)*4.4,S[1]-Math.cos(a4)*4.4]};}},
+'Paused squat':{dur:3.6,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.26,.42,.22),rl=_phase(u-.03,.26,.42,.22),A=[22,37.5],a1=(4+31*r)*_DG,a2=(7+96*r)*_DG,a3=(5+36*r+1.3*Math.sin(u*6.283)*r)*_DG,a4=(5+36*rl+1.3*Math.sin(u*6.283-.7)*rl)*_DG,b=(10+82*rl)*_DG;var K=[A[0]-Math.sin(a1)*8.5,A[1]-Math.cos(a1)*8.5],P=[K[0]+Math.sin(a2)*9,K[1]-Math.cos(a2)*9],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[A,K,P,S]],[[S,H]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Reverse lunge':{dur:3,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.38,.12,.28),rl=_phase(u-.03,.38,.12,.28),A=[19,37.5],a1=(2+4*r)*_DG,a2=(6+70*r)*_DG,a3=(4+16*r)*_DG,a4=(4+16*rl)*_DG,b=(10+26*rl)*_DG;var K=[A[0]-Math.sin(a1)*8.5,A[1]-Math.cos(a1)*8.5],P=[K[0]+Math.sin(a2)*9,K[1]-Math.cos(a2)*9],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],E=[21.8+15.7*r,37.3-2.2*Math.sin(Math.PI*r)],Q=_ik(E,P,8.5,9,-1)[0],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[A,K,P,S]],[[P,Q,E]],[[S,H]],[[A,[15.6,38.9]]],[[E,[E[0]-2.9,E[1]+1.6]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Single-leg glute bridge':{dur:3.2,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.30,.18,.34),rl=_phase(u-.03,.30,.18,.34),S=[13.5,37.6],A=[28.8,37.4],t=(4+22*r)*_DG;var P=[S[0]+Math.cos(t)*10,S[1]-Math.sin(t)*10],K=_ik(A,P,8.5,9,1)[0],n=Math.atan2(K[1]-P[1],K[0]-P[0]),f=[P[0]+Math.cos(n-.24)*9,P[1]+Math.sin(n-.24)*9],g=[f[0]+Math.cos(n-.31)*8.5,f[1]+Math.sin(n-.31)*8.5];return{parts:[[[S,P,K,A]],[[P,f,g]],[[A,[25.9,38.6]]],[[S,[21.5,38.2]]]],head:[9.7,36.3+(r-rl)*.8]};}},
+'Single-leg calf raise':{dur:2.9,refs:['M5 39.4 H41'],pose:function(u){var r=_phase(u,.34,.20,.28),rl=_phase(u-.03,.34,.20,.28),T=[20,39],w=24*r*_DG,A=_rot([23.3,37.7],T,-w),G=_rot([24.4,38.8],T,-w),a3=(3+5*r)*_DG,a4=(3+5*rl)*_DG;var K=[A[0]-.59,A[1]-8.48],P=[K[0]+.78,K[1]-8.97],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],b=(9+3*rl)*_DG,H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4],f=[P[0]-2.2,P[1]+8.73],g=[f[0]+5.2,f[1]+6.72];return{parts:[[[T,G,A]],[[A,K,P,S]],[[P,f,g]],[[S,H]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2+(r-rl)*1.1]};}},
+'Walking lunge':{dur:3.2,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.36,.14,.30),rl=_phase(u-.03,.36,.14,.30),T=[33.5,38.4],F=[26.5-11.5*r,37.3-2.6*Math.sin(Math.PI*r)],P=[28-4.5*r,20.4+7.6*r],E=_rot([31.8,37.3],T,46*r*_DG),a3=(6+16*r)*_DG,a4=(6+16*rl)*_DG,b=(6+30*rl)*_DG;var Kf=_ik(F,P,8.5,9,-1)[0],Kr=_ik(E,P,8.5,9,-1)[0],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[F,Kf,P,S]],[[P,Kr,E,T]],[[S,H]],[[F,[F[0]-3.2,F[1]+1.3]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Split squat':{dur:3,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.40,.12,.26),rl=_phase(u-.03,.40,.12,.26),F=[15.5,37.3],T=[33.5,38.4],P=[24-.4*r,23+5.4*r],E=_rot([31.8,37.3],T,(12+34*r)*_DG),a3=(8+10*r)*_DG,a4=(8+10*rl)*_DG,b=(10+20*rl)*_DG;var Kf=_ik(F,P,8.5,9,-1)[0],Kr=_ik(E,P,8.5,9,-1)[0],S=[P[0]-Math.sin(a3)*10,P[1]-Math.cos(a3)*10],H=[S[0]-Math.sin(b)*8.4,S[1]+Math.cos(b)*8.4];return{parts:[[[F,Kf,P,S]],[[P,Kr,E,T]],[[S,H]],[[F,[12.3,38.5]]]],head:[S[0]-Math.sin(a4)*4.2,S[1]-Math.cos(a4)*4.2]};}},
+'Lateral lunge':{dur:3,refs:['M5 39 H41'],pose:function(u){var r=_phase(u,.38,.14,.28),rl=_phase(u-.03,.38,.14,.28),L=[13,37.5],R=[33,37.5],P=[23-4.6*r,23.9+4.7*r],t=8*r*_DG,tl=8*rl*_DG,w=(24+26*rl)*_DG;var Kl=_ik(L,P,8.5,9,-1)[0],Kr=_ik(R,P,8.5,9,1)[0],S=[P[0]-Math.sin(t)*10,P[1]-Math.cos(t)*10],HL=[S[0]-Math.sin(w)*8.4,S[1]+Math.cos(w)*8.4],HR=[S[0]+Math.sin(w)*8.4,S[1]+Math.cos(w)*8.4];return{parts:[[[L,Kl,P],[P,Kr,R]],[[P,S]],[[S,HL],[S,HR]],[[L,[10.8,38.6]],[R,[35.2,38.6]]]],head:[P[0]-Math.sin(tl)*14.2,P[1]-Math.cos(tl)*14.2]};}},
+'Single-leg RDL':{dur:3.2,refs:['M5 39 H41'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.44,.12,.28),rl=_phase(u-.03,.44,.12,.28),A=[21,37.5];var a1=(4+6*r)*_DG,a2=(6+2*r)*_DG,t=(6+72*r)*_DG,tl=(6+72*rl)*_DG,g=(8+70*r)*_DG,g2=g-5*_DG,b=(3+6*r)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(t)*10,Hp[1]-c(t)*10];var rk=[Hp[0]+s(g)*9,Hp[1]+c(g)*9];var rf=[rk[0]+s(g2)*8.5,rk[1]+c(g2)*8.5];var Ha=[S[0]-s(b)*8.4,S[1]+c(b)*8.4];return {parts:[[[A,K,Hp,S]],[[Hp,rk,rf]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(tl)*4.2,S[1]-c(tl)*4.2]};}},
+'Cossack squat':{dur:3.1,refs:['M5 39 H41'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),A1=[14.5,37.5],A2=[33,37.5];function P(q){var t=(2+9*q)*_DG,hp=[23.5-5.7*q,23.2+7.1*q];return [hp,[hp[0]-s(t)*9.7,hp[1]-c(t)*9.7],t];}var p=P(r),hip=p[0],S=p[1],pl=P(rl),Sl=pl[1],tl=pl[2];var k1=_ik(A1,hip,8.5,9,-1)[0],k2=_ik(A2,hip,8.5,9,1)[0];return {parts:[[[A1,k1,hip,S]],[[hip,k2,A2]],[[[S[0]-8.2,S[1]+1.8],S,[S[0]+8.2,S[1]+1.8]]],[[A1,[A1[0]-2.6,A1[1]+1]],[A2,[A2[0]+2.6,A2[1]+1]]]],head:[Sl[0]-s(tl)*4.2,Sl[1]-c(tl)*4.2]};}},
+'Jump squat':{dur:2.8,refs:['M5 39 H41'],pose:function(u){var s=Math.sin,c=Math.cos;function st(q){q-=Math.floor(q);var r=_phase(q,.34,.10,.12),j=(q>.54&&q<.80)?Math.sin((q-.54)/.26*Math.PI):0,lb=(q>.78&&q<.96)?Math.sin((q-.78)/.18*Math.PI):0;return [Math.max(r,.35*j,.42*lb),3.4*j];}var t0=st(u),rr=t0[0],jy=t0[1],t1=st(u-.03),rrl=t1[0],jyl=t1[1];var A=[23,37.5-jy],a1=(4+24*rr)*_DG,a2=(7+68*rr)*_DG,a3=(4+28*rr)*_DG,a3l=(4+28*rrl)*_DG,b=(10+58*rrl)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var Ha=[S[0]-s(b)*8.4,S[1]+c(b)*8.4];return {parts:[[[A,K,Hp,S]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2+(jy-jyl)]};}},
+'Hip thrust':{dur:3,refs:['M5 39 H41','M5.5 29.4 H13.5','M9.5 29.4 V39'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.26,.16,.40),rl=_phase(u-.03,.26,.16,.40),S=[11.5,28.8],F=[30,37.5];var t=(28-25*r)*_DG,tl=(28-25*rl)*_DG;var hip=[S[0]+c(t)*10,S[1]+s(t)*10];var k=_ik(F,hip,8.5,9,1)[0];return {parts:[[[S,hip]],[[hip,k,F]],[[S,[14,36.8]]],[[F,[F[0]+3.4,F[1]+1]]]],head:[S[0]-c(tl)*4.2,S[1]-s(tl)*4.2]};}},
+'Sissy squat':{dur:3.2,refs:['M5 39 H41'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.44,.10,.24),rl=_phase(u-.03,.44,.10,.24),P=[22,37.5];var a1=(6+38*r)*_DG,a2=(4+34*r)*_DG,a3=(2+30*r)*_DG,a3l=(2+30*rl)*_DG,hf=(8+40*r)*_DG;var K=[P[0]-s(a1)*9.3,P[1]-c(a1)*9.3];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]+s(a3)*10,Hp[1]-c(a3)*10];return {parts:[[[P,K,Hp,S]],[[S,[S[0]-8.2,S[1]+1.8]]],[[P,[P[0]+c(hf)*3.4,P[1]-s(hf)*3.4]]]],head:[S[0]+s(a3l)*4.2,S[1]-c(a3l)*4.2]};}},
+'Bulgarian split squat':{dur:3.1,refs:['M5 39 H41','M28.5 30.2 H36','M32 30.2 V39'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),A=[16,37.5],Rf=[30.5,29.6];var a1=(4+30*r)*_DG,a2=(8+55*r)*_DG,a3=(4+14*r)*_DG,a3l=(4+14*rl)*_DG,b=(8+18*rl)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var e=_ik(Rf,Hp,8.5,9,-1);var Ha=[S[0]-s(b)*8.4,S[1]+c(b)*8.4];return {parts:[[[A,K,Hp,S]],[[Hp,e[0],Rf]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2]};}},
+'Nordic negative':{dur:3.5,refs:['M5 39 H41','M34.6 33.5 V38.8'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.56,.16,.08),rl=_phase(u-.02,.56,.16,.08),Kn=[24,37.3],An=[31.5,37.5];var t=(4+54*r)*_DG,tl=(4+54*rl)*_DG,w=(6+34*r)*_DG;var hip=[Kn[0]-s(t)*9,Kn[1]-c(t)*9];var S=[hip[0]-s(t)*10,hip[1]-c(t)*10];var Ha=[S[0]-s(w)*8.4,S[1]+c(w)*8.4];return {parts:[[[An,Kn,hip,S]],[[S,Ha]],[[An,[An[0]+2.6,An[1]-1.8]]]],head:[S[0]-s(tl)*4.2,S[1]-c(tl)*4.2]};}},
+'Assisted pistol':{dur:3.2,refs:['M5 39 H41','M13 6 V39'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.44,.12,.26),rl=_phase(u-.03,.44,.12,.26),A=[24,37.5];var a1=(4+42*r)*_DG,a2=(7+103*r)*_DG,a3=(6+34*r)*_DG,a3l=(6+34*rl)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var Hd=[13.4,12+10*r];var e=_ik(Hd,S,6.8,4.6,1);var f1=(60-58*r)*_DG,f2=f1+4*_DG;var kf=[Hp[0]-c(f1)*9,Hp[1]+s(f1)*9];var ff=[kf[0]-c(f2)*8.5,kf[1]+s(f2)*8.5];return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[Hd,e[0],e[1]]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2]};}},
+'Box pistol':{dur:3,refs:['M5 39 H41','M29 28.6 H40','M34.5 28.6 V39'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),A=[27,37.5];var a1=(4+29*r)*_DG,a2=(7+69*r)*_DG,a3=(6+32*r)*_DG,a3l=(6+32*rl)*_DG,b=(18+72*rl)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var Ha=[S[0]-s(b)*8.4,S[1]+c(b)*8.4];var f1=(62-59*r)*_DG,f2=f1+4*_DG;var kf=[Hp[0]-c(f1)*9,Hp[1]+s(f1)*9];var ff=[kf[0]-c(f2)*8.5,kf[1]+s(f2)*8.5];return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2]};}},
+'Pistol squat':{dur:3.3,refs:['M5 39 H41'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.44,.12,.26),rl=_phase(u-.03,.44,.12,.26),A=[25,37.5];var a1=(4+42*r)*_DG,a2=(7+103*r)*_DG,a3=(6+40*r)*_DG,a3l=(6+40*rl)*_DG,b=(20+72*rl)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var Ha=[S[0]-s(b)*8.4,S[1]+c(b)*8.4];var f1=(60-58*r)*_DG,f2=f1+4*_DG;var kf=[Hp[0]-c(f1)*9,Hp[1]+s(f1)*9];var ff=[kf[0]-c(f2)*8.5,kf[1]+s(f2)*8.5];return {parts:[[[A,K,Hp,S]],[[Hp,kf,ff]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2]};}},
+'Shrimp squat':{dur:3.2,refs:['M5 39 H41'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.44,.12,.26),rl=_phase(u-.03,.44,.12,.26),A=[21,37.5];var a1=(4+34*r)*_DG,a2=(7+80*r)*_DG,a3=(6+42*r)*_DG,a3l=(6+42*rl)*_DG,g=(12+16*r)*_DG,h=11*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var rk=[Hp[0]+s(g)*9,Hp[1]+c(g)*9];var rf=[rk[0]-s(h)*8.5,rk[1]-c(h)*8.5];var e=_ik(rf,S,7.4,5.8,1);return {parts:[[[A,K,Hp,S]],[[Hp,rk,rf]],[[rf,e[0],e[1]]],[[S,[S[0]-8.2,S[1]+1.8]]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2]};}},
+'Nordic curl':{dur:3.4,refs:['M5 39 H41','M34.6 33.5 V38.8'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.40,.12,.36),rl=_phase(u-.03,.40,.12,.36),Kn=[24,37.3],An=[31.5,37.5];var t=(4+54*r)*_DG,tl=(4+54*rl)*_DG,w=(6+34*r)*_DG;var hip=[Kn[0]-s(t)*9,Kn[1]-c(t)*9];var S=[hip[0]-s(t)*10,hip[1]-c(t)*10];var Ha=[S[0]-s(w)*8.4,S[1]+c(w)*8.4];return {parts:[[[An,Kn,hip,S]],[[S,Ha]],[[An,[An[0]+2.6,An[1]-1.8]]]],head:[S[0]-s(tl)*4.2,S[1]-c(tl)*4.2]};}},
+'Skater squat':{dur:3.2,refs:['M5 39 H41','M29 36.8 H34.5'],pose:function(u){var s=Math.sin,c=Math.cos,r=_phase(u,.42,.12,.26),rl=_phase(u-.03,.42,.12,.26),A=[22,37.5];var a1=(4+32*r)*_DG,a2=(7+78*r)*_DG,a3=(6+44*r)*_DG,a3l=(6+44*rl)*_DG,g=(14+22*r)*_DG,h=(30-8*r)*_DG,v=(-30+38*rl)*_DG;var K=[A[0]-s(a1)*8.5,A[1]-c(a1)*8.5];var Hp=[K[0]+s(a2)*9,K[1]-c(a2)*9];var S=[Hp[0]-s(a3)*10,Hp[1]-c(a3)*10];var rk=[Hp[0]+s(g)*9,Hp[1]+c(g)*9];var rf=[rk[0]+c(h)*8.5,rk[1]-s(h)*8.5];var Ha=[S[0]-c(v)*8.4,S[1]-s(v)*8.4];return {parts:[[[A,K,Hp,S]],[[Hp,rk,rf]],[[S,Ha]],[[A,[A[0]-3.6,A[1]+1.5]]]],head:[S[0]-s(a3l)*4.2,S[1]-c(a3l)*4.2]};}}
+}
+,core:{
+'Dead bug':{dur:3.2,refs:['M4 38 H42'],pose:function(u){var r=_phase(u,.38,.14,.30),rl=_phase(u-.03,.38,.14,.30),S=[13.5,35.6],Hp=[27,35.6],ar=(90+62*r)*_DG,Ha=[S[0]+Math.cos(ar)*8.4,S[1]-Math.sin(ar)*8.4],ta=(90-80*r)*_DG,kn=[Hp[0]+Math.cos(ta)*6.5,Hp[1]-Math.sin(ta)*6.5],sa=ta-(90-82*r)*_DG,ft=[kn[0]+Math.cos(sa)*6,kn[1]-Math.sin(sa)*6];return {parts:[[[S,Hp]],[[S,Ha]],[[Hp,kn,ft]]],head:[9,34.8-.25*rl]};}},
+'Bird dog':{dur:3.3,refs:['M4 38 H42'],pose:function(u){var r=_phase(u,.30,.24,.30),rl=_phase(u-.03,.30,.24,.30),S=[13,29.5],Hp=[27,30],aa=84*r*_DG,Mh=[S[0]-Math.sin(aa)*8.5,S[1]+Math.cos(aa)*8.5],la=86*r*_DG,Mk=[Hp[0]+Math.sin(la)*8,Hp[1]+Math.cos(la)*8],sa=la+(90-84*r)*_DG,Mf=[Mk[0]+Math.sin(sa)*6,Mk[1]+Math.cos(sa)*6];return {parts:[[[S,Hp]],[[S,[13,38]]],[[Hp,[27,38],[33,38]]],[[S,Mh]],[[Hp,Mk,Mf]]],head:[9.6,27.4-.5*rl]};}},
+'Forearm plank':{dur:3.3,refs:['M4 38 H42'],pose:function(u){var b=Math.sin(u*2*Math.PI),bl=Math.sin(u*2*Math.PI-.7),S=[12,29.6],hip=[25.3,32.9-.4*b];return {parts:[[[[18.5,38],[12,38],S]],[[S,hip,[38.6,36.2],[40.5,38]]]],head:[7.8,28.6-.3*bl]};}},
+'Side plank':{dur:3.1,refs:['M4 38 H42'],pose:function(u){var b=Math.sin(u*2*Math.PI),bl=Math.sin(u*2*Math.PI-.7),S=[11,29.8],hip=[24.6,32.9-.45*b];return {parts:[[[[17.5,38],[11,38],S]],[[S,hip,[39,37.4]]],[[S,[19.5,32.2-.3*b]]]],head:[6.8,28.7-.3*bl]};}},
+'Tuck hollow hold':{dur:3.2,refs:['M5 34 H41'],pose:function(u){var b=Math.sin(u*2*Math.PI)*1.3*_DG,bl=Math.sin(u*2*Math.PI-.7)*1.3*_DG,MB=[19.5,32.4];function R(p){return _rot(p,MB,b);}return {parts:[[[R([13.5,31.4]),MB,R([25.5,31.9])]],[[R([25.5,31.9]),R([24.3,26.5]),R([29,29.6])]],[[R([13.5,31.4]),R([21,30.2])]]],head:_rot([9.7,29.4],MB,bl)};}},
+'Reverse crunch':{dur:3.1,refs:['M4 38 H42'],pose:function(u){var r=_phase(u,.30,.12,.44),rl=_phase(u-.03,.30,.12,.44),S=[13.5,35.6],MB=[20,35.6],hip=_rot([27,35.6],MB,-38*r*_DG),t=52*r*_DG,kn=[hip[0]-Math.sin(t)*6.4,hip[1]-Math.cos(t)*6.4],ft=[kn[0]+Math.cos(t)*5.8,kn[1]-Math.sin(t)*5.8];return {parts:[[[S,MB,hip]],[[hip,kn,ft]],[[S,[22.5,36.8]]]],head:[9,34.8-.2*rl]};}},
+'Mountain climbers':{dur:2.6,refs:['M5 38 H42'],pose:function(u){var w=u*4*Math.PI,p1=(1-Math.cos(w))/2,p2=(1+Math.cos(w))/2,S=[13.5,29.2],hip=[28,30.7];function lg(p){var f=[38.2-11.6*p,37.7-2.1*p],k=_ik(hip,f,5.9,6,1);return [[hip,k[0],k[1]]];}return {parts:[[[[13,38],S]],[[S,hip]],lg(p1),lg(p2)],head:[9.2,28.4+.3*Math.sin(w-.6)]};}},
+'Hollow hold':{dur:3.3,refs:['M5 34 H41'],pose:function(u){var b=Math.sin(u*2*Math.PI)*1.2*_DG,bl=Math.sin(u*2*Math.PI-.7)*1.2*_DG,MB=[19.5,32.4];function R(p){return _rot(p,MB,b);}return {parts:[[[R([13.5,31.4]),MB,R([25.5,31.9])]],[[R([25.5,31.9]),R([31.4,30.6]),R([37.2,30])]],[[R([13.5,31.4]),R([6.2,28.9])]]],head:_rot([9.7,29.4],MB,bl)};}},
+'Plank shoulder taps':{dur:3,refs:['M5 38 H42'],pose:function(u){var r=_phase(u,.30,.16,.30),rl=_phase(u-.03,.30,.16,.30),S=[13.5,29.6],Ha=[12.2+3*r,38-7*r],e=_ik(Ha,S,4.4,4.3,-1);return {parts:[[[[13,38],S]],[[S,[27.5,32.2],[33.5,35],[39.2,37.6]]],[[Ha,e[0],e[1]]]],head:[9.3,28.6-.3*rl]};}},
+'Floor leg raise':{dur:3.4,refs:['M4 38 H42'],pose:function(u){var r=_phase(u,.26,.12,.46),rl=_phase(u-.03,.26,.12,.46),S=[13.5,35.6],Hp=[27,35.6],a=(8+78*r)*_DG,a2=(2+78*r)*_DG,kn=[Hp[0]+Math.cos(a)*6.4,Hp[1]-Math.sin(a)*6.4],ft=[kn[0]+Math.cos(a2)*6,kn[1]-Math.sin(a2)*6],toe=[ft[0]-Math.sin(a2)*2.2,ft[1]-Math.cos(a2)*2.2];return {parts:[[[S,Hp]],[[Hp,kn,ft,toe]],[[S,[22.5,36.7]]]],head:[9,34.8-.3*rl]};}},
+'Superman hold':{dur:3.3,refs:['M4 38 H42'],pose:function(u){var b=Math.sin(u*2*Math.PI)*1.3*_DG,bl=Math.sin(u*2*Math.PI-.7)*1.3*_DG,B=[23,36.6];function R(p){return _rot(p,B,b);}var S=R([15.6,34.2]);return {parts:[[[S,B,R([28.6,35.9]),R([34.2,34.2]),R([39.6,32.6])]],[[S,R([7.6,31.7])]]],head:_rot([11.6,32.4],B,bl)};}},
+'Hollow rock':{dur:2.7,refs:['M5 34 H41'],pose:function(u){var b=Math.sin(u*2*Math.PI)*7*_DG,bl=Math.sin(u*2*Math.PI-.5)*7*_DG,MB=[19.5,32.4];function R(p){return _rot(p,MB,b);}return {parts:[[[R([13.5,31.4]),MB,R([25.5,31.9])]],[[R([25.5,31.9]),R([31.4,30.6]),R([37.2,30])]],[[R([13.5,31.4]),R([6.2,28.9])]]],head:_rot([9.7,29.2],MB,bl)};}},
+'V-up':{dur:3,refs:['M5 34 H41'],pose:function(u){var r=_phase(u,.22,.12,.40),rl=_phase(u-.03,.22,.12,.40),hp=[23,32.6];var t=(10+48*r)*_DG,a=(8+58*r)*_DG,s2=a-7*_DG;var S=[23-Math.cos(t)*10,32.6-Math.sin(t)*10];var kn=[23+Math.cos(a)*7.8,32.6-Math.sin(a)*7.8];var ft=[kn[0]+Math.cos(s2)*7.4,kn[1]-Math.sin(s2)*7.4];var dx=ft[0]-S[0],dy=ft[1]-S[1],dd=Math.sqrt(dx*dx+dy*dy);var H=[S[0]+dx/dd*10.35,S[1]+dy/dd*10.35];var e=_ik(H,S,5.8,4.8,-1);var tl=(10+48*rl)*_DG,Sl=[23-Math.cos(tl)*10,32.6-Math.sin(tl)*10];return {parts:[[[S,hp,kn,ft]],[[H,e[0],e[1]]]],head:[Sl[0]-Math.cos(tl)*4.4,Sl[1]-Math.sin(tl)*4.4]};}},
+'Side plank dip':{dur:2.9,refs:['M5 38 H42'],pose:function(u){var r=_phase(u,.40,.08,.30),rl=_phase(u-.03,.40,.08,.30),F=[36.6,37.3],E=[13,37.2];var la=(16-10*r)*_DG;var hip=[F[0]-Math.cos(la)*12.1,F[1]-Math.sin(la)*12.1];var S=_ik(E,hip,5.7,12.1,-1)[0];var ll=(16-10*rl)*_DG;var hl=[F[0]-Math.cos(ll)*12.1,F[1]-Math.sin(ll)*12.1];var Sl=_ik(E,hl,5.7,12.1,-1)[0];return {parts:[[[F,hip,S]],[[S,E],[E,[18.6,37.2]]],[[F,[38.4,36.9]]]],head:[Sl[0]+(Sl[0]-hl[0])*.36,Sl[1]+(Sl[1]-hl[1])*.36]};}},
+'Copenhagen plank':{dur:3.2,refs:['M4 40 H42','M30 31.7 H40','M31.5 31.7 V40','M38.5 31.7 V40'],pose:function(u){var s=Math.sin(u*6.28318),sl=Math.sin((u-.06)*6.28318),F=[34.5,31.1],E=[10,39.2];var la=(5+1.2*s)*_DG;var hip=[F[0]-Math.cos(la)*12.3,F[1]+Math.sin(la)*12.3];var S=_ik(E,hip,5.7,12.3,-1)[0];var ll=(5+1.2*sl)*_DG;var hl=[F[0]-Math.cos(ll)*12.3,F[1]+Math.sin(ll)*12.3];var Sl=_ik(E,hl,5.7,12.3,-1)[0];var k2=[hip[0]-2.6,hip[1]+4.6],f2=[k2[0]+2.4,k2[1]+2.7];return {parts:[[[F,hip,S]],[[S,E],[E,[15.6,39.2]]],[[hip,k2,f2]],[[F,[36.9,31.1]]]],head:[Sl[0]+(Sl[0]-hl[0])*.36,Sl[1]+(Sl[1]-hl[1])*.36]};}},
+'Hanging knee raise':{dur:3,refs:['M14 7 H32'],pose:function(u){var r=_phase(u,.28,.12,.40),rl=_phase(u-.03,.28,.12,.40),H=[23,7.6],S=[23,17.8];var g=(-2+12*r)*_DG;var hip=[23-Math.sin(g)*9.8,17.8+Math.cos(g)*9.8];var a=(4+108*r)*_DG,c=a-(6+82*r)*_DG;var kn=[hip[0]+Math.sin(a)*7.8,hip[1]+Math.cos(a)*7.8];var ft=[kn[0]+Math.sin(c)*7.4,kn[1]+Math.cos(c)*7.4];return {parts:[[[H,S]],[[S,hip]],[[hip,kn,ft]]],head:[23.9,13.55+(r-rl)*1.2]};}},
+'Reverse plank':{dur:3.1,refs:['M5 38 H42'],pose:function(u){var r=_phase(u,.34,.16,.30),rl=_phase(u-.03,.34,.16,.30),H=[13,37.4],F=[34.6,37];var b=(7+17*r)*_DG;var hip=[F[0]-Math.cos(b)*11.6,F[1]-Math.sin(b)*11.6];var S=_ik(H,hip,10.3,11,-1)[0];var bl=(7+17*rl)*_DG;var hl=[F[0]-Math.cos(bl)*11.6,F[1]-Math.sin(bl)*11.6];var Sl=_ik(H,hl,10.3,11,-1)[0];return {parts:[[[S,hip,F],[F,[38.1,36.3]]],[[H,S]]],head:[Sl[0]+(Sl[0]-hl[0])*.4,Sl[1]+(Sl[1]-hl[1])*.4]};}},
+'Hanging leg raise':{dur:3.2,refs:['M14 7 H32'],pose:function(u){var r=_phase(u,.30,.12,.40),rl=_phase(u-.03,.30,.12,.40),H=[23,7.6],S=[23,17.8];var g=(-2+10*r)*_DG;var hip=[23-Math.sin(g)*9.8,17.8+Math.cos(g)*9.8];var a=(3+87*r)*_DG,c=a-4*_DG;var kn=[hip[0]+Math.sin(a)*7.8,hip[1]+Math.cos(a)*7.8];var ft=[kn[0]+Math.sin(c)*7.4,kn[1]+Math.cos(c)*7.4];return {parts:[[[H,S]],[[S,hip]],[[hip,kn,ft]]],head:[23.9,13.55+(r-rl)*1.2]};}},
+'Tuck L-sit':{dur:3.1,refs:['M5 39.5 H42','M16.5 36.4 H24'],pose:function(u){var s=Math.sin(u*6.28318),sl=Math.sin((u-.06)*6.28318),H=[20.2,36.3];var S=[20.9,26.2-.2*s];var hip=[S[0]+2.46,S[1]+6.77];var e=_ik(H,S,5.8,4.8,-1);function leg(off){var a=(52+2*s+off)*_DG,c=(104-2*s-off)*_DG;var k=[hip[0]+Math.cos(a)*7.8,hip[1]-Math.sin(a)*7.8];var f=[k[0]+Math.cos(c)*7.4,k[1]+Math.sin(c)*7.4];var td=c+22*_DG;return [hip,k,f,[f[0]+Math.cos(td)*1.8,f[1]+Math.sin(td)*1.8]];}return {parts:[[[S,hip]],[leg(0)],[leg(3)],[[H,e[0],e[1]]]],head:[19.4,22.06-.25*sl]};}},
+'Dragon flag negative':{dur:3.5,refs:['M5 34 H41','M8 25.5 V34'],pose:function(u){var r=_phase(u,.58,.18,.05),P=[14,31.8],A=[8,28.6];var t=(62-50*r)*_DG,t2=t-3*_DG,t3=t-6*_DG;var hip=[P[0]+Math.cos(t)*10,P[1]-Math.sin(t)*10];var kn=[hip[0]+Math.cos(t2)*7.8,hip[1]-Math.sin(t2)*7.8];var ft=[kn[0]+Math.cos(t3)*7.4,kn[1]-Math.sin(t3)*7.4];var toe=[ft[0]+Math.cos(t3)*2.1,ft[1]-Math.sin(t3)*2.1];var e=_ik(A,P,4.6,3.4,-1);return {parts:[[[P,hip,kn,ft,toe]],[[A,e[0],e[1]]]],head:[10.6,29.7]};}},
+'Toes-to-bar':{dur:3.3,refs:['M14 7 H32'],pose:function(u){var r=_phase(u,.32,.10,.38),rl=_phase(u-.03,.32,.10,.38),H=[23,7.6];var p=(1+27*r)*_DG,g=(2+56*r)*_DG;var S=[23-Math.sin(p)*10.4,7.6+Math.cos(p)*10.4];var hip=[S[0]+Math.sin(g)*10,S[1]+Math.cos(g)*10];var f=(3+172*r)*_DG;var Ft=[hip[0]+Math.sin(f)*14.9,hip[1]+Math.cos(f)*14.9];var k=_ik(Ft,hip,7.4,7.8,1);var pl=(1+27*rl)*_DG,gl=(2+56*rl)*_DG;var Sl=[23-Math.sin(pl)*10.4,7.6+Math.cos(pl)*10.4];var hl=[Sl[0]+Math.sin(gl)*10,Sl[1]+Math.cos(gl)*10];return {parts:[[[H,S]],[[S,hip]],[[Ft,k[0],k[1]]]],head:[Sl[0]+(Sl[0]-hl[0])*.43,Sl[1]+(Sl[1]-hl[1])*.43]};}},
+'L-sit':{dur:3.3,refs:['M5 39.5 H42','M16.5 36.4 H24'],pose:function(u){var s=Math.sin(u*6.28318),sl=Math.sin((u-.06)*6.28318),H=[20.2,36.3];var S=[20.9,26.2-.2*s];var hip=[S[0]+2.46,S[1]+6.77];var e=_ik(H,S,5.8,4.8,-1);function leg(off){var a=(6.5+1.6*s+off)*_DG,c=(-1+1.6*s+off)*_DG;var k=[hip[0]+Math.cos(a)*7.8,hip[1]-Math.sin(a)*7.8];var f=[k[0]+Math.cos(c)*7.4,k[1]+Math.sin(c)*7.4];var td=c+22*_DG;return [hip,k,f,[f[0]+Math.cos(td)*1.8,f[1]+Math.sin(td)*1.8]];}return {parts:[[[S,hip]],[leg(0)],[leg(3)],[[H,e[0],e[1]]]],head:[19.4,22.06-.25*sl]};}},
+'Windshield wipers':{dur:3.4,refs:['M8 8 H38'],pose:function(u){var w=.61*Math.sin(u*6.28318),HL=[17,8.6],HR=[29,8.6],SL=[19.9,16.2],SR=[26.1,16.2];var eL=_ik(HL,SL,5.8,4.8,1),eR=_ik(HR,SR,5.8,4.8,-1);var hip=[23-Math.sin(w)*1.5,25.3];function leg(d){var hp=[hip[0]+d,25.3];var kn=[hp[0]+Math.sin(w)*7.8,hp[1]-Math.cos(w)*7.8];var v=w*.86;var ft=[kn[0]+Math.sin(v)*7.4,kn[1]-Math.cos(v)*7.4];return [hp,kn,ft];}return {parts:[[[SL,SR]],[[HL,eL[0],eL[1]],[HR,eR[0],eR[1]]],[[[23,16.2],hip]],[leg(-0.8)],[leg(0.8)]],head:[23+.4*Math.sin(u*6.28318-.6),11.9]};}},
+'Dragon flag':{dur:3.4,refs:['M5 34 H41','M8 25.5 V34'],pose:function(u){var r=_phase(u,.40,.12,.32),P=[14,31.8],A=[8,28.6];var t=(62-50*r)*_DG,t2=t-3*_DG,t3=t-6*_DG;var hip=[P[0]+Math.cos(t)*10,P[1]-Math.sin(t)*10];var kn=[hip[0]+Math.cos(t2)*7.8,hip[1]-Math.sin(t2)*7.8];var ft=[kn[0]+Math.cos(t3)*7.4,kn[1]-Math.sin(t3)*7.4];var toe=[ft[0]+Math.cos(t3)*2.1,ft[1]-Math.sin(t3)*2.1];var e=_ik(A,P,4.6,3.4,-1);return {parts:[[[P,hip,kn,ft,toe]],[[A,e[0],e[1]]]],head:[10.6,29.7]};}}
+}
+};
 function moveSvg(id,c,erzwungenStill){
   var d=(typeof id==='object'&&id)?id:DEMOS[id];if(!d)return '';
   var still=SYSRED||cfg.motion==='off'||!!erzwungenStill,N=24;
@@ -4221,6 +4986,16 @@ $('moreBtn').addEventListener('click',function(e){
   if(sheetOpen)closeSheet();else openSheet();
 });
 $('sheetBg').addEventListener('click',closeSheet);
+$('sheetGrip').addEventListener('click',closeSheet);
+/* Escape schliesst das Blatt, und beim erneuten Einfuehrungs-Durchlauf auch
+   den Wizard -- der Griff- bzw. Abbrechen-Knopf ist der Maus-Weg, das hier
+   der Tastatur-Weg. Der Runner hat weiter unten seinen eigenen Escape. */
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  if(sheetOpen){closeSheet();return;}
+  var ic=$('inClose');
+  if(ic&&!ic.hidden&&$('intro').classList.contains('on'))introShow(false);
+});
 $('sheetBody').addEventListener('click',function(e){
   var b=e.target.closest('button[data-view]');if(!b)return;
   closeSheet();
@@ -4350,7 +5125,11 @@ function renderDay(){
   var items=pl.kind==='train'?sessOf(pl).items.map(function(x){return{id:x.id,l:x.l,k:x.k,v:x.v||(pl.ph.sets+' x '+pl.ph.reps)};}):(pl.items||[]).map(function(x){return{id:null,l:x.l,v:x.v};});
   items.forEach(function(it,i){
     var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
-    var icon=it.id?sv(it.id,cvar(pid[it.id].cv),28):'';
+    /* v18: uebungs-spezifisches Strichmaennchen als Kachel (Standbild);
+       solange eine Uebung kein eigenes hat, faellt es aufs Muster-Icon zurueck.
+       Eintraege ohne id (lockere und Ruhetage) bekommen ihre eigene Kachel,
+       damit die Bildspalte in jeder Wochenansicht steht. */
+    var icon=it.id?exThumb(it.l,it.id):looseThumb(it.l);
     row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+itemName(it)+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?(cfg.lang==='de'?'Erholung':'recovery'):(cfg.lang==='de'?'locker':'easy'))))+'</span></span>'+
       ((pl.kind==='train'&&it.id)?'<button type="button" class="swp" title="Swap exercise" aria-label="Swap exercise">&#8644;</button>':'')+
       '<span class="sets">'+it.v+'</span>';
@@ -5354,35 +6133,77 @@ function drawMeals(){
       mbar(DE?'Fett':'Fat',fat,zielF,'var(--brass)')+
     '</div>'+
     (zielK?'':'<p class="hint" style="margin:.6rem 0 0">'+(DE?'Kein Ziel gesetzt — oben Körperdaten eintragen.':'No target set — enter your body data above.')+'</p>')+
+    '<div class="savebar" style="margin-top:.7rem"><button type="button" class="tbtn" id="optCal" style="width:100%">'+
+      (DE?'Kalorienberechnung optimieren':'Optimise calorie targets')+'</button></div>'+
   '</div>';
-  if(!ms.length){
-    listEl.innerHTML='<p class="hint">'+(DE
-      ?'Noch nichts eingetragen. „Mahlzeit hinzufügen" — Kalorien rechnet der Hub aus den Nährwerten.'
-      :'Nothing logged yet. "Add meal" — the hub works out the calories from the macros.')+'</p>';
-    return;
-  }
+  var oc=$('optCal');
+  if(oc)oc.addEventListener('click',function(){
+    var ziel=document.querySelector('#v-fuel .form');
+    if(ziel)ziel.scrollIntoView({behavior:'smooth',block:'start'});
+  });
+  /* v18: die vier Slots stehen auch leer da -- so sieht man sofort, WO man
+     eintraegt, statt vor einer leeren Flaeche zu raten. */
   /* Farb-Chip je Zeile: vier Kennfarben im Wechsel, Teller-Symbol. */
   var MCOLS=['var(--aurora)','var(--ice)','var(--brass)','var(--ember)'];
   var MICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.4"/></svg>';
-  listEl.innerHTML=ms.map(function(m,i){
-    return '<button type="button" class="prrow" data-meal="'+i+'">'+
-      '<span class="prtop hasChip"><span class="mchip" style="--chip:'+MCOLS[i%4]+'">'+MICON+'</span><b></b><span class="prv">'+mealKcal(m)+'<i>kcal</i></span></span>'+
-      '<span class="prfoot"><span class="delta flat">'+m.p+' g P · '+m.f+' g F · '+m.c+' g '+(DE?'KH':'C')+'</span>'+
-      '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>'+
-      '</button>';
-  }).join('');
-  [].forEach.call(listEl.querySelectorAll('.prrow b'),function(b,i){b.textContent=ms[i].n;});
+  /* v18: Mahlzeiten-Slots wie im App-Standard -- Fruehstueck, Mittag, Abend,
+     Snacks. Jeder Slot mit eigenem Symbol-Chip, Summen und Plus-Knopf; alte
+     Eintraege ohne Slot laufen unter Snacks. */
+  var SLOTS=[
+    ['b',DE?'Frühstück':'Breakfast','var(--brass)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="14" r="4.6"/><path d="M12 6.5V4M6.7 8.7 5 7M17.3 8.7 19 7M3 14h2M19 14h2M4 19h16"/></svg>'],
+    ['l',DE?'Mittagessen':'Lunch','var(--aurora)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.4"/></svg>'],
+    ['d',DE?'Abendessen':'Dinner','var(--ice)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13.5A8 8 0 1 1 10.5 4.5a6.5 6.5 0 0 0 9 9Z"/></svg>'],
+    ['s','Snacks','var(--ember)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-6.5-3.8-6.5-8.4A3.6 3.6 0 0 1 12 9.3a3.6 3.6 0 0 1 6.5 2.8c0 4.6-6.5 8.4-6.5 8.4Z"/><path d="M12 9.3V6.2M10 4.5h4"/></svg>']
+  ];
+  var h='';
+  SLOTS.forEach(function(sl){
+    var eintraege=[];
+    ms.forEach(function(m,i){if((m.s||'s')===sl[0])eintraege.push([m,i]);});
+    var slotK=0;eintraege.forEach(function(x){slotK+=mealKcal(x[0]);});
+    h+='<div class="mslot"><div class="mslotHead">'+
+      '<span class="mchip" style="--chip:'+sl[2]+'">'+sl[3]+'</span>'+
+      '<b>'+sl[1]+'</b><span class="mslotK">'+(slotK?Math.round(slotK)+' kcal':'')+'</span>'+
+      '<button type="button" class="mslotAdd" data-slot="'+sl[0]+'" aria-label="+">+</button></div>';
+    eintraege.forEach(function(x){
+      var m=x[0];
+      h+='<button type="button" class="prrow" data-meal="'+x[1]+'">'+
+        '<span class="prtop"><b></b><span class="prv">'+mealKcal(m)+'<i>kcal</i></span></span>'+
+        '<span class="prfoot"><span class="delta flat">'+m.p+' g P · '+m.f+' g F · '+m.c+' g '+(DE?'KH':'C')+'</span>'+
+        '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>'+
+        '</button>';
+    });
+    h+='</div>';
+  });
+  listEl.innerHTML=h;
+  var nms=listEl.querySelectorAll('.prrow b');
+  [].forEach.call(listEl.querySelectorAll('.prrow'),function(r,ri){
+    var m=ms[+r.dataset.meal];if(m)nms[ri].textContent=m.n;
+  });
+  [].forEach.call(listEl.querySelectorAll('.mslotAdd'),function(b){
+    b.addEventListener('click',function(e){e.stopPropagation();openMeal(null,b.dataset.slot);});
+  });
 }
-/* Blatt zum Anlegen und Aendern. idx null heisst: neue Mahlzeit. */
-function openMeal(idx){
+/* Blatt zum Anlegen und Aendern. idx null heisst: neue Mahlzeit; slot ist
+   der Ziel-Slot (b/l/d/s), beim Bearbeiten kommt er aus dem Eintrag. */
+function openMeal(idx,slot){
   var DE=cfg.lang==='de',k=iso(TODAY),ms=mealsOf(k);
-  var m=(idx===null||idx===undefined)?{n:'',p:0,f:0,c:0}:ms[idx];
+  var m=(idx===null||idx===undefined)?{n:'',p:0,f:0,c:0,s:slot||'s'}:ms[idx];
   if(!m)return;
   var neu=(idx===null||idx===undefined);
   var html=
     '<h4>'+(neu?(DE?'Neue Mahlzeit':'New meal'):(DE?'Mahlzeit':'Meal'))+'</h4>'+
     '<div class="dsh">'+
       '<div class="dshHead"><b>'+(DE?'Kalorien':'Calories')+'</b><span id="mlKcal">'+mealKcal(m)+' kcal</span></div>'+
+      '<div class="savebar" style="margin:0 0 .55rem"><button type="button" class="tbtn" id="mlScan">'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="vertical-align:-2px;margin-right:.35rem"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>'+
+        (DE?'Barcode scannen':'Scan barcode')+'</button></div>'+
+      '<div class="field"><label for="mlSlot">'+(DE?'Mahlzeit':'Meal slot')+'</label>'+
+        '<div class="ctl"><select id="mlSlot">'+
+          '<option value="b"'+(m.s==='b'?' selected':'')+'>'+(DE?'Frühstück':'Breakfast')+'</option>'+
+          '<option value="l"'+(m.s==='l'?' selected':'')+'>'+(DE?'Mittagessen':'Lunch')+'</option>'+
+          '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abendessen':'Dinner')+'</option>'+
+          '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
+        '</select></div></div>'+
       '<div class="field"><label for="mlName">'+(DE?'Name':'Name')+'</label>'+
         '<div class="ctl"><input id="mlName" type="text" maxlength="40" placeholder="'+(DE?'z. B. Skyr mit Haferflocken':'e.g. skyr with oats')+'"></div></div>'+
       '<div class="field hasSlide"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
@@ -5412,6 +6233,107 @@ function openMeal(idx){
   ['mlP','mlF','mlC'].forEach(function(id){$(id).addEventListener('input',nach);});
   nach();
 }
+/* ---------- Barcode-Scanner (v18) ----------------------------------------
+   Ohne KI, mit Technik: Kamera + BarcodeDetector des Browsers lesen die EAN,
+   die Naehrwerte kommen aus Open Food Facts (freie Datenbank, braucht Netz).
+   Einmal gescannte Produkte liegen im lokalen Cache und funktionieren danach
+   offline. Ohne BarcodeDetector (aeltere iOS-Safaris) gibt es die manuelle
+   EAN-Eingabe -- gleiche Datenbank, gleicher Cache. */
+var foodCache=get('foods',{});
+var scanStream=null,scanLoop=null;
+function scanStop(){
+  if(scanLoop){clearInterval(scanLoop);scanLoop=null;}
+  if(scanStream){scanStream.getTracks().forEach(function(t){t.stop();});scanStream=null;}
+  var ov=$('scanov');if(ov)ov.remove();
+}
+function scanUI(inner){
+  scanStop();
+  var ov=document.createElement('div');ov.id='scanov';
+  ov.innerHTML='<div class="scanbox">'+inner+'</div>';
+  document.body.appendChild(ov);
+  var x=ov.querySelector('[data-scan="x"]');
+  if(x)x.addEventListener('click',scanStop);
+  return ov;
+}
+function scanStart(){
+  var DE=cfg.lang==='de';
+  var hasBD='BarcodeDetector' in window;
+  var ov=scanUI(
+    '<div class="scanhead"><b>'+(DE?'Barcode scannen':'Scan barcode')+'</b>'+
+    '<button type="button" class="iconbtn" data-scan="x" aria-label="Schließen">✕</button></div>'+
+    (hasBD?'<div class="scanvid"><video id="scanVid" playsinline muted></video><span class="scanframe"></span></div>':'')+
+    '<p class="hint" id="scanMsg">'+(hasBD
+      ?(DE?'Kamera auf den Strichcode halten.':'Point the camera at the barcode.')
+      :(DE?'Dieser Browser hat keinen Barcode-Leser — EAN unten eintippen (steht unter dem Strichcode).':'This browser has no barcode reader — type the EAN below (printed under the bars).'))+'</p>'+
+    '<div class="ctl" style="margin-top:.4rem"><input id="scanEan" type="text" inputmode="numeric" placeholder="EAN, z. B. 4311501659715" autocomplete="off"></div>'+
+    '<div class="savebar"><button type="button" class="tbtn go" id="scanGo">'+(DE?'Nachschlagen':'Look up')+'</button></div>'
+  );
+  ov.querySelector('#scanGo').addEventListener('click',function(){
+    var v=(ov.querySelector('#scanEan').value||'').replace(/\D+/g,'');
+    if(v.length>=8)foodLookup(v);
+  });
+  if(hasBD&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
+    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(st){
+      scanStream=st;
+      var vid=ov.querySelector('#scanVid');if(!vid){st.getTracks().forEach(function(t){t.stop();});return;}
+      vid.srcObject=st;vid.play();
+      var det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
+      scanLoop=setInterval(function(){
+        if(!vid.videoWidth)return;
+        det.detect(vid).then(function(codes){
+          if(codes&&codes.length){var raw=codes[0].rawValue.replace(/\D+/g,'');if(raw.length>=8)foodLookup(raw);}
+        }).catch(function(){});
+      },350);
+    }).catch(function(){
+      var m=$('scanMsg');if(m)m.textContent=DE?'Kamera nicht verfügbar — EAN unten eintippen.':'Camera unavailable — type the EAN below.';
+    });
+  }
+}
+function foodLookup(ean){
+  var DE=cfg.lang==='de',m=$('scanMsg');
+  if(foodCache[ean]){foodResult(ean,foodCache[ean]);return;}
+  if(m)m.textContent=DE?'Suche '+ean+' …':'Looking up '+ean+' …';
+  fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=product_name,brands,nutriments')
+    .then(function(r){return r.json();})
+    .then(function(j){
+      var p=j&&j.product,nu=p&&p.nutriments;
+      if(!p||!nu||nu['proteins_100g']===undefined){
+        if(m)m.textContent=DE?'Nicht in der Datenbank — Nährwerte von der Packung eintragen.':'Not in the database — enter the label values.';
+        return;
+      }
+      var food={n:(p.product_name||'Produkt')+(p.brands?' ('+String(p.brands).split(',')[0]+')':''),
+        p:+nu['proteins_100g']||0,f:+nu['fat_100g']||0,c:+nu['carbohydrates_100g']||0};
+      foodCache[ean]=food;set('foods',foodCache);
+      foodResult(ean,food);
+    })
+    .catch(function(){
+      if(m)m.textContent=DE?'Datenbank nicht erreichbar — die Suche braucht Internet. Nährwerte stehen auch auf der Packung.':'Database unreachable — lookup needs internet. The label has the values too.';
+    });
+}
+function foodResult(ean,food){
+  var DE=cfg.lang==='de';
+  if(scanLoop){clearInterval(scanLoop);scanLoop=null;}
+  if(scanStream){scanStream.getTracks().forEach(function(t){t.stop();});scanStream=null;}
+  var ov=scanUI(
+    '<div class="scanhead"><b>'+food.n+'</b><button type="button" class="iconbtn" data-scan="x" aria-label="Schließen">✕</button></div>'+
+    '<p class="hint">'+(DE?'Je 100 g: ':'Per 100 g: ')+food.p+' g P · '+food.f+' g F · '+food.c+' g '+(DE?'KH':'C')+'</p>'+
+    '<div class="field"><label for="scanG">'+(DE?'Menge':'Amount')+'</label>'+
+    '<div class="ctl hasunit"><input id="scanG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
+    '<div class="savebar"><button type="button" class="tbtn go" id="scanUse">'+(DE?'Übernehmen':'Use it')+'</button></div>'
+  );
+  ov.querySelector('#scanUse').addEventListener('click',function(){
+    var g=Math.max(1,parseFloat(ov.querySelector('#scanG').value)||100)/100;
+    if($('mlName')&&!$('mlName').value)$('mlName').value=food.n.slice(0,40);
+    if($('mlP'))$('mlP').value=Math.round(food.p*g*10)/10;
+    if($('mlF'))$('mlF').value=Math.round(food.f*g*10)/10;
+    if($('mlC'))$('mlC').value=Math.round(food.c*g*10)/10;
+    ['mlP','mlF','mlC'].forEach(function(id){var el=$(id);if(el)el.dispatchEvent(new Event('input'));});
+    scanStop();
+  });
+}
+$('sheetBody').addEventListener('click',function(e){
+  if(e.target.closest('#mlScan'))scanStart();
+});
 $('mealAdd').addEventListener('click',function(){openMeal(null);});
 $('mealList').addEventListener('click',function(e){
   var b=e.target.closest('button[data-meal]');if(b)openMeal(+b.dataset.meal);
@@ -5427,7 +6349,8 @@ $('sheetBody').addEventListener('click',function(e){
     n:($('mlName').value.trim()||(cfg.lang==='de'?'Mahlzeit':'Meal')),
     p:Math.max(0,parseFloat($('mlP').value)||0),
     f:Math.max(0,parseFloat($('mlF').value)||0),
-    c:Math.max(0,parseFloat($('mlC').value)||0)
+    c:Math.max(0,parseFloat($('mlC').value)||0),
+    s:($('mlSlot')&&$('mlSlot').value)||'s'
   };
   if(roh==='neu')meals[k].push(eintrag);else meals[k][+roh]=eintrag;
   saveMeals();drawMeals();closeSheet();
@@ -6496,6 +7419,15 @@ var OBL={
   ['bar',['Pull-up bar','Klimmzugstange'],['A doorway bar is all it takes','Ein Türreck reicht völlig'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 5h18M6 5v6M18 5v6"/><path d="M12 5v4m0 0c-2 1.6-2 4-2 6m2-6c2 1.6 2 4 2 6"/></svg>','var(--aurora)'],
   ['dip',['Dip bars','Barren / Dip-Gelegenheit'],['Parallettes or two sturdy chairs','Parallettes oder zwei stabile Stühle'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h6M14 9h6M5.5 9v8M18.5 9v8M8.5 9v8M15.5 9v8"/></svg>','var(--ice)'],
   ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 3v4M16 3v4"/><circle cx="8" cy="13" r="3.6"/><circle cx="16" cy="13" r="3.6"/></svg>','var(--brass)']],
+ act:[
+  ['1.2',['Mostly sitting','Meist sitzend'],['Desk, little walking','Schreibtisch, wenig Wege'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 99"/></svg>','var(--ember)'],
+  ['1.375',['On your feet some','Etwas auf den Beinen'],['Errands, standing spells','Wege, Phasen im Stehen'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="14 99"/></svg>','var(--brass)'],
+  ['1.55',['On your feet a lot','Viel auf den Beinen'],['Standing job, long walks','Stehberuf, lange Wege'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="21 99"/></svg>','var(--ice)'],
+  ['1.725',['Physical job','Körperliche Arbeit'],['Lifting and moving all day','Heben und Bewegen den ganzen Tag'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="28.3 99"/></svg>','var(--aurora)']],
+ ngoal:[
+  ['300',['Build muscle','Muskeln aufbauen'],['Slight surplus, steady gain','Leichter Überschuss, stetiger Aufbau'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 12h16M7 8v8M17 8v8M2.5 10v4M21.5 10v4"/></svg>','var(--aurora)'],
+  ['0',['Hold weight','Gewicht halten'],['Maintain while getting stronger','Halten und dabei stärker werden'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9.5h16M4 14.5h16"/></svg>','var(--ice)'],
+  ['-450',['Lean out','Definieren'],['Deficit, keep the muscle','Defizit, Muskel bleibt'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 3.6-4.6 5-4 9a4.3 4.3 0 0 0 8.6-.4c0-3.6-3.4-5-4.6-8.6Z"/></svg>','var(--ember)']],
  avoid:[
   ['wrist',['Wrists','Handgelenke'],null],
   ['elbow',['Elbows','Ellbogen'],null],
@@ -6510,7 +7442,7 @@ var OBL={
   ['3',['1-3 years','1-3 Jahre'],['Training is a habit','Training ist Gewohnheit']],
   ['4',['Over 3 years','Über 3 Jahre'],['You know your body well','Du kennst deinen Körper genau']]]
 };
-var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,tdays:[0,2,4],
+var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,tdays:[0,2,4],act:'1.375',ngoal:'300',
   goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
 var IT={
  hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
@@ -6530,7 +7462,14 @@ var IT={
   s:['Now we decide where you are going.','Jetzt legen wir fest, wohin du willst.'],
   nx:['Your goals','Deine Ziele'],n:['Continue','Weiter']},
  b2:{t:['Goals locked.','Ziele stehen.'],
-  s:['Now we build the week around your life.','Jetzt bauen wir die Woche um dein Leben.'],
+  s:['Two questions on fuel — the plan computes your targets from them.','Zwei Fragen zur Ernährung — daraus rechnet der Plan deine Ziele.'],
+  nx:['Your fuel','Deine Ernährung'],n:['Continue','Weiter']},
+ act:{t:['How active is your day?','Wie aktiv ist dein Alltag?'],
+  s:['Outside of training. This scales your calorie target.','Außerhalb des Trainings. Das skaliert dein Kalorienziel.']},
+ ngoal:{t:['What should the scale do?','Was soll die Waage machen?'],
+  s:['Sets surplus or deficit around your maintenance.','Legt Überschuss oder Defizit um deinen Erhalt.']},
+ b3:{t:['Fuel is set.','Ernährung steht.'],
+  s:['Your targets, computed from your numbers — editable any time under Fuel.','Deine Ziele, gerechnet aus deinen Zahlen — jederzeit unter Ernährung änderbar.'],
   nx:['Your setup','Dein Rahmen'],n:['Continue','Weiter']},
  goal:{t:['What are you here for?','Wofür bist du hier?'],
   s:['Shapes how your week is built.','Bestimmt, wie deine Woche aufgebaut wird.']},
@@ -6550,11 +7489,11 @@ var IT={
   s:['Today shows your session — every exercise has a swap button, and the coach reads your numbers. Your first session measures you in: three sets per exercise, you enter your reps, and every ladder starts at your level. No test before the training — the training is the test.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf, und der Coach liest deine Zahlen mit. Dein erstes Training misst dich ein: drei Sätze je Übung, du trägst deine Wiederholungen ein, und jede Leiter startet auf deinem Level. Kein Test vor dem Training — das Training ist der Test.'],
   n:['Start day one','Los mit Tag eins']}
 };
-var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','days','tdays','eq','avoid','ready'],inIdx=0;
+var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','act','ngoal','b3','days','tdays','eq','avoid','ready'],inIdx=0;
 /* Kapitel je Schritt (1 Profil, 2 Ziele, 3 Rahmen); Hallo und Fertig laufen ohne Chip. */
-var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,days:3,tdays:3,eq:3,avoid:3,ready:3};
-var ICHN=[null,['Your profile','Dein Profil'],['Your goals','Deine Ziele'],['Your setup','Dein Rahmen']];
-var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['days','tdays','eq','avoid']];
+var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,act:3,ngoal:3,b3:3,days:4,tdays:4,eq:4,avoid:4,ready:4};
+var ICHN=[null,['Your profile','Dein Profil'],['Your goals','Deine Ziele'],['Your fuel','Deine Ernährung'],['Your setup','Dein Rahmen']];
+var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['act','ngoal'],['days','tdays','eq','avoid']];
 /* Koerperfett-Schaetzung nach Deurenberg: BMI, Alter, Geschlecht. */
 function bfEstimate(){
   var h=obState.height/100,bmi=obState.weight/(h*h);
@@ -6614,15 +7553,31 @@ function introShow(on){
   if(on)histArm();
   document.body.style.overflow=on?'hidden':'';
 }
-function syncIntro(){if(!profile){inIdx=0;renderIntro();introShow(true);}else introShow(false);}
+function syncIntro(){if(!profile){inIdx=0;var ic0=$('inClose');if(ic0)ic0.hidden=true;renderIntro();introShow(true);}else introShow(false);}
 function introFinishProfile(){
   var av={};OBL.avoid.forEach(function(o){av[o[0]]=!!obState.avoid[o[0]];});
+  /* Beim erneuten Durchlaufen bleiben eingestellte Uebungstausche und die
+     Test-Antwort erhalten -- die Einfuehrung fragt beides nicht ab, also
+     darf sie es auch nicht stillschweigend loeschen. */
+  var altSwaps=(profile&&profile.swaps)||{};
+  var altTest=(profile&&profile.testAsked)||1;
   profile={goal:obState.goal,days:obState.days,
     eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
-    avoid:av,exp:obState.exp,swaps:{},testAsked:1,
+    avoid:av,exp:obState.exp,swaps:altSwaps,testAsked:altTest,
     sex:obState.sex,age:obState.age,height:obState.height,weight:obState.weight,bf:obState.bf,
+    act:obState.act,ngoal:obState.ngoal,
     tdays:obState.tdays.slice().sort(function(a,b){return a-b;})};
   set('profile',profile);
+  /* Ernaehrungsrechner vorbefuellen und rechnen lassen -- damit stehen die
+     Ziele (Ring, Balken, Coach) ab Tag eins, ohne dass jemand den Rechner
+     erst suchen muss. */
+  var fs=$('f-sex');if(fs)fs.value=(obState.sex==='f'?'f':'m');
+  var fa=$('f-age');if(fa)fa.value=obState.age;
+  var fh=$('f-h');if(fh)fh.value=obState.height;
+  var fw=$('f-w');if(fw)fw.value=obState.weight;
+  var fac=$('f-act');if(fac)fac.value=obState.act;
+  var fg=$('f-goal');if(fg)fg.value=obState.ngoal;
+  if(typeof calc==='function')try{calc();}catch(e){}
   cfg.tdays=profile.tdays.slice();saveCfg();
   /* Tag eins ist eine Einheit: Start auf den ersten gewaehlten Wochentag
      legen -- aber nur, solange noch kein Training abgeschlossen ist. Wer die
@@ -6640,7 +7595,7 @@ function introFinishProfile(){
 }
 function inNextStep(){inIdx=Math.min(ISTEPS.length-1,inIdx+1);renderIntro();}
 var NUMS={age:{min:14,max:80,unit:['years','Jahre']},height:{min:140,max:210,unit:['cm','cm']},weight:{min:40,max:150,unit:['kg','kg']}};
-function chDone(c,k){var ch=ICH[k]||0;return ch>c||(k==='b1'&&c===1)||(k==='b2'&&c<=2)||(k==='ready');}
+function chDone(c,k){var ch=ICH[k]||0;return ch>c||(k==='b1'&&c===1)||(k==='b2'&&c<=2)||(k==='b3'&&c<=3)||(k==='ready');}
 function inHead(k,L){
   var ch=ICH[k]||0,chip=$('inChip'),back=$('inBack'),prog=$('inProg');
   back.hidden=(inIdx===0||k==='ready');
@@ -6649,7 +7604,8 @@ function inHead(k,L){
   if(!chip.hidden){chip.textContent=ICHN[ch][L];chip.className='chchip c'+ch;}
   if(!prog.hidden){
     var h='';
-    for(var c=1;c<=3;c++){
+    var CN=ICHN.length-1;
+    for(var c=1;c<=CN;c++){
       var fill=0;
       if(chDone(c,k))fill=100;
       else if(ch===c){
@@ -6657,7 +7613,7 @@ function inHead(k,L){
         fill=i<0?100:Math.round((i+1)/steps.length*100);
       }
       h+='<span class="seg"><i style="width:'+fill+'%"></i></span>';
-      if(c<3)h+='<span class="tick'+(chDone(c,k)?' done':'')+'">✓</span>';
+      if(c<CN)h+='<span class="tick'+(chDone(c,k)?' done':'')+'">✓</span>';
     }
     prog.innerHTML=h;
   }
@@ -6721,6 +7677,20 @@ function paintTdays(L,warn){
     }else first.textContent='';
   }
 }
+/* Ziel-Vorschau auf der Ernaehrungs-Bruecke: Mifflin-St-Jeor aus den schon
+   erfragten Koerperdaten, mal Aktivitaet, plus Zielaufschlag. Nur Vorschau
+   (deshalb das Zirka) -- die verbindliche Rechnung macht der Rechner unter
+   Ernaehrung, den die Einfuehrung am Ende vorbefuellt. */
+function fuelPreviewHtml(DE){
+  var sx=obState.sex==='f'?-161:(obState.sex==='x'?-78:5);
+  var bmr=10*obState.weight+6.25*obState.height-5*obState.age+sx;
+  var kcal=Math.round((bmr*parseFloat(obState.act)+parseFloat(obState.ngoal))/10)*10;
+  var pro=Math.round(obState.weight*1.8);
+  return '<div class="fuelprev">'+
+    '<div><b>≈ '+kcal+'</b><span>'+(DE?'kcal am Tag':'kcal per day')+'</span></div>'+
+    '<div><b>≈ '+pro+' g</b><span>Protein</span></div>'+
+  '</div>';
+}
 function renderIntro(){
   var L=cfg.lang==='de'?1:0,DE=L===1,k=ISTEPS[inIdx],T=IT[k],host=$('inStep');
   if(k==='bf'&&!obState.bfTouched)obState.bf=bfEstimate();
@@ -6731,10 +7701,11 @@ function renderIntro(){
     h+='<div class="brandline"><svg width="30" height="30" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg><b>Valkr</b></div>';
     h+='<h2></h2><p class="isub"></p>';
     h+='<div class="ilang"><button type="button" data-lang="de" aria-pressed="'+(L===1)+'">Deutsch</button><button type="button" data-lang="en" aria-pressed="'+(L===0)+'">English</button></div>';
-  }else if(k==='b1'||k==='b2'){
+  }else if(k==='b1'||k==='b2'||k==='b3'){
     h+='<div class="bridge"><h2></h2><p class="isub lead"></p>'+
+       (k==='b3'?fuelPreviewHtml(DE):'')+
        '<p class="nextk">'+(DE?'Als Nächstes':'Up next')+'</p>'+
-       '<p class="nextv" style="color:'+(k==='b1'?'var(--ember)':'var(--brass)')+'">'+T.nx[L]+'</p></div>';
+       '<p class="nextv" style="color:'+(k==='b1'?'var(--ember)':(k==='b2'?'var(--ice)':'var(--brass)'))+'">'+T.nx[L]+'</p></div>';
   }else{
     h+='<h2></h2><p class="isub"></p>';
   }
@@ -6829,29 +7800,108 @@ $('inNext').addEventListener('click',function(){
   if(k==='ready'){introFinishProfile();introShow(false);if(typeof show==='function')show('today');return;}
   inNextStep();
 });
+/* Uebung tauschen (v18): statt eines nackten Dropdowns eine Blatt-Liste im
+   App-Standard -- aktuelle Uebung oben, Suche, Filter-Chips, jede Alternative
+   als Zeile mit Strichmaennchen-Vorschau. Tippen waehlt und uebernimmt. */
+function exDemoOf(name,patId){
+  if(typeof EXA==='undefined')return null;
+  var m=EXA[patId];return (m&&m[name])||null;
+}
+function exThumb(name,patId,size){
+  var d=exDemoOf(name,patId);
+  var c=cvar(pid[patId]?pid[patId].cv:'--aurora');
+  var inner=d?moveSvg(d,c,true):sv(patId,c,size||34);
+  return '<span class="swthumb">'+inner+'</span>';
+}
+/* Kacheln fuer Eintraege ohne Uebungs-id (lockere und Ruhetage). Ohne sie
+   fehlte an diesen Tagen die ganze Bildspalte und die Liste sprang im
+   Wochenlauf zwischen zwei Layouts. Wo eine passende Figur existiert
+   (Beweglichkeits-Drills), steht sie als Standbild; der Rest bekommt ruhige
+   Strichzeichen im selben Strich wie die Skelette. Alles in Eis -- die
+   Farbe der Erholung. */
+var GEHDEMO={dur:3,refs:['M5 39.5 H41'],pose:function(){
+  return {parts:[
+    [[[22.8,24.8],[26.4,32.0],[29.6,38.9]]],
+    [[[22.8,24.8],[20.2,32.3],[16.6,38.7]]],
+    [[[22.8,24.8],[23.8,15.2]]],
+    [[[23.8,15.2],[21.3,19.5],[19.4,23.3]]],
+    [[[23.8,15.2],[26.3,19.1],[28.1,22.5]]],
+    [[[29.6,38.9],[31.5,38.9]]]
+  ],head:[24.3,11.2]};}};
+function looseThumb(label){
+  var c=cvar('--ice'),l=String(label||''),inner='';
+  if(/Handgelenk|Wrist/i.test(l)&&typeof MOBDEMO!=='undefined'&&MOBDEMO[4])inner=moveSvg(MOBDEMO[4],c,true);
+  else if(/Mobility/i.test(l)&&typeof MOBDEMO!=='undefined'&&MOBDEMO[0])inner=moveSvg(MOBDEMO[0],c,true);
+  else if(/Skill/i.test(l))inner=sv('skill',c);
+  else if(/Spazier|Walk/i.test(l))inner=moveSvg(GEHDEMO,c,true);
+  else if(/Protein/i.test(l))inner='<svg viewBox="0 0 46 46" aria-hidden="true">'+
+    '<circle cx="23" cy="23" r="12.5" fill="none" stroke="'+c+'" stroke-width="2.4"/>'+
+    '<circle cx="23" cy="23" r="6.6" fill="none" stroke="'+c+'" stroke-width="2" opacity=".65"/>'+
+    '<circle cx="23" cy="23" r="2.3" fill="'+c+'"/></svg>';
+  else if(/Schlaf|Sleep/i.test(l))inner='<svg viewBox="0 0 46 46" aria-hidden="true">'+
+    '<path d="M28.5 8.5 A 14.5 14.5 0 1 0 37.5 29.5 A 12 12 0 0 1 28.5 8.5 Z" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linejoin="round"/></svg>';
+  return inner?'<span class="swthumb">'+inner+'</span>':'';
+}
 function openSwap(pl,idx,it,after){
   var DE=cfg.lang==='de',L=DE?1:0;
   var list=(EXDB[it.id]||[]).filter(function(e){return exAvail(e)&&exAllowed(e);});
-  var sel='<div class="ctl"><select id="swapSel">'+
-    '<option value="">'+(DE?'Standard (Plan wählt)':'Default (plan decides)')+'</option>'+
-    list.map(function(e){
+  var curTier=null;
+  list.forEach(function(e){if(e[0]===it.l)curTier=e[1];});
+  var q='',filt='all';
+  function rows(){
+    var out='';
+    out+='<button type="button" class="swaprow'+(!it.l?' cur':'')+'" data-ex=""><span class="swthumb none">∅</span>'+
+      '<span class="swnm"><b>'+(DE?'Standard (Plan wählt)':'Default (plan decides)')+'</b><span>'+(DE?'zurück zur Leiter':'back to the ladder')+'</span></span>'+
+      '<span class="swtick">✓</span></button>';
+    list.forEach(function(e){
+      if(q&&exName(e).toLowerCase().indexOf(q)<0&&e[0].toLowerCase().indexOf(q)<0)return;
+      if(filt==='easier'&&!(curTier!==null&&e[1]<curTier))return;
+      if(filt==='harder'&&!(curTier!==null&&e[1]>curTier))return;
+      if(filt==='noeq'&&e[2])return;
       var tag=TLBL[e[1]][L]+(e[2]&&EQN[e[2]]?' · '+EQN[e[2]][L]:'');
-      /* Wert bleibt der englische Schluessel, sichtbar ist der Anzeigename. */
-      return '<option value="'+e[0].replace(/"/g,'&quot;')+'"'+(e[0]===it.l?' selected':'')+'>'+exName(e)+' — '+tag+'</option>';
-    }).join('')+'</select></div>';
-  openModal(DE?'Übung tauschen':'Swap exercise',
-    DE?'Gleiche Bewegungsrichtung, andere Übung. Equipment und Schonungen sind schon rausgefiltert.'
-      :'Same movement pattern, different exercise. Gear and joint flags are already filtered out.',
-    DE?'Übernehmen':'Apply',
-    function(){
-      var v=$('swapSel')?$('swapSel').value:'';
-      if(!profile){profile={goal:'fit',days:cfg.track,eq:{bar:true,dip:true,rings:true},avoid:{},swaps:{}};}
-      profile.swaps=profile.swaps||{};
-      var key=cfg.track+':'+pl.s+':'+idx;
-      if(v)profile.swaps[key]=v;else delete profile.swaps[key];
-      set('profile',profile);applyProfile();renderDay();
-      if(after)after();
-    },sel);
+      out+='<button type="button" class="swaprow'+(e[0]===it.l?' cur':'')+'" data-ex="'+e[0].replace(/"/g,'&quot;')+'">'+
+        exThumb(e[0],it.id)+
+        '<span class="swnm"><b>'+exName(e)+'</b><span>'+tag+'</span></span>'+
+        '<span class="swtick">✓</span></button>';
+    });
+    return out;
+  }
+  var chips=[['all',DE?'Alle':'All'],['easier',DE?'Leichter':'Easier'],['harder',DE?'Schwerer':'Harder'],['noeq',DE?'Ohne Gerät':'No gear']];
+  openSheet(
+    '<h4>'+(DE?'Übung tauschen':'Swap exercise')+'</h4>'+
+    '<p class="hint" style="margin:.2rem 0 .6rem">'+(DE
+      ?'Gleiche Bewegungsrichtung, andere Übung. Equipment und Schonungen sind schon rausgefiltert.'
+      :'Same movement pattern, different exercise. Gear and joint flags are already filtered out.')+'</p>'+
+    '<div class="swapcur">'+exThumb(it.l,it.id)+'<span class="swnm"><b>'+itemName(it)+'</b><span>'+(DE?'Aktuell im Plan':'Currently in the plan')+'</span></span></div>'+
+    '<div class="ctl" style="margin:.55rem 0"><input id="swapQ" type="text" placeholder="'+(DE?'Übung suchen':'Search exercises')+'" autocomplete="off"></div>'+
+    '<div class="chips" id="swapChips">'+chips.map(function(c){
+      return '<button type="button" class="chip" data-f="'+c[0]+'" aria-pressed="'+(filt===c[0])+'">'+c[1]+'</button>';
+    }).join('')+'</div>'+
+    '<div class="swaplist" id="swapList">'+rows()+'</div>'
+  );
+  function wire(){
+    [].forEach.call(document.querySelectorAll('#swapList .swaprow'),function(b){
+      b.addEventListener('click',function(){
+        var v=b.dataset.ex||'';
+        if(!profile){profile={goal:'fit',days:cfg.track,eq:{bar:true,dip:true,rings:true},avoid:{},swaps:{}};}
+        profile.swaps=profile.swaps||{};
+        var key=cfg.track+':'+pl.s+':'+idx;
+        if(v)profile.swaps[key]=v;else delete profile.swaps[key];
+        set('profile',profile);applyProfile();renderDay();
+        closeSheet();
+        if(after)after();
+      });
+    });
+  }
+  wire();
+  $('swapQ').addEventListener('input',function(){q=this.value.trim().toLowerCase();$('swapList').innerHTML=rows();wire();});
+  [].forEach.call(document.querySelectorAll('#swapChips .chip'),function(c){
+    c.addEventListener('click',function(){
+      filt=c.dataset.f;
+      [].forEach.call(document.querySelectorAll('#swapChips .chip'),function(x){x.setAttribute('aria-pressed',String(x===c));});
+      $('swapList').innerHTML=rows();wire();
+    });
+  });
 }
 var catPat='all',catQ='';
 /* Schaltet der Katalog auf die volle Liste um? Wird beim Suchen und beim
@@ -7265,6 +8315,15 @@ function patLP(p){
   var prPart=Math.min(200,prFor(PRMAP[p.id])*8);
   return Math.round(Math.min(ladderPart+prPart+adherence(),wkStats().cap));
 }
+/* Nur der musterspezifische Anteil -- Leiterstufe und Rekorde, ohne den
+   Adhaerenz-Sockel und ohne den Wochendeckel. Der Rang beantwortet "wie
+   verlaesslich trainierst du"; die Koerperkarte beantwortet "wo sitzt die
+   Arbeit". Mit dem gemeinsamen Sockel staenden alle achtzehn Zonen auf
+   derselben Farbe, sobald irgendjemand vier Wochen halbwegs dabei war. */
+function patWork(p){
+  var st=steps[p.id]||0,len=Math.max(1,p.ladder.length-1);
+  return Math.round((st/len)*600*stepConf(p.id)+Math.min(200,prFor(PRMAP[p.id])*8));
+}
 function adherence(){
   var kept=0,poss=0;
   for(var i=0;i<28;i++){
@@ -7425,6 +8484,29 @@ function armToast(ms){
   window.addEventListener('mousemove',function(e){if(x0!==null)move(e.clientX);});
   window.addEventListener('mouseup',end);
 })();
+/* v18: anatomischer Datensatz (Scan-Optik) -- Silhouetten und Muskelplatten,
+   erzeugt vom Anatomie-Generator, strukturell validiert. */
+var BODYSIL={front:'M 60 4.2 C 66.2 4.4 69.2 8.6 69.4 14.2 C 69.5 18.8 68.3 22 66.6 24.8 Q 64.9 27.8 63.5 29.4 C 64.1 32 64.3 34.6 64.5 37.2 C 66.5 40.6 71.5 42.4 76.2 44.6 C 82 45.6 86.4 49 87.4 55 C 88.3 61 88.5 76 89.3 89 C 90.8 95 89.8 111 86.2 123.5 Q 85.3 126.2 85.8 128.5 C 87.5 131 87.1 139 84.2 143 Q 82.2 145.4 81.3 142.4 Q 79.8 137.5 80 131.5 Q 79.9 127 80.9 124.5 C 80.1 115 79.9 105 80.2 95.5 C 80.4 85 78.8 73.5 74.8 67.5 Q 75.3 74 74.7 82 C 73.6 94 72.4 106 72.5 116 C 74.7 123 76.3 128 76.7 134 C 77.2 152 75.3 176 71.6 197.5 Q 73.5 205.5 73.3 213 C 72.6 224 69.5 233 67.4 240 C 68.3 244.5 69.3 248 69.8 251 Q 68 253.4 65 253.4 Q 62.2 253.4 61.9 250 Q 61.6 244 62 240.5 C 61 232 61.2 224 62 216 Q 62.8 206 63.6 198.5 C 63.2 180 61.6 158 60.3 146 Q 60.1 143.5 60 143.5 Q 59.9 143.5 59.7 146 C 58.4 158 56.8 180 56.4 198.5 Q 57.2 206 58 216 C 58.8 224 59 232 58 240.5 Q 58.4 244 58.1 250 Q 57.8 253.4 55 253.4 Q 52 253.4 50.2 251 C 50.7 248 51.7 244.5 52.6 240 C 50.5 233 47.4 224 46.7 213 Q 46.5 205.5 48.4 197.5 C 44.7 176 42.8 152 43.3 134 C 43.7 128 45.3 123 47.5 116 C 47.6 106 46.4 94 45.3 82 Q 44.7 74 45.2 67.5 C 41.2 73.5 39.6 85 39.8 95.5 C 40.1 105 39.9 115 39.1 124.5 Q 40.1 127 40 131.5 Q 40.2 137.5 38.7 142.4 Q 37.8 145.4 35.8 143 C 32.9 139 32.5 131 34.2 128.5 Q 34.7 126.2 33.8 123.5 C 30.2 111 29.2 95 30.7 89 C 31.5 76 31.7 61 32.6 55 C 33.6 49 38 45.6 43.8 44.6 C 48.5 42.4 53.5 40.6 55.5 37.2 C 55.7 34.6 55.9 32 56.5 29.4 Q 55.1 27.8 53.4 24.8 C 51.7 22 50.5 18.8 50.6 14.2 C 50.8 8.6 53.8 4.4 60 4.2 Z',back:'M 180 4.2 C 186.2 4.4 189.2 8.6 189.4 14.2 C 189.5 18.8 188.3 22 186.6 24.8 Q 184.9 27.8 183.5 29.4 C 184.1 32 184.3 34.6 184.5 37.2 C 186.5 40.6 191.5 42.4 196.2 44.6 C 202 45.6 206.4 49 207.4 55 C 208.3 61 208.5 76 209.3 89 C 210.8 95 209.8 111 206.2 123.5 Q 205.3 126.2 205.8 128.5 C 207.5 131 207.1 139 204.2 143 Q 202.2 145.4 201.3 142.4 Q 199.8 137.5 200 131.5 Q 199.9 127 200.9 124.5 C 200.1 115 199.9 105 200.2 95.5 C 200.4 85 198.8 73.5 194.8 67.5 Q 195.3 74 194.7 82 C 193.6 94 192.4 106 192.5 116 C 194.7 123 196.3 128 196.7 134 C 197.2 152 195.3 176 191.6 197.5 Q 193.5 205.5 193.3 213 C 192.6 224 189.5 233 187.4 240 C 188.3 244.5 189.3 248 189.8 251 Q 188 253.4 185 253.4 Q 182.2 253.4 181.9 250 Q 181.6 244 182 240.5 C 181 232 181.2 224 182 216 Q 182.8 206 183.6 198.5 C 183.2 180 181.6 158 180.3 146 Q 180.1 143.5 180 143.5 Q 179.9 143.5 179.7 146 C 178.4 158 176.8 180 176.4 198.5 Q 177.2 206 178 216 C 178.8 224 179 232 178 240.5 Q 178.4 244 178.1 250 Q 177.8 253.4 175 253.4 Q 172 253.4 170.2 251 C 170.7 248 171.7 244.5 172.6 240 C 170.5 233 167.4 224 166.7 213 Q 166.5 205.5 168.4 197.5 C 164.7 176 162.8 152 163.3 134 C 163.7 128 165.3 123 167.5 116 C 167.6 106 166.4 94 165.3 82 Q 164.7 74 165.2 67.5 C 161.2 73.5 159.6 85 159.8 95.5 C 160.1 105 159.9 115 159.1 124.5 Q 160.1 127 160 131.5 Q 160.2 137.5 158.7 142.4 Q 157.8 145.4 155.8 143 C 152.9 139 152.5 131 154.2 128.5 Q 154.7 126.2 153.8 123.5 C 150.2 111 149.2 95 150.7 89 C 151.5 76 151.7 61 152.6 55 C 153.6 49 158 45.6 163.8 44.6 C 168.5 42.4 173.5 40.6 175.5 37.2 C 175.7 34.6 175.9 32 176.5 29.4 Q 175.1 27.8 173.4 24.8 C 171.7 22 170.5 18.8 170.6 14.2 C 170.8 8.6 173.8 4.4 180 4.2 Z'};
+var BODYZONES2=[
+  {pat:'press',side:'f',name:['Shoulders','Schultern'],d:'M 76 49 C 81.4 46.8 85.2 50 86.2 54.6 C 87 58.8 86.4 62.6 84.6 65.4 Q 81 68 77.9 65.2 C 75.9 61.5 75.2 56 76 49 Z M 44 49 C 38.6 46.8 34.8 50 33.8 54.6 C 33 58.8 33.6 62.6 35.4 65.4 Q 39 68 42.1 65.2 C 44.1 61.5 44.8 56 44 49 Z'},
+  {pat:'push',side:'f',name:['Chest','Brust'],d:'M 61 53 C 65.8 51.4 70.4 52.2 72.6 55.2 C 74 60 73.6 65.4 72 69.4 C 70 73.8 65.4 75.2 62.2 73 Q 61 71 61 67 C 60.9 62 60.9 57 61 53 Z M 59 53 C 54.2 51.4 49.6 52.2 47.4 55.2 C 46 60 46.4 65.4 48 69.4 C 50 73.8 54.6 75.2 57.8 73 Q 59 71 59 67 C 59.1 62 59.1 57 59 53 Z'},
+  {pat:'row',side:'f',name:['Biceps','Bizeps'],d:'M 81.8 70 C 84.8 68.6 86.9 69.8 87.4 73 C 87.9 79 87.6 85 86.4 89.5 Q 84.2 92.6 82.4 89.6 C 81.2 83 81 76 81.8 70 Z M 38.2 70 C 35.2 68.6 33.1 69.8 32.6 73 C 32.1 79 32.4 85 33.6 89.5 Q 35.8 92.6 37.6 89.6 C 38.8 83 39 76 38.2 70 Z'},
+  {pat:'row',side:'f',name:['Forearms','Unterarme'],d:'M 82.6 98 C 85.8 96.2 88 97.4 88.6 101 C 89.2 108 88.4 116 86.4 122.6 Q 84.6 125.4 83.2 122.4 C 82 114 82 105.5 82.6 98 Z M 37.4 98 C 34.2 96.2 32 97.4 31.4 101 C 30.8 108 31.6 116 33.6 122.6 Q 35.4 125.4 36.8 122.4 C 38 114 38 105.5 37.4 98 Z'},
+  {pat:'core',side:'f',name:['Abs','Gerader Bauch'],d:'M 61 78.5 C 63.6 77.9 66.2 78.1 67 79.3 C 67.5 81.6 67.4 84.2 66.9 86.1 Q 64 87.3 61.4 86.7 Q 60.9 82.5 61 78.5 Z M 59 78.5 C 56.4 77.9 53.8 78.1 53 79.3 C 52.5 81.6 52.6 84.2 53.1 86.1 Q 56 87.3 58.6 86.7 Q 59.1 82.5 59 78.5 Z M 61.2 89.4 Q 64.4 88.4 66.8 89.4 C 67.4 91.6 67.3 94.4 66.7 96.6 Q 63.9 97.8 61.5 97.2 Q 61 93 61.2 89.4 Z M 58.8 89.4 Q 55.6 88.4 53.2 89.4 C 52.6 91.6 52.7 94.4 53.3 96.6 Q 56.1 97.8 58.5 97.2 Q 59 93 58.8 89.4 Z M 61.4 100 Q 64.2 99 66.5 100.2 C 67 103.5 66.6 107.5 65.5 110.8 Q 63.8 113.4 62.2 111.6 Q 61.2 105.5 61.4 100 Z M 58.6 100 Q 55.8 99 53.5 100.2 C 53 103.5 53.4 107.5 54.5 110.8 Q 56.2 113.4 57.8 111.6 Q 58.8 105.5 58.6 100 Z'},
+  {pat:'core',side:'f',name:['Obliques','Seitlicher Bauch'],d:'M 68.9 80 C 71.4 82.2 72.4 86 72.4 91 C 72.4 98.5 71.8 106.5 70.9 113 Q 69.9 116.4 68.9 113.4 C 68.1 102 68.2 90 68.9 80 Z M 51.1 80 C 48.6 82.2 47.6 86 47.6 91 C 47.6 98.5 48.2 106.5 49.1 113 Q 50.1 116.4 51.1 113.4 C 51.9 102 51.8 90 51.1 80 Z'},
+  {pat:'legs',side:'f',name:['Quads','Quadrizeps'],d:'M 66.8 146.5 C 70.6 145.2 73.4 146.8 74.5 150.5 C 75.2 160 74 172 72.8 181.5 C 71.9 188 70 192.8 67.5 194.2 C 65.3 195 64 192.8 64.2 189.5 C 64.5 183 65.2 175 65.8 167 C 66.2 159.5 66.4 152.5 66.8 146.5 Z M 53.2 146.5 C 49.4 145.2 46.6 146.8 45.5 150.5 C 44.8 160 46 172 47.2 181.5 C 48.1 188 50 192.8 52.5 194.2 C 54.7 195 56 192.8 55.8 189.5 C 55.5 183 54.8 175 54.2 167 C 53.8 159.5 53.6 152.5 53.2 146.5 Z'},
+  {pat:'legs',side:'f',name:['Adductors','Adduktoren'],d:'M 62.9 147 C 64.2 145.9 65.2 146.5 65.5 148.8 C 65.8 154 65.4 160 64.6 165.2 Q 63.6 168.2 62.9 165.4 C 62.3 159.3 62.4 152.4 62.9 147 Z M 57.1 147 C 55.8 145.9 54.8 146.5 54.5 148.8 C 54.2 154 54.6 160 55.4 165.2 Q 56.4 168.2 57.1 165.4 C 57.7 159.3 57.6 152.4 57.1 147 Z'},
+  {pat:'legs',side:'f',name:['Shins','Schienbeine'],d:'M 64.9 203.5 C 67.4 202.2 69.4 203 70 206.5 C 70.8 215 69.9 226 67.9 234 Q 66.4 237.2 65.1 233.8 C 63.9 223 64 212 64.9 203.5 Z M 55.1 203.5 C 52.6 202.2 50.6 203 50 206.5 C 49.2 215 50.1 226 52.1 234 Q 53.6 237.2 54.9 233.8 C 56.1 223 56 212 55.1 203.5 Z'},
+  {pat:'press',side:'b',name:['Traps / neck','Trapez / Nacken'],d:'M 180 36.4 C 183.4 37.6 187.8 39.8 192.6 43.6 Q 189.4 46.8 185.2 48.4 C 183.2 53.5 181.6 59 180.6 64 Q 180.3 65.4 180 65.4 Q 179.7 65.4 179.4 64 C 178.4 59 176.8 53.5 174.8 48.4 Q 170.6 46.8 167.4 43.6 C 172.2 39.8 176.6 37.6 180 36.4 Z'},
+  {pat:'press',side:'b',name:['Rear delts','Hintere Schulter'],d:'M 196 49.6 C 201.4 47.4 205.2 50.6 206.2 55.2 C 207 59.4 206.4 63.2 204.6 66 Q 201 68.6 197.9 65.8 C 195.9 62.1 195.2 56.6 196 49.6 Z M 164 49.6 C 158.6 47.4 154.8 50.6 153.8 55.2 C 153 59.4 153.6 63.2 155.4 66 Q 159 68.6 162.1 65.8 C 164.1 62.1 164.8 56.6 164 49.6 Z'},
+  {pat:'pull',side:'b',name:['Lats','Latissimus'],d:'M 182.4 64.5 C 186.6 63.8 191 65.6 193.2 69.5 C 194.3 77 193.4 85.5 190.8 93 C 188.4 99.5 184.8 104 182 105.8 Q 181.1 106.3 181.1 104 C 181.2 91 181.3 76 181.5 67 Q 181.6 64.8 182.4 64.5 Z M 177.6 64.5 C 173.4 63.8 169 65.6 166.8 69.5 C 165.7 77 166.6 85.5 169.2 93 C 171.6 99.5 175.2 104 178 105.8 Q 178.9 106.3 178.9 104 C 178.8 91 178.7 76 178.5 67 Q 178.4 64.8 177.6 64.5 Z'},
+  {pat:'row',side:'b',name:['Triceps','Trizeps'],d:'M 201.8 70 C 204.8 68.4 206.9 69.6 207.4 73 C 207.9 79.5 207.5 85.5 206.2 90 Q 204.2 93.2 202.3 90 C 201.1 83 201 76.5 201.8 70 Z M 158.2 70 C 155.2 68.4 153.1 69.6 152.6 73 C 152.1 79.5 152.5 85.5 153.8 90 Q 155.8 93.2 157.7 90 C 158.9 83 159 76.5 158.2 70 Z'},
+  {pat:'row',side:'b',name:['Forearms','Unterarme'],d:'M 202.6 98 C 205.8 96.2 208 97.4 208.6 101 C 209.2 108 208.4 116 206.4 122.6 Q 204.6 125.4 203.2 122.4 C 202 114 202 105.5 202.6 98 Z M 157.4 98 C 154.2 96.2 152 97.4 151.4 101 C 150.8 108 151.6 116 153.6 122.6 Q 155.4 125.4 156.8 122.4 C 158 114 158 105.5 157.4 98 Z'},
+  {pat:'core',side:'b',name:['Lower back','Unterer Rücken'],d:'M 181.4 108.5 C 183.6 107.9 185.6 108.5 186.2 110.5 C 186.8 115.5 186.4 120.5 185.2 124.5 Q 183.4 127 181.9 124.8 C 181.1 119.5 181.1 113.5 181.4 108.5 Z M 178.6 108.5 C 176.4 107.9 174.4 108.5 173.8 110.5 C 173.2 115.5 173.6 120.5 174.8 124.5 Q 176.6 127 178.1 124.8 C 178.9 119.5 178.9 113.5 178.6 108.5 Z'},
+  {pat:'legs',side:'b',name:['Glutes','Gesäß'],d:'M 181.6 129.5 C 186.6 127.9 191.4 129.3 193.8 133.5 C 195.2 138.5 194.4 144.5 191.8 148.3 C 188.6 151.2 184.4 151.4 181.9 149.4 Q 181 146.5 181 140 C 181 134 181.1 130.4 181.6 129.5 Z M 178.4 129.5 C 173.4 127.9 168.6 129.3 166.2 133.5 C 164.8 138.5 165.6 144.5 168.2 148.3 C 171.4 151.2 175.6 151.4 178.1 149.4 Q 179 146.5 179 140 C 179 134 178.9 130.4 178.4 129.5 Z'},
+  {pat:'legs',side:'b',name:['Hamstrings','Beinbeuger'],d:'M 183.2 154.5 C 187.6 153.2 191.6 154.4 193.2 158 C 194.4 167 193.8 178 192.2 186 C 191 191.5 188.2 194.6 185.8 194 Q 184.2 193.4 184.4 189 C 184.4 177 183.8 165 183.2 154.5 Z M 176.8 154.5 C 172.4 153.2 168.4 154.4 166.8 158 C 165.6 167 166.2 178 167.8 186 C 169 191.5 171.8 194.6 174.2 194 Q 175.8 193.4 175.6 189 C 175.6 177 176.2 165 176.8 154.5 Z'},
+  {pat:'legs',side:'b',name:['Calves','Waden'],d:'M 184.4 203.5 C 188.4 201.8 190.8 202.8 191.6 207 C 192.2 214 191.2 222 189 230 Q 187 234 185.2 231 C 183.4 221 183.6 211 184.4 203.5 Z M 175.6 203.5 C 171.6 201.8 169.2 202.8 168.4 207 C 167.8 214 168.8 222 171 230 Q 173 234 174.8 231 C 176.6 221 176.4 211 175.6 203.5 Z'}
+];
 /* Koerperkarte: jede Zone faerbt sich nach dem Rang des zugehoerigen Musters.
    Beste Zone bekommt einen pulsierenden Ring, damit sofort klar ist, wo die
    Staerke sitzt -- und im Umkehrschluss, wo nicht. */
@@ -7441,11 +8523,41 @@ function drawBody(){
   var DE=cfg.lang==='de', L=DE?1:0;
   var lpBy={},bestId=null,bestLp=-1,worstId=null,worstLp=1e9;
   PAT.forEach(function(p){
-    var lp=patLP(p); lpBy[p.id]=lp;
+    var lp=patWork(p); lpBy[p.id]=lp;
     if(lp>bestLp){bestLp=lp;bestId=p.id;}
     if(lp<worstLp){worstLp=lp;worstId=p.id;}
   });
   var parts='';
+  /* v18: liegt der anatomische Datensatz vor (BODYSIL/BODYZONES2), zeichnet
+     die Karte im Scan-Stil -- realistische Silhouetten, Muskelplatten als
+     dunkle Anlagen, die mit dem Rang ihres Musters aufleuchten. Ohne den
+     Datensatz laeuft die bisherige Tafel weiter. */
+  if(typeof BODYZONES2!=='undefined'&&typeof BODYSIL!=='undefined'){
+    parts+='<path d="'+BODYSIL.front+'" fill="color-mix(in srgb,var(--night) 88%,var(--surf))" stroke="var(--line)" stroke-width="1.1"/>';
+    parts+='<path d="'+BODYSIL.back+'" fill="color-mix(in srgb,var(--night) 88%,var(--surf))" stroke="var(--line)" stroke-width="1.1"/>';
+    BODYZONES2.forEach(function(z){
+      var lp=lpBy[z.pat]||0, t=tierOf(lp), col=t.col;
+      var hat=t.t>=0;
+      /* Grundanlage immer sichtbar (dunkle Platte wie im Scan), Rangfarbe
+         legt sich mit wachsender Deckkraft darueber. */
+      var op=hat?(0.42+Math.min(0.5,t.t*0.06)):0.16;
+      parts+='<path class="bz" d="'+z.d+'" fill="'+(hat?col:'var(--ink3)')+'" fill-opacity="'+op.toFixed(2)+'"'+
+        ' stroke="'+(hat?col:'var(--ink3)')+'" stroke-width=".7" stroke-opacity=".5">'+
+        '<title>'+z.name[L]+' — '+lp+' LP '+(DE?'Aufbau':'built')+'</title></path>';
+    });
+    parts+='<text x="60" y="266" text-anchor="middle" fill="var(--ink3)" style="font-family:var(--fm);font-size:11px;letter-spacing:.14em">'+(DE?'VORDERSEITE':'FRONT')+'</text>';
+    parts+='<text x="180" y="266" text-anchor="middle" fill="var(--ink3)" style="font-family:var(--fm);font-size:11px;letter-spacing:.14em">'+(DE?'RÜCKSEITE':'BACK')+'</text>';
+    var anchor2={press:[180,52],push:[60,62],row:[27,78],core:[60,102],pull:[180,92],legs:[180,220]};
+    if(bestLp>0&&(bestLp-worstLp)>=25&&anchor2[bestId]){
+      var a2=anchor2[bestId],bc2=tierOf(bestLp).col;
+      parts+='<circle cx="'+a2[0]+'" cy="'+a2[1]+'" r="16" fill="none" stroke="'+bc2+'" stroke-width="2" opacity=".5">'+
+        '<animate attributeName="r" values="13;22;13" dur="2.4s" repeatCount="indefinite"/>'+
+        '<animate attributeName="opacity" values=".55;0;.55" dur="2.4s" repeatCount="indefinite"/></circle>';
+    }
+    sv.innerHTML=parts;
+    bodyCapPaint(DE,bestId,worstId,bestLp,worstLp);
+    return;
+  }
   /* Zwei Figuren wie auf einer Anatomie-Tafel: links die Vorderseite,
      rechts die Rueckseite. Muskeln liegen als Platten auf neutralen
      Silhouetten und faerben sich nach dem Rang ihres Musters. */
@@ -7463,7 +8575,7 @@ function drawBody(){
   BODYZONES.forEach(function(z){
     var lp=lpBy[z.id]||0, t=tierOf(lp), col=t.col;
     var op=t.t<0?0.30:0.55+Math.min(0.4,t.t*0.05);
-    parts+='<path class="bz" d="'+z.d+'" fill="'+col+'" fill-opacity="'+op.toFixed(2)+'" stroke="'+col+'" stroke-width=".9" stroke-opacity=".55"><title>'+z.label[L]+' — '+t.label+' ('+lp+' LP)</title></path>';
+    parts+='<path class="bz" d="'+z.d+'" fill="'+col+'" fill-opacity="'+op.toFixed(2)+'" stroke="'+col+'" stroke-width=".9" stroke-opacity=".55"><title>'+z.label[L]+' — '+lp+' LP '+(DE?'Aufbau':'built')+'</title></path>';
   });
   // bester Bereich: pulsierender Ring an der Zone
   var anchor={press:[180,52],push:[60,62],row:[27,78],core:[60,102],pull:[180,92],legs:[180,220]};
@@ -7476,6 +8588,9 @@ function drawBody(){
       '<animateTransform attributeName="transform" type="rotate" from="0 '+a[0]+' '+a[1]+'" to="360 '+a[0]+' '+a[1]+'" dur="7s" repeatCount="indefinite"/></circle>';
   }
   sv.innerHTML=parts;
+  bodyCapPaint(DE,bestId,worstId,bestLp,worstLp);
+}
+function bodyCapPaint(DE,bestId,worstId,bestLp,worstLp){
   var bn='',wn='';
   PAT.forEach(function(p){if(p.id===bestId)bn=p.name;if(p.id===worstId)wn=p.name;});
   var spread=bestLp-worstLp;
@@ -7759,11 +8874,18 @@ if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
     obState.weight=profile.weight||78;obState.bf=profile.bf||20;obState.bfTouched=!!profile.bf;
     obState.goal=profile.goal||'muscle';obState.days=profile.days||'3';obState.exp=profile.exp||'1';
     obState.tdays=(profile.tdays&&profile.tdays.length)?profile.tdays.slice():(obState.days==='4'?[0,1,3,4]:[0,2,4]);
+    obState.act=profile.act||'1.375';obState.ngoal=profile.ngoal||'300';
     obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings)};
     obState.avoid={};if(profile.avoid)Object.keys(profile.avoid).forEach(function(a){if(profile.avoid[a])obState.avoid[a]=true;});
   }
-  inIdx=0;renderIntro();introShow(true);
+  inIdx=0;
+  /* Nur der erneute Durchlauf laesst sich abbrechen -- das Profil bleibt
+     dann unangetastet, geaenderte Antworten verfallen. */
+  var ic=$('inClose');if(ic)ic.hidden=false;
+  renderIntro();introShow(true);
 });
+var inCloseBtn=$('inClose');
+if(inCloseBtn)inCloseBtn.addEventListener('click',function(){introShow(false);});
 paintSetProfile();
 syncIntro();
 /* Im Theme „Automatisch" haengen alle Farben am Systemmodus. Wechselt der,
