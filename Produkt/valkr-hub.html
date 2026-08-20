@@ -639,6 +639,7 @@
   .rung.done .bar{background:var(--aurora);opacity:.75}.rung.done .lb{color:var(--ink2)}
 
   .weeks{display:flex;flex-direction:column;gap:.42rem}
+  .wlist{display:flex;flex-direction:column;gap:.45rem}
   .wrow{background:var(--surf);border:1px solid var(--line);border-radius:4px;overflow:hidden;transition:.18s;box-shadow:var(--sh)}
   .wrow.cur{border-color:var(--ember)}
   .whead{display:flex;align-items:center;gap:.75rem;padding:.68rem .82rem;width:100%;text-align:left;transition:.16s}
@@ -732,32 +733,55 @@
 
   .chartbox{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:1rem;box-shadow:var(--sh);display:flex;flex-direction:column;gap:.55rem}
   .chartbox h4{font-family:var(--fd);font-weight:600;font-size:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--ink2)}
-  .volbar{display:flex;flex-direction:column;gap:.38rem}
+  .volbar{display:flex;flex-direction:column;gap:.42rem}
+  /* Das Urteil steht oben und gross -- es ist die Antwort, die Balken sind die
+     Begruendung. Vorher war es umgekehrt: sechs Balken, und die Aussage stand
+     als Fliesstext darunter. */
+  .volhead{display:flex;align-items:flex-end;justify-content:space-between;gap:.8rem;
+    padding-bottom:.55rem;margin-bottom:.35rem;border-bottom:1px solid var(--line)}
+  .volhead .vq em{display:block;font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  .volhead .vq b{font-family:var(--fd);font-weight:600;font-size:1.28rem;
+    font-variant-numeric:tabular-nums;line-height:1.1}
+  .volhead .vv{font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;
+    text-transform:uppercase;white-space:nowrap}
+  /* Die Balkenlaenge traegt selbst Information: sie zeigt, wie viel geplant
+     ist. Deshalb steht jede Schiene auf ihrer eigenen Breite und nicht alle
+     auf voller Zeile -- sonst saehen drei und zwoelf Saetze gleich lang aus. */
   .vrow{display:flex;align-items:center;gap:.55rem;font-family:var(--fm);font-size:var(--t2)}
-  .vrow .vl{width:4.2rem;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-size:var(--t2)}
-  .vrow .track{flex:1;height:11px;background:var(--surf2);border-radius:2px;overflow:hidden}
+  .vrow .vl{width:4.2rem;flex:none;color:var(--ink3);text-transform:uppercase;letter-spacing:.08em;font-size:var(--t1)}
+  .vrow .track{height:12px;min-width:6px;background:var(--surf2);border:1px solid var(--line);
+    border-radius:3px;overflow:hidden;margin-right:auto}
   .vrow .track i{display:block;height:100%;transition:width .5s ease}
-  .vrow .vn{width:2.5rem;text-align:right;font-variant-numeric:tabular-nums}
+  .vrow .vn{width:3.4rem;flex:none;text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+  .vrow .vn em{font-style:normal;color:var(--ink3)}
   .gauge{display:flex;align-items:center;gap:1rem;flex-wrap:wrap}
   .gauge .gtxt b{display:block;font-family:var(--fd);font-size:1.28rem;font-weight:600}
   .gauge .gtxt span{font-family:var(--fm);font-size:var(--t2);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
 
   .prlist{display:flex;flex-direction:column;gap:.38rem}
-  .prrow{display:flex;align-items:center;gap:.55rem;background:var(--surf2);border:1px solid var(--line);padding:.46rem .68rem;border-radius:3px;transition:.16s}
-  .prrow:hover{border-color:var(--ice)}
-  .prrow b{flex:1;font-family:var(--fd);font-weight:600;font-size:var(--t3);min-width:0}
-  .prrow .track{width:70px;height:8px;background:var(--line2);border-radius:2px;overflow:hidden;flex:none}
+  /* Zwei Zeilen statt einer: oben Name und Wert, darunter der Balken ueber die
+     volle Breite. In einer Zeile lagen Name, Balken, Feld, Einheit, Differenz
+     und Loeschkreuz nebeneinander -- gut 230 Pixel fest belegt, wodurch der
+     Name auf 375 Pixeln umbrach und der Balken mitten im Text stand. */
+  .prlist{display:flex;flex-direction:column;gap:.45rem}
+  .prrow{display:flex;flex-direction:column;gap:.4rem;width:100%;text-align:left;
+    background:var(--surf2);border:1px solid var(--line);padding:.7rem .8rem;
+    border-radius:var(--r2);cursor:pointer;font-family:var(--fb);color:var(--ink);
+    transition:border-color .16s}
+  .prrow:hover{border-color:var(--aurora)}
+  .prrow .prtop{display:flex;align-items:baseline;justify-content:space-between;gap:.7rem}
+  .prrow b{font-family:var(--fd);font-weight:600;font-size:var(--t4);min-width:0}
+  .prrow .prv{font-family:var(--fd);font-weight:600;font-size:var(--t5);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .prrow .prv i{font-style:normal;font-size:.62em;font-weight:400;color:var(--ink3);margin-left:.15em}
+  .prrow .track{display:block;width:100%;height:6px;background:var(--line);
+    border-radius:3px;overflow:hidden}
   .prrow .track i{display:block;height:100%;background:var(--aurora);transition:width .5s}
-  .prrow input{width:60px;background:var(--surf);border:1px solid var(--line);color:var(--ink);padding:.3rem .4rem;font-family:var(--fm);font-size:var(--t3);border-radius:2px;text-align:right}
-  .prrow .u{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);width:1.9rem}
-  .prrow .delta{font-family:var(--fm);font-size:var(--t2);width:3.7rem;text-align:right}
-  /* 22 Pixel hoch war das Loeschkreuz -- unter jeder Empfehlung fuer
-     Beruehrungsziele, und ausgerechnet an einer Stelle, wo ein Fehlgriff
-     einen Bestwert loescht. Jetzt 32 Pixel und ein eigener Rahmen. */
-  .prrow .del{color:var(--ink3);font-size:var(--t3);flex:none;
-    min-width:32px;min-height:32px;display:inline-flex;align-items:center;justify-content:center;
-    border-radius:var(--r1)}
-  .prrow .del:hover{color:var(--ember);background:color-mix(in srgb,var(--ember) 12%,transparent)}
+  .prrow .prfoot{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+  .prrow .delta{font-family:var(--fm);font-size:var(--t2)}
+  .prrow .go{width:14px;height:14px;flex:none;color:var(--ink3);fill:none;stroke:currentColor;
+    stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .delta.up{color:var(--aurora)}.delta.flat{color:var(--ink3)}.delta.down{color:var(--ember)}
 
   .chips{display:flex;flex-wrap:wrap;gap:.34rem}
@@ -765,6 +789,37 @@
   .chip:hover{transform:translateY(-2px);border-color:var(--ice)}
   .chip[aria-pressed="true"]{background:var(--aurora);color:var(--bg);border-color:var(--aurora)}
 
+  /* ---- Ausklapper -------------------------------------------------------
+     Ein Element fuer alles, was zwar dazugehoert, aber nicht sofort gelesen
+     werden muss: Erklaerungen, Umfaenge, Rekorde, Abzeichen, die uebrigen
+     Wochen. Vorher stand das alles offen untereinander -- jeder Bereich war
+     dadurch eine Seite zum Scrollen statt eine zum Ansehen.
+
+     Bewusst das eingebaute <details> und nicht eine eigene Loesung: es
+     funktioniert mit Tastatur, mit Vorlesesoftware und mit der Seitensuche des
+     Browsers, ohne dass eine Zeile JavaScript dafuer noetig ist. */
+  details.fold{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    overflow:hidden;box-shadow:var(--sh)}
+  details.fold+details.fold{margin-top:.45rem}
+  details.fold>summary{display:flex;align-items:center;gap:.7rem;padding:.8rem .9rem;
+    cursor:pointer;list-style:none;transition:background .16s;min-height:46px}
+  details.fold>summary::-webkit-details-marker{display:none}
+  details.fold>summary:hover{background:var(--surf3)}
+  details.fold>summary .ft{flex:1;min-width:0;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
+  details.fold>summary .fs{font-family:var(--fm);font-size:var(--t2);color:var(--ink3);
+    white-space:nowrap;font-variant-numeric:tabular-nums}
+  details.fold>summary .fc{flex:none;width:15px;height:15px;color:var(--ink3);
+    fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    transition:transform .2s}
+  details.fold[open]>summary .fc{transform:rotate(90deg)}
+  details.fold[open]>summary{border-bottom:1px solid var(--line2)}
+  .foldBody{padding:.85rem .9rem 1rem;display:flex;flex-direction:column;gap:.7rem;
+    animation:fade .2s ease}
+  .foldBody>p:first-child{margin-top:0}
+  @media (max-width:640px){
+    details.fold>summary{padding:.75rem .8rem}
+    .foldBody{padding:.75rem .8rem .9rem}
+  }
   .acc{display:flex;flex-direction:column;gap:.4rem}
   .accItem{background:var(--surf);border:1px solid var(--line);border-radius:4px;overflow:hidden;box-shadow:var(--sh)}
   .accHead{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;padding:.72rem .85rem;transition:.16s}
@@ -1362,7 +1417,7 @@
     <div class="chartbox">
       <h4 data-i18n="train.vol">Weekly volume balance</h4>
       <div class="volbar" id="volbar"></div>
-      <p class="hint" data-i18n="train.volHint">Pull should never sit below push. That imbalance is the most common cause of shoulder trouble in calisthenics.</p>
+      <p class="hint" id="volNote"></p>
     </div>
     <div class="form">
       <div class="savebar" style="justify-content:space-between">
@@ -1418,46 +1473,56 @@
         <div class="rankList" id="rankList"></div>
       </div>
     </div>
-    <div class="card">
-      <h4 data-i18n="rk.how">How the rank is earned</h4>
-      <ul>
-        <li data-i18n="rk.h1">Ladder position is worth the most. Moving one step up is worth more than a month of extra reps.</li>
-        <li data-i18n="rk.h2">Personal records above your week-1 baseline add on top.</li>
-        <li data-i18n="rk.h3">Following the plan adds the rest — and a logged rest day counts exactly like a session.</li>
-        <li data-i18n="rk.h4">Strength only sets your ceiling. What unlocks it is showing up: every active week raises your cap a little. The top rank is months of work, on purpose.</li>
-        <li data-i18n="rk.h5">Every completely empty week costs rank. Long break, lower rank — the ladder remembers, the rank has to be re-earned.</li>
-      </ul>
-    </div>
+    <!-- Erklaerung, Rangverteilung und Extras stehen zugeklappt: alles drei ist
+         Nachschlagestoff, das man einmal liest und danach kennt. Offen machten
+         sie den Rangbereich zur laengsten Seite der App. -->
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="rk.how">How the rank is earned</span></summary>
+      <div class="foldBody">
+        <ul>
+          <li data-i18n="rk.h1">Ladder position is worth the most.</li>
+          <li data-i18n="rk.h2">Personal records above your week-1 baseline add on top.</li>
+          <li data-i18n="rk.h3">Following the plan adds the rest.</li>
+          <li data-i18n="rk.h4">Strength only sets your ceiling.</li>
+          <li data-i18n="rk.h5">Every completely empty week costs rank.</li>
+        </ul>
+      </div>
+    </details>
     <div id="achWrap"></div>
 
-    <div class="chartbox">
-      <h4 data-i18n="rk.dist">All ranks &mdash; who stands where</h4>
-      <div class="tblwrap" style="box-shadow:none;border:none;padding:0"><table class="cmp" id="tierTable"></table></div>
-      <p class="hint" id="tierNote"></p>
-    </div>
-    <div class="chartbox">
-      <h4 data-i18n="rk.addons">Rank-exclusive designs</h4>
-      <div id="addonList"></div>
-      <p class="hint" data-i18n="rk.addonsNote">Pure cosmetics &mdash; they change how your figures look, never how the rank is earned. At the top rank, every figure wears a crown and a boss aura.</p>
-    </div>
-
-    <div class="chartbox">
-      <div class="savebar" style="justify-content:space-between">
-        <h4 data-i18n="lb.h">Leaderboard</h4>
-        <span class="pill" id="lbState"></span>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="rk.dist">All ranks &mdash; who stands where</span></summary>
+      <div class="foldBody">
+        <div class="tblwrap" style="box-shadow:none;border:none;padding:0"><table class="cmp" id="tierTable"></table></div>
+        <p class="hint" id="tierNote"></p>
       </div>
-      <div class="tblwrap" style="box-shadow:none;border:none;padding:0">
-        <div class="tblwrap"><table class="cmp" id="lbTable"></table></div>
+    </details>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="rk.addons">Rank-exclusive designs</span></summary>
+      <div class="foldBody">
+        <div id="addonList"></div>
+        <p class="hint" data-i18n="rk.addonsNote">Pure cosmetics &mdash; they change how your figures look, never how the numbers are earned.</p>
       </div>
-      <p class="hint" id="lbNote"></p>
-    </div>
+    </details>
+    <!-- Die Bestenliste ist raus. Neun von zehn Zeilen darin waren erfunden,
+         und direkt darueber steht bereits eine Tabelle mit allen Raengen und
+         der eigenen Position. Zwei Tabellen fuer dieselbe Frage, von denen die
+         eine nicht echt ist -- die schwaechere geht.
+         Sie kommt wieder, wenn es einen Server gibt, auf dem echte Zeilen von
+         echten Leuten stehen. Der Code dafuer liegt in renderBoard(). -->
+  </section>
   </section>
 
   <section class="view" id="v-skills">
     <div><h2 class="sec" data-i18n="skills.h">Skills</h2><p class="sub" data-i18n="skills.s">These are why most people start calisthenics. Each one has an entry requirement &mdash; the hub checks yours against it.</p></div>
     <div class="grid" id="skillTiles"></div>
     <div id="skillDetail"></div>
-    <div class="card"><h4 data-i18n="skills.rules">Three rules for skill work</h4>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="skills.rules">Three rules for skill work</span></summary>
+      <div class="foldBody">
       <ul><li data-i18n="skills.r1">Train it fresh, right after the warm-up, before anything else.</li>
       <li data-i18n="skills.r2">Stop well short of failure. Skills are coordination, and tired practice builds a sloppy pattern.</li>
       <li data-i18n="skills.r3">Ten minutes four or five times a week beats an hour once.</li></ul></div>
@@ -1473,14 +1538,18 @@
         <span class="clock" id="mobClock" style="font-size:1.4rem">0:45</span>
         <span class="hint" id="mobNow"></span>
       </div>
+    </details>
     </div>
     <div class="cols" id="mobList"></div>
-    <div class="card"><h4 data-i18n="mob.dose">The weekly dose</h4>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="mob.dose">The weekly dose</span></summary>
+      <div class="foldBody">
       <div class="facts">
         <div class="fact"><span data-i18n="mob.d1">Before every session</span><b style="font-weight:400">6-8 min</b></div>
         <div class="fact"><span data-i18n="mob.d2">After two sessions</span><b style="font-weight:400">8 min</b></div>
         <div class="fact"><span data-i18n="mob.d3">Optional full sequence</span><b style="font-weight:400">20 min</b></div>
       </div>
+    </details>
       <p class="hint" data-i18n="mob.note">Static stretching before training briefly lowers force output. Save the long holds for after, or for their own slot.</p>
     </div>
   </section>
@@ -1504,7 +1573,9 @@
         <tbody id="testTable"></tbody>
       </table>
     </div>
-    <div class="card"><h4 data-i18n="test.retest">Retest at week 6 and week 12</h4>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="test.retest">Retest at week 6 and week 12</span></summary>
+      <div class="foldBody">
       <p class="hint" data-i18n="test.retestP">Same warm-up, same standards, same tests. The temptation is to loosen your form so the number looks better. The only person that flatters is you.</p></div>
   </section>
   <section class="view" id="v-fuel">
@@ -1519,6 +1590,7 @@
         <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2" data-i18n="f.a1">Mostly sitting</option><option value="1.375" selected data-i18n="f.a2">On feet some</option><option value="1.55" data-i18n="f.a3">On feet a lot</option><option value="1.725" data-i18n="f.a4">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected data-i18n="f.g1">Build muscle</option><option value="0" data-i18n="f.g2">Maintain</option><option value="-450" data-i18n="f.g3">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
+    </details>
       <div class="out" id="est"></div>
     </div>
     <div class="form">
@@ -1594,24 +1666,38 @@
       <div id="wChart"></div>
       <p class="hint" id="wNote"></p>
     </div>
-    <div class="form">
-      <div class="savebar" style="justify-content:space-between">
-        <p class="eyebrow" style="margin:0" data-i18n="you.meas">Measurements &mdash; same time of day, relaxed</p>
-        <button class="tbtn" id="rebase" data-i18n="btn.rebase">Set today as baseline</button>
+    <!-- Umfaenge und Rekorde stehen zugeklappt. Beides ist Nachschlagestoff:
+         man traegt es alle paar Wochen ein und sieht sonst nur hin, wenn man
+         wissen will, ob sich etwas bewegt hat. Offen nahmen die beiden Bloecke
+         zusammen rund tausend Pixel -- auf dem Bildschirm, der eigentlich den
+         Fortschritt zeigen soll. Die Kurzfassung in der Kopfzeile beantwortet
+         die haeufigste Frage, ohne dass man aufklappen muss. -->
+    <details class="fold" id="foldMeas">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="you.meas">Measurements</span><span class="fs" id="measSum"></span></summary>
+      <div class="foldBody">
+        <p class="hint" data-i18n="you.measHint">Same time of day, relaxed, tape level. Comparable beats flattering.</p>
+        <div class="savebar" style="justify-content:flex-end">
+          <button class="tbtn" id="rebase" data-i18n="btn.rebase">Set today as baseline</button>
+        </div>
+        <div class="fgrid" id="measGrid"></div>
+        <div class="out" id="bfOut"></div>
+        <p class="hint" id="measNote"></p>
       </div>
-      <div class="fgrid" id="measGrid"></div>
-      <div class="out" id="bfOut"></div>
-      <p class="hint" id="measNote"></p>
-    </div>
-    <div class="form">
-      <p class="eyebrow" data-i18n="you.prs">Personal records &mdash; clean reps only</p>
-      <div class="prlist" id="prlist"></div>
-      <div class="savebar">
-        <div class="ctl" style="flex:1;min-width:150px"><input id="prName" type="text" placeholder="Dips"></div>
-        <div class="ctl" style="max-width:110px"><select id="prUnit"><option value="reps">reps</option><option value="sec">sec</option><option value="kg">kg</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div>
-        <button class="tbtn go" id="prAdd" data-i18n="btn.addEx">Add exercise</button>
+    </details>
+    <details class="fold" id="foldPr">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="you.prs">Personal records</span><span class="fs" id="prSum"></span></summary>
+      <div class="foldBody">
+        <p class="hint" data-i18n="you.prsHint">Clean reps only. A record you would not film is not one.</p>
+        <div class="prlist" id="prlist"></div>
+        <div class="savebar">
+          <div class="ctl" style="flex:1;min-width:150px"><input id="prName" type="text" placeholder="Dips"></div>
+          <div class="ctl" style="max-width:110px"><select id="prUnit"><option value="reps">reps</option><option value="sec">sec</option><option value="kg">kg</option></select></div>
+          <button class="tbtn go" id="prAdd" data-i18n="btn.addEx">Add exercise</button>
+        </div>
       </div>
-    </div>
+    </details>
     <div class="form">
       <p class="eyebrow" data-i18n="you.taking">What you are taking</p>
       <div class="chips" id="suppchips"></div>
@@ -1626,23 +1712,31 @@
   <section class="view" id="v-coach">
     <div><h2 class="sec" data-i18n="coach.h">Coach</h2><p class="sub" data-i18n="coach.s">Reads everything you have entered and updates the moment you change a number. Ordered by what costs you the most.</p></div>
     <div class="coach" id="coachList"></div>
-    <div class="card"><h4 data-i18n="coach.how">How this works</h4>
-      <p class="hint" data-i18n="coach.howP">No guessing and no chatbot. It applies the same rules the book uses &mdash; sleep, volume balance, weeks since a deload, whether your records are moving, whether your waist is climbing faster than your arms &mdash; to your own numbers.</p></div>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="coach.how">How this works</span></summary>
+      <div class="foldBody">
+        <p class="hint" data-i18n="coach.howP">No guessing and no chatbot.</p>
+      </div>
+    </details>
   </section>
 
   <section class="view" id="v-learn">
-    <div><h2 class="sec" data-i18n="learn.h">The book, in short</h2><p class="sub" data-i18n="learn.s">All twelve chapters as a reference you can scan mid-session. The full prose lives in the PDF; this is the part you look up when you forget a rule.</p></div>
+    <div><h2 class="sec" data-i18n="learn.h">The book, in short</h2><p class="sub" data-i18n="learn.s">Twelve chapters, short enough to look up mid-session.</p></div>
     <div class="acc" id="chapters"></div>
-    <!-- Belege. Wettbewerber schreiben „wissenschaftliches Know-how" auf die
+    <!-- Belege. Wettbewerber schreiben "wissenschaftliches Know-how" auf die
          Startseite und nennen keine einzige Quelle. Wir nennen sie. Das ist
          billig zu bauen und schwer zu kopieren, weil es voraussetzt, dass die
-         Regeln im Produkt wirklich aus der Literatur kommen. -->
-    <div class="card" id="evidence">
-      <h4 data-i18n="ev.h">Where these rules come from</h4>
-      <p class="hint" data-i18n="ev.s">Every number in this app has a reason. These are the main ones. Findings are summarised in plain language &mdash; look them up if you want the detail.</p>
-      <div class="log" id="evList"></div>
-      <p class="hint"><b data-i18n="ev.noteB">Not medical advice.</b> <span data-i18n="ev.note">These references support the training principles, not any promise about your individual result. Persistent pain, illness or a known condition goes to a doctor, not to a checklist.</span></p>
-    </div>
+         Regeln im Produkt wirklich aus der Literatur kommen.
+         Zugeklappt, weil es Belege sind: man will wissen, DASS es sie gibt,
+         und liest sie einmal nach. -->
+    <details class="fold" id="evidence">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="ev.h">Where these rules come from</span></summary>
+      <div class="foldBody">
+        <p class="hint" data-i18n="ev.s">Every number in this app has a reason.</p>
+        <div class="log" id="evList"></div>
+        <p class="hint"><b data-i18n="ev.noteB">Not medical advice.</b> <span data-i18n="ev.note">These references support the rules, they do not replace a doctor.</span></p>
+      </div>
+    </details>
   </section>
 
   <section class="view" id="v-access">
@@ -1735,7 +1829,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.5';
+var VERSION='14.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1920,7 +2014,7 @@ var DICT={
  'plan.h':['The twelve weeks','Die zwölf Wochen'],'plan.s':['One row per week. Open a week to see its days and jump to any of them.','Eine Zeile pro Woche. Aufklappen zeigt die Tage, Klick springt hin.'],
  'plan.miles':['Milestones','Meilensteine'],
  'train.h':['The six patterns','Die sechs Muster'],'train.s':['Everything you train is one of these. Open one for the ladder, the cues, and what usually goes wrong.','Alles was du trainierst ist eines davon. Öffnen für Leiter, Technik und typische Fehler.'],
- 'train.vol':['Weekly volume balance','Wochenvolumen im Verhältnis'],
+ 'train.vol':['Weekly volume','Wochenvolumen'],
  'train.volHint':['Pull should never sit below push. That imbalance is the most common cause of shoulder trouble in calisthenics.','Zug darf nie unter Druck liegen. Dieses Ungleichgewicht ist die häufigste Ursache für Schulterprobleme.'],
  'train.ladder':['Your ladder — tap a step to set where you are','Deine Leiter — Stufe antippen um deinen Stand zu setzen'],
  'train.how':['How to do it','Ausführung'],'train.wrong':['What goes wrong','Typische Fehler'],'train.numbers':['Numbers','Zahlen'],
@@ -1951,8 +2045,9 @@ var DICT={
  'f.pro':['Protein','Protein'],'f.fat':['Fat','Fett'],'f.carb':['Carbs (derived)','Kohlenhydrate (abgeleitet)'],
  'you.h':['You','Du'],'you.s':['Baseline is week 1. Everything here is measured against your own start, not against anyone else.','Basis ist Woche 1. Alles hier misst gegen deinen eigenen Start, nicht gegen andere.'],
  'you.ready':['Readiness right now','Tagesform'],'you.habits':['Habits — the coach reads these live','Gewohnheiten — der Coach liest sie live'],
- 'you.weight':['Bodyweight trend','Gewichtsverlauf'],'you.meas':['Measurements — same time of day, relaxed','Umfänge — gleiche Tageszeit, entspannt'],
- 'you.prs':['Personal records — clean reps only','Rekorde — nur saubere Wiederholungen'],'you.taking':['What you are taking','Was du nimmst'],
+ 'you.weight':['Bodyweight trend','Gewichtsverlauf'],'you.meas':['Measurements','Umfänge'],
+ 'you.measHint':['Same time of day, relaxed, tape level. Comparable beats flattering.','Gleiche Tageszeit, entspannt, Band waagerecht. Vergleichbar schlägt schmeichelhaft.'], 'you.prsHint':['Clean reps only. A record you would not film is not one.','Nur saubere Wiederholungen. Ein Rekord, den du nicht filmen würdest, ist keiner.'],
+ 'you.prs':['Personal records','Rekorde'],'you.taking':['What you are taking','Was du nimmst'],
  'y.exp':['Training since','Trainiere seit'],'y.sleep':['Sleep average','Schlaf im Schnitt'],'y.mood':['Motivation now','Motivation heute'],
  'y.sore':['Soreness','Muskelkater'],'y.stress':['Life load','Belastung im Alltag'],'y.goal':['Your goal','Dein Ziel'],
  'coach.h':['Coach','Coach'],'coach.s':['Reads your numbers and speaks up when something shifts. Ordered by what costs you the most.','Liest deine Zahlen mit und meldet sich, wenn etwas kippt. Sortiert nach dem, was dich am meisten kostet.'],
@@ -2800,6 +2895,16 @@ function svgDecide(s){
   if(an){if(s.animationsPaused())s.unpauseAnimations();}
   else if(!s.animationsPaused())s.pauseAnimations();
 }
+/* Baut einen Ausklapper. titel steht immer da, nebentext rechts daneben als
+   Kurzfassung dessen, was drinsteckt -- so muss man zum Nachsehen gar nicht
+   erst oeffnen. */
+function fold(titel,nebentext,inhalt,offen){
+  return '<details class="fold"'+(offen?' open':'')+'>'+
+    '<summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
+    '<span class="ft">'+titel+'</span>'+
+    (nebentext?'<span class="fs">'+nebentext+'</span>':'')+
+    '</summary><div class="foldBody">'+inhalt+'</div></details>';
+}
 function pauseHiddenSvg(){
   if(!svgObs&&window.IntersectionObserver){
     svgObs=new IntersectionObserver(function(es){
@@ -3305,6 +3410,10 @@ function streak(){
 /* ---------- plan ---------- */
 function buildWeeks(){
   var wrap=$('weeks');wrap.innerHTML='';
+  /* Zweiter Behaelter fuer die uebrigen Wochen. Er wandert am Ende in einen
+     Ausklapper -- gebaut werden sie trotzdem alle, weil die Gesamtzahlen
+     darunter (Einheiten, Logs) sie brauchen. */
+  var restWrap=document.createElement('div');restWrap.className='wlist';
   /* Ueberschrift traegt den Block, sonst sehen zwoelf Wochen im Block 3
      genauso aus wie zwoelf Wochen im Block 1. */
   var LB=cfg.lang==='de'?1:0,cbk=curBlock(),hd=document.querySelector('#v-plan h2.sec'),sb=document.querySelector('#v-plan p.sub');
@@ -3333,7 +3442,21 @@ function buildWeeks(){
     head.addEventListener('click',function(){row.classList.toggle('open');});
     row.appendChild(head);row.appendChild(body);
     if(w===curW)row.classList.add('open');
-    wrap.appendChild(row);})(w);}
+    /* Nur die laufende Woche steht offen da. Zwoelf Wochenzeilen sind rund
+       tausend Pixel, von denen elf niemanden interessieren, solange man in
+       Woche eins steht. Der Rest liegt hinter einem Griff. */
+    (w===curW?wrap:restWrap).appendChild(row);})(w);}
+  /* Die uebrigen elf Wochen hinter einen Griff legen. Die Kurzfassung rechts
+     sagt schon, worum es geht -- oeffnen muss nur, wer wirklich vorausschauen
+     will. */
+  if(restWrap.children.length){
+    var d=document.createElement('details');d.className='fold';
+    d.innerHTML='<summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
+      '<span class="ft">'+(cfg.lang==='de'?'Die übrigen Wochen':'The other weeks')+'</span>'+
+      '<span class="fs">'+restWrap.children.length+'</span></summary>';
+    var bd=document.createElement('div');bd.className='foldBody';
+    bd.appendChild(restWrap);d.appendChild(bd);wrap.appendChild(d);
+  }
   var logged=Object.keys(logs).length;
   $('planKpis').innerHTML=kpi(cfg.lang==='de'?'Einheiten':'Sessions done',totDone,(cfg.lang==='de'?'von ':'of ')+totTrain)+
     kpi(cfg.lang==='de'?'Aktuelle Woche':'Current week',(curW<1?'-':(curW>12?'12+':curW)),'of 12')+
@@ -3394,14 +3517,61 @@ function ladder(){
     b.addEventListener('click',function(){steps[cur]=i;set('steps',steps);set('lastStepUp',iso(TODAY));ladder();buildTiles();refresh();});
     l.appendChild(b);});
 }
+/* Wochenvolumen. Vorher standen hier sechs Balken mit blossen Zahlen -- man
+   sah, dass Beine laenger war als Druecken, aber nicht, ob das gut ist,
+   woher die Zahlen kommen oder was man selbst schon geschafft hat. Ein
+   Diagramm, das eine Frage aufwirft statt eine zu beantworten.
+
+   Jetzt beantwortet es die eine Frage, um die es hier wirklich geht: liegt
+   Zug unter Druck? Das ist der Grund, warum die Aufstellung ueberhaupt da ist
+   -- ein Missverhaeltnis dort ist die haeufigste Ursache fuer Schulteraerger.
+   Und die Balken zeigen erledigt gegen geplant, sind also waehrend der Woche
+   in Bewegung statt fuer zwoelf Wochen dieselben. */
 function volBar(){
   var w=Math.min(12,Math.max(1,wkOf(TODAY))),ph=phase(w),S=cfg.track==='4'?SESS4:SESS3;
-  var counts={push:0,pull:0,row:0,press:0,legs:0,core:0};
-  Object.keys(S).forEach(function(s){S[s].items.forEach(function(x){counts[x.id]+=ph.sets;});});
-  var max=Math.max.apply(null,Object.keys(counts).map(function(k){return counts[k];}))||1;
-  $('volbar').innerHTML=PAT.map(function(p){
-    return '<div class="vrow"><span class="vl">'+p.name+'</span><span class="track"><i style="width:'+Math.round(counts[p.id]/max*100)+'%;background:var('+p.cv+')"></i></span><span class="vn">'+counts[p.id]+'</span></div>';
-  }).join('');
+  var DE=cfg.lang==='de';
+  var soll={push:0,pull:0,row:0,press:0,legs:0,core:0};
+  var ist ={push:0,pull:0,row:0,press:0,legs:0,core:0};
+  Object.keys(S).forEach(function(s){S[s].items.forEach(function(x){if(soll[x.id]!==undefined)soll[x.id]+=ph.sets;});});
+  /* Erledigt: die sieben Tage dieser Woche durchgehen. Die Reihenfolge der
+     Positionen ist dieselbe wie beim Abhaken, deshalb passt der Index. */
+  for(var i=0;i<7;i++){
+    var dt=add(STD,(w-1)*7+i),pl=plan(dt),dn=doneMap[iso(dt)]||{};
+    if(pl.kind!=='train')continue;
+    sessOf(pl).items.forEach(function(x,idx){
+      if(dn[idx]&&x.id&&ist[x.id]!==undefined)ist[x.id]+=ph.sets;
+    });
+  }
+  var max=Math.max.apply(null,Object.keys(soll).map(function(k){return soll[k];}))||1;
+  var zug=soll.pull+soll.row, druck=soll.push+soll.press;
+  var q=druck?zug/druck:1;
+  var urteil,farbe;
+  if(q>=1){urteil=DE?'ausgewogen':'balanced';farbe='var(--aurora)';}
+  else if(q>=0.85){urteil=DE?'knapp':'tight';farbe='var(--brass)';}
+  else {urteil=DE?'zu wenig Zug':'too little pull';farbe='var(--ember)';}
+  $('volbar').innerHTML=
+    '<div class="volhead">'+
+      '<span class="vq"><em>'+(DE?'Zug zu Druck':'Pull to push')+'</em>'+
+        '<b>'+q.toFixed(2).replace('.',DE?',':'.')+' : 1</b></span>'+
+      '<span class="vv" style="color:'+farbe+'">'+urteil+'</span>'+
+    '</div>'+
+    PAT.map(function(p){
+      var s=soll[p.id]||0,d=ist[p.id]||0;
+      var breite=Math.round(s/max*100);
+      var fuell=s?Math.round(Math.min(100,d/s*100)):0;
+      return '<div class="vrow">'+
+        '<span class="vl">'+p.name+'</span>'+
+        '<span class="track" style="width:'+breite+'%"><i style="width:'+fuell+'%;background:var('+p.cv+')"></i></span>'+
+        '<span class="vn">'+d+'<em> / '+s+'</em></span></div>';
+    }).join('');
+  var note=$('volNote');
+  if(note)note.textContent=DE
+    ? ('Balkenlänge = geplante Sätze diese Woche, gefüllt = davon erledigt. '+
+       (q>=1?'Zug liegt nicht unter Druck — so soll es sein.'
+            :'Zug liegt unter Druck. Das ist die häufigste Ursache für Schulterprobleme — häng eine Ruder- oder Klimmzugeinheit an.'))
+    : ('Bar length = sets planned this week, filled = done. '+
+       (q>=1?'Pull is not below push — that is how it should be.'
+            :'Pull sits below push. That is the most common cause of shoulder trouble — add a row or pull-up slot.'));
 }
 
 /* ---------- skills ---------- */
@@ -4084,6 +4254,16 @@ function hasBase(k){return measBase[k]!==undefined;}
    Veraenderung darunter. Eintragen passiert beim Antippen -- dort ist Platz
    fuer Regler, Startwert und die Einordnung, ohne dass sie sieben Mal
    herumsteht. */
+/* Kurzfassung in der Kopfzeile des Ausklappers: wie viele Umfaenge stehen,
+   und der wichtigste davon. Damit beantwortet die geschlossene Zeile die
+   haeufigste Frage, ohne dass man sie oeffnen muss. */
+function measSummary(){
+  var el=$('measSum');if(!el)return;
+  var n=MEAS.filter(function(m){return meas[m[0]]!==undefined;}).length;
+  if(!n){el.textContent=cfg.lang==='de'?'noch keine':'none yet';return;}
+  var t=meas.waist!==undefined?(' · '+(cfg.lang==='de'?'Taille ':'waist ')+toDisp(meas.waist,'l').toFixed(0)+' '+ul()):'';
+  el.textContent=n+' / '+MEAS.length+t;
+}
 function measCard(m){
   var k=m[0],has=meas[k]!==undefined,v=mval(k);
   var diff=(has&&hasBase(k))?(v-measBase[k]):null;
@@ -4104,11 +4284,13 @@ function buildMeas(){
   var g=$('measGrid');if(!g)return;
   g.className='cards';
   g.innerHTML=MEAS.map(measCard).join('');
+  measSummary();
   bodyFat();measNote();
 }
 function measRefresh(){
   var g=$('measGrid');if(!g)return;
   g.innerHTML=MEAS.map(measCard).join('');
+  measSummary();
   bodyFat();measNote();
 }
 /* Detail eines Umfangs. Oeffnet im selben Blatt wie das Menue -- eine Form
@@ -4209,19 +4391,76 @@ $('rebase').addEventListener('click',function(){
   MEAS.forEach(function(m){if(meas[m[0]]!==undefined)measBase[m[0]]=meas[m[0]];});
   set('measBase',measBase);buildMeas();refresh();});
 var PRS=get('prs',[{n:'Push-ups',u:'reps',b:0,v:0},{n:'Pull-ups',u:'reps',b:0,v:0},{n:'Inverted rows',u:'reps',b:0,v:0},{n:'Squats',u:'reps',b:0,v:0},{n:'Hollow hold',u:'sec',b:0,v:0},{n:'Pike push-ups',u:'reps',b:0,v:0}]);
+/* Rekorde als Fortschrittszeilen. Vorher stand alles in einer Zeile: Name,
+   Balken, Eingabefeld, Einheit, Differenz und Loeschkreuz. Das sind gut 230
+   Pixel fest belegte Breite -- auf einem 375-Pixel-Bildschirm brach der Name
+   dadurch auf drei Zeilen um und der Balken stand mitten im Text. Genau das
+   war der "Beschriftung im Balken"-Eindruck.
+   Jetzt zwei Zeilen: oben Name und Wert, darunter der Balken ueber die volle
+   Breite. Geaendert wird per Antippen im Detailblatt -- dort ist Platz. */
 function buildPR(){
-  var el=$('prlist');el.innerHTML='';
-  PRS.forEach(function(p,i){
-    var r=document.createElement('div');r.className='prrow';
-    var gain=p.b>0?Math.min(200,Math.round(p.v/p.b*100)):100;
-    r.innerHTML='<b></b><span class="track"><i style="width:'+Math.min(100,gain/2)+'%"></i></span><input type="number" min="0" value="'+p.v+'"><span class="u">'+p.u+'</span><span class="delta"></span><button class="del" title="Remove">X</button>';
-    r.querySelector('b').textContent=p.n;
-    var d=r.querySelector('.delta'),df=p.v-p.b;
-    d.className='delta '+(df>0?'up':(df<0?'down':'flat'));d.textContent=(df>0?'+':'')+df+' vs wk1';
-    r.querySelector('input').addEventListener('input',function(e){PRS[i].v=parseFloat(e.target.value)||0;set('prs',PRS);buildPR();refresh();});
-    r.querySelector('.del').addEventListener('click',function(){PRS.splice(i,1);set('prs',PRS);buildPR();refresh();});
-    el.appendChild(r);});
+  var el=$('prlist');if(!el)return;
+  var DE=cfg.lang==='de';
+  el.innerHTML=PRS.map(function(p,i){
+    var df=p.v-p.b;
+    /* Der Balken zeigt den Zuwachs gegen Woche 1, gedeckelt bei Verdoppelung.
+       Ohne Startwert gibt es nichts zu vergleichen -- dann bleibt er leer,
+       statt eine volle Leiste vorzutaeuschen. */
+    var pct=p.b>0?Math.max(0,Math.min(100,(p.v/p.b-1)*100)):0;
+    var cls=df>0?'up':(df<0?'down':'flat');
+    return '<button type="button" class="prrow" data-pr="'+i+'">'+
+      '<span class="prtop"><b></b><span class="prv">'+p.v+' <i>'+p.u+'</i></span></span>'+
+      '<span class="track"><i style="width:'+pct.toFixed(0)+'%"></i></span>'+
+      '<span class="prfoot"><span class="delta '+cls+'">'+(df>0?'+':'')+df+' '+(DE?'seit Woche 1':'since week 1')+'</span>'+
+      '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>'+
+      '</button>';
+  }).join('');
+  [].forEach.call(el.querySelectorAll('.prrow b'),function(b,i){b.textContent=PRS[i].n;});
+  var besser=PRS.filter(function(p){return p.v>p.b;}).length;
+  var sum=$('prSum');if(sum)sum.textContent=besser+' / '+PRS.length+(DE?' verbessert':' improved');
 }
+/* Detail eines Rekords: Wert aendern, Startwert setzen, Uebung entfernen. */
+function openPR(i){
+  var p=PRS[i];if(!p)return;
+  var DE=cfg.lang==='de',df=p.v-p.b;
+  var max=Math.max(20,Math.ceil((Math.max(p.v,p.b)*1.6)/5)*5);
+  var html=
+    '<h4>'+(DE?'Rekord':'Record')+'</h4>'+
+    '<div class="dsh">'+
+      '<div class="dshHead"><b></b><span>'+p.v+' '+p.u+'</span></div>'+
+      '<div class="field hasSlide"><label for="prIn">'+(DE?'Bestwert':'Best')+'</label>'+
+        '<div class="ctl hasunit"><input id="prIn" type="number" min="0" value="'+p.v+'"><span class="unit">'+p.u+'</span></div></div>'+
+      '<div class="dshRow"><span>'+(DE?'Startwert':'Baseline')+'</span><b>'+p.b+' '+p.u+'</b></div>'+
+      '<div class="dshRow"><span>'+(DE?'Änderung':'Change')+'</span><b>'+(df>0?'+':'')+df+' '+p.u+'</b></div>'+
+      '<p class="hint">'+(DE
+        ?'Nur saubere Wiederholungen. Ein Rekord, den du nicht filmen würdest, ist keiner — und die Zahl hier misst nur gegen dich selbst.'
+        :'Clean reps only. A record you would not film is not one — and this number only measures against yourself.')+'</p>'+
+      '<div class="savebar">'+
+        '<button class="tbtn" data-pract="base">'+(DE?'Als Startwert setzen':'Set as baseline')+'</button>'+
+        '<button class="tbtn dngr" data-pract="del">'+(DE?'Übung entfernen':'Remove exercise')+'</button>'+
+      '</div>'+
+    '</div>';
+  openSheet(html);
+  $('sheetBody').dataset.pr=String(i);
+  var h=$('sheetBody').querySelector('.dshHead b');if(h)h.textContent=p.n;
+  var inp=$('prIn');
+  if(inp){
+    pairSlider(inp,{min:0,max:max,step:1,empty:0});
+    inp.addEventListener('input',function(){
+      PRS[i].v=parseFloat(this.value)||0;set('prs',PRS);buildPR();refresh();
+      var s=$('sheetBody').querySelector('.dshHead span');if(s)s.textContent=PRS[i].v+' '+p.u;
+    });
+  }
+}
+$('prlist').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-pr]');if(b)openPR(+b.dataset.pr);
+});
+$('sheetBody').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-pract]');if(!b)return;
+  var i=+$('sheetBody').dataset.pr;if(isNaN(i)||!PRS[i])return;
+  if(b.dataset.pract==='base'){PRS[i].b=PRS[i].v;set('prs',PRS);buildPR();refresh();openPR(i);}
+  else{PRS.splice(i,1);set('prs',PRS);buildPR();refresh();closeSheet();}
+});
 $('prAdd').addEventListener('click',function(){
   var n=$('prName').value.trim();if(!n)return;
   PRS.push({n:n,u:$('prUnit').value,b:0,v:0});set('prs',PRS);$('prName').value='';buildPR();refresh();});
@@ -5134,7 +5373,7 @@ function buildCatalog(){
      Treffer, der Rest auf Knopfdruck -- wer den Katalog wirklich durchsieht,
      sucht ohnehin, und die Suche steht direkt darueber. */
   var host=$('catList'),total=0,shown=0,gezeigt=0;host.innerHTML='';
-  var GRENZE=catAll?1e9:12;
+  var GRENZE=catAll?1e9:5;
   PAT.forEach(function(p){
     (EXDB[p.id]||[]).forEach(function(e){
       total++;
@@ -5161,7 +5400,7 @@ function buildCatalog(){
     mb.textContent=(DE?'Alle '+shown+' zeigen':'Show all '+shown);
     mb.addEventListener('click',function(){catAll=true;buildCatalog();});
     host.appendChild(mb);
-  }else if(catAll&&shown>12){
+  }else if(catAll&&shown>5){
     var lb=document.createElement('button');
     lb.type='button';lb.className='tbtn';lb.style.marginTop='.4rem';
     lb.textContent=(DE?'Weniger zeigen':'Show fewer');
@@ -5742,17 +5981,22 @@ function renderRanks(){
       '<span class="nm"><b>'+p.name+'</b><span>'+pt.label+'</span></span>'+
       '<span class="lpwrap"><span class="lpbar"><i style="width:'+pt.within+'%"></i></span><span>'+lps[i]+' LP</span></span></div>';
   }).join('');
+  /* Abzeichen nach Kategorie, jede zugeklappt. Vorher standen alle achtund-
+     zwanzig offen untereinander -- eine Wand aus Sechsecken, in der die
+     wenigen erreichten untergingen. Zugeklappt sagt jede Zeile das Wichtigste:
+     wie viele der Kategorie man hat. */
   var byCat={};ACH.forEach(function(a){(byCat[a.cat]=byCat[a.cat]||[]).push(a);});
   var html='';
   Object.keys(CATN).forEach(function(c){
     if(!byCat[c])return;
     var done=byCat[c].filter(function(a){return got[a.id];}).length;
-    html+='<p class="achCat">'+CATN[c][L]+' · '+done+'/'+byCat[c].length+'</p><div class="achGrid">'+
+    var innen='<div class="achGrid">'+
       byCat[c].map(function(a){
         var g=!!got[a.id];
         return '<div class="ach '+(g?'got':'locked')+'">'+badgeSvg(Math.min(8,Math.floor(a.p/25)),40)+
           '<b>'+a.n[L]+'</b><span>'+a.d[L]+'</span><span class="pts">+'+a.p+' XP</span></div>';
       }).join('')+'</div>';
+    html+=fold(CATN[c][L],done+' / '+byCat[c].length,innen,false);
   });
   $('achWrap').innerHTML=html;
   drawBody();
@@ -5762,7 +6006,7 @@ function renderRanks(){
      der Service Worker wurde nie registriert. */
   var rb=$('rankBadge');
   if(rb){rb.textContent=Object.keys(got).length;rb.style.display=Object.keys(got).length?'':'none';}
-  renderTierTable(t.t);renderAddons(t.t);renderBoard(avg);
+  renderTierTable(t.t);renderAddons(t.t);
 }
 
 var CROWNMINI='<svg width="12" height="9" viewBox="0 0 13 10" style="vertical-align:-1px" aria-hidden="true"><path d="M1 9 L1 3 L4 5.5 L6.5 1 L9 5.5 L12 3 L12 9 Z" fill="#F0D060" stroke="#B8862F" stroke-width=".6"/></svg>';
@@ -5807,6 +6051,10 @@ var DEMO=[
  {n:'Lena',ad:64,st:4,lv:4,lp:190},{n:'Nils',ad:52,st:2,lv:3,lp:120},{n:'Jonas',ad:41,st:1,lv:2,lp:45}
 ];
 function boardScore(ad,st,lv){return Math.round(ad*4+Math.min(st,60)*6+lv*20);}
+/* renderBoard bleibt als Code stehen, wird aber nicht mehr aufgerufen: die
+   Bestenliste ist aus der Oberflaeche raus, solange neun von zehn Zeilen
+   erfunden sind. Sobald ein Server echte Zeilen liefert, braucht es hier nur
+   den Aufruf zurueck und die Markup-Zeilen im Rangbereich. */
 function renderBoard(avgLp){
   var DE=cfg.lang==='de';
   var mine={n:DE?'Du':'You',ad:adherence(),st:streakVal,lv:levelOf(xpTotal()),lp:avgLp,me:1};
