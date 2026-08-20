@@ -2024,7 +2024,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.6';
+var VERSION='16.7';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2455,6 +2455,62 @@ function phase(w){
   var p=curBlock().ph[w<=4?0:(w<=8?1:2)];
   return{name:p.n[L],sets:p.sets,reps:p.reps,rest:p.rest[L],rs:p.rs};
 }
+/* Anzeigenamen der Sitzungen und ihrer Plaetze.
+
+   Auch hier gilt: der englische Text in title/sub/l ist Schluessel, nicht
+   Beschriftung. l wird gegen den Katalog verglichen (Uebung tauschen), und
+   getauschte Uebungen liegen unter diesem Namen im Profil. Uebersetzt wird
+   deshalb erst beim Anzeigen.
+   Was hier nicht steht, bleibt englisch stehen -- eine fehlende Zeile faellt
+   weniger auf als eine falsche. */
+var SESSDE={
+  'Pull day':'Zugtag','Push day':'Drucktag','Legs day':'Beintag',
+  'Upper A':'Oberkörper A','Lower A':'Unterkörper A',
+  'Upper B':'Oberkörper B','Lower B':'Unterkörper B',
+  'Pull / Row / Push / Squat / Core':'Zug / Rudern / Druck / Kniebeuge / Rumpf',
+  'Press / Push / Row / Hinge / Core':'Überkopf / Druck / Rudern / Hüfte / Rumpf',
+  'Squat / Hinge / Pull / Push / Core':'Kniebeuge / Hüfte / Zug / Druck / Rumpf'
+};
+var SLOTDE={
+  'Pull-up or negative':'Klimmzug oder negativ',
+  'Pull-up progression':'Klimmzug-Stufe',
+  'Pull-up, easier step':'Klimmzug, leichtere Stufe',
+  'Inverted row':'Rudern liegend',
+  'Inverted row, harder angle':'Rudern, steilerer Winkel',
+  'Push-up':'Liegestütz',
+  'Push-up progression':'Liegestütz-Stufe',
+  'Push-up, harder step':'Liegestütz, schwerere Stufe',
+  'Push-up, different angle':'Liegestütz, anderer Winkel',
+  'Pike push-up':'Pike-Liegestütz',
+  'Pike progression':'Pike-Stufe',
+  'Squat':'Kniebeuge',
+  'Squat progression':'Kniebeuge-Stufe',
+  'Paused squat':'Kniebeuge mit Pause',
+  'Split squat':'Split Squat',
+  'Bulgarian split squat':'Bulgarische Kniebeuge',
+  'Glute bridge':'Beckenheben',
+  'Single-leg glute bridge':'Einbeiniges Beckenheben',
+  'Single-leg RDL':'Einbeiniges Kreuzheben',
+  'Single-leg calf raise':'Einbeiniges Wadenheben',
+  'Nordic negative':'Nordic Curl, negativ',
+  'Nordic curl progression':'Nordic-Curl-Stufe',
+  'Hollow hold':'Hollow Hold',
+  'Hollow rock':'Hollow Rock',
+  'Side plank':'Seitstütz',
+  'Knee raise':'Knieheben',
+  'Hanging knee raise':'Hängendes Knieheben'
+};
+function sessDe(s){return (cfg.lang==='de'&&SESSDE[s])?SESSDE[s]:s;}
+function slotDe(l){return (cfg.lang==='de'&&SLOTDE[l])?SLOTDE[l]:l;}
+/* Der Generator setzt echte Katalog-Uebungen in die Plaetze -- die stehen
+   nicht in SLOTDE, haben aber im Katalog eine deutsche Fassung. Erst die
+   Platzbezeichnung, dann der Katalog, dann das englische Original. */
+function itemName(it){
+  if(cfg.lang!=='de'||!it)return it?it.l:'';
+  if(SLOTDE[it.l])return SLOTDE[it.l];
+  if(it.id){var e=exFind(it.id,it.l);if(e)return exName(e);}
+  return it.l;
+}
 var SESS3={
  pull:{title:'Pull day',sub:'Pull / Row / Push / Squat / Core',items:[{id:'pull',l:'Pull-up or negative'},{id:'row',l:'Inverted row'},{id:'push',l:'Push-up'},{id:'legs',l:'Squat'},{id:'core',l:'Hollow hold'}]},
  push:{title:'Push day',sub:'Press / Push / Row / Hinge / Core',items:[{id:'press',l:'Pike push-up'},{id:'push',l:'Push-up'},{id:'row',l:'Inverted row'},{id:'legs',l:'Glute bridge'},{id:'core',l:'Side plank'}]},
@@ -2682,12 +2738,12 @@ function plan(d){
   var S=cfg.track==='4'?SESS4:SESS3;
   var map3={0:'pull',2:'push',4:'legs'},map4={0:'upA',1:'lowA',3:'upB',4:'lowB'};
   var key=cfg.track==='4'?map4[wd]:map3[wd];
-  if(key)return{kind:'train',title:S[key].title,sub:S[key].sub,s:key,ph:ph,w:w};
+  if(key)return{kind:'train',title:sessDe(S[key].title),sub:sessDe(S[key].sub),s:key,ph:ph,w:w};
   var easy=cfg.lang==='de'?'Lockerer Tag':'Easy day',opt=cfg.lang==='de'?'Optional':'Optional',rest=cfg.lang==='de'?'Ruhetag':'Rest';
-  if(wd===1||wd===2&&cfg.track==='4')return{kind:'move',title:easy,sub:'Walk and mobility',ph:ph,w:w,items:[{l:'Walk',v:'30 min'},{l:'Wrist prep',v:'2 min'},{l:'Mobility set',v:'8 min'}],note:cfg.lang==='de'?'Danach solltest du dich besser fühlen als vorher.':'Finish this feeling better than you started.'};
-  if(wd===5)return{kind:'move',title:opt,sub:'Skill practice',ph:ph,w:w,items:[{l:'Skill practice',v:'10 min'},{l:'Walk',v:'30-45 min'}],note:cfg.lang==='de'?'Ohne schlechtes Gewissen streichen, wenn die Woche hart war.':'Skip it guilt-free if the week was heavy.'};
-  if(wd===3)return{kind:'rest',title:rest,sub:'Recovery',ph:ph,w:w,items:[{l:'Protein target',v:'hit it'},{l:'Sleep',v:'7-9 h'}],note:cfg.lang==='de'?'Hier entsteht der Muskel.':'This is where the muscle is built.'};
-  return{kind:'rest',title:rest,sub:'Recovery and review',ph:ph,w:w,items:[{l:'Weigh-in average',v:'write it'},{l:'Count hard sets',v:'per pattern'}],note:cfg.lang==='de'?'Zwei Minuten. Das macht Woche 12 aussagekräftig.':'Two minutes. This makes week 12 mean something.'};
+  if(wd===1||wd===2&&cfg.track==='4')return{kind:'move',title:easy,sub:(cfg.lang==='de'?'Gehen und Beweglichkeit':'Walk and mobility'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30 Min'},{l:(cfg.lang==='de'?'Handgelenke':'Wrist prep'),v:'2 min'},{l:'Mobility set',v:'8 min'}],note:cfg.lang==='de'?'Danach solltest du dich besser fühlen als vorher.':'Finish this feeling better than you started.'};
+  if(wd===5)return{kind:'move',title:opt,sub:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),v:'10 Min'},{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30-45 Min'}],note:cfg.lang==='de'?'Ohne schlechtes Gewissen streichen, wenn die Woche hart war.':'Skip it guilt-free if the week was heavy.'};
+  if(wd===3)return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung':'Recovery'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Protein-Ziel':'Protein target'),v:(cfg.lang==='de'?'treffen':'hit it')},{l:(cfg.lang==='de'?'Schlaf':'Sleep'),v:'7-9 h'}],note:cfg.lang==='de'?'Hier entsteht der Muskel.':'This is where the muscle is built.'};
+  return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung und Rückblick':'Recovery and review'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Wiege-Schnitt':'Weigh-in average'),v:(cfg.lang==='de'?'eintragen':'write it')},{l:(cfg.lang==='de'?'Harte Sätze zählen':'Count hard sets'),v:(cfg.lang==='de'?'je Muster':'per pattern')}],note:cfg.lang==='de'?'Zwei Minuten. Das macht Woche 12 aussagekräftig.':'Two minutes. This makes week 12 mean something.'};
 }
 /* ---------- icons + patterns ---------- */
 /* Die Maennchen. Regeln, damit jede Uebung auf den ersten Blick lesbar ist:
@@ -3611,7 +3667,7 @@ function renderDay(){
   items.forEach(function(it,i){
     var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
     var icon=it.id?sv(it.id,cvar(pid[it.id].cv),28):'';
-    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+it.l+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?'recovery':'easy')))+'</span></span>'+
+    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+itemName(it)+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?(cfg.lang==='de'?'Erholung':'recovery'):(cfg.lang==='de'?'locker':'easy'))))+'</span></span>'+
       ((pl.kind==='train'&&it.id)?'<button type="button" class="swp" title="Swap exercise" aria-label="Swap exercise">&#8644;</button>':'')+
       '<span class="sets">'+it.v+'</span>';
     var swpBtn=row.querySelector('.swp');

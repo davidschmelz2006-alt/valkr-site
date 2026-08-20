@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->20.08.2026, 17:30<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->20.08.2026, 17:42<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -150,8 +150,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v16.6</span>
-        <span class="fm"><b>6.907</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v16.7</span>
+        <span class="fm"><b>6.963</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -164,11 +164,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">2c0ba4f</span><div class="t"><b>Hub v16.6: gemessene Bildrate in den Einstellungen unter dem Sparmodus, mit Urteil - macht die Optimierung auf dem echten Geraet im Park nachpruefbar statt behauptet</b></div></div>
       <div class="row"><span class="h">90fd80a</span><div class="t"><b>Hub v16.5: Uebungskatalog auf Deutsch (alle 114 Uebungen, englischer Name bleibt als Schluessel damit gespeicherte Tausche nicht brechen, Suche trifft beide Sprachen); Sparmodus in den Einstellungen erzwingbar mit Hinweis was gerade gilt; Tableiste repariert - der aktive Reiter hatte einen Block in Textfarbe hinterlegt, weil die Regel fuer die obere Reihe am Rechner auch auf die Tableiste zutraf (beides nav). Dazu binda.sh zeigt die eigene Baustelle und scripts/baustelle.sh macht daraus abschickfertige Auftraege</b></div></div>
       <div class="row"><span class="h">15b54f5</span><div class="t"><b>Hub v16.4: Ernaehrungstagebuch mit eigenen Mahlzeiten - Kalorien werden aus den Naehrwerten gerechnet statt abgefragt, zwei Kacheln zeigen Kalorien und Protein gegen das Ziel mit Rest, gespeichert je Tag; Ruckeln beim Zuklappen behoben (Bewegung endet jetzt am echten transitionend statt an einer Stoppuhr, Startwert per erzwungenem Layout festgeschrieben); Sparmodus fuer schwache Geraete - keine Unschaerfe, halb so viele Partikel, stillstehende Kulisse, erkannt an Kernanzahl und Arbeitsspeicher</b></div></div>
       <div class="row"><span class="h">b829d98</span><div class="t"><b>Hub v16.3: Strukturfehler behoben - sieben von vierzehn Ansichten hingen am nackten body statt in der Huelle (kein Seitenrand, keine Maximalbreite, kein Platz fuer die Tableiste). Ursache waren fuenf unbalancierte Tags aus dem Ausklapp-Umbau; der Browser schliesst umgebende Elemente in so einem Fall stillschweigend mit, deshalb fiel es nur als schiefes Layout auf</b></div></div>
       <div class="row"><span class="h">6f8dca0</span><div class="t"><b>Hub v16.2: alle Schriftgroessen unter 11 Pixel gehoben - Katalogzeilen von 8 auf 11 Pixel (das war Lesetext), Einheiten in Kacheln und Rekorden, Beschriftung der Anatomie-Figur von 6,5 auf 11; Liams Nebenfund damit erledigt. Einfuehrungs-Wizard komplett durchgetestet: 14 Schritte, keine Fehler, kein Ueberlauf, Profil wird gespeichert</b></div></div>
-      <div class="row"><span class="h">8ccfac3</span><div class="t"><b>Hub v16.1 live: Einfuehrung als Kapitel-Wizard nach MCI-Analyse (42 Screenshots), Koerperfett-Slider mit Echtzeit-Figur, Settings mit farbigen Icon-Chips und Profil-Gruppe, farbige Tabbar. Dazu Design-Loop-Skill (/design-loop) mit Designsystem-Export und drei durchgeprueften Artefakten (Karussell, Animation, 404). Qualitaet ueber Gauntlet-Kritiker in zwei Runden, alles dokumentiert.</b></div></div>
     </div>
   </div>
 
@@ -181,6 +181,10 @@
       <li class="star"><b>Preis und Zugangsschutz entscheiden.</b> Grundlage steht in <code>Produkt/ZUGANGSSCHUTZ.md</code>, fällig mit der Verkaufsseite.</li>
       <li class="star"><b>Sieben Belege fachlich gegenlesen lassen</b>, dazu Satz-Autoregulation und Einmess-Heuristiken (v13.7). Vor kommerzieller Nutzung.</li>
       <li class="big">Produkt — Liam</li>
+      <li class="star"><b>Einführung: Trainingstage selbst wählen lassen</b> und den Wochenplan darauf legen. Heute rechnet <code>plan()</code> mit festen Wochentagen (Mo/Mi/Fr bei drei Tagen) — wer donnerstags anfängt, bekommt als Allererstes einen Ruhetag. Bestätigt beobachtet am 2026-08-20. Das ist der schlechteste erste Eindruck, den die App machen kann.</li>
+      <li class="star"><b>Ausklapper: das letzte Haken kurz vor dem Schließen.</b> Öffnen und das Ende der Bewegung sind seit v16.4 sauber (<code>transitionend</code> statt Stoppuhr), aber im letzten Stück des Zuklappens ruckelt es noch. Verdacht: das Umschalten von <code>open</code> fällt mit dem letzten Bild der Bewegung zusammen.</li>
+      <li class="star"><b>Einheit, Skills, Beweglichkeit und Test überarbeiten.</b> Bei Test die Stufen (L1 … L6) verständlicher und schöner darstellen — „L1" sagt niemandem etwas. Bewegungsdemos für alles, was noch keine hat, besonders die untergeordneten Skill-Stufen. Sparsam halten: die sechs Demos im Trainingsbereich laufen nur noch, wenn sie im Bild stehen (v14.0) — dieselbe Regel gilt für neue.</li>
+      <li class="star"><b>Komplette Test- und Fehlerprüfung</b> nach den Umbauten. Vorlage: alle Ansichten anfahren, auf <code>errs</code>, Überlauf bei 375 px, Schrift unter 11 px und Tag-Stapel prüfen.</li>
       <li class="star"><b>42 MCI-Screenshots auswerten und das Design angleichen</b> (ZIP von David, <code>Downloads/drive-download-20260820T121026Z-1-001.zip</code>). Ausdrücklich Liams Baustelle mit Fable 5 Ultracode und <code>/design-loop</code>. Schwerpunkte laut David: Settings überarbeiten, mehr Farbe in den Symbolen, Liquid-Glass weiter einbringen, Ernährungsbereich optisch an die Screenshots angleichen — die Funktion dahinter (eigene Mahlzeiten, Kalorienrechnung) steht seit v16.4.</li>
       <li class="star"><b>Deutsche Fassung des Manuskripts</b> (12 Kapitel, ~12.000 Wörter). DE-Ordner ist leer. Größter offener Posten.</li>
       <li>Manuskript in den Wissens-Bereich holen, sobald die DE-Fassung steht — dann ist der Hub das ganze Produkt statt zwei getrennter Lieferungen.</li>
