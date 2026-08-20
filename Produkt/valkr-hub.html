@@ -983,7 +983,7 @@
   .xpRow b{font-weight:400;opacity:1}
 
   /* Koerperkarte: links die Figur, rechts die Rangliste */
-  .bodyWrap{display:grid;grid-template-columns:minmax(150px,190px) 1fr;gap:1rem;align-items:center}
+  .bodyWrap{display:grid;grid-template-columns:minmax(190px,250px) 1fr;gap:1rem;align-items:center}
   @media (max-width:640px){.bodyWrap{grid-template-columns:1fr}}
   .bodyFig{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.8rem;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;gap:.5rem}
   .bodyFig svg{width:100%;height:auto;max-height:280px;overflow:visible}
@@ -1492,7 +1492,7 @@
     <div class="coach"><div id="rkIntegrity" class="cnote md"></div></div>
     <div class="bodyWrap">
       <div class="bodyFig">
-        <svg id="bodySvg" viewBox="0 0 120 260" aria-hidden="true"></svg>
+        <svg id="bodySvg" viewBox="0 0 240 268" aria-hidden="true"></svg>
         <p class="bodyCap" id="bodyCap"></p>
       </div>
       <div class="bodySide">
@@ -1863,7 +1863,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.9';
+var VERSION='15.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -5972,12 +5972,12 @@ function armToast(ms){
    Beste Zone bekommt einen pulsierenden Ring, damit sofort klar ist, wo die
    Staerke sitzt -- und im Umkehrschluss, wo nicht. */
 var BODYZONES=[
-  {id:'press', label:['Shoulders','Schultern'], d:'M 46 45.5 Q 50.5 38 57 36.5 L 58 43.5 Q 51 44.5 47.5 48.5 Z M 74 45.5 Q 69.5 38 63 36.5 L 62 43.5 Q 69 44.5 72.5 48.5 Z M 45 49 Q 35 47 29 53 Q 25 59 27 67.5 Q 31 71.5 37 68.5 Q 43 63.5 45 55.5 Z M 75 49 Q 85 47 91 53 Q 95 59 93 67.5 Q 89 71.5 83 68.5 Q 77 63.5 75 55.5 Z'},
+  {id:'press', label:['Shoulders','Schultern'], d:'M 46 45.5 Q 50.5 38 57 36.5 L 58 43.5 Q 51 44.5 47.5 48.5 Z M 74 45.5 Q 69.5 38 63 36.5 L 62 43.5 Q 69 44.5 72.5 48.5 Z M 45 49 Q 35 47 29 53 Q 25 59 27 67.5 Q 31 71.5 37 68.5 Q 43 63.5 45 55.5 Z M 75 49 Q 85 47 91 53 Q 95 59 93 67.5 Q 89 71.5 83 68.5 Q 77 63.5 75 55.5 Z M 180 35 L 164 47.5 Q 166.5 58 173.5 65 L 180 72 L 186.5 65 Q 193.5 58 196 47.5 Z M 165 49 Q 155 47 149 53 Q 145 59 147 67.5 Q 151 71.5 157 68.5 Q 163 63.5 165 55.5 Z M 195 49 Q 205 47 211 53 Q 215 59 213 67.5 Q 209 71.5 203 68.5 Q 197 63.5 195 55.5 Z'},
   {id:'push',  label:['Chest','Brust'], d:'M 46.5 51.5 Q 57 49 58.7 54 L 58.7 69.5 Q 58 75.5 51 75.5 Q 44.5 73.5 43 66.5 Q 42.5 57 46.5 51.5 Z M 73.5 51.5 Q 63 49 61.3 54 L 61.3 69.5 Q 62 75.5 69 75.5 Q 75.5 73.5 77 66.5 Q 77.5 57 73.5 51.5 Z'},
-  {id:'row',   label:['Arms','Arme'], d:'M 26.5 62 Q 23.5 70 24.5 81 Q 26.5 87 31 86.5 Q 35.5 84 35.5 74 Q 34.5 64.5 31 61 Q 28 59.5 26.5 62 Z M 93.5 62 Q 96.5 70 95.5 81 Q 93.5 87 89 86.5 Q 84.5 84 84.5 74 Q 85.5 64.5 89 61 Q 92 59.5 93.5 62 Z M 24 93 Q 21 103 21 114 L 22 124 Q 25 128 29 125.5 L 30 110 Q 30 99 29 93 Q 26 89.5 24 93 Z M 96 93 Q 99 103 99 114 L 98 124 Q 95 128 91 125.5 L 90 110 Q 90 99 91 93 Q 94 89.5 96 93 Z'},
-  {id:'core',  label:['Core','Rumpf'], d:'M 52.5 85 Q 52 84 53.5 84 L 57 84 Q 58.6 84 58.6 85.5 L 58.6 92.5 Q 58.6 94 57 94 L 54 94 Q 52.5 94 52.5 92.5 Z M 67.5 85 Q 68 84 66.5 84 L 63 84 Q 61.4 84 61.4 85.5 L 61.4 92.5 Q 61.4 94 63 94 L 66 94 Q 67.5 94 67.5 92.5 Z M 52.5 98 Q 52 97 53.5 97 L 57 97 Q 58.6 97 58.6 98.5 L 58.6 105.5 Q 58.6 107 57 107 L 54 107 Q 52.5 107 52.5 105.5 Z M 67.5 98 Q 68 97 66.5 97 L 63 97 Q 61.4 97 61.4 98.5 L 61.4 105.5 Q 61.4 107 63 107 L 66 107 Q 67.5 107 67.5 105.5 Z M 52.5 111 Q 52 110 53.5 110 L 57 110 Q 58.6 110 58.6 111.5 L 58.6 118.5 Q 58.6 120 57 120 L 54 120 Q 52.5 120 52.5 118.5 Z M 67.5 111 Q 68 110 66.5 110 L 63 110 Q 61.4 110 61.4 111.5 L 61.4 118.5 Q 61.4 120 63 120 L 66 120 Q 67.5 120 67.5 118.5 Z M 46 86 Q 44 96 45 110 L 46 119 Q 48.5 121 50 119 L 50 88 Q 48 84 46 86 Z M 74 86 Q 76 96 75 110 L 74 119 Q 71.5 121 70 119 L 70 88 Q 72 84 74 86 Z'},
-  {id:'pull',  label:['Lats','Latissimus'], d:'M 38 74 Q 33.5 80 32 90 L 31.5 104 Q 35.5 108.5 41 109 L 42.5 86 Q 42 78 38 74 Z M 82 74 Q 86.5 80 88 90 L 88.5 104 Q 84.5 108.5 79 109 L 77.5 86 Q 78 78 82 74 Z'},
-  {id:'legs',  label:['Legs','Beine'], d:'M 45 142 Q 40.5 160 42.5 178 Q 44.5 189 50.5 193 Q 56.5 190.5 58 180 L 58.3 156 Q 56.5 144.5 50.5 140.5 Q 47 139 45 142 Z M 75 142 Q 79.5 160 77.5 178 Q 75.5 189 69.5 193 Q 63.5 190.5 62 180 L 61.7 156 Q 63.5 144.5 69.5 140.5 Q 73 139 75 142 Z M 46.5 202 Q 44.5 216 45.5 231 L 47.5 243 Q 50.5 245.5 53 243 L 54.3 222 Q 54.3 209 52.5 201 Q 48.5 197.5 46.5 202 Z M 73.5 202 Q 75.5 216 74.5 231 L 72.5 243 Q 69.5 245.5 67 243 L 65.7 222 Q 65.7 209 67.5 201 Q 71.5 197.5 73.5 202 Z'}
+  {id:'row',   label:['Arms','Arme'], d:'M 26.5 62 Q 23.5 70 24.5 81 Q 26.5 87 31 86.5 Q 35.5 84 35.5 74 Q 34.5 64.5 31 61 Q 28 59.5 26.5 62 Z M 93.5 62 Q 96.5 70 95.5 81 Q 93.5 87 89 86.5 Q 84.5 84 84.5 74 Q 85.5 64.5 89 61 Q 92 59.5 93.5 62 Z M 24 93 Q 21 103 21 114 L 22 124 Q 25 128 29 125.5 L 30 110 Q 30 99 29 93 Q 26 89.5 24 93 Z M 96 93 Q 99 103 99 114 L 98 124 Q 95 128 91 125.5 L 90 110 Q 90 99 91 93 Q 94 89.5 96 93 Z M 146.5 62 Q 143.5 70 144.5 81 Q 146.5 87 151 86.5 Q 155.5 84 155.5 74 Q 154.5 64.5 151 61 Q 148 59.5 146.5 62 Z M 213.5 62 Q 216.5 70 215.5 81 Q 213.5 87 209 86.5 Q 204.5 84 204.5 74 Q 205.5 64.5 209 61 Q 212 59.5 213.5 62 Z M 144 93 Q 141 103 141 114 L 142 124 Q 145 128 149 125.5 L 150 110 Q 150 99 149 93 Q 146 89.5 144 93 Z M 216 93 Q 219 103 219 114 L 218 124 Q 215 128 211 125.5 L 210 110 Q 210 99 211 93 Q 214 89.5 216 93 Z'},
+  {id:'core',  label:['Core','Rumpf'], d:'M 52.5 85 Q 52 84 53.5 84 L 57 84 Q 58.6 84 58.6 85.5 L 58.6 92.5 Q 58.6 94 57 94 L 54 94 Q 52.5 94 52.5 92.5 Z M 67.5 85 Q 68 84 66.5 84 L 63 84 Q 61.4 84 61.4 85.5 L 61.4 92.5 Q 61.4 94 63 94 L 66 94 Q 67.5 94 67.5 92.5 Z M 52.5 98 Q 52 97 53.5 97 L 57 97 Q 58.6 97 58.6 98.5 L 58.6 105.5 Q 58.6 107 57 107 L 54 107 Q 52.5 107 52.5 105.5 Z M 67.5 98 Q 68 97 66.5 97 L 63 97 Q 61.4 97 61.4 98.5 L 61.4 105.5 Q 61.4 107 63 107 L 66 107 Q 67.5 107 67.5 105.5 Z M 52.5 111 Q 52 110 53.5 110 L 57 110 Q 58.6 110 58.6 111.5 L 58.6 118.5 Q 58.6 120 57 120 L 54 120 Q 52.5 120 52.5 118.5 Z M 67.5 111 Q 68 110 66.5 110 L 63 110 Q 61.4 110 61.4 111.5 L 61.4 118.5 Q 61.4 120 63 120 L 66 120 Q 67.5 120 67.5 118.5 Z M 46 86 Q 44 96 45 110 L 46 119 Q 48.5 121 50 119 L 50 88 Q 48 84 46 86 Z M 74 86 Q 76 96 75 110 L 74 119 Q 71.5 121 70 119 L 70 88 Q 72 84 74 86 Z M 175.2 76 L 175.2 118 Q 176.8 121 178.5 118 L 178.5 76 Q 176.8 73.5 175.2 76 Z M 184.8 76 L 184.8 118 Q 183.2 121 181.5 118 L 181.5 76 Q 183.2 73.5 184.8 76 Z'},
+  {id:'pull',  label:['Back / lats','Rücken / Lat'], d:'M 165 70 Q 158.5 77 157 89 L 156.5 101 Q 163 109 172 113 L 177.5 115.5 L 178.5 84 Q 174.5 73.5 165 70 Z M 195 70 Q 201.5 77 203 89 L 203.5 101 Q 197 109 188 113 L 182.5 115.5 L 181.5 84 Q 185.5 73.5 195 70 Z'},
+  {id:'legs',  label:['Legs','Beine'], d:'M 45 142 Q 40.5 160 42.5 178 Q 44.5 189 50.5 193 Q 56.5 190.5 58 180 L 58.3 156 Q 56.5 144.5 50.5 140.5 Q 47 139 45 142 Z M 75 142 Q 79.5 160 77.5 178 Q 75.5 189 69.5 193 Q 63.5 190.5 62 180 L 61.7 156 Q 63.5 144.5 69.5 140.5 Q 73 139 75 142 Z M 46.5 202 Q 44.5 216 45.5 231 L 47.5 243 Q 50.5 245.5 53 243 L 54.3 222 Q 54.3 209 52.5 201 Q 48.5 197.5 46.5 202 Z M 73.5 202 Q 75.5 216 74.5 231 L 72.5 243 Q 69.5 245.5 67 243 L 65.7 222 Q 65.7 209 67.5 201 Q 71.5 197.5 73.5 202 Z M 165 128 Q 160 132 160.5 142 Q 162 150 170 151 Q 177 149.5 177.5 140 Q 177 130 170 127.5 Q 166.5 126.5 165 128 Z M 195 128 Q 200 132 199.5 142 Q 198 150 190 151 Q 183 149.5 182.5 140 Q 183 130 190 127.5 Q 193.5 126.5 195 128 Z M 164.5 156 Q 161 170 162.5 184 Q 164.5 192 170 194 Q 175.5 191 176.5 180 L 177 164 Q 175 156 169.5 153.5 Q 166 152.5 164.5 156 Z M 195.5 156 Q 199 170 197.5 184 Q 195.5 192 190 194 Q 184.5 191 183.5 180 L 183 164 Q 185 156 190.5 153.5 Q 194 152.5 195.5 156 Z M 166 202 Q 162.5 212 163.5 226 Q 165.5 236 170 238 Q 174.5 235 175.5 224 Q 175.5 210 172.5 201 Q 168.5 197.5 166 202 Z M 194 202 Q 197.5 212 196.5 226 Q 194.5 236 190 238 Q 185.5 235 184.5 224 Q 184.5 210 187.5 201 Q 191.5 197.5 194 202 Z'}
 ];
 function drawBody(){
   var sv=$('bodySvg'); if(!sv) return;
@@ -5989,20 +5989,27 @@ function drawBody(){
     if(lp<worstLp){worstLp=lp;worstId=p.id;}
   });
   var parts='';
-  /* Neutrale Basis: Kopf, Hals, Rumpf-Bein-Silhouette, Arme. Die Muskel-
-     platten liegen mit sichtbaren Fugen darueber -- so liest sich die Figur
-     wie eine Anatomie-Karte, nicht wie ein Schattenriss. */
-  parts+='<ellipse cx="60" cy="21" rx="10.5" ry="12" fill="var(--surf2)" stroke="var(--line)" stroke-width="1.4"/>';
+  /* Zwei Figuren wie auf einer Anatomie-Tafel: links die Vorderseite,
+     rechts die Rueckseite. Muskeln liegen als Platten auf neutralen
+     Silhouetten und faerben sich nach dem Rang ihres Musters. */
+  [0,120].forEach(function(dx){
+    parts+='<ellipse cx="'+(60+dx)+'" cy="21" rx="10.5" ry="12" fill="var(--surf2)" stroke="var(--line)" stroke-width="1.4"/>';
+  });
   parts+='<path d="M 53.5 33 L 53.5 45.5 L 66.5 45.5 L 66.5 33 Q 60 36.5 53.5 33 Z" fill="var(--surf2)" stroke="var(--line)" stroke-width="1"/>';
+  parts+='<path d="M 173.5 33 L 173.5 45.5 L 186.5 45.5 L 186.5 33 Q 180 36.5 173.5 33 Z" fill="var(--surf2)" stroke="var(--line)" stroke-width="1"/>';
   parts+='<path d="M 44 47 Q 39 64 41 86 L 43 108 Q 42 118 44 126 Q 40 158 42 182 L 43 198 L 43 234 Q 43 249 46 254 L 56 254 Q 57.5 246 56.5 234 L 58.5 206 L 59.5 174 L 60 144 L 60 144 L 60.5 174 L 61.5 206 L 63.5 234 Q 62.5 246 64 254 L 74 254 Q 77 249 77 234 L 77 198 L 78 182 Q 80 158 76 126 Q 78 118 77 108 L 79 86 Q 81 64 76 47 Q 60 42.5 44 47 Z" fill="var(--surf2)" stroke="var(--line)" stroke-width="1.2"/>';
+  parts+='<path d="M 164 47 Q 159 64 161 86 L 163 108 Q 162 118 164 126 Q 160 158 162 182 L 163 198 L 163 234 Q 163 249 166 254 L 176 254 Q 177.5 246 176.5 234 L 178.5 206 L 179.5 174 L 180 144 L 180 144 L 180.5 174 L 181.5 206 L 183.5 234 Q 182.5 246 184 254 L 194 254 Q 197 249 197 234 L 197 198 L 198 182 Q 200 158 196 126 Q 198 118 197 108 L 199 86 Q 201 64 196 47 Q 180 42.5 164 47 Z" fill="var(--surf2)" stroke="var(--line)" stroke-width="1.2"/>';
   parts+='<path d="M 28.5 50 Q 22.5 54.5 21.5 65 L 19.5 96 L 17.5 126 Q 16.5 138 22.5 143 Q 28.5 145 29.5 135 L 31.5 103 L 34.5 74 Q 36.5 59 33.5 52.5 Q 31.5 49.5 28.5 50 Z M 91.5 50 Q 97.5 54.5 98.5 65 L 100.5 96 L 102.5 126 Q 103.5 138 97.5 143 Q 91.5 145 90.5 135 L 88.5 103 L 85.5 74 Q 83.5 59 86.5 52.5 Q 88.5 49.5 91.5 50 Z" fill="var(--surf2)" stroke="var(--line)" stroke-width="1.2"/>';
+  parts+='<path d="M 148.5 50 Q 142.5 54.5 141.5 65 L 139.5 96 L 137.5 126 Q 136.5 138 142.5 143 Q 148.5 145 149.5 135 L 151.5 103 L 154.5 74 Q 156.5 59 153.5 52.5 Q 151.5 49.5 148.5 50 Z M 211.5 50 Q 217.5 54.5 218.5 65 L 220.5 96 L 222.5 126 Q 223.5 138 217.5 143 Q 211.5 145 210.5 135 L 208.5 103 L 205.5 74 Q 203.5 59 206.5 52.5 Q 208.5 49.5 211.5 50 Z" fill="var(--surf2)" stroke="var(--line)" stroke-width="1.2"/>';
+  parts+='<text x="60" y="266" text-anchor="middle" fill="var(--ink3)" style="font-family:var(--fm);font-size:6.5px;letter-spacing:.15em">'+(DE?'VORDERSEITE':'FRONT')+'</text>';
+  parts+='<text x="180" y="266" text-anchor="middle" fill="var(--ink3)" style="font-family:var(--fm);font-size:6.5px;letter-spacing:.15em">'+(DE?'RÜCKSEITE':'BACK')+'</text>';
   BODYZONES.forEach(function(z){
     var lp=lpBy[z.id]||0, t=tierOf(lp), col=t.col;
     var op=t.t<0?0.30:0.55+Math.min(0.4,t.t*0.05);
     parts+='<path class="bz" d="'+z.d+'" fill="'+col+'" fill-opacity="'+op.toFixed(2)+'" stroke="'+col+'" stroke-width=".9" stroke-opacity=".55"><title>'+z.label[L]+' — '+t.label+' ('+lp+' LP)</title></path>';
   });
   // bester Bereich: pulsierender Ring an der Zone
-  var anchor={press:[60,53],push:[60,62],row:[27,78],core:[60,102],pull:[60,92],legs:[60,166]};
+  var anchor={press:[180,52],push:[60,62],row:[27,78],core:[60,102],pull:[180,92],legs:[180,220]};
   if(bestLp>0&&(bestLp-worstLp)>=25&&anchor[bestId]){
     var a=anchor[bestId],bc=tierOf(bestLp).col;
     parts+='<circle cx="'+a[0]+'" cy="'+a[1]+'" r="16" fill="none" stroke="'+bc+'" stroke-width="2" opacity=".5">'+
