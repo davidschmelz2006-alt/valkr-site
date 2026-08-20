@@ -1214,6 +1214,26 @@
      (Handy) -- nicht zusaetzlich in der oberen Reihe. */
   nav#nav button[data-view="settings"]{display:none}
 
+  /* ---- Sparmodus --------------------------------------------------------
+     Steht bewusst hier unten: Medienabfragen erhoehen die Spezifitaet nicht,
+     und die Glasregeln fuer das Handy stehen weiter oben im Dokument. Nur von
+     hier aus gewinnt der Sparmodus gegen sie.
+     Statt Unschaerfe eine dichte Flaeche -- die Leisten bleiben lesbar, der
+     teuerste Rechenschritt der Oberflaeche entfaellt. */
+  :root[data-spar="1"] .bar,
+  :root[data-spar="1"] #tabbar,
+  :root[data-spar="1"] nav#nav,
+  :root[data-spar="1"] #runner,
+  :root[data-spar="1"] #sheet,
+  :root[data-spar="1"] #toast{backdrop-filter:none;-webkit-backdrop-filter:none}
+  :root[data-spar="1"] .bar{background:var(--bg)}
+  :root[data-spar="1"] #tabbar,
+  :root[data-spar="1"] nav#nav{background:var(--surf)}
+  /* Die Kulisse steht im Sparmodus still und traegt keine Verlaeufe mehr,
+     die bei jeder Bewegung neu gezeichnet werden muessten. */
+  :root[data-spar="1"] .glowA,
+  :root[data-spar="1"] .glowB{animation:none}
+
   /* Leitspruch nur auf "Heute" -- steht hier unten, weil Medienabfragen die
      Spezifitaet nicht erhoehen und die allgemeinen .creed-Regeln weiter oben
      im Dokument stehen. Weiter oben waere diese Regel wirkungslos gewesen. */
@@ -1731,9 +1751,20 @@
       <div class="out" id="perkg"></div>
       <p class="hint" id="f-note"></p>
     </div>
+    <!-- Was heute gegessen wurde. Vorher standen hier vier feste Vorschlaege
+         ("Skyr mit Haferflocken") mit dem Tagesprotein geteilt durch vier --
+         das war eine Beispielrechnung, kein Tagebuch. Man konnte nichts
+         eintragen und sah nie, wo man steht.
+         Jetzt: eigene Mahlzeiten, Kalorien werden aus den Naehrwerten
+         gerechnet statt abgefragt. Wer Protein, Fett und Kohlenhydrate kennt,
+         kennt die Kalorien -- danach zu fragen waere eine Fehlerquelle mehr. -->
     <div class="form">
-      <p class="eyebrow" data-i18n="fuel.split">Split across the day</p>
-      <div class="cols" id="mealplan"></div>
+      <div class="savebar" style="justify-content:space-between">
+        <p class="eyebrow" style="margin:0" data-i18n="fuel.today">Eaten today</p>
+        <button class="tbtn go" id="mealAdd" data-i18n="btn.addMeal">Add meal</button>
+      </div>
+      <div class="cards" id="mealSum"></div>
+      <div class="prlist" id="mealList"></div>
     </div>
     <div class="form">
       <p class="eyebrow" data-i18n="fuel.hydr">Water and caffeine</p>
@@ -1964,7 +1995,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.3';
+var VERSION='16.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2016,6 +2047,30 @@ function rewind(){
 }
 function $(id){return document.getElementById(id);}
 var SYSRED=false;try{SYSRED=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+
+/* ---------- Sparmodus fuer schwache Geraete ------------------------------
+   Der teuerste Posten der Oberflaeche ist die Unschaerfe hinter Kopf- und
+   Tableiste: beide stehen fest, also muss der Bereich dahinter bei jeder
+   Scrollbewegung neu verrechnet werden. Auf einem aktuellen Telefon faellt
+   das nicht auf, auf einem fuenf Jahre alten bricht genau dort die Bildrate
+   ein -- und das ist das Geraet, mit dem jemand im Park steht.
+
+   Erkannt wird das am Geraet selbst, nicht an einem Schalter, den niemand
+   findet: Kernanzahl und Arbeitsspeicher verraet der Browser. Wer starke
+   Hardware hat, verliert nichts; wer schwache hat, bekommt statt Milchglas
+   eine dichte Flaeche und weniger Partikel. Beides sieht ruhig aus -- nur
+   eben nicht durchscheinend.
+
+   deviceMemory kennt nur Chrome. Fehlt der Wert, wird von ausreichend
+   ausgegangen: lieber einmal zu schoen als grundlos abgespeckt. */
+var SPAR=(function(){
+  try{
+    var kerne=navigator.hardwareConcurrency||8;
+    var ram=navigator.deviceMemory||8;
+    return kerne<=4||ram<=3;
+  }catch(e){return false;}
+})();
+if(SPAR)document.documentElement.setAttribute('data-spar','1');
 
 /* ---------- Schieberegler ------------------------------------------------
    pairSlider haengt an ein vorhandenes Zahlenfeld einen Regler und haelt
@@ -2171,7 +2226,7 @@ var DICT={
  'test.retestP':['Same warm-up, same standards, same tests. The temptation is to loosen your form so the number looks better. The only person that flatters is you.','Gleiches Aufwärmen, gleiche Maßstäbe. Die Versuchung ist, die Form zu lockern damit die Zahl besser aussieht. Damit betrügst du nur dich.'],
  'fuel.h':['Fuel','Ernährung'],'fuel.s':['Estimated with Mifflin–St Jeor. Tap any target to change it.','Geschätzt nach Mifflin-St-Jeor. Jeden Zielwert antippen zum Ändern.'],
  'fuel.about':['About you','Über dich'],'fuel.targets':['Your targets — edit any of them','Deine Ziele — alles änderbar'],
- 'fuel.split':['Split across the day','Auf den Tag verteilt'],'fuel.hydr':['Water and caffeine','Wasser und Koffein'],
+ 'fuel.today':['Eaten today','Heute gegessen'],'btn.addMeal':['Add meal','Mahlzeit hinzufügen'],'fuel.hydr':['Water and caffeine','Wasser und Koffein'],
  'fuel.hydrNote':['Thirst is a decent guide for most people. The number below is a rough floor, not a quota to force down. Caffeine cut-off is eight hours before bed.','Durst ist für die meisten ein guter Maßstab. Die Zahl ist eine grobe Untergrenze, kein Soll. Koffein-Schluss acht Stunden vor dem Schlafen.'],
  'fuel.supps':['Supplements — hover for the detail','Supplements — für Details drüberfahren'],
  'fuel.suppNote':['Green means the evidence is decent. Amber means it works for some people or in narrow cases. Orange means save your money. None of this is medical advice — if you take medication or have a condition, ask a doctor first.','Grün heißt die Datenlage ist ordentlich. Gelb heißt es wirkt bei manchen oder in engen Fällen. Orange heißt spar dir das Geld. Keine medizinische Beratung — bei Medikamenten oder Erkrankungen vorher zum Arzt.'],
@@ -3075,17 +3130,45 @@ function normFolds(root){
     if(d.open)d.classList.add('exp');
   }
 }
+/* Oeffnen und Schliessen.
+
+   Beides hing vorher an einer Stoppuhr: aufklappen nach einem Bild, zuklappen
+   nach 260 Millisekunden. Beides ist geraten. Braucht der Browser fuer das
+   erste Bild laenger -- was auf schwacher Hardware genau dann passiert, wenn
+   gerade etwas anderes laeuft --, fehlt der Startwert und es springt auf.
+   Und laeuft die Bewegung kuerzer oder laenger als die 260 Millisekunden,
+   sieht man am Ende einen Ruck, weil open erst danach faellt.
+
+   Jetzt wird der Startwert durch ein erzwungenes Nachrechnen des Layouts
+   festgeschrieben, und das Ende kommt vom Browser selbst (transitionend).
+   Die Stoppuhr bleibt nur als Sicherheitsnetz: transitionend faellt aus, wenn
+   das Element unsichtbar ist oder der Nutzer Bewegung reduziert hat. */
 var FOLDMS=260;
+function foldWrap(d){
+  for(var c=d.firstElementChild;c;c=c.nextElementSibling)
+    if(c.className==='foldWrap')return c;
+  return null;
+}
 function foldOpen(d){
   d.open=true;
-  /* Ein Bild abwarten: sonst fasst der Browser "eingeblendet" und "aufgeklappt"
-     zu einem Schritt zusammen und es gibt nichts zu animieren. */
-  requestAnimationFrame(function(){d.classList.add('exp');});
+  var w=foldWrap(d);
+  /* Layout erzwingen: erst dadurch gilt 0fr wirklich als Ausgangswert. */
+  if(w)void w.offsetHeight;
+  d.classList.add('exp');
 }
 function foldClose(d,sofort){
   d.classList.remove('exp');
-  if(sofort){d.open=false;return;}
-  setTimeout(function(){if(!d.classList.contains('exp'))d.open=false;},FOLDMS);
+  var w=foldWrap(d);
+  if(sofort||!w){clearTimeout(d._ft);d.open=false;return;}
+  var fertig=function(e){
+    if(e&&e.target!==w)return;
+    w.removeEventListener('transitionend',fertig);
+    clearTimeout(d._ft);
+    if(!d.classList.contains('exp'))d.open=false;
+  };
+  w.addEventListener('transitionend',fertig);
+  clearTimeout(d._ft);
+  d._ft=setTimeout(fertig,FOLDMS+140);
 }
 function foldCloseAll(sofort,ausser){
   var list=document.querySelectorAll('details.fold[open]');
@@ -3097,7 +3180,9 @@ document.addEventListener('click',function(e){
   e.preventDefault();
   var d=s.parentNode;
   if(d.classList.contains('exp')){foldClose(d);return;}
-  foldCloseAll(true,d);
+  /* Der vorherige klappt mit Bewegung zu, nicht schlagartig -- sonst rutscht
+     der Inhalt unter dem Finger weg, waehrend der neue aufgeht. */
+  foldCloseAll(false,d);
   foldOpen(d);
 });
 function pauseHiddenSvg(){
@@ -4242,7 +4327,7 @@ function calc(){
       :'Enter your age, height and weight — then this calculates your numbers. Anything before that would be somebody else&rsquo;s.')+'</p>';
     drawMacros({cal:0,pro:0,fat:0,carb:0},0);
     $('mbar').innerHTML='';$('perkg').innerHTML='';$('f-note').textContent='';
-    if($('mealplan'))$('mealplan').innerHTML='';
+    drawMeals();
     if($('hydrOut'))$('hydrOut').innerHTML='';
     slRetune();
     return;
@@ -4262,7 +4347,7 @@ function calc(){
   drawMacros(macroNow,kg);
   var pc=pro*4,fc=fat*9,cc=carb*4,t=Math.max(1,pc+fc+cc);
   $('mbar').innerHTML='<i style="background:var(--aurora);width:'+(pc/t*100)+'%"></i><i style="background:var(--brass);width:'+(fc/t*100)+'%"></i><i style="background:var(--ice);width:'+(cc/t*100)+'%"></i>';
-  $('perkg').innerHTML=bx('Protein / kg',(pro/kg).toFixed(1),'g')+bx('Fat / kg',(fat/kg).toFixed(1),'g')+bx('Carbs / kg',(carb/kg).toFixed(1),'g')+bx('Cal / kg',Math.round(cal/kg),'kcal');
+  $('perkg').innerHTML=bx((cfg.lang==='de'?'Protein / kg':'Protein / kg'),(pro/kg).toFixed(1),'g')+bx((cfg.lang==='de'?'Fett / kg':'Fat / kg'),(fat/kg).toFixed(1),'g')+bx((cfg.lang==='de'?'Kohlenhydrate / kg':'Carbs / kg'),(carb/kg).toFixed(1),'g')+bx((cfg.lang==='de'?'Kalorien / kg':'Cal / kg'),Math.round(cal/kg),'kcal');
   var warn='';
   if(pro/kg<1.6)warn=' <b style="color:var(--ember)">'+(cfg.lang==='de'?'Protein unter 1,6 g/kg begrenzt, was dein Training aufbauen kann.':'Protein is below 1.6 g/kg, which limits what your training can build.')+'</b>';
   else if(pro/kg>2.4)warn=' <b style="color:var(--brass)">'+(cfg.lang==='de'?'Über 2,2 g/kg bringt nichts mehr.':'Above 2.2 g/kg adds nothing.')+'</b>';
@@ -4270,9 +4355,7 @@ function calc(){
   $('f-note').innerHTML=(goal>0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+toDisp(kg*0.0035,'w').toFixed(1)+' '+uw()+(cfg.lang==='de'?' pro Woche. Schneller ist überwiegend Fett.':' per week. Faster and most of it is fat.'))
     :goal<0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+toDisp(kg*0.006,'w').toFixed(1)+' '+uw()+(cfg.lang==='de'?' pro Woche. Protein hoch halten.':' per week. Keep protein high.'))
     :(cfg.lang==='de'?'Erhaltung. Sinnvoll in den ersten Monaten oder wenn die Regeneration eng ist.':'Maintenance. Sensible in your first months or any stretch where recovery is tight.'))+warn;
-  var per=Math.round(pro/4);
-  $('mealplan').innerHTML=[['Meal 1','Skyr with oats and berries'],['Meal 2','Chicken, rice, vegetables'],['Meal 3','Eggs, potatoes, salad'],['Meal 4','Quark with nuts, or a shake']]
-    .map(function(m){return '<div class="card"><h4>'+m[0]+'</h4><div class="facts"><div class="fact"><span>Protein</span><b style="font-weight:400">'+per+' g</b></div><div class="fact"><span>Calories</span><b style="font-weight:400">'+Math.round(cal/4)+'</b></div></div><p class="hint">'+m[1]+'</p></div>';}).join('');
+  drawMeals();
   var water=(kg*0.033).toFixed(1),caf=Math.round(kg*4);
   var sleepH=parseFloat($('y-sleep').value)||7;
   $('hydrOut').innerHTML=bx(cfg.lang==='de'?'Wasser, Basis':'Water, floor',water,'L',1)+
@@ -4362,6 +4445,114 @@ function openMacro(k){
     });
   }
 }
+/* ---------- Mahlzeiten ---------------------------------------------------
+   Kalorien werden gerechnet, nicht gefragt: Protein und Kohlenhydrate mit
+   vier, Fett mit neun. Wer die Naehrwerte kennt, kennt damit die Kalorien --
+   sie zusaetzlich abzufragen waere eine Fehlerquelle mehr und eine Zahl, die
+   irgendwann nicht mehr zu den anderen passt.
+   Gespeichert wird je Tag. Ein Ernaehrungstagebuch, das gestern und heute
+   vermischt, ist keins. */
+var meals=get('meals',{});
+function mealKcal(m){return Math.round(m.p*4+m.f*9+m.c*4);}
+function mealsOf(k){return meals[k]||[];}
+function saveMeals(){set('meals',meals);}
+function drawMeals(){
+  var listEl=$('mealList'),sumEl=$('mealSum');
+  if(!listEl||!sumEl)return;
+  var DE=cfg.lang==='de',k=iso(TODAY),ms=mealsOf(k);
+  var kcal=0,pro=0,fat=0,carb=0;
+  ms.forEach(function(m){kcal+=mealKcal(m);pro+=m.p;fat+=m.f;carb+=m.c;});
+  /* Ziel kommt aus dem Rechner darueber. Ohne Koerperdaten gibt es keins --
+     dann zeigt die Kachel nur das Gegessene, statt gegen eine erfundene Zahl
+     zu messen. */
+  var zielK=macroNow.cal||0,zielP=macroNow.pro||0;
+  function kachel(lbl,wert,einheit,ziel,farbe){
+    var pct=ziel?Math.min(100,wert/ziel*100):0;
+    var rest=ziel?(ziel-wert):null;
+    return '<div class="mcard"><em>'+lbl+'</em>'+
+      '<b>'+Math.round(wert)+'<i>'+einheit+'</i></b>'+
+      (ziel?'<div class="meter"><i style="width:'+pct.toFixed(0)+'%;background:'+farbe+'"></i></div>':'')+
+      '<span class="sub">'+(ziel
+        ? (rest>0?(Math.round(rest)+' '+einheit+(DE?' übrig':' left')):(DE?'Ziel erreicht':'target met'))
+        : (DE?'kein Ziel gesetzt':'no target set'))+'</span></div>';
+  }
+  sumEl.innerHTML=
+    kachel(DE?'Kalorien':'Calories',kcal,'kcal',zielK,'var(--ember)')+
+    kachel(DE?'Protein':'Protein',pro,'g',zielP,'var(--aurora)');
+  if(!ms.length){
+    listEl.innerHTML='<p class="hint">'+(DE
+      ?'Noch nichts eingetragen. „Mahlzeit hinzufügen" — Kalorien rechnet der Hub aus den Nährwerten.'
+      :'Nothing logged yet. "Add meal" — the hub works out the calories from the macros.')+'</p>';
+    return;
+  }
+  listEl.innerHTML=ms.map(function(m,i){
+    return '<button type="button" class="prrow" data-meal="'+i+'">'+
+      '<span class="prtop"><b></b><span class="prv">'+mealKcal(m)+'<i>kcal</i></span></span>'+
+      '<span class="prfoot"><span class="delta flat">'+m.p+' g P · '+m.f+' g F · '+m.c+' g '+(DE?'KH':'C')+'</span>'+
+      '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>'+
+      '</button>';
+  }).join('');
+  [].forEach.call(listEl.querySelectorAll('.prrow b'),function(b,i){b.textContent=ms[i].n;});
+}
+/* Blatt zum Anlegen und Aendern. idx null heisst: neue Mahlzeit. */
+function openMeal(idx){
+  var DE=cfg.lang==='de',k=iso(TODAY),ms=mealsOf(k);
+  var m=(idx===null||idx===undefined)?{n:'',p:0,f:0,c:0}:ms[idx];
+  if(!m)return;
+  var neu=(idx===null||idx===undefined);
+  var html=
+    '<h4>'+(neu?(DE?'Neue Mahlzeit':'New meal'):(DE?'Mahlzeit':'Meal'))+'</h4>'+
+    '<div class="dsh">'+
+      '<div class="dshHead"><b>'+(DE?'Kalorien':'Calories')+'</b><span id="mlKcal">'+mealKcal(m)+' kcal</span></div>'+
+      '<div class="field"><label for="mlName">'+(DE?'Name':'Name')+'</label>'+
+        '<div class="ctl"><input id="mlName" type="text" maxlength="40" placeholder="'+(DE?'z. B. Skyr mit Haferflocken':'e.g. skyr with oats')+'"></div></div>'+
+      '<div class="field hasSlide"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
+        '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
+      '<div class="field hasSlide"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
+        '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
+      '<div class="field hasSlide"><label for="mlC">'+(DE?'Kohlenhydrate':'Carbs')+'</label>'+
+        '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
+      '<p class="hint">'+(DE
+        ?'Kalorien rechnet der Hub: Protein und Kohlenhydrate mal vier, Fett mal neun. Nährwerte stehen auf jeder Packung.'
+        :'The hub works out the calories: protein and carbs times four, fat times nine. The macros are on every label.')+'</p>'+
+      '<div class="savebar">'+
+        '<button class="tbtn go" data-mlact="save">'+(neu?(DE?'Hinzufügen':'Add'):(DE?'Speichern':'Save'))+'</button>'+
+        (neu?'':'<button class="tbtn dngr" data-mlact="del">'+(DE?'Löschen':'Delete')+'</button>')+
+      '</div>'+
+    '</div>';
+  openSheet(html);
+  $('sheetBody').dataset.meal=(neu?'neu':String(idx));
+  $('mlName').value=m.n;
+  pairSlider('mlP',{min:0,max:120,step:1,empty:0});
+  pairSlider('mlF',{min:0,max:80,step:1,empty:0});
+  pairSlider('mlC',{min:0,max:200,step:5,empty:0});
+  function nach(){
+    var p=parseFloat($('mlP').value)||0,f=parseFloat($('mlF').value)||0,c=parseFloat($('mlC').value)||0;
+    $('mlKcal').textContent=Math.round(p*4+f*9+c*4)+' kcal';
+  }
+  ['mlP','mlF','mlC'].forEach(function(id){$(id).addEventListener('input',nach);});
+  nach();
+}
+$('mealAdd').addEventListener('click',function(){openMeal(null);});
+$('mealList').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-meal]');if(b)openMeal(+b.dataset.meal);
+});
+$('sheetBody').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-mlact]');if(!b)return;
+  var roh=$('sheetBody').dataset.meal,k=iso(TODAY);
+  if(!meals[k])meals[k]=[];
+  if(b.dataset.mlact==='del'){
+    meals[k].splice(+roh,1);saveMeals();drawMeals();closeSheet();return;
+  }
+  var eintrag={
+    n:($('mlName').value.trim()||(cfg.lang==='de'?'Mahlzeit':'Meal')),
+    p:Math.max(0,parseFloat($('mlP').value)||0),
+    f:Math.max(0,parseFloat($('mlF').value)||0),
+    c:Math.max(0,parseFloat($('mlC').value)||0)
+  };
+  if(roh==='neu')meals[k].push(eintrag);else meals[k][+roh]=eintrag;
+  saveMeals();drawMeals();closeSheet();
+});
 function bx(l,v,u,hi){return '<div class="obox'+(hi?' hi':'')+'"><em>'+l+'</em><b>'+v+' <i>'+u+'</i></b></div>';}
 ['f-sex','f-age','f-h','f-w','f-act','f-goal'].forEach(function(id){$(id).addEventListener('input',function(){calc();refresh();});$(id).addEventListener('change',function(){calc();refresh();});});
 /* Die Zielwerte werden im Detailblatt geaendert, nicht mehr hier -- das
@@ -5856,6 +6047,10 @@ function sizeCv(){
   W=window.innerWidth;H=window.innerHeight;
   cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
   var n=fxCalm()?Math.round(Math.min(30,Math.max(14,W/48))):Math.round(Math.min(64,Math.max(24,W/28)));
+  /* Auf schwacher Hardware die Haelfte. Weniger Punkte heisst nicht nur
+     weniger Rechenarbeit je Bild, sondern auch kleinere Flaechen, die neu
+     gezeichnet werden muessen. */
+  if(SPAR)n=Math.max(8,Math.round(n/2));
   parts=[];for(var i=0;i<n;i++)parts.push(mk(true));
   shots=[];raf=requestAnimationFrame(tick);
 }
