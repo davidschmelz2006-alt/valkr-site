@@ -934,7 +934,7 @@
      grosse Antwortkarten mit Icon und Auswahlkreis, fixe Weiter-Pille unten.
      Dazu Zwischenseiten beim Kapitelwechsel und der Koerperfett-Schieber mit
      Figur, die in Echtzeit mitgeht. */
-  #intro{position:fixed;inset:0;z-index:95;background:var(--bg);display:none;overflow:auto;
+  #intro{position:fixed;inset:0;z-index:95;background:var(--bg);display:none;overflow:auto;overflow-x:hidden;
     padding:calc(.9rem + env(safe-area-inset-top,0px)) 1.2rem calc(1rem + env(safe-area-inset-bottom,0px))}
   #intro.on{display:flex;justify-content:center}
   #intro .ibox{width:100%;max-width:460px;display:flex;flex-direction:column;gap:.9rem;min-height:min(660px,92vh)}
@@ -951,8 +951,8 @@
   #intro .iprog{display:flex;align-items:center;gap:.45rem}
   #intro .iprog .seg{flex:1;height:5px;border-radius:999px;background:var(--surf2);overflow:hidden}
   #intro .iprog .seg i{display:block;height:100%;width:0%;border-radius:999px;background:var(--ink);transition:width .3s ease}
-  #intro .iprog .tick{width:15px;height:15px;flex:none;border-radius:50%;border:1.4px solid var(--line);color:transparent;
-    display:flex;align-items:center;justify-content:center;font-size:.55rem;transition:.2s;background:var(--surf)}
+  #intro .iprog .tick{width:18px;height:18px;flex:none;border-radius:50%;border:1.4px solid var(--line);color:transparent;
+    display:flex;align-items:center;justify-content:center;font-size:var(--t1);transition:.2s;background:var(--surf)}
   #intro .iprog .tick.done{border-color:var(--ink);color:var(--bg);background:var(--ink)}
   #intro .istep{display:flex;flex-direction:column;gap:.85rem;flex:1;min-height:0}
   #intro .istep.slide{animation:inslide .3s ease}
@@ -973,11 +973,11 @@
   #intro .iopt .tx b{display:block;font-family:var(--fd);font-weight:600;font-size:.95rem;line-height:1.25}
   #intro .iopt .tx small{display:block;font-size:.78rem;color:var(--ink3);margin-top:.1rem;line-height:1.35}
   #intro .iopt .ring{width:22px;height:22px;flex:none;border-radius:50%;border:1.6px solid var(--line2);
-    display:flex;align-items:center;justify-content:center;color:transparent;transition:.16s;font-size:.66rem}
+    display:flex;align-items:center;justify-content:center;color:transparent;transition:.16s;font-size:var(--t1)}
   #intro .iopt[aria-pressed="true"] .ring{border-color:var(--aurora);background:var(--aurora);color:var(--hero)}
   #intro .iopt .reco{position:absolute;top:-7px;right:.8rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;
     text-transform:uppercase;color:var(--brass);background:var(--bg);border:1px dashed color-mix(in srgb,var(--brass) 60%,transparent);
-    border-radius:3px;padding:.12rem .4rem}
+    border-radius:var(--r1);padding:.12rem .4rem}
   #intro .recoleg{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--brass);
     text-align:center;margin:0}
   /* Zahlwert-Schritte: grosser Wert, Schieber, Feinjustage */
@@ -989,7 +989,7 @@
     color:var(--ink);font-size:1.15rem;line-height:1;transition:.16s;flex:none}
   #intro .stepbtns button:hover{border-color:var(--aurora);color:var(--aurora)}
   #intro input[type="range"].islide{width:100%;accent-color:var(--aurora);height:26px}
-  #intro .slidewrap{position:relative;padding-top:.3rem}
+  #intro .slidewrap{position:relative;padding-top:.3rem;width:100%}
   #intro .slidewrap .est{position:absolute;top:-4px;transform:translateX(-50%);font-family:var(--fm);font-size:var(--t1);
     letter-spacing:.14em;text-transform:uppercase;color:var(--brass);white-space:nowrap}
   #intro .slidewrap .est::after{content:"";display:block;width:1px;height:9px;background:var(--brass);margin:.15rem auto 0}
@@ -1011,7 +1011,7 @@
   #intro .inav .tbtn.go:hover{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
   #intro .ilang{display:flex;gap:.4rem;justify-content:center}
   #intro .ilang button{font-family:var(--fm);font-size:var(--t1);letter-spacing:.12em;text-transform:uppercase;
-    border:1px solid var(--line);border-radius:2px;padding:.3rem .6rem;color:var(--ink2)}
+    border:1px solid var(--line);border-radius:var(--r1);padding:.3rem .6rem;color:var(--ink2)}
   #intro .ilang button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
   @media (prefers-reduced-motion:reduce){#intro .istep.slide{animation:none}}
   #modal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.62);padding:1rem}
@@ -1291,7 +1291,7 @@
   .profrow button:hover{border-color:var(--aurora);color:var(--aurora)}
   .profrow select{background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);color:var(--ink);
     padding:.3rem .5rem;font:inherit;font-size:var(--t3)}
-  #setBfSlide{width:130px;accent-color:var(--aurora)}
+  #setBfSlide{flex:1;min-width:120px;accent-color:var(--aurora)}
   /* ── v16: Tabbar mit Farbe. Der aktive Bereich bekommt seine eigene
      Kennfarbe -- Heute Aurora, Training Ember, Coach Ice, Du Gold. ── */
   #tabbar button[data-view="today"][aria-current="true"] svg{stroke:var(--aurora)}
