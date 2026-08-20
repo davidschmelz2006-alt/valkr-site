@@ -2024,7 +2024,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.5';
+var VERSION='16.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6049,15 +6049,35 @@ $('setSpar').addEventListener('change',function(){
 });
 /* Sagt, was gerade gilt und warum -- ein Modus, der unsichtbar schaltet, ist
    beim Testen wertlos. */
+/* Sagt, was gerade gilt und warum -- ein Modus, der unsichtbar schaltet, ist
+   beim Testen wertlos.
+
+   Dazu die gemessene Bildrate. Der Grund ist unbequem, aber ehrlich: ob der
+   Hub auf einem fuenf Jahre alten Telefon fluessig laeuft, laesst sich auf
+   einem Entwicklerrechner nicht feststellen -- dort ist immer alles fluessig.
+   Wer im Park steht, kann jetzt nachsehen statt zu raten, und die beiden
+   Einstellungen gegeneinander messen. */
+function fpsMessen(cb){
+  var f=0,t0=performance.now();
+  function step(t){f++;if(t-t0<1000)requestAnimationFrame(step);else cb(Math.round(f/((t-t0)/1000)));}
+  requestAnimationFrame(step);
+}
 function sparNote(){
   var el=$('sparNote');if(!el)return;
   var DE=cfg.lang==='de',w=get('spar','auto');
   var k=navigator.hardwareConcurrency||'?',m=navigator.deviceMemory;
   var geraet=(DE?'Gerät: ':'Device: ')+k+(DE?' Kerne':' cores')+(m?', '+m+' GB':'');
-  el.textContent=(w==='auto'
-    ? (DE?('Automatisch — gerade '+(SPAR?'an':'aus')+'. '):('Automatic — currently '+(SPAR?'on':'off')+'. '))
-    : (SPAR?(DE?'Erzwungen an. ':'Forced on. '):(DE?'Erzwungen aus. ':'Forced off. ')))
-    +geraet+(DE?'. Spart Milchglas und Partikel.':'. Drops the glass blur and half the particles.');
+  var stand=(w==='auto'
+    ? (DE?('Automatisch — gerade '+(SPAR?'an':'aus')+'.'):('Automatic — currently '+(SPAR?'on':'off')+'.'))
+    : (SPAR?(DE?'Erzwungen an.':'Forced on.'):(DE?'Erzwungen aus.':'Forced off.')));
+  el.textContent=stand+' '+geraet+(DE?'. Bildrate wird gemessen …':'. Measuring frame rate …');
+  fpsMessen(function(fps){
+    /* Nur schreiben, wenn der Hinweis noch derselbe ist -- sonst ueberschreibt
+       eine alte Messung eine neue Einstellung. */
+    if(!$('sparNote'))return;
+    var urteil=fps>=55?(DE?'flüssig':'smooth'):fps>=40?(DE?'brauchbar':'usable'):(DE?'zu langsam — Sparmodus einschalten':'too slow — turn the mode on');
+    $('sparNote').textContent=stand+' '+geraet+'. '+fps+' '+(DE?'Bilder/s':'fps')+' — '+urteil+'.';
+  });
 }
 $('setHealth').addEventListener('change',function(){cfg.health=this.value;saveCfg();syncHealthUI();});
 $('healthTest').addEventListener('click',function(){healthLog(5);});
