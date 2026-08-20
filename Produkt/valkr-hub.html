@@ -733,6 +733,7 @@
 
   .chartbox{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:1rem;box-shadow:var(--sh);display:flex;flex-direction:column;gap:.55rem}
   .chartbox h4{font-family:var(--fd);font-weight:600;font-size:var(--t3);letter-spacing:.08em;text-transform:uppercase;margin:0;color:var(--ink2)}
+  .secbar{display:flex;align-items:center;justify-content:space-between;gap:.7rem;margin:.2rem 0 .1rem}
   .volbar{display:flex;flex-direction:column;gap:.42rem}
   /* Das Urteil steht oben und gross -- es ist die Antwort, die Balken sind die
      Begruendung. Vorher war es umgekehrt: sechs Balken, und die Aussage stand
@@ -808,16 +809,33 @@
   details.fold>summary .ft{flex:1;min-width:0;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
   details.fold>summary .fs{font-family:var(--fm);font-size:var(--t2);color:var(--ink3);
     white-space:nowrap;font-variant-numeric:tabular-nums}
+  /* Feiner Balken in der Kopfzeile: die Zahl daneben sagt das Genaue, der
+     Balken das Gefuehl. Zusammen sieht man auf einen Blick, wo man steht,
+     ohne zu oeffnen. */
+  details.fold>summary .fbar{flex:none;width:58px;height:4px;border-radius:2px;
+    background:var(--line);overflow:hidden}
+  details.fold>summary .fbar i{display:block;height:100%;background:var(--aurora);
+    transition:width .5s ease}
   details.fold>summary .fc{flex:none;width:15px;height:15px;color:var(--ink3);
     fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
-    transition:transform .2s}
-  details.fold[open]>summary .fc{transform:rotate(90deg)}
-  details.fold[open]>summary{border-bottom:1px solid var(--line2)}
-  .foldBody{padding:.85rem .9rem 1rem;display:flex;flex-direction:column;gap:.7rem;
-    animation:fade .2s ease}
+    transition:transform .24s cubic-bezier(.3,.8,.4,1)}
+  details.fold.exp>summary .fc{transform:rotate(90deg)}
+  details.fold.exp>summary{border-bottom:1px solid var(--line2)}
+  /* Von 0fr auf 1fr: der einzige Weg, eine Hoehe von "nichts" auf "so hoch wie
+     noetig" zu animieren, ohne sie vorher zu kennen. */
+  .foldWrap{display:grid;grid-template-rows:0fr;
+    transition:grid-template-rows var(--foldms,.26s) cubic-bezier(.3,.8,.4,1)}
+  details.fold.exp .foldWrap{grid-template-rows:1fr}
+  .foldWrap>.foldBody{overflow:hidden;min-height:0}
+  .foldBody{padding:.85rem .9rem 1rem;display:flex;flex-direction:column;gap:.7rem}
   .foldBody>p:first-child{margin-top:0}
+  @media (prefers-reduced-motion:reduce){
+    .foldWrap{transition:none}
+    details.fold>summary .fc{transition:none}
+  }
   @media (max-width:640px){
-    details.fold>summary{padding:.75rem .8rem}
+    details.fold>summary{padding:.75rem .8rem;gap:.6rem}
+    details.fold>summary .fbar{width:44px}
     .foldBody{padding:.75rem .8rem .9rem}
   }
   .acc{display:flex;flex-direction:column;gap:.4rem}
@@ -975,15 +993,24 @@
   .bz:hover{filter:brightness(1.25)}
   @keyframes bestGlow{0%,100%{opacity:.25;r:15}50%{opacity:.6;r:19}}
   @keyframes bestSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  .rankList{display:flex;flex-direction:column;gap:.42rem}
-  .rankRow{display:flex;align-items:center;gap:.75rem;background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.6rem .75rem;transition:.18s}
-  .rankRow:hover{border-color:var(--aurora);transform:translateX(2px)}
-  .rankRow .nm{flex:1;min-width:0}
-  .rankRow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
-  .rankRow .nm span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
-  .rankRow .lpwrap{width:120px;flex:none}
-  .rankRow .lpwrap .lpbar{height:7px;max-width:none}
-  .rankRow .lpwrap span{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);display:block;margin-top:.22rem;text-align:right}
+  /* Rang je Muster kompakt. Vorher sechs Zeilen mit je 34-Pixel-Abzeichen,
+     zweizeiligem Namen und 120 Pixel breitem Balkenblock -- gut 400 Pixel fuer
+     sechs Zahlen, die alle dasselbe sagen, solange man am Anfang steht.
+     Jetzt zwei Spalten, eine Zeile je Muster, Balken darunter. */
+  .rankList{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.42rem}
+  .rankRow{display:flex;flex-direction:column;gap:.3rem;background:var(--surf2);
+    border:1px solid var(--line);border-radius:var(--r2);padding:.55rem .65rem;
+    transition:border-color .16s}
+  .rankRow:hover{border-color:var(--aurora)}
+  .rankRow .rtop{display:flex;align-items:center;gap:.45rem}
+  .rankRow .rtop svg{flex:none}
+  .rankRow .nm{flex:1;min-width:0;display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap}
+  .rankRow .nm b{font-family:var(--fd);font-weight:600;font-size:var(--t4)}
+  .rankRow .nm span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink3)}
+  .rankRow .lpbar{height:5px;max-width:none;margin:0}
+  .rankRow .lpn{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);
+    text-align:right;font-variant-numeric:tabular-nums}
 
   .achGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:.5rem}
   .ach{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.75rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;transition:.2s;position:relative;overflow:hidden}
@@ -1489,11 +1516,18 @@
         </ul>
       </div>
     </details>
+    <!-- Ohne Ueberschrift stehen hier fuenf Ausklapper mit Woertern wie
+         "Konsistenz" und "Kraft" -- man erkennt nicht, dass es Erfolge sind.
+         Der Zaehler rechts sagt zusaetzlich, wie viele es insgesamt gibt. -->
+    <div class="secbar">
+      <p class="eyebrow" style="margin:0" data-i18n="rk.ach">Achievements</p>
+      <span class="pill" id="achCount"></span>
+    </div>
     <div id="achWrap"></div>
 
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="rk.dist">All ranks &mdash; who stands where</span></summary>
+        <span class="ft" data-i18n="rk.dist">All ranks &mdash; who stands where</span><span class="fs" id="distSum"></span></summary>
       <div class="foldBody">
         <div class="tblwrap" style="box-shadow:none;border:none;padding:0"><table class="cmp" id="tierTable"></table></div>
         <p class="hint" id="tierNote"></p>
@@ -1501,7 +1535,7 @@
     </details>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="rk.addons">Rank-exclusive designs</span></summary>
+        <span class="ft" data-i18n="rk.addons">Rank-exclusive designs</span><span class="fbar" id="addonBar"><i style="width:0%"></i></span><span class="fs" id="addonSum"></span></summary>
       <div class="foldBody">
         <div id="addonList"></div>
         <p class="hint" data-i18n="rk.addonsNote">Pure cosmetics &mdash; they change how your figures look, never how the numbers are earned.</p>
@@ -1829,7 +1863,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='14.6';
+var VERSION='14.7';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -1986,6 +2020,7 @@ var DICT={
  'rk.dist':['All ranks — who stands where','Alle Ränge — wer steht wo'],
  'rk.addons':['Rank-exclusive designs','Rang-exklusive Designs'],
  'rk.addonsNote':['Pure cosmetics — they change how your figures look, never how the rank is earned. At the top rank, every figure wears a crown and a boss aura.','Reine Optik — sie ändern, wie deine Figuren aussehen, nie wie der Rang entsteht. Beim höchsten Rang trägt jedes Männchen eine Krone und eine Boss-Aura.'],
+ 'rk.ach':['Achievements','Erfolge'],
  'rk.perPat':['Rank per pattern','Rang je Muster'],'rk.how':['How the rank is earned','Wie der Rang entsteht'],
  'rk.h1':['Ladder position is worth the most. Moving one step up is worth more than a month of extra reps.','Die Leiterstufe zählt am meisten. Eine Stufe hoch ist mehr wert als ein Monat Zusatzwiederholungen.'],
  'rk.h2':['Personal records above your week-1 baseline add on top.','Rekorde über deiner Woche-1-Basis kommen obendrauf.'],
@@ -2898,13 +2933,71 @@ function svgDecide(s){
 /* Baut einen Ausklapper. titel steht immer da, nebentext rechts daneben als
    Kurzfassung dessen, was drinsteckt -- so muss man zum Nachsehen gar nicht
    erst oeffnen. */
-function fold(titel,nebentext,inhalt,offen){
+/* Baut einen Ausklapper. nebentext steht rechts in der Kopfzeile als
+   Kurzfassung dessen, was drinsteckt -- so muss man zum Nachsehen gar nicht
+   erst oeffnen. anteil (0..1) zeichnet zusaetzlich einen feinen Balken:
+   bei "3 / 10" sagt die Zahl das Genaue, der Balken das Gefuehl. */
+function fold(titel,nebentext,inhalt,offen,anteil){
+  var bar=(anteil===undefined||anteil===null)?'':
+    '<span class="fbar"><i style="width:'+Math.round(Math.max(0,Math.min(1,anteil))*100)+'%"></i></span>';
   return '<details class="fold"'+(offen?' open':'')+'>'+
     '<summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
-    '<span class="ft">'+titel+'</span>'+
+    '<span class="ft">'+titel+'</span>'+bar+
     (nebentext?'<span class="fs">'+nebentext+'</span>':'')+
     '</summary><div class="foldBody">'+inhalt+'</div></details>';
 }
+
+/* ---------- Verhalten der Ausklapper -------------------------------------
+   Drei Dinge, die <details> von sich aus nicht kann:
+
+   1. Immer nur einer offen. Sonst klappt man sich Stueck fuer Stueck genau die
+      Wand wieder auf, wegen der zugeklappt ueberhaupt der Normalfall ist.
+   2. Beim Wechsel des Bereichs alles zu. Wer zurueckkommt, soll denselben
+      ruhigen Zustand vorfinden wie beim ersten Mal -- nicht das Chaos, das er
+      vor fuenf Minuten hinterlassen hat.
+   3. Eine Bewegung beim Oeffnen. <details> springt hart auf.
+
+   Die Bewegung laeuft ueber grid-template-rows von 0fr auf 1fr. Das ist der
+   einzige Weg, eine Hoehe von "nichts" auf "so hoch wie noetig" zu
+   animieren, ohne die Hoehe vorher zu kennen. Dafuer braucht der Koerper eine
+   Huelle -- die haengt normFolds() nachtraeglich ein, damit im Markup nichts
+   davon steht. */
+function normFolds(root){
+  var list=(root||document).querySelectorAll('details.fold');
+  for(var i=0;i<list.length;i++){
+    var d=list[i],body=d.querySelector(':scope > .foldBody');
+    if(body){
+      var wrap=document.createElement('div');wrap.className='foldWrap';
+      d.insertBefore(wrap,body);wrap.appendChild(body);
+    }
+    if(d.open)d.classList.add('exp');
+  }
+}
+var FOLDMS=260;
+function foldOpen(d){
+  d.open=true;
+  /* Ein Bild abwarten: sonst fasst der Browser "eingeblendet" und "aufgeklappt"
+     zu einem Schritt zusammen und es gibt nichts zu animieren. */
+  requestAnimationFrame(function(){d.classList.add('exp');});
+}
+function foldClose(d,sofort){
+  d.classList.remove('exp');
+  if(sofort){d.open=false;return;}
+  setTimeout(function(){if(!d.classList.contains('exp'))d.open=false;},FOLDMS);
+}
+function foldCloseAll(sofort,ausser){
+  var list=document.querySelectorAll('details.fold[open]');
+  for(var i=0;i<list.length;i++)if(list[i]!==ausser)foldClose(list[i],sofort);
+}
+document.addEventListener('click',function(e){
+  var s=e.target.closest('details.fold > summary');
+  if(!s)return;
+  e.preventDefault();
+  var d=s.parentNode;
+  if(d.classList.contains('exp')){foldClose(d);return;}
+  foldCloseAll(true,d);
+  foldOpen(d);
+});
 function pauseHiddenSvg(){
   if(!svgObs&&window.IntersectionObserver){
     svgObs=new IntersectionObserver(function(es){
@@ -2996,6 +3089,10 @@ function show(n,fromBack){
   /* Erst hier: die Zeilen darueber bauen Inhalte neu auf (Plan, Raenge, Du),
      und frisch erzeugte SVG-Animationen starten immer laufend. */
   pauseHiddenSvg();
+  /* Ausklapper: neu gebaute einhaengen, alle schliessen. Wer einen Bereich
+     erneut betritt, findet denselben ruhigen Zustand vor wie beim ersten Mal. */
+  normFolds($(VS[n]));
+  foldCloseAll(true);
   /* Ansichts-Historie fuer die Zurueck-Taste. */
   if(!fromBack&&vStack[vStack.length-1]!==n){
     /* Schon besuchte Ansicht wandert nach oben statt sich zu wiederholen.
@@ -5977,9 +6074,10 @@ function renderRanks(){
   $('rkGot').textContent=' '+Object.keys(got).length+'/'+ACH.length;
   $('rankList').innerHTML=PAT.map(function(p,i){
     var pt=tierOf(lps[i]);
-    return '<div class="rankRow">'+badgeSvg(pt.t,34)+
-      '<span class="nm"><b>'+p.name+'</b><span>'+pt.label+'</span></span>'+
-      '<span class="lpwrap"><span class="lpbar"><i style="width:'+pt.within+'%"></i></span><span>'+lps[i]+' LP</span></span></div>';
+    return '<div class="rankRow">'+
+      '<span class="rtop">'+badgeSvg(pt.t,22)+'<span class="nm"><b>'+p.name+'</b><span>'+pt.label+'</span></span></span>'+
+      '<span class="lpbar"><i style="width:'+pt.within+'%"></i></span>'+
+      '<span class="lpn">'+lps[i]+' LP</span></div>';
   }).join('');
   /* Abzeichen nach Kategorie, jede zugeklappt. Vorher standen alle achtund-
      zwanzig offen untereinander -- eine Wand aus Sechsecken, in der die
@@ -5996,8 +6094,10 @@ function renderRanks(){
         return '<div class="ach '+(g?'got':'locked')+'">'+badgeSvg(Math.min(8,Math.floor(a.p/25)),40)+
           '<b>'+a.n[L]+'</b><span>'+a.d[L]+'</span><span class="pts">+'+a.p+' XP</span></div>';
       }).join('')+'</div>';
-    html+=fold(CATN[c][L],done+' / '+byCat[c].length,innen,false);
+    html+=fold(CATN[c][L],done+" / "+byCat[c].length,innen,false,done/byCat[c].length);
   });
+  var ac=document.getElementById('achCount');
+  if(ac)ac.textContent=Object.keys(got).length+' / '+ACH.length;
   $('achWrap').innerHTML=html;
   drawBody();
   /* Das Abzeichen sitzt jetzt auf "Du" -- dort liegen die Raenge seit der
@@ -6023,6 +6123,10 @@ function renderTierTable(myT){
     rows+='<tr'+(ti===myT?' class="mine"':'')+'><td style="white-space:nowrap;color:'+TIERS[ti].c+'">'+badgeSvg(ti,26)+' '+TIERS[ti].n[DE?1:0]+(ti===8?' '+CROWNMINI:'')+'</td><td class="c">'+here.length+'</td><td style="white-space:nowrap"><span class="distbar"><i style="width:'+pct+'%"></i></span><span style="font-family:var(--fm);font-size:var(--t2)">'+pct+' %</span></td><td class="names">'+names+'</td></tr>';
   })(ti);}
   $('tierTable').innerHTML='<thead><tr><th>'+(DE?'Rang':'Rank')+'</th><th class="c">'+(DE?'Leute':'People')+'</th><th>'+(DE?'Anteil':'Share')+'</th><th>'+(DE?'Wer steht hier':'Who is here')+'</th></tr></thead><tbody>'+rows+'</tbody>';
+  /* Kurzfassung fuer die zugeklappte Kopfzeile: der eigene Rang. Das ist die
+     Frage, wegen der man diese Tabelle ueberhaupt aufmacht. */
+  var ts=$('distSum');
+  if(ts)ts.textContent=(TIERS[myT]?TIERS[myT].n[DE?1:0]:'-');
   $('tierNote').innerHTML=DE
     ?'Mit * markierte Namen sind Demo-Einträge. Setzt du alles zurück, fällt deine Zeile auf Holz zurück — XP, Level und Abzeichen inklusive.'
     :'Names marked * are demo entries. Reset everything and your row drops back to Wood — XP, level and badges included.';
@@ -6043,6 +6147,10 @@ function renderAddons(myT){
     var keep=curTier;curTier=a[0];var ex=sv('pull',cvar('--ice'),34);curTier=keep;
     return '<div class="addonRow '+(on?'on':'off')+'">'+badgeSvg(a[0],30)+ex+'<span class="nm"><b>'+TIERS[a[0]].n[DE?1:0]+' — '+a[1]+'</b><span>'+a[2]+'</span></span><span class="st">'+(on?(DE?'Aktiv':'Active'):(DE?'Gesperrt':'Locked'))+'</span></div>';
   }).join('');
+  /* Kurzfassung fuer die zugeklappte Kopfzeile: wie viele Designs frei sind. */
+  var frei=A.filter(function(a){return myT>=a[0];}).length;
+  var as=$('addonSum');if(as)as.textContent=frei+' / '+A.length+(DE?' frei':' unlocked');
+  var ab=$('addonBar');if(ab)ab.firstChild.style.width=Math.round(frei/A.length*100)+'%';
 }
 /* leaderboard — ranked on adherence, not on self-reported strength */
 var DEMO=[
