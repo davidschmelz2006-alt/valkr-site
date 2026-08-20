@@ -215,19 +215,25 @@
     .exrow{padding-top:.55rem;padding-bottom:.55rem}
     .exrow .tick{width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex:none}
 
+    /* Die Leiste bekommt oben etwas Luft, damit die aktive Flaeche nicht an
+       der Kante klebt, und die Schrift wird kleiner als das Symbol -- eine
+       Beschriftung soll das Symbol erklaeren, nicht mit ihm konkurrieren. */
     #tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;
       background:var(--surf);border-top:1px solid var(--line);
-      padding-bottom:env(safe-area-inset-bottom,0px);box-shadow:0 -2px 14px rgba(0,0,0,.14)}
-    /* Kompakter: 52 statt 56 px, kleinere Beschriftung in normaler Schreibweise
-       statt gesperrter Versalien. Eine Tableiste soll da sein, nicht den
-       Bildschirm besetzen. */
-    #tabbar button{flex:1;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-      gap:.14rem;color:var(--ink3);font-family:var(--fb);font-weight:600;font-size:.63rem;letter-spacing:.01em;
-      text-transform:none;position:relative;transition:color .16s}
-    #tabbar svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+      padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
+      box-shadow:0 -2px 14px rgba(0,0,0,.14)}
+    #tabbar button{flex:1;min-width:0;min-height:52px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
+      font-family:var(--fb);font-weight:600;font-size:.6rem;letter-spacing:.01em;
+      text-transform:none;position:relative;transition:color .16s;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #tabbar svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     #tabbar button[aria-current="true"]{color:var(--aurora)}
-    #tabbar .badge{position:absolute;top:7px;right:calc(50% - 20px);min-width:15px;height:15px;line-height:15px;
-      background:var(--ember);color:#fff;border-radius:8px;font-size:var(--t1);font-style:normal;text-align:center;display:none;padding:0 3px}
+    /* Das Abzeichen sass auf einem festen Abstand vom Reitermittelpunkt und
+       rutschte dadurch bei schmalen Reitern in die Nachbarspalte. Jetzt haengt
+       es am Symbol statt an einer geratenen Zahl. */
+    #tabbar .badge{position:absolute;top:5px;left:calc(50% + 5px);min-width:15px;height:15px;line-height:15px;
+      background:var(--ember);color:#fff;border-radius:8px;font-size:var(--t1);font-style:normal;text-align:center;display:none;padding:0 3px;z-index:1}
     /* Die obere Reihe verschwindet auf dem Handy ganz -- ihre Aufgabe
        uebernehmen unten die Tableiste und das Menue-Blatt. */
     nav#nav{display:none!important}
@@ -391,10 +397,15 @@
   .creed .rot span{font-family:var(--fb);font-size:var(--t3);letter-spacing:0;color:var(--ink3);line-height:1.5;transition:opacity .55s,transform .55s;max-width:60ch}
   .creed .rot span.out{opacity:0;transform:translateY(-4px)}
 
-  nav{display:flex;gap:.28rem;padding:.5rem 0 .75rem;flex-wrap:wrap;justify-content:center;border-bottom:1px solid var(--line2)}
-  nav button{font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;padding:.44rem .68rem;border:1px solid var(--line);color:var(--ink2);border-radius:2px;transition:.18s}
-  nav button:hover{border-color:var(--aurora);color:var(--ink);transform:translateY(-1px)}
-  nav button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  /* Diese vier Regeln gelten der oberen Reihe am Rechner. Sie mussten auf
+     nav#nav eingegrenzt werden: die Tableiste unten ist ebenfalls ein <nav>,
+     und so bekam der aktive Reiter dort einen Block in Textfarbe hinterlegt --
+     im dunklen Theme also eine fast weisse Flaeche. Das war das "aufgeklebt"
+     aussehende Kaestchen. Keine der Regeln war je fuer sie gedacht. */
+  nav#nav{display:flex;gap:.28rem;padding:.5rem 0 .75rem;flex-wrap:wrap;justify-content:center;border-bottom:1px solid var(--line)}
+  nav#nav button{font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;padding:.44rem .68rem;border:1px solid var(--line);color:var(--ink2);border-radius:2px;transition:.18s}
+  nav#nav button:hover{border-color:var(--aurora);color:var(--ink);transform:translateY(-1px)}
+  nav#nav button[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
   /* Einstellungen sitzen auf dem Desktop oben in der Leiste -- in der Reihe
      waeren sie doppelt. Nur im Handy-Menue tauchen sie auf. */
   nav button .badge{display:inline-block;margin-left:.3rem;background:var(--ember);color:#fff;border-radius:8px;padding:0 .3rem;font-size:var(--t1)}
@@ -1260,8 +1271,22 @@
     #tabbar{background:color-mix(in srgb,var(--surf) 84%,transparent);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
       border-radius:var(--r3) var(--r3) 0 0}
-    #tabbar button[aria-current="true"]::before{content:"";position:absolute;top:6px;
-      width:38px;height:30px;border-radius:var(--r1);background:color-mix(in srgb,var(--aurora) 16%,transparent)}
+    /* Der aktive Reiter.
+
+       Vorher lag dahinter eine 38 mal 30 Pixel grosse Flaeche, oben mit sechs
+       Pixeln Abstand festgenagelt. Sie war schmaler als der Reiter, hoeher als
+       das Symbol und kuemmerte sich nicht um die Beschriftung darunter -- das
+       ist der "aufgeklebt"-Eindruck: eine Form, die zu nichts gehoert, was sie
+       umgibt.
+
+       Jetzt umschliesst die Flaeche den ganzen Reiter mit gleichem Abstand auf
+       allen Seiten. Sie ist damit kein Aufkleber mehr, sondern der Reiter
+       selbst -- und weil sie sich aus der Themenfarbe mischt, bleibt sie in
+       jedem Theme zurueckhaltend statt weiss zu leuchten. */
+    #tabbar button[aria-current="true"]::before{content:"";position:absolute;
+      left:6px;right:6px;top:5px;bottom:5px;border-radius:var(--r2);
+      background:color-mix(in srgb,var(--aurora) 14%,transparent);
+      box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--aurora) 22%,transparent)}
     #tabbar svg,#tabbar span{position:relative}
     nav#nav{border-radius:var(--r3) var(--r3) 0 0;
       background:color-mix(in srgb,var(--surf) 88%,transparent);
@@ -1950,6 +1975,10 @@
         <div class="field"><label data-i18n="set.start">Programme start</label><div class="ctl"><input id="setStart" type="date"></div></div>
         <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="3">3 days - full body</option><option value="4">4 days - upper / lower</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected>Calm</option><option value="on">Full</option><option value="off">Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <!-- Der Sparmodus laeuft automatisch nach Geraeteleistung. Hier laesst
+             er sich erzwingen oder abschalten -- zum Testen, und fuer den Fall,
+             dass ein Geraet sich staerker meldet als es ist. -->
+        <div class="field"><label data-i18n="set.spar">Performance mode</label><div class="ctl"><select id="setSpar"><option value="auto" selected>Automatic</option><option value="on">Always on</option><option value="off">Always off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="hint" id="sparNote"></span></div>
         <div class="field"><label data-i18n="set.sound">Timer sound</label><div class="ctl"><select id="setSound"><option value="on">On</option><option value="off" selected>Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.hooks">Rotating quotes</label><div class="ctl"><select id="setHooks"><option value="on">On</option><option value="off">Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
@@ -1995,7 +2024,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='16.4';
+var VERSION='16.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2063,14 +2092,23 @@ var SYSRED=false;try{SYSRED=matchMedia('(prefers-reduced-motion: reduce)').match
 
    deviceMemory kennt nur Chrome. Fehlt der Wert, wird von ausreichend
    ausgegangen: lieber einmal zu schoen als grundlos abgespeckt. */
-var SPAR=(function(){
+var SCHWACH=(function(){
   try{
     var kerne=navigator.hardwareConcurrency||8;
     var ram=navigator.deviceMemory||8;
     return kerne<=4||ram<=3;
   }catch(e){return false;}
 })();
-if(SPAR)document.documentElement.setAttribute('data-spar','1');
+/* Automatik laesst sich in den Einstellungen ueberstimmen -- zum Testen auf
+   starker Hardware, und fuer Geraete, die sich staerker melden als sie sind. */
+var SPAR=SCHWACH;
+function sparSet(){
+  var w=get('spar','auto');
+  SPAR=(w==='on')||(w!=='off'&&SCHWACH);
+  if(SPAR)document.documentElement.setAttribute('data-spar','1');
+  else document.documentElement.removeAttribute('data-spar');
+}
+sparSet();
 
 /* ---------- Schieberegler ------------------------------------------------
    pairSlider haengt an ein vorhandenes Zahlenfeld einen Regler und haelt
@@ -2268,6 +2306,7 @@ var DICT={
  'set.themeNote':['Each theme changes the palette and the ambient effect — snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.','Jedes Design ändert Farben und Hintergrundeffekt — Schnee, Glühwürmchen, Pollen, Blasen oder Funken. Auto folgt deiner Systemeinstellung.'],
  'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],'set.clock':['Time format','Zeitformat'],
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
+ 'set.spar':['Performance mode','Sparmodus'],
  'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],'set.hooks':['Rotating quotes','Rotierende Sprüche'],
  'set.langNote':['The interface translates fully. Chapter text and technique cues stay English in this prototype — the German edition follows with the book.','Die Oberfläche ist vollständig übersetzt. Kapiteltexte und Technikhinweise bleiben im Prototyp englisch — die deutsche Fassung kommt mit dem Buch.'],
  'ob.h':['Your plan — five quick questions','Dein Plan — fünf schnelle Fragen'],
@@ -2435,130 +2474,130 @@ var SESS4={
    Flags: w=handgelenklastig, s=Schulter ueber Kopf, k=knielastig. */
 var EXDB={
  push:[
-  ['Wall push-up',0,'wl','','Hands on the wall, body one line, chest to the wall.'],
-  ['Incline push-up (table)',0,'tb','','Hands on a table edge, body straight, full range.'],
-  ['Incline push-up (chair)',1,'ch','w','Lower surface, harder angle. Lock out every rep.'],
-  ['Knee push-up',1,'','w','Knees down, hips forward in one line with the torso.'],
-  ['Push-up on fists',1,'','','Neutral wrists on soft ground - the wrist-friendly push-up.'],
-  ['Full push-up',2,'','w','Chest a fist above the floor, elbows back at 45 degrees.'],
-  ['Wide push-up',2,'','w','Hands wider, more chest, less triceps.'],
-  ['Staggered push-up',2,'','w','One hand forward, one back - uneven load, swap sides.'],
-  ['Sphinx push-up',2,'','e','Forearms to hands and back - triceps, wrist-friendly start.'],
-  ['Diamond push-up',3,'','we','Hands form a triangle under the chest. Triceps day.'],
-  ['Hindu push-up',3,'','ws','Dive from pike through low arc to cobra and back.'],
-  ['Decline push-up',3,'ch','w','Feet elevated - more weight on the shoulders.'],
-  ['Pseudo planche lean',3,'','we','Push-up hold, hands by the hips, lean far forward.'],
-  ['Pseudo planche push-up',4,'','we','Push-ups with hands at the hips, body leaning forward.'],
-  ['Archer push-up',4,'','w','One arm bends, the other stays straight and wide.'],
-  ['Clap push-up',4,'','we','Explode off the floor, clap, land soft. Power work.'],
-  ['Ring push-up',4,'rg','w','Rings under the chest - every rep fights the wobble.'],
-  ['Typewriter push-up',5,'','we','Low over the floor, shift chest from hand to hand.'],
-  ['One-arm incline push-up',5,'tb','we','One hand on a table, body braced against rotation.'],
-  ['One-arm push-up',5,'','we','Feet wide, hips square. The horizontal-push summit.']
+  ['Wall push-up',0,'wl','','Hands on the wall, body one line, chest to the wall.','Liegestütz an der Wand|Hände an die Wand, Körper eine Linie, Brust zur Wand.'],
+  ['Incline push-up (table)',0,'tb','','Hands on a table edge, body straight, full range.','Liegestütz an der Tischkante|Hände auf die Tischkante, Körper gerade, voller Weg.'],
+  ['Incline push-up (chair)',1,'ch','w','Lower surface, harder angle. Lock out every rep.','Liegestütz an der Stuhllehne|Tiefere Auflage, schwererer Winkel. Oben jede Wiederholung strecken.'],
+  ['Knee push-up',1,'','w','Knees down, hips forward in one line with the torso.','Liegestütz auf den Knien|Knie ab, Hüfte vor - eine Linie mit dem Oberkörper.'],
+  ['Push-up on fists',1,'','','Neutral wrists on soft ground - the wrist-friendly push-up.','Liegestütz auf den Fäusten|Gerade Handgelenke auf weichem Boden - die handgelenkschonende Variante.'],
+  ['Full push-up',2,'','w','Chest a fist above the floor, elbows back at 45 degrees.','Voller Liegestütz|Brust eine Faust über dem Boden, Ellbogen 45 Grad nach hinten.'],
+  ['Wide push-up',2,'','w','Hands wider, more chest, less triceps.','Weiter Liegestütz|Hände weiter außen: mehr Brust, weniger Trizeps.'],
+  ['Staggered push-up',2,'','w','One hand forward, one back - uneven load, swap sides.','Versetzter Liegestütz|Eine Hand vor, eine zurück - ungleiche Last, Seiten wechseln.'],
+  ['Sphinx push-up',2,'','e','Forearms to hands and back - triceps, wrist-friendly start.','Sphinx-Liegestütz|Von den Unterarmen auf die Hände und zurück - Trizeps, schonender Einstieg.'],
+  ['Diamond push-up',3,'','we','Hands form a triangle under the chest. Triceps day.','Diamant-Liegestütz|Hände bilden ein Dreieck unter der Brust. Trizeps-Tag.'],
+  ['Hindu push-up',3,'','ws','Dive from pike through low arc to cobra and back.','Hindu-Liegestütz|Aus dem Hundeblick tief durch und in die Kobra, dann zurück.'],
+  ['Decline push-up',3,'ch','w','Feet elevated - more weight on the shoulders.','Liegestütz mit erhöhten Füßen|Füße hoch - mehr Gewicht auf den Schultern.'],
+  ['Pseudo planche lean',3,'','we','Push-up hold, hands by the hips, lean far forward.','Planche-Lean|Liegestützhalt, Hände neben der Hüfte, weit nach vorn lehnen.'],
+  ['Pseudo planche push-up',4,'','we','Push-ups with hands at the hips, body leaning forward.','Pseudo-Planche-Liegestütz|Liegestütze mit Händen an der Hüfte, Körper nach vorn gelehnt.'],
+  ['Archer push-up',4,'','w','One arm bends, the other stays straight and wide.','Archer-Liegestütz|Ein Arm beugt, der andere bleibt lang und weit außen.'],
+  ['Clap push-up',4,'','we','Explode off the floor, clap, land soft. Power work.','Klatsch-Liegestütz|Explosiv abdrücken, klatschen, weich landen. Schnellkraft.'],
+  ['Ring push-up',4,'rg','w','Rings under the chest - every rep fights the wobble.','Liegestütz an Ringen|Ringe unter der Brust - jede Wiederholung kämpft gegen das Wackeln.'],
+  ['Typewriter push-up',5,'','we','Low over the floor, shift chest from hand to hand.','Typewriter-Liegestütz|Tief über dem Boden die Brust von Hand zu Hand schieben.'],
+  ['One-arm incline push-up',5,'tb','we','One hand on a table, body braced against rotation.','Einarmiger Liegestütz erhöht|Eine Hand auf den Tisch, Körper gegen das Verdrehen gespannt.'],
+  ['One-arm push-up',5,'','we','Feet wide, hips square. The horizontal-push summit.','Einarmiger Liegestütz|Füße weit, Hüfte gerade. Die Spitze des waagerechten Drückens.']
  ],
  pull:[
-  ['Dead hang',0,'br','','Just hang. Grip, shoulders, patience.'],
-  ['Active hang',0,'br','','Hang, then pull the shoulder blades down without bending arms.'],
-  ['Scapular pull-up',1,'br','','Small pulls from the shoulder blades only. The first inch.'],
-  ['Jumping pull-up',1,'br','','Jump to the top, lower with control.'],
-  ['Band-assisted pull-up',1,'br','','Band under the knee takes what you cannot lift yet.'],
-  ['Negative pull-up',2,'br','','Start at the top, lower for 3-5 seconds.'],
-  ['Chin-up',2,'br','','Palms toward you - more biceps, usually the first to work.'],
-  ['Pull-up',3,'br','','Dead hang to chin clearly over the bar. No kipping.'],
-  ['Close-grip chin-up',3,'br','','Hands close, elbows tight - short lever, strong pull.'],
-  ['Wide-grip pull-up',3,'br','','Wider hands, more upper back, less biceps help.'],
-  ['Commando pull-up',3,'br','','Sideways under the bar, alternating head sides.'],
-  ['L-sit pull-up',4,'br','','Legs held horizontal through every rep.'],
-  ['High pull-up',4,'br','','Pull until the chest reaches the bar. Muscle-up currency.'],
-  ['Archer pull-up',4,'br','e','Chin over the bar shifted to one side, other arm long.'],
-  ['Typewriter pull-up',5,'br','e','Hold at the top, travel from hand to hand.'],
-  ['Weighted pull-up',5,'br','','Backpack with books. Progress you can count in kilos.'],
-  ['One-arm assisted pull-up',5,'br','e','One hand on a towel lower than the bar.'],
-  ['One-arm pull-up',5,'br','e','The vertical-pull summit. Years, not weeks.']
+  ['Dead hang',0,'br','','Just hang. Grip, shoulders, patience.','Passives Hängen|Einfach hängen. Griff, Schultern, Geduld.'],
+  ['Active hang',0,'br','','Hang, then pull the shoulder blades down without bending arms.','Aktives Hängen|Hängen, dann die Schulterblätter nach unten ziehen, Arme bleiben gestreckt.'],
+  ['Scapular pull-up',1,'br','','Small pulls from the shoulder blades only. The first inch.','Scapula-Klimmzug|Kleine Züge nur aus den Schulterblättern. Die ersten Zentimeter.'],
+  ['Jumping pull-up',1,'br','','Jump to the top, lower with control.','Sprung-Klimmzug|Nach oben springen, kontrolliert ablassen.'],
+  ['Band-assisted pull-up',1,'br','','Band under the knee takes what you cannot lift yet.','Klimmzug mit Band|Das Band unter dem Knie nimmt ab, was noch fehlt.'],
+  ['Negative pull-up',2,'br','','Start at the top, lower for 3-5 seconds.','Negativer Klimmzug|Oben starten, in 3 bis 5 Sekunden ablassen.'],
+  ['Chin-up',2,'br','','Palms toward you - more biceps, usually the first to work.','Klimmzug im Kammgriff|Handflächen zu dir - mehr Bizeps, meist der erste, der klappt.'],
+  ['Pull-up',3,'br','','Dead hang to chin clearly over the bar. No kipping.','Klimmzug|Aus dem Hang bis das Kinn klar über der Stange ist. Kein Schwung.'],
+  ['Close-grip chin-up',3,'br','','Hands close, elbows tight - short lever, strong pull.','Enger Kammgriff-Klimmzug|Hände eng, Ellbogen dicht am Körper - kurzer Hebel, starker Zug.'],
+  ['Wide-grip pull-up',3,'br','','Wider hands, more upper back, less biceps help.','Weiter Klimmzug|Hände weiter außen: mehr oberer Rücken, weniger Bizeps.'],
+  ['Commando pull-up',3,'br','','Sideways under the bar, alternating head sides.','Commando-Klimmzug|Längs unter der Stange, Kopf abwechselnd links und rechts.'],
+  ['L-sit pull-up',4,'br','','Legs held horizontal through every rep.','Klimmzug im L-Sitz|Beine bleiben die ganze Wiederholung waagerecht.'],
+  ['High pull-up',4,'br','','Pull until the chest reaches the bar. Muscle-up currency.','Hoher Klimmzug|Ziehen bis die Brust die Stange erreicht. Die Währung für den Muscle-up.'],
+  ['Archer pull-up',4,'br','e','Chin over the bar shifted to one side, other arm long.','Archer-Klimmzug|Kinn über der Stange zu einer Seite, der andere Arm bleibt lang.'],
+  ['Typewriter pull-up',5,'br','e','Hold at the top, travel from hand to hand.','Typewriter-Klimmzug|Oben halten und von Hand zu Hand wandern.'],
+  ['Weighted pull-up',5,'br','','Backpack with books. Progress you can count in kilos.','Klimmzug mit Zusatzgewicht|Rucksack mit Büchern. Fortschritt, den man in Kilo zählt.'],
+  ['One-arm assisted pull-up',5,'br','e','One hand on a towel lower than the bar.','Einarmiger Klimmzug mit Hilfe|Eine Hand am Handtuch unterhalb der Stange.'],
+  ['One-arm pull-up',5,'br','e','The vertical-pull summit. Years, not weeks.','Einarmiger Klimmzug|Die Spitze des senkrechten Ziehens. Jahre, keine Wochen.']
  ],
  row:[
-  ['Doorframe row',0,'','','Stand in the door, hold the frame, lean back, pull in.'],
-  ['Table row',0,'tb','','Under a sturdy table, body straight, chest to the edge.'],
-  ['Bar row, chest height',1,'br','','Nearly upright - the easiest bar angle.'],
-  ['Bar row, waist height',2,'br','','The standard inverted row. Body one line.'],
-  ['Bar row, hip height',3,'br','','Nearly horizontal - close to pull-up load.'],
-  ['Ring row',3,'rg','','Rings turn with you - smooth on the shoulders, hard on form.'],
-  ['Feet-elevated row',3,'tb','','Feet on a chair under the table edge - full horizontal.'],
-  ['Pause row',4,'br','','Two seconds chest at the bar, every rep.'],
-  ['Wide row',4,'br','','Wide grip, elbows out - rear shoulder focus.'],
-  ['Archer row',4,'br','','Pull to one hand, other arm straight.'],
-  ['One-arm row',5,'tb','e','One hand on the edge, body braced against twisting.'],
-  ['Tuck front-lever row',5,'br','','Row while holding a tuck lever. Core included.']
+  ['Doorframe row',0,'','','Stand in the door, hold the frame, lean back, pull in.','Rudern am Türrahmen|In der Tür stehen, Rahmen greifen, zurücklehnen, heranziehen.'],
+  ['Table row',0,'tb','','Under a sturdy table, body straight, chest to the edge.','Rudern unter dem Tisch|Unter einem stabilen Tisch, Körper gerade, Brust zur Kante.'],
+  ['Bar row, chest height',1,'br','','Nearly upright - the easiest bar angle.','Rudern, Stange auf Brusthöhe|Fast aufrecht - der leichteste Winkel.'],
+  ['Bar row, waist height',2,'br','','The standard inverted row. Body one line.','Rudern, Stange auf Hüfthöhe|Das Standard-Rudern. Körper eine Linie.'],
+  ['Bar row, hip height',3,'br','','Nearly horizontal - close to pull-up load.','Rudern, Stange tief|Fast waagerecht - nah an der Last eines Klimmzugs.'],
+  ['Ring row',3,'rg','','Rings turn with you - smooth on the shoulders, hard on form.','Rudern an Ringen|Ringe drehen mit - schonend für die Schulter, hart für die Form.'],
+  ['Feet-elevated row',3,'tb','','Feet on a chair under the table edge - full horizontal.','Rudern mit erhöhten Füßen|Füße auf einen Stuhl unter der Tischkante - voll waagerecht.'],
+  ['Pause row',4,'br','','Two seconds chest at the bar, every rep.','Rudern mit Pause|Zwei Sekunden Brust an der Stange, jede Wiederholung.'],
+  ['Wide row',4,'br','','Wide grip, elbows out - rear shoulder focus.','Weites Rudern|Weiter Griff, Ellbogen nach außen - hintere Schulter.'],
+  ['Archer row',4,'br','','Pull to one hand, other arm straight.','Archer-Rudern|Zu einer Hand ziehen, der andere Arm bleibt gestreckt.'],
+  ['One-arm row',5,'tb','e','One hand on the edge, body braced against twisting.','Einarmiges Rudern|Eine Hand an der Kante, Körper gegen das Verdrehen gespannt.'],
+  ['Tuck front-lever row',5,'br','','Row while holding a tuck lever. Core included.','Rudern im Tuck-Front-Lever|Rudern aus dem angehockten Front-Lever. Rumpf inklusive.']
  ],
  press:[
-  ['Pike push-up, hands elevated',0,'tb','s','Hips high, hands on a table - the gentle entry.'],
-  ['Pike push-up',1,'','ws','Upside-down V, head lowers between the hands.'],
-  ['Bench dips',2,'ch','se','Hands on a chair behind you. Shoulders down, short range.'],
-  ['Feet-elevated pike push-up',2,'ch','ws','Feet on a chair, hips over shoulders.'],
-  ['Deficit pike push-up',3,'','ws','Hands on books - deeper range than the floor allows.'],
-  ['Wall walk',3,'wl','ws','Walk the feet up the wall, hands toward it, walk back.'],
-  ['Straight-bar dip',3,'br','se','Both hands on one bar, lean over it, dip.'],
-  ['Parallel-bar dip',3,'dp','se','Full dips - shoulders below elbows, press to lockout.'],
-  ['Wall handstand push-up, partial',4,'wl','ws','Head toward a book stack, quarter to half range.'],
-  ['Ring dip',4,'rg','se','Dips on rings - the stabilizers pay the bill.'],
-  ['Wall handstand push-up',5,'wl','ws','Head to the floor and back up, heels on the wall.'],
-  ['Korean dip',5,'br','se','Bar behind the back. Unforgiving shoulder range.'],
-  ['Freestanding handstand push-up',5,'','ws','No wall. The vertical-push summit.']
+  ['Pike push-up, hands elevated',0,'tb','s','Hips high, hands on a table - the gentle entry.','Pike-Liegestütz erhöht|Hüfte hoch, Hände auf dem Tisch - der sanfte Einstieg.'],
+  ['Pike push-up',1,'','ws','Upside-down V, head lowers between the hands.','Pike-Liegestütz|Umgedrehtes V, der Kopf senkt sich zwischen die Hände.'],
+  ['Bench dips',2,'ch','se','Hands on a chair behind you. Shoulders down, short range.','Dips an der Bank|Hände auf dem Stuhl hinter dir. Schultern tief, kurzer Weg.'],
+  ['Feet-elevated pike push-up',2,'ch','ws','Feet on a chair, hips over shoulders.','Pike-Liegestütz mit erhöhten Füßen|Füße auf den Stuhl, Hüfte über den Schultern.'],
+  ['Deficit pike push-up',3,'','ws','Hands on books - deeper range than the floor allows.','Pike-Liegestütz mit Defizit|Hände auf Büchern - tiefer, als der Boden erlaubt.'],
+  ['Wall walk',3,'wl','ws','Walk the feet up the wall, hands toward it, walk back.','Wall Walk|Mit den Füßen die Wand hochlaufen, Hände heran, zurücklaufen.'],
+  ['Straight-bar dip',3,'br','se','Both hands on one bar, lean over it, dip.','Dip an der geraden Stange|Beide Hände auf einer Stange, darüber lehnen, absenken.'],
+  ['Parallel-bar dip',3,'dp','se','Full dips - shoulders below elbows, press to lockout.','Dip am Barren|Volle Dips - Schultern unter die Ellbogen, oben durchdrücken.'],
+  ['Wall handstand push-up, partial',4,'wl','ws','Head toward a book stack, quarter to half range.','Handstand-Liegestütz an der Wand, teilweise|Kopf Richtung Bücherstapel, viertel bis halber Weg.'],
+  ['Ring dip',4,'rg','se','Dips on rings - the stabilizers pay the bill.','Dip an Ringen|Dips an Ringen - die Stabilisatoren zahlen die Rechnung.'],
+  ['Wall handstand push-up',5,'wl','ws','Head to the floor and back up, heels on the wall.','Handstand-Liegestütz an der Wand|Kopf zum Boden und zurück, Fersen an der Wand.'],
+  ['Korean dip',5,'br','se','Bar behind the back. Unforgiving shoulder range.','Korean Dip|Stange hinter dem Rücken. Gnadenloser Schulterweg.'],
+  ['Freestanding handstand push-up',5,'','ws','No wall. The vertical-push summit.','Freier Handstand-Liegestütz|Ohne Wand. Die Spitze des senkrechten Drückens.']
  ],
  legs:[
-  ['Box squat',0,'ch','','Sit back to a chair, stand up without rocking.'],
-  ['Glute bridge',0,'','','Shoulders on the floor, hips to the ceiling, squeeze.'],
-  ['Wall sit',0,'wl','k','Back on the wall, thighs level. Hold and breathe.'],
-  ['Air squat',1,'','','Hip crease below the knee, heels planted.'],
-  ['Step-up',1,'ch','k','Full foot on the surface, drive through the heel.'],
-  ['Calf raise',1,'','','Full stretch at the bottom, pause at the top.'],
-  ['Good morning',1,'','l','Hands behind the head, hinge at the hip, flat back.'],
-  ['Paused squat',2,'','','Two seconds at the bottom. No bounce, all muscle.'],
-  ['Reverse lunge',2,'','k','Step back instead of forward - kinder to the knee.'],
-  ['Single-leg glute bridge',2,'','','One leg up, hips stay level.'],
-  ['Single-leg calf raise',2,'','','All bodyweight on one calf, full range.'],
-  ['Walking lunge',2,'','k','Long steps, torso tall, knee tracks the toes.'],
-  ['Split squat',3,'','k','Feet split, back knee toward the floor.'],
-  ['Lateral lunge',3,'','kh','Step sideways, sit into one hip, other leg straight.'],
-  ['Single-leg RDL',3,'','l','Hinge on one leg, back flat - hamstrings and balance.'],
-  ['Cossack squat',3,'','kh','Weight over one heel, wide stance, other leg straight.'],
-  ['Jump squat',3,'','k','Explode up, land soft into the next rep.'],
-  ['Hip thrust',3,'ch','','Shoulders on a couch edge, hips to full lockout.'],
-  ['Sissy squat',4,'','k','Knees travel far forward, body leans back. Quad isolation.'],
-  ['Bulgarian split squat',4,'ch','kh','Rear foot on a chair - the single-leg workhorse.'],
-  ['Nordic negative',4,'an','k','Heels anchored, lower forward as slowly as you can.'],
-  ['Assisted pistol',4,'','kh','Hold a doorframe, one-leg squat to the bottom.'],
-  ['Box pistol',4,'ch','kh','One-leg squat to a chair, stand back up.'],
-  ['Pistol squat',5,'','kh','Full one-leg squat, other leg straight in front.'],
-  ['Shrimp squat',5,'','kh','Rear foot held in the hand, knee to the floor.'],
-  ['Nordic curl',5,'an','k','The full negative plus the way back up. Hamstring summit.'],
-  ['Skater squat',5,'','kh','One-leg squat, rear knee taps a pad behind you.']
+  ['Box squat',0,'ch','','Sit back to a chair, stand up without rocking.','Kniebeuge auf den Stuhl|Zum Stuhl zurücksetzen, ohne Schwung aufstehen.'],
+  ['Glute bridge',0,'','','Shoulders on the floor, hips to the ceiling, squeeze.','Beckenheben|Schultern am Boden, Hüfte zur Decke, Gesäß anspannen.'],
+  ['Wall sit',0,'wl','k','Back on the wall, thighs level. Hold and breathe.','Wandsitz|Rücken an die Wand, Oberschenkel waagerecht. Halten und atmen.'],
+  ['Air squat',1,'','','Hip crease below the knee, heels planted.','Freie Kniebeuge|Hüftfalte unter das Knie, Fersen bleiben am Boden.'],
+  ['Step-up',1,'ch','k','Full foot on the surface, drive through the heel.','Aufsteiger|Ganzer Fuß auf die Fläche, über die Ferse hochdrücken.'],
+  ['Calf raise',1,'','','Full stretch at the bottom, pause at the top.','Wadenheben|Unten voll dehnen, oben kurz halten.'],
+  ['Good morning',1,'','l','Hands behind the head, hinge at the hip, flat back.','Good Morning|Hände hinter den Kopf, aus der Hüfte beugen, Rücken gerade.'],
+  ['Paused squat',2,'','','Two seconds at the bottom. No bounce, all muscle.','Kniebeuge mit Pause|Zwei Sekunden unten. Kein Federn, alles Muskel.'],
+  ['Reverse lunge',2,'','k','Step back instead of forward - kinder to the knee.','Ausfallschritt nach hinten|Schritt zurück statt vor - schonender fürs Knie.'],
+  ['Single-leg glute bridge',2,'','','One leg up, hips stay level.','Einbeiniges Beckenheben|Ein Bein hoch, die Hüfte bleibt waagerecht.'],
+  ['Single-leg calf raise',2,'','','All bodyweight on one calf, full range.','Einbeiniges Wadenheben|Das ganze Körpergewicht auf einer Wade, voller Weg.'],
+  ['Walking lunge',2,'','k','Long steps, torso tall, knee tracks the toes.','Ausfallschritt gehend|Lange Schritte, Oberkörper aufrecht, Knie über den Zehen.'],
+  ['Split squat',3,'','k','Feet split, back knee toward the floor.','Split Squat|Füße versetzt, hinteres Knie Richtung Boden.'],
+  ['Lateral lunge',3,'','kh','Step sideways, sit into one hip, other leg straight.','Seitlicher Ausfallschritt|Schritt zur Seite, in eine Hüfte setzen, anderes Bein gestreckt.'],
+  ['Single-leg RDL',3,'','l','Hinge on one leg, back flat - hamstrings and balance.','Einbeiniges Kreuzheben|Auf einem Bein aus der Hüfte beugen, Rücken gerade - Beinbeuger und Gleichgewicht.'],
+  ['Cossack squat',3,'','kh','Weight over one heel, wide stance, other leg straight.','Kosakenkniebeuge|Gewicht über einer Ferse, breiter Stand, anderes Bein gestreckt.'],
+  ['Jump squat',3,'','k','Explode up, land soft into the next rep.','Sprungkniebeuge|Explosiv hoch, weich in die nächste Wiederholung landen.'],
+  ['Hip thrust',3,'ch','','Shoulders on a couch edge, hips to full lockout.','Hip Thrust|Schultern auf der Sofakante, Hüfte ganz durchstrecken.'],
+  ['Sissy squat',4,'','k','Knees travel far forward, body leans back. Quad isolation.','Sissy Squat|Knie weit nach vorn, Körper lehnt zurück. Reine Oberschenkelarbeit.'],
+  ['Bulgarian split squat',4,'ch','kh','Rear foot on a chair - the single-leg workhorse.','Bulgarische Kniebeuge|Hinterer Fuß auf dem Stuhl - das Arbeitspferd fürs einzelne Bein.'],
+  ['Nordic negative',4,'an','k','Heels anchored, lower forward as slowly as you can.','Nordic Curl, negativ|Fersen fixiert, so langsam wie möglich nach vorn ablassen.'],
+  ['Assisted pistol',4,'','kh','Hold a doorframe, one-leg squat to the bottom.','Pistol mit Hilfe|Am Türrahmen festhalten, einbeinig ganz nach unten.'],
+  ['Box pistol',4,'ch','kh','One-leg squat to a chair, stand back up.','Pistol auf den Stuhl|Einbeinig zum Stuhl absenken, wieder aufstehen.'],
+  ['Pistol squat',5,'','kh','Full one-leg squat, other leg straight in front.','Pistol Squat|Volle einbeinige Kniebeuge, anderes Bein gestreckt nach vorn.'],
+  ['Shrimp squat',5,'','kh','Rear foot held in the hand, knee to the floor.','Shrimp Squat|Hinteren Fuß in der Hand halten, Knie zum Boden.'],
+  ['Nordic curl',5,'an','k','The full negative plus the way back up. Hamstring summit.','Nordic Curl|Das volle Ablassen plus der Weg zurück. Die Spitze für den Beinbeuger.'],
+  ['Skater squat',5,'','kh','One-leg squat, rear knee taps a pad behind you.','Skater Squat|Einbeinige Kniebeuge, hinteres Knie tippt ein Polster an.']
  ],
  core:[
-  ['Dead bug',0,'','','Opposite arm and leg lower, back stays glued down.'],
-  ['Bird dog',0,'','','On all fours, opposite arm and leg long, hips level.'],
-  ['Forearm plank',0,'','','Elbows under shoulders, glutes on, no sag.'],
-  ['Side plank',1,'','','Straight line on one forearm, hips high.'],
-  ['Tuck hollow hold',1,'','','Lower back pressed down, knees pulled in.'],
-  ['Reverse crunch',1,'','','Knees to chest, hips peel off the floor. No pulling on the neck.'],
-  ['Mountain climbers',1,'','w','Push-up position, knees drive fast, hips stay low.'],
-  ['Hollow hold',2,'','','Arms and legs long, lower back never leaves the floor.'],
-  ['Plank shoulder taps',2,'','w','Push-up plank, tap the opposite shoulder, hips still.'],
-  ['Floor leg raise',2,'','l','Legs to vertical and slowly back to a hover.'],
-  ['Superman hold',2,'','l','Face down, chest and thighs off the floor.'],
-  ['Hollow rock',3,'','','The hollow hold, rocking like a banana. Shape stays.'],
-  ['V-up',3,'','l','Fold from hollow - hands meet the feet over the hips.'],
-  ['Side plank dip',3,'','','Side plank, lower the hip, lift it back.'],
-  ['Copenhagen plank',3,'ch','','Top foot on a chair, side plank on the inner thigh.'],
-  ['Hanging knee raise',3,'br','','Hang, knees to the chest without swinging.'],
-  ['Reverse plank',3,'','wsl','Face up, hips to a straight line, chest open.'],
-  ['Hanging leg raise',4,'br','lh','Straight legs to horizontal, no momentum.'],
-  ['Tuck L-sit',4,'','wh','On the floor or parallettes, knees tucked, hips lifted.'],
-  ['Dragon flag negative',4,'an','l','Shoulders down, body straight, lower slowly.'],
-  ['Toes-to-bar',5,'br','lh','Feet touch the bar, controlled both ways.'],
-  ['L-sit',5,'','wh','Legs horizontal, hips floating. The core summit on the floor.'],
-  ['Windshield wipers',5,'br','l','Legs up at the bar, swing side to side with control.'],
-  ['Dragon flag',5,'an','l','Straight body lowers and rises from the shoulders.']
+  ['Dead bug',0,'','','Opposite arm and leg lower, back stays glued down.','Dead Bug|Gegengleich Arm und Bein senken, der Rücken bleibt am Boden.'],
+  ['Bird dog',0,'','','On all fours, opposite arm and leg long, hips level.','Bird Dog|Im Vierfüßler gegengleich Arm und Bein lang, Hüfte bleibt waagerecht.'],
+  ['Forearm plank',0,'','','Elbows under shoulders, glutes on, no sag.','Unterarmstütz|Ellbogen unter den Schultern, Gesäß fest, kein Durchhängen.'],
+  ['Side plank',1,'','','Straight line on one forearm, hips high.','Seitstütz|Gerade Linie auf einem Unterarm, Hüfte hoch.'],
+  ['Tuck hollow hold',1,'','','Lower back pressed down, knees pulled in.','Hollow Hold angehockt|Unterer Rücken gedrückt, Knie herangezogen.'],
+  ['Reverse crunch',1,'','','Knees to chest, hips peel off the floor. No pulling on the neck.','Umgekehrter Crunch|Knie zur Brust, Hüfte hebt vom Boden. Nicht am Nacken ziehen.'],
+  ['Mountain climbers',1,'','w','Push-up position, knees drive fast, hips stay low.','Mountain Climbers|Liegestützposition, Knie schnell nach vorn, Hüfte bleibt tief.'],
+  ['Hollow hold',2,'','','Arms and legs long, lower back never leaves the floor.','Hollow Hold|Arme und Beine lang, der untere Rücken bleibt am Boden.'],
+  ['Plank shoulder taps',2,'','w','Push-up plank, tap the opposite shoulder, hips still.','Schultertippen im Stütz|Im Liegestütz die gegenüberliegende Schulter antippen, Hüfte ruhig.'],
+  ['Floor leg raise',2,'','l','Legs to vertical and slowly back to a hover.','Beinheben am Boden|Beine senkrecht und langsam zurück bis knapp über den Boden.'],
+  ['Superman hold',2,'','l','Face down, chest and thighs off the floor.','Superman|Bauchlage, Brust und Oberschenkel vom Boden abheben.'],
+  ['Hollow rock',3,'','','The hollow hold, rocking like a banana. Shape stays.','Hollow Rock|Der Hollow Hold, schaukelnd wie eine Banane. Die Form bleibt.'],
+  ['V-up',3,'','l','Fold from hollow - hands meet the feet over the hips.','V-Up|Aus dem Hollow zusammenklappen - Hände treffen die Füße über der Hüfte.'],
+  ['Side plank dip',3,'','','Side plank, lower the hip, lift it back.','Seitstütz mit Absenken|Im Seitstütz die Hüfte senken und wieder anheben.'],
+  ['Copenhagen plank',3,'ch','','Top foot on a chair, side plank on the inner thigh.','Copenhagen Plank|Oberer Fuß auf dem Stuhl, Seitstütz auf der Innenseite des Oberschenkels.'],
+  ['Hanging knee raise',3,'br','','Hang, knees to the chest without swinging.','Hängendes Knieheben|Hängen, Knie zur Brust, ohne zu schwingen.'],
+  ['Reverse plank',3,'','wsl','Face up, hips to a straight line, chest open.','Umgekehrter Stütz|Blick nach oben, Hüfte in einer Linie, Brust offen.'],
+  ['Hanging leg raise',4,'br','lh','Straight legs to horizontal, no momentum.','Hängendes Beinheben|Gestreckte Beine bis waagerecht, ohne Schwung.'],
+  ['Tuck L-sit',4,'','wh','On the floor or parallettes, knees tucked, hips lifted.','L-Sitz angehockt|Am Boden oder auf Parallettes, Knie angezogen, Hüfte abgehoben.'],
+  ['Dragon flag negative',4,'an','l','Shoulders down, body straight, lower slowly.','Dragon Flag, negativ|Schultern unten, Körper gerade, langsam ablassen.'],
+  ['Toes-to-bar',5,'br','lh','Feet touch the bar, controlled both ways.','Zehen zur Stange|Die Füße berühren die Stange, kontrolliert in beide Richtungen.'],
+  ['L-sit',5,'','wh','Legs horizontal, hips floating. The core summit on the floor.','L-Sitz|Beine waagerecht, Hüfte schwebt. Die Rumpfspitze am Boden.'],
+  ['Windshield wipers',5,'br','l','Legs up at the bar, swing side to side with control.','Scheibenwischer|Beine oben an der Stange, kontrolliert von Seite zu Seite.'],
+  ['Dragon flag',5,'an','l','Straight body lowers and rises from the shoulders.','Dragon Flag|Der gerade Körper senkt und hebt sich aus den Schultern.']
  ]
 };
 var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Sofa-Halt']};
@@ -2579,6 +2618,17 @@ function exAllowed(e){if(!profile||!profile.avoid)return true;var f=e[3]||'';
   if(profile.avoid.lowback&&f.indexOf('l')>-1)return false;
   if(profile.avoid.hip&&f.indexOf('h')>-1)return false;
   return true;}
+/* Anzeigename und Hinweis in der eingestellten Sprache.
+
+   Der englische Name in Feld 0 bleibt unangetastet -- er ist der Schluessel,
+   unter dem getauschte Uebungen im Profil gespeichert sind und unter dem
+   SLOTDEF die Standardbelegung nennt. Wuerde man ihn uebersetzen, verloere
+   jeder gespeicherte Tausch sein Ziel, und zwar still.
+   Deutsch haengt deshalb als Feld 5 dran: "Name|Hinweis". Fehlt es, bleibt
+   Englisch stehen -- besser eine unuebersetzte Zeile als eine leere. */
+function exDe(e){return (e&&e[5])?e[5].split('|'):null;}
+function exName(e){var d=(cfg.lang==='de')?exDe(e):null;return (d&&d[0])?d[0]:e[0];}
+function exCue(e){var d=(cfg.lang==='de')?exDe(e):null;return (d&&d[1])?d[1]:e[4];}
 function exFind(pat,name){var L=EXDB[pat]||[];for(var i=0;i<L.length;i++)if(L[i][0]===name)return L[i];return null;}
 function exPick(pat,wantTier,used){var best=null,bd=99;
   (EXDB[pat]||[]).forEach(function(e){
@@ -5878,7 +5928,8 @@ function openSwap(pl,idx,it,after){
     '<option value="">'+(DE?'Standard (Plan wählt)':'Default (plan decides)')+'</option>'+
     list.map(function(e){
       var tag=TLBL[e[1]][L]+(e[2]&&EQN[e[2]]?' · '+EQN[e[2]][L]:'');
-      return '<option value="'+e[0].replace(/"/g,'&quot;')+'"'+(e[0]===it.l?' selected':'')+'>'+e[0]+' — '+tag+'</option>';
+      /* Wert bleibt der englische Schluessel, sichtbar ist der Anzeigename. */
+      return '<option value="'+e[0].replace(/"/g,'&quot;')+'"'+(e[0]===it.l?' selected':'')+'>'+exName(e)+' — '+tag+'</option>';
     }).join('')+'</select></div>';
   openModal(DE?'Übung tauschen':'Swap exercise',
     DE?'Gleiche Bewegungsrichtung, andere Übung. Equipment und Schonungen sind schon rausgefiltert.'
@@ -5922,7 +5973,8 @@ function buildCatalog(){
     (EXDB[p.id]||[]).forEach(function(e){
       total++;
       if(catPat!=='all'&&catPat!==p.id)return;
-      if(catQ&&e[0].toLowerCase().indexOf(catQ)<0)return;
+      /* Suche trifft beide Sprachen: wer "Liegestuetz" tippt, meint push-up. */
+      if(catQ&&(e[0]+' '+(e[5]||'')).toLowerCase().indexOf(catQ)<0)return;
       shown++;
       if(gezeigt>=GRENZE)return;
       gezeigt++;
@@ -5932,9 +5984,9 @@ function buildCatalog(){
       if(!exAvail(e)||!exAllowed(e))tags.push(DE?'für dich gefiltert':'filtered for you');
       var d=document.createElement('div');d.className='catrow';
       d.innerHTML='<b></b><span class="ct"></span><span class="cc"></span>';
-      d.querySelector('b').textContent=e[0];
+      d.querySelector('b').textContent=exName(e);
       d.querySelector('.ct').textContent=tags.join(' · ');
-      d.querySelector('.cc').textContent=e[4];
+      d.querySelector('.cc').textContent=exCue(e);
       host.appendChild(d);
     });
   });
@@ -5975,6 +6027,8 @@ function syncHealthUI(){
   var el=$('healthSetup');if(el)el.style.display=cfg.health==='on'?'':'none';
 }
 function syncSettings(){
+  var sp=$('setSpar');if(sp)sp.value=get('spar','auto');
+  if(typeof sparNote==='function')sparNote();
   $('setLang').value=cfg.lang;$('setClock').value=cfg.clock;$('setUnits').value=cfg.units;
   $('setTrack').value=cfg.track;$('setMotion').value=cfg.motion;$('setSound').value=cfg.sound;
   $('setHealth').value=cfg.health||'off';syncHealthUI();
@@ -5990,6 +6044,21 @@ $('setUnits').addEventListener('change',function(){
   syncSettings();buildMeas();calc();drawW();refresh();});
 $('setTrack').addEventListener('change',function(){cfg.track=this.value;saveCfg();renderDay();buildWeeks();volBar();refresh();});
 $('setMotion').addEventListener('change',function(){cfg.motion=this.value;saveCfg();sizeCv();drawScene();});
+$('setSpar').addEventListener('change',function(){
+  set('spar',this.value);sparSet();sizeCv();drawScene();sparNote();
+});
+/* Sagt, was gerade gilt und warum -- ein Modus, der unsichtbar schaltet, ist
+   beim Testen wertlos. */
+function sparNote(){
+  var el=$('sparNote');if(!el)return;
+  var DE=cfg.lang==='de',w=get('spar','auto');
+  var k=navigator.hardwareConcurrency||'?',m=navigator.deviceMemory;
+  var geraet=(DE?'Gerät: ':'Device: ')+k+(DE?' Kerne':' cores')+(m?', '+m+' GB':'');
+  el.textContent=(w==='auto'
+    ? (DE?('Automatisch — gerade '+(SPAR?'an':'aus')+'. '):('Automatic — currently '+(SPAR?'on':'off')+'. '))
+    : (SPAR?(DE?'Erzwungen an. ':'Forced on. '):(DE?'Erzwungen aus. ':'Forced off. ')))
+    +geraet+(DE?'. Spart Milchglas und Partikel.':'. Drops the glass blur and half the particles.');
+}
 $('setHealth').addEventListener('change',function(){cfg.health=this.value;saveCfg();syncHealthUI();});
 $('healthTest').addEventListener('click',function(){healthLog(5);});
 $('setSound').addEventListener('change',function(){cfg.sound=this.value;saveCfg();if(this.value==='on')beep();});
