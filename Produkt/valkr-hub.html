@@ -2066,10 +2066,11 @@
         <text id="ringTxt" x="31" y="35" text-anchor="middle" fill="currentColor" style="font-family:ui-monospace,monospace;font-size:12px">0%</text>
       </svg>
     </div>
-    <div class="savebar" id="runBar" style="display:none">
-      <button class="tbtn go" id="runStart" data-i18n="btn.runStart">Start session</button>
-      <span class="hint" id="runHintTxt" data-i18n="btn.runHint">Guided: one set at a time, rest starts by itself.</span>
-    </div>
+    <!-- "Einheit starten" stand hier und auf HEUTE. Training ist die
+         Uebersicht: welcher Tag, welche Uebungen, wo stehe ich auf den Leitern.
+         Gestartet wird dort, wo der Tag steht -- auf HEUTE. Zwei Startknoepfe
+         an zwei Orten sind kein Komfort, sondern die Frage, ob sie dasselbe
+         tun. -->
     <div>
       
       <p class="hint" id="lockNote" style="display:none;margin:0 0 .5rem"></p>
@@ -2615,7 +2616,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='20.1';
+var VERSION='20.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2798,7 +2799,10 @@ var DICT={
  'nav.fuel':['Fuel','Ernährung'],'nav.you':['You','Du'],'nav.coach':['Coach','Coach'],
  'nav.learn':['Learn','Wissen'],'nav.access':['Access','Zugang'],'nav.settings':['Settings','Einstellungen'],
  'nav.ranks':['Ranks','Ränge'],'nav.prog':['Progress','Fortschritt'],'nav.more':['More','Mehr'],'nav.moreTitle':['More sections','Weitere Bereiche'],
- 'home.habits':['Habits','Gewohnheiten'],'home.improve':['Improve','Verbessern'],
+ /* "Gewohnheiten" versprach etwas, das die Kacheln nicht halten -- dort stehen
+    Kalorien, Trainings, Gewicht und Serie, also der Stand von heute. Genau das
+    sagt "Uebersicht". */
+ 'home.habits':['Overview','Übersicht'],'home.improve':['Improve','Verbessern'],
  'fuel.micro':['Nutrients','Nährstoffe'],'fuel.recipes':['Recipes','Rezepte'],
  'fuel.calcFold':['Calculator — your data','Rechner — deine Daten'],
  'fuel.targetFold':['Targets — edit any of them','Zielwerte — alle änderbar'],
@@ -3062,13 +3066,21 @@ function phase(w){
    deshalb erst beim Anzeigen.
    Was hier nicht steht, bleibt englisch stehen -- eine fehlende Zeile faellt
    weniger auf als eine falsche. */
+/* Push, Pull, Legs, Core stehen bewusst auch im Deutschen so da. Das sind die
+   Begriffe, unter denen jeder Trainierende sie kennt -- aus jedem Studio, jedem
+   Video, jeder anderen App. "Drucktag" und "Beintag" sind zwar Deutsch, aber
+   niemand sagt sie, und ein erfundenes Wort macht eine Sache nicht klarer,
+   sondern fremd.
+   Uebersetzt wird nur, wo es ein gebraeuchliches deutsches Wort gibt
+   (Oberkoerper, Kniebeuge) -- nicht dort, wo der englische Begriff selbst der
+   gebraeuchliche ist. */
 var SESSDE={
-  'Pull day':'Zugtag','Push day':'Drucktag','Legs day':'Beintag',
   'Upper A':'Oberkörper A','Lower A':'Unterkörper A',
   'Upper B':'Oberkörper B','Lower B':'Unterkörper B',
-  'Pull / Row / Push / Squat / Core':'Zug / Rudern / Druck / Kniebeuge / Rumpf',
-  'Press / Push / Row / Hinge / Core':'Überkopf / Druck / Rudern / Hüfte / Rumpf',
-  'Squat / Hinge / Pull / Push / Core':'Kniebeuge / Hüfte / Zug / Druck / Rumpf'
+  'Pull / Row / Push / Squat / Core':'Pull · Row · Push · Squat · Core',
+  'Press / Push / Row / Hinge / Core':'Press · Push · Row · Hinge · Core',
+  'Squat / Hinge / Pull / Push / Core':'Squat · Hinge · Pull · Push · Core',
+  'Full body':'Full Body','Rest':'Ruhetag','Easy day':'Locker'
 };
 var SLOTDE={
   'Pull-up or negative':'Klimmzug oder negativ',
@@ -3111,9 +3123,9 @@ function itemName(it){
   return it.l;
 }
 var SESS3={
- pull:{title:'Pull day',sub:'Pull / Row / Push / Squat / Core',items:[{id:'pull',l:'Pull-up or negative'},{id:'row',l:'Inverted row'},{id:'push',l:'Push-up'},{id:'legs',l:'Squat'},{id:'core',l:'Hollow hold'}]},
- push:{title:'Push day',sub:'Press / Push / Row / Hinge / Core',items:[{id:'press',l:'Pike push-up'},{id:'push',l:'Push-up'},{id:'row',l:'Inverted row'},{id:'legs',l:'Glute bridge'},{id:'core',l:'Side plank'}]},
- legs:{title:'Legs day',sub:'Squat / Hinge / Pull / Push / Core',items:[{id:'legs',l:'Split squat'},{id:'legs',l:'Nordic negative'},{id:'pull',l:'Pull-up or negative'},{id:'push',l:'Push-up, harder step'},{id:'core',l:'Knee raise'}]}
+ pull:{title:'Pull',sub:'Pull / Row / Push / Squat / Core',items:[{id:'pull',l:'Pull-up or negative'},{id:'row',l:'Inverted row'},{id:'push',l:'Push-up'},{id:'legs',l:'Squat'},{id:'core',l:'Hollow hold'}]},
+ push:{title:'Push',sub:'Press / Push / Row / Hinge / Core',items:[{id:'press',l:'Pike push-up'},{id:'push',l:'Push-up'},{id:'row',l:'Inverted row'},{id:'legs',l:'Glute bridge'},{id:'core',l:'Side plank'}]},
+ legs:{title:'Legs',sub:'Squat / Hinge / Pull / Push / Core',items:[{id:'legs',l:'Split squat'},{id:'legs',l:'Nordic negative'},{id:'pull',l:'Pull-up or negative'},{id:'push',l:'Push-up, harder step'},{id:'core',l:'Knee raise'}]}
 };
 var SESS4={
  upA:{title:'Upper A',sub:'Pull / Push / Row / Press / Core',items:[{id:'pull',l:'Pull-up progression'},{id:'push',l:'Push-up progression'},{id:'row',l:'Inverted row'},{id:'press',l:'Pike push-up'},{id:'core',l:'Hollow hold'}]},
@@ -5682,15 +5694,10 @@ function renderDay(){
               :'Future day — this is what is coming. Ticking works on the day itself.');
     }else lb.style.display='none';
   }
+  /* Die Startleiste im Trainings-Bereich ist entfernt -- gestartet wird auf
+     HEUTE. Der Block bleibt abgesichert stehen, falls ihn jemand zurueckholt. */
   var rb=$('runBar');
-  if(pl.kind==='train'&&isT){
-    rb.style.display='';
-    var open=run&&run.on&&run.key===key;
-    $('runStart').textContent=T(open?'btn.runResume':'btn.runStart');
-    $('runHintTxt').textContent=open
-      ?(cfg.lang==='de'?'Läuft — Übung '+((run.ex||0)+1)+', Satz '+(run.set||1)+'.':'In progress — exercise '+((run.ex||0)+1)+', set '+(run.set||1)+'.')
-      :T('btn.runHint');
-  }else rb.style.display='none';
+  if(rb)rb.style.display='none';
   var heroEl=document.querySelector('#v-today .hero');
   if(heroEl){
     var heroGo=isT&&pl.kind==='train';
@@ -6441,10 +6448,12 @@ function runPaint(){
     n=Math.max(0,n+d);e.value=n;run.reps[runRepsKey()]=n;saveRun();
   }
 }
-$('runStart').addEventListener('click',function(){
-  if(runValid()){openRun();return;}
-  openSessOv();
-});
+(function(){var b=$('runStart');if(!b)return;
+  b.addEventListener('click',function(){
+    if(runValid()){openRun();return;}
+    openSessOv();
+  });
+})();
 $('rnClose').addEventListener('click',closeRun);
 $('rnPrev').addEventListener('click',function(){runJump(-1);});
 $('rnNext').addEventListener('click',function(){runJump(1);});

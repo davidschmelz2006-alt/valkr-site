@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->21.08.2026, 16:35<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->21.08.2026, 21:15<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -162,8 +162,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v20.1</span>
-        <span class="fm"><b>11.122</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v20.2</span>
+        <span class="fm"><b>11.131</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -176,11 +176,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">f1d16af</span><div class="t"><b>Uebergabepaket fuer den Mac: ein Befehl richtet alles ein</b></div></div>
+      <div class="row"><span class="h">e199b6f</span><div class="t"><b>Protokollnotiz fuenfte Session (v20.1)</b></div></div>
+      <div class="row"><span class="h">bbf7cc0</span><div class="t"><b>Hub v20.1: Geraete-Videos ausgewertet - iOS-Duplikate beim Scrollen behoben (Gummiband steigt auf iOS aus, will-change erst beim Eingreifen statt bei jeder Beruehrung), Android-Pinch-Zoom endgueltig gesperrt (touch-action pan-x pan-y statt manipulation plus Gestenabbruch beim zweiten Finger), Klebekopf nach MCI (Abschnittsleiste und Wochenstreifen bleiben beim Scrollen stehen), Leistung fuer schwache Geraete (content-visibility fuer Katalog/Buch/Statistik/Wochen, Tooltip-Scrollzuhoerer mit Fruehausstieg); Gauntlet-Runde alle Kritiker PASS</b></div></div>
       <div class="row"><span class="h">b89e71a</span><div class="t"><b>Sessionabschluss: Hub steht auf v20.0. Fortschritt-Kennzahlen gebaut, Verkaufsseite und drei Rechtstexte angelegt, Datenimport, Leitersprossen mit Katalognamen und deutsch, Doppeltes entfernt, AMOLED-Schwarz, Gummiband und Zoom-Sperre, Kopf- und Tableiste nach MCI-Vorbild</b></div></div>
       <div class="row"><span class="h">8b07996</span><div class="t"><b>Hub v20.0: die eigentliche Ursache des Ruckelns gefunden - die Randpruefung las scrollHeight bei jeder Fingerbewegung und zwang den Browser damit zu einer vollstaendigen Layout-Neuberechnung, bei jedem normalen Scrollen. Gemessen 4,8 auf 0,2 ms, Faktor 24. Zoom gesperrt inklusive Safari-Sonderweg ueber die gesture-Ereignisse, Doppeltipp ueber touch-action. Tableiste tiefer (Sicherheitsbereich minus 1,3 rem statt additiv) und groesser: 84 statt 76 Pixel</b></div></div>
-      <div class="row"><span class="h">8d85a05</span><div class="t"><b>Hub v19.9: Gummiband-Ruckeln auf Android behoben - die Ansicht wird beim Beruehren als eigene Ebene angemeldet (will-change) und im Bildtakt statt bei jedem Beruehrungsereignis gezeichnet, vorher zeichnete der Browser in jedem Bild den ganzen Baum neu. Tableiste auf dem iPhone tiefer: der Sicherheitsbereich wurde additiv gerechnet, dadurch schwebte sie dort ueber vierzig Pixel hoch und auf Android nur acht. Tableiste insgesamt groesser: 76 statt 64 Pixel, Symbole 24 statt 21</b></div></div>
-      <div class="row"><span class="h">67c24fe</span><div class="t"><b>Hub v19.8: Chromes Pull-to-Refresh abgeschaltet (Safari kennt es nicht, daher war das iPhone unauffaellig) und dafuer ein gedaempftes Gummiband am Rand gebaut - bewegt wird nur die sichtbare Ansicht, nicht die Huelle, sonst wanderte die feste Tableiste mit. Kopfleiste ohne Trennlinie und ohne Woche, Tableiste schwebend mit Luft ringsum statt am Rand angeschraubt</b></div></div>
-      <div class="row"><span class="h">330b9bb</span><div class="t"><b>Hub v19.7: Pausenuhr und Ganzen-Tag-abhaken raus (der Trainingsmodus kann beides schon und weiss dabei, bei welchem Satz man steht); Uhr und Serie aus der Kopfleiste - die Serie stand an drei Stellen, die Uhr wiederholte die Statusleiste des Systems; zwei Stellen lasen den Serienwert aus dem Anzeige-Element zurueck, jetzt aus streakVal; Verlaufs-Kennungen der Abzeichen eindeutig gemacht (14-mal dieselbe ID, latent statt sichtbar); Onyx auf echtes AMOLED-Schwarz, Flaechen bewusst nicht mitgezogen</b></div></div>
     </div>
   </div>
 
@@ -193,6 +193,12 @@
       <li class="star"><b>Preis und Zugangsschutz entscheiden.</b> Grundlage steht in <code>Produkt/ZUGANGSSCHUTZ.md</code>, fällig mit der Verkaufsseite.</li>
       <li class="star"><b>Sieben Belege fachlich gegenlesen lassen</b>, dazu Satz-Autoregulation und Einmess-Heuristiken (v13.7). Vor kommerzieller Nutzung.</li>
       <li class="star"><b>Deutsche Buchfassung fachlich gegenlesen</b> (12 Kapitel in <code>02 Manuskript DE</code>, seit v17.0 auch komplett im Hub-Wissensbereich). Übersetzung ist durch drei Kritikerrunden, die fachliche Freigabe ist Menschensache.</li>
+      <li class="big">Produkt — Liam, aus Davids Liste vom 2026-08-21</li>
+      <li class="star"><b>1. Bewegungsdemos nur auf Anforderung.</b> Sie laufen dauerhaft, sobald sie im Bild sind — bei sechs Musterkacheln plus Katalog sind das zu viele gleichzeitig, David meldet Einbrüche der Bildrate. Ziel: still, bis jemand die Kachel antippt. Dann <b>genau diese eine</b> läuft. Beim Scrollen, beim Antippen einer anderen und beim Verlassen der Ansicht hält sie an. Ein Startzeichen (kleines Dreieck) sagt, dass da etwas ist. Technik: <code>svg.pauseAnimations()</code> / <code>unpauseAnimations()</code> gibt es schon in <code>pauseHiddenSvg()</code>; es braucht nur eine zweite Bedingung „angetippt" statt „sichtbar", plus IntersectionObserver zum Anhalten beim Wegscrollen.</li>
+      <li class="star"><b>2. Wortwahl: ALLES kürzer.</b> Davids Worte: „zu viel dummes zeug am stehen das keinen interessiert". Konkret: - Jeden Erklärsatz prüfen: sagt er etwas, das der Wert daneben nicht schon sagt? Wenn nein, weg. - Universelle Begriffe statt gezwungenem Deutsch. Push, Pull, Legs, Core, Reps, Sets stehen so da. In v20.2 für die Tagesnamen schon gemacht — denselben Maßstab auf Katalog, Statistik, Coach und Einstellungen anwenden. - Untertitel unter Überschriften: höchstens ein Satz, unter 70 Zeichen. - Zielbild: „extrem clean, wie eine moderne Bombe".</li>
+      <li class="star"><b>3. Kalorien-Kachel.</b> Ring mittig, in vernünftiger Größe, <b>gegessen und übrig im Ring</b>, Zahl zählt animiert hoch — wie MCI. Aktuell steht dort ein kleiner Ring links und die Zahl darunter.</li>
+      <li class="star"><b>4. Gewicht als Kurve</b> statt einzelner Zahl. Startgewicht als Bezug. Bei nur einem Wert: schlichte Linie ohne Punkte, kein leeres Diagramm.</li>
+      <li class="star"><b>5. HEUTE-Kachel überarbeiten.</b> Die Übungssymbole gehören <b>unten in eine Reihe</b>, damit alle Übungen des Tages sichtbar sind — aktuell stehen sie rechts untereinander und passen nicht.</li>
       <li class="big">Produkt — offen, ohne Termin</li>
       <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16/v17-Wizard, Körperfett-Figur, Trainingstage-Pillen, Stufenbänder, Ernährungs-Ring).</li>
       <li class="star"><b>Ersatzübungen — Rest:</b> Seit v18.0 hat jede Übung ein Tausch-Blatt mit Filtern (Leichter/Schwerer/Ohne Gerät) — deckt „keine Stange" und Niveau ab. Offen bleibt gezielte Führung bei Schmerz (welcher Tausch bei welchem Zwicken) und Platzmangel/unterwegs als eigene Filter.</li>
