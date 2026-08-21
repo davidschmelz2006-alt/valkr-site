@@ -197,8 +197,7 @@
   .bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
     padding:calc(.8rem + env(safe-area-inset-top,0px)) 0 .6rem;
     position:sticky;top:0;z-index:30;
-    background:color-mix(in srgb,var(--bg) 82%,transparent);
-    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+    background:var(--bg)}
   .barL,.barR{display:flex;align-items:center;gap:.7rem}
   .brand{display:flex;align-items:center;gap:.6rem}
   .brand p{margin:0;font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:var(--t5)}
@@ -351,19 +350,17 @@
   @media (max-width:640px){
     #subnav{margin-bottom:.85rem;gap:1rem}
     #subnav button{font-size:.8rem}
-    /* MCI-Scrollverhalten: der grosse Titel scrollt weg, Abschnittsleiste
-       und Wochenstreifen bleiben unter der Kopfleiste kleben. Volle Breite
-       ueber dieselbe Randformel wie .shell, Grund deckend (kein Glas --
-       das waere auf schwachen Geraeten eine staendige Unschaerfe-Rechnung),
-       darunter ein weicher Auslauf statt harter Kante. */
-    #subnav,#dstrip,#fstrip{
+    /* MCI-Scrollverhalten: nur die Abschnittsleiste bleibt unter der
+       Kopfleiste kleben. Der Wochenstreifen scrollt mit dem Inhalt weg und
+       verschwindet unter der deckenden Kopfleiste -- ein Kalender ist
+       Kontext, kein Werkzeug, und klebender Kontext frisst Bildschirm. */
+    #subnav{
       --gut:max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px));
       position:sticky;z-index:25;background:var(--bg);
       margin-left:calc(var(--gut)*-1);margin-right:calc(var(--gut)*-1);
       padding-left:var(--gut);padding-right:var(--gut)}
     #subnav{top:var(--barH,58px)}
-    #dstrip,#fstrip{top:calc(var(--barH,58px) + var(--subH,0px));padding-top:.25rem;padding-bottom:.45rem;margin-bottom:.55rem}
-    #subnav::after,#dstrip::after,#fstrip::after{content:"";position:absolute;
+    #subnav::after{content:"";position:absolute;
       left:0;right:0;bottom:-10px;height:10px;pointer-events:none;
       background:linear-gradient(var(--bg),transparent)}
   }
@@ -1745,11 +1742,7 @@
       background:color-mix(in srgb,var(--aurora) 14%,transparent);
       box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--aurora) 22%,transparent)}
     #tabbar svg,#tabbar span{position:relative}
-    nav#nav{border-radius:var(--r3) var(--r3) 0 0;
-      background:var(--surf);
-      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
-    .bar{background:var(--bg);
-      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+    nav#nav{border-radius:var(--r3) var(--r3) 0 0;background:var(--surf)}
 
     /* ---- Tabellen auf dem Handy ---------------------------------------
        Gemessen: Bestenliste 420 px breit in einem 319-px-Container, sieben
@@ -2717,7 +2710,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='22.0';
+var VERSION='22.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6393,6 +6386,10 @@ function beep(){
 var run=get('run',null),runTi=null;
 function runItems(){
   var pl=plan(TODAY);
+  /* v22.1: am freien Tag zaehlt die naechste geplante Einheit -- die Karte
+     auf HEUTE startet immer direkt, also muss hier auch immer eine Einheit
+     liegen. Der Lauf haengt am heutigen Datum: trainiert wird heute. */
+  for(var vz=1;vz<=14&&pl.kind!=='train';vz++)pl=plan(add(TODAY,vz));
   if(pl.kind!=='train')return null;
   var adj=(run&&run.on&&run.key===iso(TODAY)&&run.adj)||0;
   var xl=get('exlog',{});
@@ -9115,16 +9112,14 @@ function renderHome(){
        vier Symbole, dann ist die Kachelhoehe alle; eine Reihe unter dem Text
        traegt den ganzen Tag. */
     var thumbs=its.map(function(x){return x.id?exThumb(x.l,x.id):looseThumb(x.l);}).join('');
-    /* Heute: der Knopf startet die Einheit sofort. Vorher fuehrte er in eine
-       Uebersicht und von dort in einen Check-in -- zwei Bildschirme zwischen
-       "ich will jetzt trainieren" und dem ersten Satz.
-       An einem kuenftigen Tag waere Starten falsch; dort fuehrt er wie bisher
-       in den Trainings-Bereich zum Ansehen. */
-    var heute=(off===0);
-    heroEl.innerHTML='<button type="button" class="hcard" '+(heute?'data-run="1"':'data-go="train"')+'>'+
+    /* v22.1: die Karte startet IMMER direkt -- auch am freien Tag. Wer auf
+       sein Training tippt, will trainieren, nicht etwas ansehen; runItems()
+       zieht dafuer die naechste geplante Einheit vor. Ansehen gibt es
+       weiterhin, aber im Trainings-Bereich, wo es hingehoert. */
+    heroEl.innerHTML='<button type="button" class="hcard" data-run="1">'+
       '<span class="hcMain"><p class="tag">'+tag+'</p><h3>'+pl.title+'</h3>'+
       '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+' · '+Object.keys(muster).join(' · ')+'</p>'+
-      '<span class="hcGo">'+(heute?(DE?'Starten':'Start'):(DE?'Ansehen':'View'))+' ▸</span></span>'+
+      '<span class="hcGo">'+(DE?'Starten':'Start')+' ▸</span></span>'+
       '<span class="hcThumbs">'+thumbs+'</span></button>';
   }else{
     heroEl.innerHTML='<button type="button" class="hcard" data-go="train">'+
