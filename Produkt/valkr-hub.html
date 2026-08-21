@@ -474,9 +474,6 @@
   .creed{display:flex;flex-direction:column;align-items:center;gap:.22rem;padding:.7rem 0 .6rem;text-align:center}
   .creed .motto{font-family:var(--fd);font-weight:600;font-size:var(--t5);margin:0;display:flex;align-items:center;gap:.7rem;justify-content:center;flex-wrap:wrap;letter-spacing:.01em}
   .creed .motto i{display:block;width:clamp(14px,4vw,30px);height:1px;background:var(--brass);opacity:.7;flex:none}
-  .creed .rot{min-height:1.1rem;display:flex;align-items:center;justify-content:center;padding:0 .5rem}
-  .creed .rot span{font-family:var(--fb);font-size:var(--t3);letter-spacing:0;color:var(--ink3);line-height:1.5;transition:opacity .55s,transform .55s;max-width:60ch}
-  .creed .rot span.out{opacity:0;transform:translateY(-4px)}
 
   /* Diese vier Regeln gelten der oberen Reihe am Rechner. Sie mussten auf
      nav#nav eingegrenzt werden: die Tableiste unten ist ebenfalls ein <nav>,
@@ -1707,7 +1704,6 @@
     .creed{padding:.4rem 0 .5rem}
     /* Der wechselnde Merksatz entfaellt auf dem Handy: zwei Zeilen Zierat
        ueber dem, weswegen man die App geoeffnet hat. Am Rechner ist Platz. */
-    .creed .rot{display:none}
     .creed .motto{font-size:var(--t4)}
   }
 
@@ -2061,7 +2057,6 @@
 
   <div class="creed">
     <p class="motto"><i aria-hidden="true"></i><span id="mottoTxt">Show up. Add one rep.</span><i aria-hidden="true"></i></p>
-    <div class="rot"><span id="rotq"></span></div>
   </div>
   <!-- Oberste Ebene, sieben Ziele. Reihenfolge am Rechner nach Nutzung:
        der Coach zuerst, weil er die Lage liest und sagt, was ansteht.
@@ -2655,7 +2650,6 @@
         <div class="gt"><b data-i18n="set.display">Display and units</b></div></div>
       <div class="fgrid">
         <div class="field"><label data-i18n="set.lang">Language</label><div class="ctl"><select id="setLang"><option value="en">English</option><option value="de">Deutsch</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label data-i18n="set.clock">Time format</label><div class="ctl"><select id="setClock"><option value="24">24 hour</option><option value="12">12 hour</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.units">Units</label><div class="ctl"><select id="setUnits"><option value="metric">Metric (kg, cm)</option><option value="imperial">Imperial (lb, in)</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.start">Programme start</label><div class="ctl"><input id="setStart" type="date"></div></div>
         <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="3">3 days - full body</option><option value="4">4 days - upper / lower</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
@@ -2665,7 +2659,6 @@
              dass ein Geraet sich staerker meldet als es ist. -->
         <div class="field"><label data-i18n="set.spar">Performance mode</label><div class="ctl"><select id="setSpar"><option value="auto" selected>Automatic</option><option value="on">Always on</option><option value="off">Always off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="hint" id="sparNote"></span></div>
         <div class="field"><label data-i18n="set.sound">Timer sound</label><div class="ctl"><select id="setSound"><option value="on">On</option><option value="off" selected>Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label data-i18n="set.hooks">Rotating quotes</label><div class="ctl"><select id="setHooks"><option value="on">On</option><option value="off">Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
       <p class="hint" data-i18n="set.langNote">The interface translates fully. Chapter text and technique cues stay English in this prototype &mdash; the German edition follows with the book.</p>
     </div>
@@ -2710,7 +2703,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='22.1';
+var VERSION='22.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2880,7 +2873,7 @@ function storeNote(){
 }
 
 /* ---------- settings ---------- */
-var cfg=get('cfg',{lang:'en',clock:'24',units:'metric',track:'3',motion:'calm',sound:'off',hooks:'on',health:'off'});
+var cfg=get('cfg',{lang:'en',units:'metric',track:'3',motion:'calm',sound:'off',health:'off'});
 /* Allererster Start: Geraetesprache uebernehmen. Wer schon eine Einstellung
    hat, behaelt sie. */
 if(rawGet('cfg')===null&&/^de/i.test(navigator.language||''))cfg.lang='de';
@@ -3001,10 +2994,10 @@ var DICT={
  'set.hueNote':['Overrides the active theme accent. Backgrounds stay.','Überschreibt den Akzent des Themes. Hintergründe bleiben.'],
  'set.motionNote':['Calm shows just the app. Full brings scenery and particles.','Ruhig zeigt nur die App. Voll bringt Kulisse und Partikel.'],
  'set.themeNote':['Each theme changes the palette. Ambient effect only on Full.','Jedes Design ändert die Farben. Hintergrund nur auf Voll.'],
- 'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],'set.clock':['Time format','Zeitformat'],
+ 'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.spar':['Performance mode','Sparmodus'],
- 'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],'set.hooks':['Rotating quotes','Rotierende Sprüche'],
+ 'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],
  'set.langNote':['Interface fully translated. Chapter text stays English in this prototype.','Oberfläche vollständig übersetzt. Kapiteltexte bleiben im Prototyp englisch.'],
  'ob.h':['Your plan — five quick questions','Dein Plan — fünf schnelle Fragen'],
  'ob.s':['Answer once. Everything stays changeable.','Einmal beantworten. Später alles änderbar.'],
@@ -3103,15 +3096,6 @@ var STD=new Date(ST+'T00:00:00');
 function dIdx(d){return Math.round((sod(d)-STD)/86400000);}
 function wkOf(d){return Math.floor(dIdx(d)/7)+1;}
 var sel=new Date(TODAY);
-function fmtClock(d){
-  var h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0');
-  if(cfg.clock==='12'){var ap=h<12?'AM':'PM';h=h%12;if(h===0)h=12;return h+':'+m+' '+ap;}
-  return String(h).padStart(2,'0')+':'+m;
-}
-/* Die Uhr in der Kopfleiste ist entfernt -- das Telefon zeigt die Zeit
-   ohnehin eine Zeile darueber. fmtClock() bleibt: der Trainingsmodus und die
-   Logs benutzen es weiter. */
-function tickClock(){var e=$('clockNow');if(e)e.textContent=fmtClock(new Date());}
 
 /* ---------- program ---------- */
 /* ---------- Bloecke ------------------------------------------------------
@@ -10248,14 +10232,13 @@ function syncHealthUI(){
 function syncSettings(){
   var sp=$('setSpar');if(sp)sp.value=get('spar','auto');
   if(typeof sparNote==='function')sparNote();
-  $('setLang').value=cfg.lang;$('setClock').value=cfg.clock;$('setUnits').value=cfg.units;
+  $('setLang').value=cfg.lang;$('setUnits').value=cfg.units;
   $('setTrack').value=cfg.track;$('setMotion').value=cfg.motion;$('setSound').value=cfg.sound;
   $('setHealth').value=cfg.health||'off';syncHealthUI();
-  $('setHooks').value=cfg.hooks;$('setStart').value=ST;
+  $('setStart').value=ST;
   $('u-h').textContent=ul();$('u-w').textContent=uw();$('u-w2').textContent=uw();
 }
 $('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();drawW();refresh();testCalc();});
-$('setClock').addEventListener('change',function(){cfg.clock=this.value;saveCfg();tickClock();});
 $('setUnits').addEventListener('change',function(){
   var oldW=fromDisp(nv('f-w'),'w'),oldH=fromDisp(nv('f-h'),'l');
   cfg.units=this.value;saveCfg();
@@ -10310,36 +10293,9 @@ function sparNote(){
 $('setHealth').addEventListener('change',function(){cfg.health=this.value;saveCfg();syncHealthUI();});
 $('healthTest').addEventListener('click',function(){healthLog(5);});
 $('setSound').addEventListener('change',function(){cfg.sound=this.value;saveCfg();if(this.value==='on')beep();});
-$('setHooks').addEventListener('change',function(){cfg.hooks=this.value;saveCfg();$('rotq').style.display=this.value==='on'?'':'none';});
 $('setStart').addEventListener('change',function(){
   if(!this.value)return;ST=this.value;set('start',ST);STD=new Date(ST+'T00:00:00');
   renderDay();buildWeeks();streak();refresh();});
-
-/* ---------- quotes ---------- */
-var QUOTES=[
- "You are not weak. You are doing half reps.",
- "Fifty fast push-ups build less than eight slow ones.",
- "A mediocre plan you finish beats a perfect plan you quit.",
- "Your rest day is not lazy. It is the part that builds you.",
- "If you cannot name what got harder, nothing did.",
- "A rep only counts if you would be happy to film it.",
- "Sleep is the cheapest performance drug you own.",
- "Never miss twice in a row.",
- "Leverage is your weight plate.",
- "Soreness is a side effect, not a scoreboard.",
- "Stop switching programs. Start finishing one.",
- "The bottom third of the rep is where the work lives.",
- "Pull at least as much as you push. Your shoulders will thank you.",
- "Nobody ever regretted the session they almost skipped."
-];
-var qi=Math.floor(Math.random()*QUOTES.length);
-function rotQ(first){
-  var el=$('rotq');
-  if(first){el.textContent=QUOTES[qi];return;}
-  el.classList.add('out');
-  setTimeout(function(){qi=(qi+1)%QUOTES.length;el.textContent=QUOTES[qi];el.classList.remove('out');},560);
-}
-setInterval(function(){if(cfg.hooks==='on')rotQ(false);},180000);
 
 /* ---------- ambient canvas ---------- */
 var cv=$('bgfx'),cx=cv.getContext('2d'),W=0,H=0,parts=[],shots=[],mouse={x:-999,y:-999},raf=null;
@@ -11303,9 +11259,8 @@ syncIntro();
    Farben von vorhin weiter. */
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(){
   cvarFlush();syncThemeColor();drawScene();buildTiles();buildSkills();refresh();});}catch(e){}
-drawScene();rotQ(true);if(cfg.hooks!=='on')$('rotq').style.display='none';
+drawScene();
 $('y-goal').value=get('goal','');
-tickClock();setInterval(tickClock,20000);
 $('verTag').textContent='v'+VERSION;
 sizeCv();
 /* Startbildschirm. Immer "Heute" -- und ausdruecklich ueber show(), nicht nur
