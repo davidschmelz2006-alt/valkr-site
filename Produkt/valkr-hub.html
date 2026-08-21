@@ -1590,6 +1590,19 @@
   /* Einzelbuchstaben ohne Sperrung: letter-spacing haengt HINTER jeder Glyphe
      und wuerde das eine Zeichen im Kreis nach links ruecken. */
   .profrow .setdays button[aria-pressed="true"]{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
+  /* Auf dem Telefon bekommen die sieben Wochentage eine eigene Zeile.
+     Vorher standen sie neben der Beschriftung und mussten sich mit ihr rund
+     310 Pixel teilen -- dabei blieben 27 Pixel je Knopf uebrig. Eine Fingerkuppe
+     ist etwa 44 breit, und hier stellt ein Fehlgriff die Trainingswoche um.
+     Sieben Knoepfe zu 44 plus Abstaende sind allein schon breiter als die
+     Zeile: nebeneinander mit Beschriftung geht es also gar nicht auf. Eigene
+     Zeile, volle Breite, gleichmaessig verteilt. */
+  @media (max-width:640px){
+    .profrow:has(.setdays){flex-wrap:wrap}
+    .profrow .setdays{flex:1 0 100%;justify-content:space-between;gap:.3rem;margin-top:.55rem}
+    .profrow .setdays button{flex:1;width:auto;height:auto;min-height:40px;
+      aspect-ratio:1;max-width:46px;font-size:var(--t3)}
+  }
   #setBfSlide{flex:1;min-width:120px;accent-color:var(--aurora)}
   /* ── v17 (Baustelle 3): Stufenbaender im Test. Sechs benannte Segmente,
      das eigene leuchtet; darunter Stufenname im Klartext. ── */
@@ -2463,7 +2476,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.0';
+var VERSION='19.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -5187,6 +5200,22 @@ function histBackStep(){
   el=$('modal');
   if(el&&el.classList.contains('on')){closeModal();return true;}
   if(sheetOpen){closeSheet();return true;}
+  /* Schiebeansicht (Coach, Wissen, Einstellungen, Zugang, Detail, Kamera).
+     Sie liegt als Vollbild ueber ihrem Bereich; zurueck heisst hier: wieder
+     der Bereich darunter. Ohne diesen Zweig lief die Taste ins Leere -- die
+     Ansicht blieb stehen, und der einzige Ausweg war der kleine Pfeil oben
+     links. Auf dem Telefon ist das genau der Moment, in dem eine App als
+     kaputt gilt.
+     body.dataset.view zeigt weiter auf den Bereich darunter: show() laesst ihn
+     beim Schieben absichtlich unangetastet. */
+  if(document.body.dataset.pushed){
+    /* Die Schiebeansicht auch vom Ansichts-Stapel nehmen. Bliebe sie dort,
+       liefe der naechste Druck ins Leere: er wuerde auf den Bereich
+       zurueckwollen, auf dem man ohnehin schon steht. */
+    if(vStack[vStack.length-1]===document.body.dataset.pushed)vStack.pop();
+    show(document.body.dataset.view||"today",true);
+    return true;
+  }
   if(vStack.length>1){vStack.pop();show(vStack[vStack.length-1],true);return true;}
   return false;
 }
@@ -10553,10 +10582,22 @@ $('y-goal').value=get('goal','');
 tickClock();setInterval(tickClock,20000);
 $('verTag').textContent='v'+VERSION;
 sizeCv();
-/* Startbildschirm. Wer noch nichts abgehakt hat, landet beim Coach -- dort
-   steht die Anleitung, womit anzufangen ist. Wer schon trainiert, will
-   „Heute" sehen und keine Einfuehrung mehr. */
-if(totalSets()===0)show('coach');
+/* Startbildschirm. Immer "Heute" -- und ausdruecklich ueber show(), nicht nur
+   ueber die Klasse im Markup.
+
+   Zwei Gruende, beide aus dem v19-Umbau:
+
+   1. Bis hierher stand hier "wer noch nichts abgehakt hat, landet beim Coach".
+      Das stammt aus der Zeit, als der Coach ein normaler Bereich war. Seit v19
+      ist er eine Schiebeansicht -- der Aufruf legte ihn also als Vollbild ueber
+      das neue HEUTE, samt Zurueckpfeil und ohne Tableiste. Jeder neue Kunde sah
+      als Erstes eine Unteransicht statt der Uebersicht. Die Anleitung, die der
+      Coach dort gab, uebernimmt inzwischen die Einfuehrung.
+   2. v-today trug sein "on" nur aus dem Markup. Damit war die Ansichts-
+      Historie beim Start leer, und die Zurueck-Taste hatte nichts, wohin sie
+      haette zuruecklaufen koennen. Ein show() beim Start legt den ersten
+      Eintrag an. */
+show('today');
 
 /* Startbild wegblenden, sobald alles steht. Mindestens 700 ms, damit die
    Zeichenanimation nicht mitten im Strich abbricht -- auf einem schnellen
