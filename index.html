@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->21.08.2026, 23:47<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->22.08.2026, 00:02<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -162,8 +162,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v21.0</span>
-        <span class="fm"><b>11.421</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v22.0</span>
+        <span class="fm"><b>11.408</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -176,11 +176,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">a82eed9</span><div class="t"><b>Cockpit auf v21.0 nachgezogen</b></div></div>
       <div class="row"><span class="h">8a57bab</span><div class="t"><b>Hub v21.0: Bewegungsdemos nur auf Anforderung, HEUTE-Kachel, Kalorien-Ring, Gewichtskurve, Wortkur</b></div></div>
       <div class="row"><span class="h">2621aa6</span><div class="t"><b>Vault: Vorlagen-Ordner konfiguriert</b></div></div>
       <div class="row"><span class="h">efd97d8</span><div class="t"><b>Cockpit auf v20.4 nachgezogen</b></div></div>
       <div class="row"><span class="h">047cf87</span><div class="t"><b>Hub v20.4: Untertitel "Calisthenics" steht jetzt auch auf dem Handy unter dem Markennamen</b></div></div>
-      <div class="row"><span class="h">199dcd8</span><div class="t"><b>Sessionabschluss: Hub steht auf v20.3. Uebergabepaket fuer den Mac gebaut (ein Befehl, sieben Schritte, alles automatisch), Wortwahl auf universelle Begriffe umgestellt, Starten auf HEUTE startet direkt, Trainingsmodus nach MCI neu gestaltet</b></div></div>
     </div>
   </div>
 
@@ -193,12 +193,6 @@
       <li class="star"><b>Preis und Zugangsschutz entscheiden.</b> Grundlage steht in <code>Produkt/ZUGANGSSCHUTZ.md</code>, fällig mit der Verkaufsseite.</li>
       <li class="star"><b>Sieben Belege fachlich gegenlesen lassen</b>, dazu Satz-Autoregulation und Einmess-Heuristiken (v13.7). Vor kommerzieller Nutzung.</li>
       <li class="star"><b>Deutsche Buchfassung fachlich gegenlesen</b> (12 Kapitel in <code>02 Manuskript DE</code>, seit v17.0 auch komplett im Hub-Wissensbereich). Übersetzung ist durch drei Kritikerrunden, die fachliche Freigabe ist Menschensache.</li>
-      <li class="big">Produkt — Liam, aus Davids Liste vom 2026-08-21</li>
-      <li class="star"><b>1. Bewegungsdemos nur auf Anforderung.</b> Sie laufen dauerhaft, sobald sie im Bild sind — bei sechs Musterkacheln plus Katalog sind das zu viele gleichzeitig, David meldet Einbrüche der Bildrate. Ziel: still, bis jemand die Kachel antippt. Dann <b>genau diese eine</b> läuft. Beim Scrollen, beim Antippen einer anderen und beim Verlassen der Ansicht hält sie an. Ein Startzeichen (kleines Dreieck) sagt, dass da etwas ist. Technik: <code>svg.pauseAnimations()</code> / <code>unpauseAnimations()</code> gibt es schon in <code>pauseHiddenSvg()</code>; es braucht nur eine zweite Bedingung „angetippt" statt „sichtbar", plus IntersectionObserver zum Anhalten beim Wegscrollen.</li>
-      <li class="star"><b>2. Wortwahl: ALLES kürzer.</b> Davids Worte: „zu viel dummes zeug am stehen das keinen interessiert". Konkret: - Jeden Erklärsatz prüfen: sagt er etwas, das der Wert daneben nicht schon sagt? Wenn nein, weg. - Universelle Begriffe statt gezwungenem Deutsch. Push, Pull, Legs, Core, Reps, Sets stehen so da. In v20.2 für die Tagesnamen schon gemacht — denselben Maßstab auf Katalog, Statistik, Coach und Einstellungen anwenden. - Untertitel unter Überschriften: höchstens ein Satz, unter 70 Zeichen. - Zielbild: „extrem clean, wie eine moderne Bombe".</li>
-      <li class="star"><b>3. Kalorien-Kachel.</b> Ring mittig, in vernünftiger Größe, <b>gegessen und übrig im Ring</b>, Zahl zählt animiert hoch — wie MCI. Aktuell steht dort ein kleiner Ring links und die Zahl darunter.</li>
-      <li class="star"><b>4. Gewicht als Kurve</b> statt einzelner Zahl. Startgewicht als Bezug. Bei nur einem Wert: schlichte Linie ohne Punkte, kein leeres Diagramm.</li>
-      <li class="star"><b>5. HEUTE-Kachel überarbeiten.</b> Die Übungssymbole gehören <b>unten in eine Reihe</b>, damit alle Übungen des Tages sichtbar sind — aktuell stehen sie rechts untereinander und passen nicht.</li>
       <li class="big">Produkt — offen, ohne Termin</li>
       <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16/v17-Wizard, Körperfett-Figur, Trainingstage-Pillen, Stufenbänder, Ernährungs-Ring).</li>
       <li class="star"><b>Ersatzübungen — Rest:</b> Seit v18.0 hat jede Übung ein Tausch-Blatt mit Filtern (Leichter/Schwerer/Ohne Gerät) — deckt „keine Stange" und Niveau ab. Offen bleibt gezielte Führung bei Schmerz (welcher Tausch bei welchem Zwicken) und Platzmangel/unterwegs als eigene Filter.</li>

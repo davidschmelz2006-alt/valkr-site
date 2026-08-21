@@ -48,7 +48,7 @@
        Absichtlich in jedem Theme gleich dunkel -- ein Scan ist immer Nacht. */
     --night:#08131C;
     --p1:53,195,156;--p2:127,205,228;--part:120,150,170;
-    --sh:0 1px 2px rgba(0,0,0,.07),0 8px 20px rgba(0,0,0,.09);
+    --sh:none;
     /* Schriftsystem. Vorher lief die Oberflaeche in Georgia -- das liest sich
        wie ein Buch, nicht wie eine App, und auf dem Telefon wirkt es alt.
        Jetzt durchgehend die Systemschrift (auf iOS San Francisco, auf Android
@@ -68,20 +68,20 @@
     /* Glasoptik: durchscheinende Flaechen mit Unschaerfe dahinter. Der Effekt
        lebt davon, dass etwas durchscheint -- deshalb liegt die Atmosphaere
        hinter der ganzen Seite und nicht nur unten. */
-    --glass:blur(16px) saturate(1.5);
+    --glass:none;
     --fm:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
   }
   @media (prefers-color-scheme:dark){:root[data-pack="auto"]{
     --bg:#050F16;--surf:#0D212C;--surf2:#091820;--surf3:#112A37;
     --ink:#E6EDF0;--ink2:#93A9B6;--ink3:#63798A;--line:#1B3441;--line2:#132631;
-    --part:224,238,244;--sh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);}}
+    --part:224,238,244;--sh:none;}}
 
   :root[data-pack="aurora"]{
     --bg:#050F16;--surf:#0D212C;--surf2:#091820;--surf3:#112A37;
     --ink:#E6EDF0;--ink2:#93A9B6;--ink3:#63798A;--line:#1B3441;--line2:#132631;
     --hero:#08151E;--heroInk:#EFEAE0;--part:224,238,244;
     --p1:53,195,156;--p2:127,205,228;
-    --sh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);}
+    --sh:none;}
 
   :root[data-pack="jungle"]{
     --aurora:#57D07C;--ice:#9BE07F;--ember:#E5A63C;--brass:#C9E265;
@@ -89,7 +89,7 @@
     --ink:#E7F2E5;--ink2:#93B79C;--ink3:#65866D;--line:#1D3B27;--line2:#152C1D;
     --hero:#06170E;--heroInk:#EDF6EA;--part:150,225,140;
     --p1:87,208,124;--p2:201,226,101;
-    --sh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);}
+    --sh:none;}
 
   :root[data-pack="summer"]{
     --aurora:#E2803B;--ice:#F0B94E;--ember:#D95A3C;--brass:#B8862F;
@@ -97,7 +97,7 @@
     --ink:#3A2716;--ink2:#7A5F41;--ink3:#A08762;--line:#DEC79C;--line2:#EBDBBB;
     --hero:#2E1B0E;--heroInk:#FBF2E0;--part:214,160,84;
     --p1:226,128,59;--p2:240,185,78;
-    --sh:0 1px 2px rgba(90,60,20,.09),0 8px 20px rgba(90,60,20,.12);}
+    --sh:none;}
 
   :root[data-pack="ocean"]{
     --aurora:#3FC7D8;--ice:#7EA8F0;--ember:#F2795B;--brass:#8FD3C4;
@@ -105,7 +105,7 @@
     --ink:#E2EEF5;--ink2:#8CAEC4;--ink3:#5F8299;--line:#153A52;--line2:#0F2C40;
     --hero:#03101A;--heroInk:#E7F2F8;--part:150,205,235;
     --p1:63,199,216;--p2:126,168,240;
-    --sh:0 1px 2px rgba(0,0,0,.4),0 10px 26px rgba(0,0,0,.35);}
+    --sh:none;}
 
   :root[data-pack="ember"]{
     --aurora:#F0913F;--ice:#E5C169;--ember:#E4553C;--brass:#C98A2E;
@@ -113,7 +113,7 @@
     --ink:#F2E7E1;--ink2:#B39B92;--ink3:#87706A;--line:#3A2621;--line2:#2A1B18;
     --hero:#0E0806;--heroInk:#F6EBE4;--part:245,170,90;
     --p1:240,145,63;--p2:228,85,60;
-    --sh:0 1px 2px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.4);}
+    --sh:none;}
 
   /* Onyx ist AMOLED-schwarz: der Hintergrund ist echtes #000, nicht
      "sehr dunkelgrau". Auf einem OLED-Bildschirm bleiben diese Pixel
@@ -129,14 +129,14 @@
     --ink:#EDEDF2;--ink2:#9A9AA8;--ink3:#6A6A78;--line:#22222D;--line2:#17171F;
     --hero:#08080E;--heroInk:#EDEDF2;--part:167,139,250;
     --p1:167,139,250;--p2:196,181,253;
-    --sh:0 1px 2px rgba(0,0,0,.7),0 12px 32px rgba(0,0,0,.6);}
+    --sh:none;}
   :root[data-pack="stone"]{
     --aurora:#2E7D6B;--ice:#4A7C94;--ember:#B4552F;--brass:#8A7333;
     --bg:#E6E4DF;--surf:#F1EFEA;--surf2:#DAD7D0;--surf3:#F8F6F2;
     --ink:#1D2124;--ink2:#555C61;--ink3:#868C90;--line:#C9C5BD;--line2:#DCD8D1;
     --hero:#22282B;--heroInk:#F1EFEA;--part:120,130,135;
     --p1:46,125,107;--p2:74,124,148;
-    --sh:0 1px 2px rgba(0,0,0,.06),0 8px 20px rgba(0,0,0,.08);}
+    --sh:none;}
 
   /* Kein Pull-to-Refresh und kein Ueberzieh-Schimmer von Chrome. Beides ist
      hier falsch: die App haelt alles lokal, ein Neuladen bringt nichts und
@@ -178,14 +178,7 @@
   .glowA{animation:glowP 16s ease-in-out infinite}
   .glowB{animation:glowP 21s ease-in-out infinite reverse}
   @keyframes glowP{0%,100%{opacity:.8}50%{opacity:1}}
-  .sway{transform-origin:bottom center;animation:sway 7s ease-in-out infinite}
-  .sway2{transform-origin:bottom center;animation:sway 9s ease-in-out infinite reverse}
-  @keyframes sway{0%,100%{transform:rotate(-1.4deg)}50%{transform:rotate(1.4deg)}}
-  .bob{animation:bob 6s ease-in-out infinite}
-  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
-  .shimmer{animation:shimmer 5s ease-in-out infinite}
-  @keyframes shimmer{0%,100%{opacity:.28}50%{opacity:.6}}
-  @media (prefers-reduced-motion:reduce){.sway,.sway2,.bob,.shimmer,.glowA,.glowB{animation:none}}
+  @media (prefers-reduced-motion:reduce){.glowA,.glowB{animation:none}}
   #bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
   .shell{max-width:1120px;margin:0 auto;position:relative;z-index:1;
     padding:0 max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-right,0px)) 4rem max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px))}
@@ -278,15 +271,14 @@
          iPhone bleiben rund 13 Pixel, auf Android 7 -- auf beiden sitzt die
          Leiste unten, ohne den Strich zu beruehren. */
       bottom:max(.45rem,calc(env(safe-area-inset-bottom,0px) - 1.3rem));
-      background:color-mix(in srgb,var(--surf) 88%,transparent);
+      background:var(--surf);
       backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
       border:1px solid var(--line2);border-radius:26px;
       /* Groesser: 5 Pixel Innenabstand und 60 Pixel hohe Reiter ergaben eine
          schmale Leiste, die neben den grossen Kacheln darueber verloren wirkte.
          Eine Tableiste ist das meistbenutzte Element der App -- sie darf Platz
          beanspruchen. */
-      padding:8px 6px;
-      box-shadow:0 10px 34px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.3)}
+      padding:8px 6px}
     #tabbar button{flex:1;min-width:0;min-height:66px;display:flex;flex-direction:column;
       align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
       font-family:var(--fb);font-weight:600;font-size:var(--t2);letter-spacing:.01em;
@@ -436,7 +428,6 @@
   #sheet{position:fixed;left:0;right:0;bottom:0;z-index:79;
     background:var(--surf);border-top:1px solid var(--line);
     border-radius:var(--r3) var(--r3) 0 0;
-    box-shadow:0 -12px 40px rgba(0,0,0,.34);
     padding:.5rem .9rem calc(1rem + env(safe-area-inset-bottom,0px));
     max-height:78vh;overflow:auto;
     transform:translateY(102%);transition:transform .28s cubic-bezier(.2,.9,.3,1);
@@ -529,7 +520,7 @@
     body[data-pushed] #tabbar{transform:translateY(130%)}
     .pushhead{display:flex;align-items:center;gap:.7rem;position:sticky;top:0;z-index:6;
       margin:0 -14px;padding:calc(.55rem + env(safe-area-inset-top,0px)) 14px .55rem;
-      background:color-mix(in srgb,var(--bg) 92%,transparent);
+      background:var(--bg);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
     .pushhead b{font-family:var(--fd);font-weight:800;font-size:var(--t5);
       letter-spacing:.06em;text-transform:uppercase}
@@ -595,10 +586,6 @@
   .habheat i.tr{background:color-mix(in srgb,var(--ember) 75%,var(--surf))}
   .habheat i.ms{background:color-mix(in srgb,var(--ink3) 30%,var(--surf2))}
   .habheat i.td{outline:1.5px solid var(--ink);outline-offset:1px}
-  /* Zellen staffeln sich beim Aufbau ein (MCI); im Sparmodus stehen sie. */
-  .habheat i{animation:habpop .22s ease backwards;animation-delay:calc(var(--i)*12ms)}
-  @keyframes habpop{from{transform:scale(.4);opacity:0}}
-  :root[data-spar="1"] .habheat i{animation:none}
   /* Reihenfolge und Breite der Dashboard-Kacheln. Kalorien und Gewicht tragen
      beide ein Bild -- ein Ring mit Zahlen darin und eine Kurve. Auf halber
      Breite waere der Ring zu klein zum Ablesen und die Kurve zu kurz, um eine
@@ -1078,7 +1065,7 @@
   .sup.g .vd{background:rgba(var(--p1),.16);color:var(--aurora)}
   .sup.a .vd{background:rgba(212,167,60,.16);color:var(--brass)}
   .sup.r .vd{background:rgba(232,112,58,.16);color:var(--ember)}
-  #tipbox{position:fixed;z-index:200;max-width:300px;background:var(--hero);color:var(--heroInk);border:1px solid var(--line);border-radius:4px;padding:.72rem .82rem;font-size:var(--t3);line-height:1.45;box-shadow:0 12px 32px rgba(0,0,0,.45);pointer-events:none;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .2s,transform .2s,visibility 0s linear .2s}
+  #tipbox{position:fixed;z-index:200;max-width:300px;background:var(--hero);color:var(--heroInk);border:1px solid var(--line);border-radius:4px;padding:.72rem .82rem;font-size:var(--t3);line-height:1.45;pointer-events:none;opacity:0;visibility:hidden;transform:translateY(5px);transition:opacity .2s,transform .2s,visibility 0s linear .2s}
   #tipbox.on{opacity:1;visibility:visible;transform:none;transition:opacity .2s,transform .2s,visibility 0s}
   #tipbox .th{display:block;font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--aurora);margin-bottom:.26rem}
   #tipbox .dose{display:block;margin-top:.38rem;font-family:var(--fm);font-size:var(--t2);color:var(--ice)}
@@ -1450,7 +1437,7 @@
   @media (prefers-reduced-motion:reduce){#intro .istep.slide{animation:none}}
   #modal{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.62);padding:1rem}
   #modal.on{display:flex;animation:fade .2s ease}
-  #modal .box{background:var(--surf);border:1px solid var(--line);border-radius:5px;max-width:400px;width:100%;padding:1.3rem;display:flex;flex-direction:column;gap:.8rem;box-shadow:0 20px 50px rgba(0,0,0,.5)}
+  #modal .box{background:var(--surf);border:1px solid var(--line);border-radius:5px;max-width:400px;width:100%;padding:1.3rem;display:flex;flex-direction:column;gap:.8rem}
   #modal h3{font-family:var(--fd);font-weight:600;font-size:1.05rem;margin:0}
   #modal p{margin:0;font-size:var(--t4);color:var(--ink2)}
   #modal .ctl input{text-align:center;letter-spacing:.2em}
@@ -1524,7 +1511,7 @@
     backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
     color:var(--heroInk);border:1px solid var(--line);border-left:3px solid var(--aurora);
     border-radius:var(--r1);padding:.5rem .65rem;display:flex;align-items:center;gap:.55rem;
-    box-shadow:0 8px 26px rgba(0,0,0,.38);opacity:0;visibility:hidden;pointer-events:none;
+    opacity:0;visibility:hidden;pointer-events:none;
     transition:transform .34s cubic-bezier(.2,.9,.3,1),opacity .24s ease,visibility .24s;
     max-width:min(290px,calc(100vw - 20px));cursor:grab;touch-action:pan-y;user-select:none}
   #toast.on{transform:translateX(0);opacity:1;visibility:visible;pointer-events:auto}
@@ -1737,8 +1724,7 @@
        mit dem Radius -- 9 statt 16 Pixel ist knapp die Haelfte davon.
        Damit die Flaechen dabei nicht duenner wirken, sind sie unten dichter
        gemischt. Am Rechner bleibt der volle Radius. */
-    :root{--glass:blur(9px) saturate(1.4)}
-    /* Die schwebende Fassung weiter oben legt Rundung, Rand und Schatten fest.
+        /* Die schwebende Fassung weiter oben legt Rundung, Rand und Schatten fest.
        Hier bleibt nur die guenstigere Unschaerfe -- die Form nicht mehr
        ueberschreiben, sonst klebt die Leiste wieder unten. */
     #tabbar{backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
@@ -1760,9 +1746,9 @@
       box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--aurora) 22%,transparent)}
     #tabbar svg,#tabbar span{position:relative}
     nav#nav{border-radius:var(--r3) var(--r3) 0 0;
-      background:color-mix(in srgb,var(--surf) 88%,transparent);
+      background:var(--surf);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
-    .bar{background:color-mix(in srgb,var(--bg) 88%,transparent);
+    .bar{background:var(--bg);
       backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
 
     /* ---- Tabellen auf dem Handy ---------------------------------------
@@ -1848,7 +1834,7 @@
   /* ── v17 (Baustelle 5): Ernaehrung nach App-Standard. Ring in der Mitte
      (Uebrig), links Gegessen, rechts Ziel, darunter drei Makro-Balken.
      Glasflaeche mit Unschaerfe -- der Sparmodus schaltet sie unten ab. ── */
-  .macroCard{background:color-mix(in srgb,var(--surf) 72%,transparent);border:1px solid var(--line);
+  .macroCard{background:var(--surf);border:1px solid var(--line);
     border-radius:var(--r2);padding:1rem;box-shadow:var(--sh);
     backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
   .macroRing{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
@@ -2680,7 +2666,7 @@
         <div class="field"><label data-i18n="set.units">Units</label><div class="ctl"><select id="setUnits"><option value="metric">Metric (kg, cm)</option><option value="imperial">Imperial (lb, in)</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.start">Programme start</label><div class="ctl"><input id="setStart" type="date"></div></div>
         <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="3">3 days - full body</option><option value="4">4 days - upper / lower</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected>Calm</option><option value="on">Full</option><option value="off">Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected>Calm</option><option value="full">Full</option><option value="off">Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <!-- Der Sparmodus laeuft automatisch nach Geraeteleistung. Hier laesst
              er sich erzwingen oder abschalten -- zum Testen, und fuer den Fall,
              dass ein Geraet sich staerker meldet als es ist. -->
@@ -2731,7 +2717,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='21.0';
+var VERSION='22.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2905,6 +2891,8 @@ var cfg=get('cfg',{lang:'en',clock:'24',units:'metric',track:'3',motion:'calm',s
 /* Allererster Start: Geraetesprache uebernehmen. Wer schon eine Einstellung
    hat, behaelt sie. */
 if(rawGet('cfg')===null&&/^de/i.test(navigator.language||''))cfg.lang='de';
+/* Altbestand: die Auswahl "Voll" speicherte bis v21 den Wert 'on'. */
+if(cfg.motion==='on'){cfg.motion='full';saveCfg();}
 function saveCfg(){set('cfg',cfg);}
 
 /* ---------- i18n ---------- */
@@ -3018,8 +3006,8 @@ var DICT={
  'set.dev':['Developer','Entwickler'],
  'btn.devOn':['Unlock','Freischalten'],
  'set.hueNote':['Overrides the active theme accent. Backgrounds stay.','Überschreibt den Akzent des Themes. Hintergründe bleiben.'],
- 'set.motionNote':['Calm quiets the scenery and turns particles off. Full brings both back.','Ruhig nimmt Kulisse und Partikel zurück. Voll bringt beides wieder.'],
- 'set.themeNote':['Each theme changes palette and ambient effect. Auto follows your system.','Jedes Design ändert Farben und Hintergrund. Auto folgt dem System.'],
+ 'set.motionNote':['Calm shows just the app. Full brings scenery and particles.','Ruhig zeigt nur die App. Voll bringt Kulisse und Partikel.'],
+ 'set.themeNote':['Each theme changes the palette. Ambient effect only on Full.','Jedes Design ändert die Farben. Hintergrund nur auf Voll.'],
  'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],'set.clock':['Time format','Zeitformat'],
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.spar':['Performance mode','Sparmodus'],
@@ -9326,11 +9314,10 @@ var sceneTmr=null;
 window.addEventListener('resize',function(){clearTimeout(sceneTmr);sceneTmr=setTimeout(drawScene,180);});
 function drawScene(){
   var el=$('scenery'); if(!el) return;
-  if(cfg.motion==='off'||SYSRED){el.innerHTML='';return;}
-  /* „Ruhig" ist die neue Voreinstellung: die Kulisse bleibt, tritt aber weit
-     zurueck und die Partikel sind aus. Eine Trainings-App, in der staendig
-     etwas flimmert, wirkt nicht ernst -- wer die volle Kulisse will, stellt
-     sie in den Einstellungen auf „Voll". */
+  if(cfg.motion!=='full'||SYSRED){el.innerHTML='';return;}
+  /* „Ruhig" heisst seit v22: gar keine Kulisse. Eine Flaeche, die nichts sagt,
+     hat hinter einer Trainings-App nichts verloren, egal wie leise sie
+     ist -- wer sie will, stellt in den Einstellungen auf „Voll". */
   el.style.opacity='1';
   el.innerHTML=sceneFor(pack);
 }
@@ -10363,7 +10350,7 @@ setInterval(function(){if(cfg.hooks==='on')rotQ(false);},180000);
 var cv=$('bgfx'),cx=cv.getContext('2d'),W=0,H=0,parts=[],shots=[],mouse={x:-999,y:-999},raf=null;
 /* „Ruhig" heisst weniger Partikel, nicht keine -- ein paar driftende Punkte
    und ein seltener Lichtstreif sind das, was Atmosphaere ausmacht. */
-function fxOn(){return !SYSRED&&cfg.motion!=='off'&&fxOf()!=='none';}
+function fxOn(){return !SYSRED&&cfg.motion==='full'&&fxOf()!=='none';}
 function fxCalm(){return cfg.motion==='calm';}
 function pcol(){return cvar('--part')||'200,220,230';}
 function sizeCv(){
