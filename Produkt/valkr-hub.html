@@ -551,7 +551,7 @@
   .arehead{display:flex;align-items:center;gap:.6rem;margin:0 0 -.4rem}
   .arehead b{font-family:var(--fd);font-weight:800;font-size:var(--t6);
     letter-spacing:.05em;text-transform:uppercase}
-  .hcard{display:flex;align-items:stretch;gap:.8rem;width:100%;text-align:left;
+  .hcard{display:flex;flex-direction:column;gap:.7rem;width:100%;text-align:left;
     background:var(--surf);border:1px solid var(--line);border-radius:var(--r3);
     padding:1rem 1.05rem;box-shadow:var(--sh);cursor:pointer;transition:border-color .16s}
   .hcard:hover{border-color:var(--ice)}
@@ -564,8 +564,19 @@
     font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;
     color:var(--ember);border:1px solid color-mix(in srgb,var(--ember) 55%,transparent);
     border-radius:var(--r1);padding:.34rem .7rem}
-  .hcard .hcThumbs{display:flex;flex-direction:column;justify-content:center;gap:.15rem}
-  .hcard .hcThumbs .swthumb{width:38px;height:38px}
+  /* Die Uebungssymbole stehen unten in EINER Reihe. Als Spalte rechts neben
+     dem Text passten vier -- ein Tag hat aber fuenf oder sechs Uebungen, und
+     welche fehlten, sah man der Kachel nicht an. Quer ueber die volle Breite
+     passen alle, und die feine Linie trennt Ansage von Inhalt. */
+  .hcard .hcThumbs{display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;
+    gap:.3rem;padding-top:.7rem;border-top:1px solid var(--line)}
+  .hcard .hcThumbs:empty{display:none}
+  .hcard .hcThumbs .swthumb{width:36px;height:36px}
+  .hcard .hcThumbs .swthumb svg{width:32px;height:32px}
+  @media (max-width:380px){
+    .hcard .hcThumbs .swthumb{width:32px;height:32px}
+    .hcard .hcThumbs .swthumb svg{width:28px;height:28px}
+  }
   .habgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
   .habcard{display:flex;flex-direction:column;gap:.45rem;text-align:left;min-height:118px;
     background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
@@ -588,7 +599,32 @@
   .habheat i{animation:habpop .22s ease backwards;animation-delay:calc(var(--i)*12ms)}
   @keyframes habpop{from{transform:scale(.4);opacity:0}}
   :root[data-spar="1"] .habheat i{animation:none}
+  /* Reihenfolge und Breite der Dashboard-Kacheln. Kalorien und Gewicht tragen
+     beide ein Bild -- ein Ring mit Zahlen darin und eine Kurve. Auf halber
+     Breite waere der Ring zu klein zum Ablesen und die Kurve zu kurz, um eine
+     Richtung zu zeigen. Also volle Breite, und die zwei reinen Zahlen-Kacheln
+     teilen sich die Zeile darunter. */
+  .habgrid .hcCal{grid-column:1/-1;order:1;align-items:center}
+  .habgrid .hcWeight{grid-column:1/-1;order:2}
+  .habgrid .hcTrain{order:3}
+  .habgrid .hcStreak{order:4}
+  .habcard.hcCal em{align-self:flex-start}
+  /* Kalorien: der Ring steht mittig, gegessen und uebrig stehen IM Ring.
+     Vorher stand ein kleiner Ring links und dieselbe Aussage nochmal als
+     Text darunter -- zwei Orte fuer eine Zahl. */
+  .calring{position:relative;width:132px;max-width:66%;margin:.35rem auto .15rem}
+  .calring svg{width:100%;height:auto;display:block}
+  .calmid{position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2px;pointer-events:none}
+  .calmid b{font-family:var(--fd);font-weight:700;font-size:var(--t7);line-height:1}
+  .calmid span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.06em;color:var(--ink3)}
+  .habcard.hcCal .sub{text-align:center;width:100%}
+  .habcard.hcCal .sub b{font-family:var(--fd);font-weight:700;color:var(--ink)}
+  /* Gewicht: Kurve statt Zahl. Die gestrichelte Linie ist das Startgewicht --
+     ohne Bezug sagt eine Kurve nur, dass sich etwas bewegt, nicht wohin. */
+  .wspark{width:100%;height:34px;display:block;margin-top:auto;overflow:visible}
   .habring{margin-top:auto;align-self:flex-start}
+
   .upstack{display:flex;flex-direction:column;gap:.6rem}
   .upcard{display:flex;align-items:center;gap:.75rem;width:100%;text-align:left;
     background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
@@ -931,6 +967,21 @@
      Ausgeblendet pausiert pauseHiddenSvg() die Kacheln wie alles andere. */
   .tile .tdemo{display:block;width:64px;height:64px}
   .tile .tdemo svg{width:100%;height:100%}
+  /* Bewegungsdemos stehen still, bis sie angetippt werden -- siehe demoHost().
+     Das Dreieck sagt, dass da etwas ist: eine stille Figur ohne Zeichen sieht
+     aus wie ein Bild, und auf ein Bild tippt niemand. */
+  .dmo{position:relative;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .dmo .dmoGo{position:absolute;right:-1px;bottom:-1px;width:14px;height:14px;border-radius:999px;
+    background:var(--surf2);border:1px solid var(--line);pointer-events:none;transition:opacity .16s ease}
+  .dmo .dmoGo::after{content:"";position:absolute;left:5px;top:3.4px;
+    border-left:4.6px solid var(--ink2);border-top:3.2px solid transparent;border-bottom:3.2px solid transparent}
+  .dmo.an .dmoGo{opacity:0}
+  .dmo.ruht{cursor:default}
+  .dmo.ruht .dmoGo{display:none}
+  .dmo:focus-visible{outline:2px solid var(--ice);outline-offset:2px;border-radius:10px}
+  /* Die Demo im Muster-Detail fuellt ihre Box wie vorher das nackte SVG. */
+  .media .demo .hdemo{display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+
   .tile:hover{border-color:var(--aurora);transform:translateY(-3px);box-shadow:var(--sh)}
   .tile b{font-family:var(--fd);font-weight:600;font-size:var(--t5)}
   .tile .k{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;color:var(--ink3);text-transform:uppercase}
@@ -2088,7 +2139,7 @@
          wohnt jetzt im Bereich TRAINING. Hier: naechste Einheit,
          Gewohnheiten, Verbessern. Inhalt baut renderHome(). -->
     <div id="homeHero"></div>
-    <p class="eyebrow" data-i18n="home.habits">Habits</p>
+    <p class="eyebrow" data-i18n="home.habits">Overview</p>
     <div class="habgrid" id="homeHabits"></div>
     <p class="eyebrow" data-i18n="home.improve">Improve</p>
     <div class="upstack" id="homeCards"></div>
@@ -2680,7 +2731,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='20.4';
+var VERSION='21.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2871,19 +2922,19 @@ var DICT={
  'fuel.calcFold':['Calculator — your data','Rechner — deine Daten'],
  'fuel.targetFold':['Targets — edit any of them','Zielwerte — alle änderbar'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
- 'rk.s':['From where you stand on each ladder, not from how hard you sweat.','Aus deinem Stand auf jeder Leiter, nicht daraus wie sehr du schwitzt.'],
+ 'rk.s':['From where you stand on the ladders, not from sweat.','Aus deinem Stand auf den Leitern, nicht aus Schweiß.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
  'lb.h':['Leaderboard','Bestenliste'],
  'rk.dist':['All ranks — who stands where','Alle Ränge — wer steht wo'],
  'rk.addons':['Rank-exclusive designs','Rang-exklusive Designs'],
- 'rk.addonsNote':['Pure cosmetics — they change how your figures look, never how the rank is earned. At the top rank, every figure wears a crown and a boss aura.','Reine Optik — sie ändern, wie deine Figuren aussehen, nie wie der Rang entsteht. Beim höchsten Rang trägt jedes Männchen eine Krone und eine Boss-Aura.'],
+ 'rk.addonsNote':['Pure cosmetics — they never change how the rank is earned.','Reine Optik — sie ändern nie, wie der Rang entsteht.'],
  'rk.ach':['Achievements','Erfolge'],
  'rk.perPat':['Rank per pattern','Rang je Muster'],'rk.how':['How the rank is earned','Wie der Rang entsteht'],
- 'rk.h1':['Ladder position is worth the most. Moving one step up is worth more than a month of extra reps.','Die Leiterstufe zählt am meisten. Eine Stufe hoch ist mehr wert als ein Monat Zusatzwiederholungen.'],
+ 'rk.h1':['Ladder position counts most, more than extra reps.','Die Leiterstufe zählt am meisten, mehr als Zusatzwiederholungen.'],
  'rk.h2':['Personal records above your week-1 baseline add on top.','Rekorde über deiner Woche-1-Basis kommen obendrauf.'],
- 'rk.h3':['Following the plan adds the rest — and a logged rest day counts exactly like a session.','Plan einhalten macht den Rest — und ein eingetragener Ruhetag zählt genau wie eine Einheit.'],
- 'rk.h4':['Strength only sets your ceiling. What unlocks it is showing up: every active week raises your cap a little. The top rank is months of work, on purpose.','Stärke setzt nur deine Obergrenze. Freigeschaltet wird sie durchs Dranbleiben: Jede aktive Woche hebt dein Limit ein Stück. Der höchste Rang ist bewusst Monate an Arbeit.'],
- 'rk.h5':['Every completely empty week costs rank. Long break, lower rank — the ladder remembers, the rank has to be re-earned.','Jede komplett leere Woche kostet Rang. Lange Pause, tieferer Rang — die Leiter merkt sich alles, der Rang will neu verdient werden.'],
+ 'rk.h3':['Following the plan adds the rest. A rest day counts like a session.','Plan einhalten macht den Rest. Ein Ruhetag zählt wie eine Einheit.'],
+ 'rk.h4':['Strength sets the ceiling, showing up raises it. The top rank is months of work, on purpose.','Stärke setzt die Obergrenze, Dranbleiben hebt sie. Der höchste Rang ist bewusst Monate an Arbeit.'],
+ 'rk.h5':['Every empty week costs rank. Long break, lower rank.','Jede leere Woche kostet Rang. Lange Pause, tieferer Rang.'],
  'streak':['Streak','Serie'],'week':['Week','Woche'],
  'btn.theme':['Theme','Design'],
  'btn.sessOv':['Session detail','Einheit ansehen'],
@@ -2901,100 +2952,100 @@ var DICT={
  'btn.undo':['Undo last change','Letzte Änderung zurücknehmen'],
  'btn.export':['Copy my data','Daten kopieren'],'btn.import':['Restore from backup','Daten einspielen'],'btn.resetAll':['Reset everything','Alles zurücksetzen'],
  'btn.getBook':['Get the book','Buch kaufen'],'btn.getHub':['Get lifetime access','Lifetime-Zugang'],'btn.later':['Opens later','Kommt später'],
- 'today.tick':['Tick the box when a block is done · tap the name for technique','Haken setzen wenn ein Block fertig ist · Name antippen für Technik'],
+ 'today.tick':['Tick = done · tap a name for technique','Haken = fertig · Name antippen für Technik'],
  'log.effort':['How hard was it? (RPE)','Wie hart war es? (RPE)'],'log.energy':['Energy before','Energie vorher'],
  'log.dur':['Duration','Dauer'],'log.pain':['Anything hurt? Tap the area','Etwas getan weh? Bereich antippen'],'log.notes':['Notes','Notizen'],
- 'plan.h':['The twelve weeks','Die zwölf Wochen'],'plan.s':['One row per week. Open a week to see its days and jump to any of them.','Eine Zeile pro Woche. Aufklappen zeigt die Tage, Klick springt hin.'],
+ 'plan.h':['The twelve weeks','Die zwölf Wochen'],'plan.s':['One row per week. Open one to see its days.','Eine Zeile pro Woche. Aufklappen zeigt die Tage.'],
  'plan.miles':['Milestones','Meilensteine'],
- 'train.h':['The six patterns','Die sechs Muster'],'train.s':['Everything you train is one of these. Open one for the ladder, the cues, and what usually goes wrong.','Alles was du trainierst ist eines davon. Öffnen für Leiter, Technik und typische Fehler.'],
+ 'train.h':['The six patterns','Die sechs Muster'],'train.s':['Everything you train. Open one for ladder and cues.','Alles, was du trainierst. Öffnen für Leiter und Technik.'],
  'train.vol':['Weekly volume','Wochenvolumen'],
- 'train.volHint':['Pull should never sit below push. That imbalance is the most common cause of shoulder trouble in calisthenics.','Zug darf nie unter Druck liegen. Dieses Ungleichgewicht ist die häufigste Ursache für Schulterprobleme.'],
+ 'train.volHint':['Pull should never sit below push — that imbalance is the most common cause of shoulder trouble.','Zug darf nie unter Druck liegen — das ist die häufigste Ursache für Schulterprobleme.'],
  'train.ladder':['Your ladder — tap a step to set where you are','Deine Leiter — Stufe antippen um deinen Stand zu setzen'],
  'train.how':['How to do it','Ausführung'],'train.wrong':['What goes wrong','Typische Fehler'],'train.numbers':['Numbers','Zahlen'],
- 'skills.h':['Skills','Skills'],'skills.s':['Each one has an entry requirement. The hub checks yours against it.','Jeder Skill hat eine Voraussetzung. Das Hub prüft deine dagegen.'],
+ 'skills.h':['Skills','Skills'],'skills.s':['Each one has an entry requirement. The hub checks it.','Jeder Skill hat eine Voraussetzung. Der Hub prüft sie.'],
  'skills.rules':['Three rules for skill work','Drei Regeln für Skill-Training'],
- 'skills.r1':['Train it fresh, right after the warm-up, before anything else.','Ausgeruht trainieren, direkt nach dem Aufwärmen, vor allem anderen.'],
- 'skills.r2':['Stop well short of failure. Skills are coordination, and tired practice builds a sloppy pattern.','Deutlich vor dem Versagen aufhören. Skills sind Koordination, müdes Üben baut ein schlampiges Muster.'],
- 'skills.r3':['Ten minutes four or five times a week beats an hour once.','Zehn Minuten vier- bis fünfmal die Woche schlagen eine Stunde einmal.'],
+ 'skills.r1':['Train it fresh, right after the warm-up.','Ausgeruht üben, direkt nach dem Aufwärmen.'],
+ 'skills.r2':['Stop well short of failure — tired practice gets sloppy.','Weit vor dem Versagen aufhören — müdes Üben schlampt.'],
+ 'skills.r3':['Ten minutes five times a week beats an hour once.','Zehn Minuten fünfmal die Woche schlagen eine Stunde einmal.'],
  'mob.h':['Mobility that earns its place','Mobilität, die sich lohnt'],
- 'mob.s':['Under thirty minutes a week, aimed at five restrictions.','Unter dreißig Minuten die Woche, gezielt auf fünf Einschränkungen.'],
+ 'mob.s':['Under 30 minutes a week, on five restrictions.','Unter 30 Minuten die Woche, auf fünf Einschränkungen.'],
  'mob.guided':['Guided routine','Geführte Routine'],'mob.dose':['The weekly dose','Wochendosis'],
  'mob.d1':['Before every session','Vor jeder Einheit'],'mob.d2':['After two sessions','Nach zwei Einheiten'],'mob.d3':['Optional full sequence','Optional komplett'],
- 'mob.note':['Static stretching before training briefly lowers force output. Save the long holds for after, or for their own slot.','Statisches Dehnen vor dem Training senkt kurzzeitig die Kraft. Lange Halten danach oder separat.'],
+ 'mob.note':['Save long holds for after training — before, they cost force.','Langes Dehnen erst nach dem Training — davor kostet es Kraft.'],
  'test.h':['Find your starting point','Finde deinen Startpunkt'],
- 'test.note0':['Day one measures you in automatically — first contact with an exercise runs three max sets inside the session. This page is for the week 6 and week 12 retests. Warm up first, rest three minutes between tests, and stop the moment your form breaks.','Tag eins misst dich automatisch ein — der Erstkontakt mit einer Übung läuft als drei Max-Sätze in der Einheit. Diese Seite ist für die Wiederholungstests in Woche 6 und 12. Vorher aufwärmen, drei Minuten Pause zwischen den Tests, abbrechen sobald die Form bricht.'],
- 'test.s':['Four tests, twenty minutes. Your lowest score is your level.','Vier Tests, zwanzig Minuten. Dein schwächster Wert ist dein Level.'],
+ 'test.note0':['Day one measures you in automatically. This page is for the week 6 and 12 retests: warm up, three minutes rest, stop when form breaks.','Tag eins misst automatisch ein. Diese Seite ist für die Retests in Woche 6 und 12: aufwärmen, drei Minuten Pause, abbrechen wenn die Form bricht.'],
+ 'test.s':['Four tests, 20 minutes. Your lowest score counts.','Vier Tests, 20 Minuten. Der schwächste Wert zählt.'],
  'test.tbl':['Test','Test'],'test.retest':['Retest at week 6 and week 12','Wiederholung in Woche 6 und 12'],
- 'test.retestP':['Same warm-up, same standards, same tests. The temptation is to loosen your form so the number looks better. The only person that flatters is you.','Gleiches Aufwärmen, gleiche Maßstäbe. Die Versuchung ist, die Form zu lockern damit die Zahl besser aussieht. Damit betrügst du nur dich.'],
- 'fuel.h':['Fuel','Ernährung'],'fuel.s':['Estimated with Mifflin–St Jeor. Tap any target to change it.','Geschätzt nach Mifflin-St-Jeor. Jeden Zielwert antippen zum Ändern.'],
+ 'test.retestP':['Same warm-up, same standards. Loosening your form only flatters you.','Gleiches Aufwärmen, gleiche Maßstäbe. Lockere Form betrügt nur dich.'],
+ 'fuel.h':['Fuel','Ernährung'],'fuel.s':['Mifflin–St Jeor. Tap a target to change it.','Nach Mifflin-St-Jeor. Zielwert antippen zum Ändern.'],
  'fuel.about':['About you','Über dich'],'fuel.targets':['Your targets — edit any of them','Deine Ziele — alles änderbar'],
  'fuel.today':['Eaten today','Heute gegessen'],'btn.addMeal':['Add meal','Mahlzeit hinzufügen'],'fuel.hydr':['Water and caffeine','Wasser und Koffein'],
- 'fuel.hydrNote':['Thirst is a decent guide for most people. The number below is a rough floor, not a quota to force down. Caffeine cut-off is eight hours before bed.','Durst ist für die meisten ein guter Maßstab. Die Zahl ist eine grobe Untergrenze, kein Soll. Koffein-Schluss acht Stunden vor dem Schlafen.'],
+ 'fuel.hydrNote':['Thirst is a decent guide. The number is a floor, not a quota. Caffeine: eight hours before bed.','Durst ist ein guter Maßstab. Die Zahl ist Untergrenze, kein Soll. Koffein: acht Stunden vor dem Schlafen.'],
  'fuel.supps':['Supplements — hover for the detail','Supplements — für Details drüberfahren'],
- 'fuel.suppNote':['Green means the evidence is decent. Amber means it works for some people or in narrow cases. Orange means save your money. None of this is medical advice — if you take medication or have a condition, ask a doctor first.','Grün heißt die Datenlage ist ordentlich. Gelb heißt es wirkt bei manchen oder in engen Fällen. Orange heißt spar dir das Geld. Keine medizinische Beratung — bei Medikamenten oder Erkrankungen vorher zum Arzt.'],
+ 'fuel.suppNote':['Green: evidence is decent. Amber: works for some. Orange: save your money. Not medical advice — ask a doctor if you take medication.','Grün: Datenlage ordentlich. Gelb: wirkt bei manchen. Orange: spar dir das Geld. Keine medizinische Beratung — bei Medikamenten zum Arzt.'],
  'f.sex':['Sex','Geschlecht'],'f.age':['Age','Alter'],'f.height':['Height','Größe'],'f.weight':['Weight','Gewicht'],
  'f.m':['Male','Männlich'],'f.f':['Female','Weiblich'], 'f.a1':['Mostly sitting','Überwiegend sitzend'],'f.a2':['On feet some','Teils auf den Beinen'], 'f.a3':['On feet a lot','Viel auf den Beinen'],'f.a4':['Physical job','Körperliche Arbeit'], 'f.g1':['Build muscle','Muskeln aufbauen'],'f.g2':['Maintain','Halten'],'f.g3':['Lean out','Abnehmen'],
  'f.act':['Daily activity','Alltagsaktivität'],'f.goal':['Goal','Ziel'],'f.cal':['Calories','Kalorien'],
  'f.pro':['Protein','Protein'],'f.fat':['Fat','Fett'],'f.carb':['Carbs (derived)','Kohlenhydrate (abgeleitet)'],
- 'you.h':['You','Du'],'you.s':['Baseline is week 1. Everything here is measured against your own start, not against anyone else.','Basis ist Woche 1. Alles hier misst gegen deinen eigenen Start, nicht gegen andere.'],
+ 'you.h':['You','Du'],'you.s':['Measured against your own start, not anyone else.','Misst gegen deinen Start, nicht gegen andere.'],
  'you.ready':['Readiness right now','Tagesform'],'you.habits':['Habits — the coach reads these live','Gewohnheiten — der Coach liest sie live'],
  'you.weight':['Bodyweight trend','Gewichtsverlauf'],'you.meas':['Measurements','Umfänge'],
- 'you.measHint':['Same time of day, relaxed, tape level. Comparable beats flattering.','Gleiche Tageszeit, entspannt, Band waagerecht. Vergleichbar schlägt schmeichelhaft.'], 'you.prsHint':['Clean reps only. A record you would not film is not one.','Nur saubere Wiederholungen. Ein Rekord, den du nicht filmen würdest, ist keiner.'],
+ 'you.measHint':['Same time of day, relaxed, tape level.','Gleiche Tageszeit, entspannt, Band waagerecht.'], 'you.prsHint':['Clean reps only. A record you would not film is not one.','Nur saubere Wiederholungen. Sonst ist es keiner.'],
  'you.prs':['Personal records','Rekorde'],'you.taking':['What you are taking','Was du nimmst'],
  'y.exp':['Training since','Trainiere seit'],'y.sleep':['Sleep average','Schlaf im Schnitt'],'y.mood':['Motivation now','Motivation heute'],
  'y.sore':['Soreness','Muskelkater'],'y.stress':['Life load','Belastung im Alltag'],'y.goal':['Your goal','Dein Ziel'],
- 'coach.h':['Coach','Coach'],'coach.s':['Reads your numbers and speaks up when something shifts. Ordered by what costs you the most.','Liest deine Zahlen mit und meldet sich, wenn etwas kippt. Sortiert nach dem, was dich am meisten kostet.'],
+ 'coach.h':['Coach','Coach'],'coach.s':['Speaks up when something shifts. Worst first.','Meldet sich, wenn etwas kippt. Wichtigstes zuerst.'],
  'coach.how':['How this works','Wie das funktioniert'],
- 'coach.howP':['No guessing. It applies the same rules the book uses — sleep, volume balance, deloads, whether your records move — to your own numbers, live. When something shifts it tells you what to do about it: the training lever, the recovery lever, and where the evidence supports one, a supplement with its dose. None of this is medical advice — persistent pain or illness goes to a doctor, not a checklist.','Kein Raten. Er wendet dieselben Regeln wie das Buch live auf deine Zahlen an — Schlaf, Volumenbalance, Deloads, ob deine Rekorde steigen. Kippt etwas, sagt er dir was dagegen hilft: der Trainingshebel, der Regenerationshebel und, wo die Datenlage es hergibt, ein Supplement samt Dosis. Nichts davon ist medizinische Beratung — anhaltender Schmerz oder Krankheit gehört zum Arzt, nicht in eine Checkliste.'],
+ 'coach.howP':['Applies the book rules to your numbers, live — sleep, volume, deloads, records. When something shifts, it names the fix. Not medical advice: pain or illness goes to a doctor.','Wendet die Regeln des Buchs live auf deine Zahlen an — Schlaf, Volumen, Deloads, Rekorde. Kippt etwas, nennt er den Hebel. Keine medizinische Beratung: Schmerz oder Krankheit gehört zum Arzt.'],
  'learn.h':['The book, in short','Das Buch, kompakt'],
  'a2.h':['Put VALKR on your home screen','VALKR auf den Startbildschirm'],
  'a2.go':['Install','Installieren'],
  'a2.sub':['Opens like an app and works without internet.','Öffnet wie eine App und läuft ohne Internet.'],
  'a2.ios':['Tap the share icon, then „Zum Home-Bildschirm“.','Auf das Teilen-Symbol tippen, dann „Zum Home-Bildschirm“.'],
  'ev.h':['Where these rules come from','Woher diese Regeln kommen'],
- 'ev.s':['Every number in this app has a reason. These are the main ones. Findings are summarised in plain language — look them up if you want the detail.','Jede Zahl in dieser App hat einen Grund. Das sind die wichtigsten. Die Befunde stehen in einfacher Sprache da — wer es genau will, schlägt nach.'],
+ 'ev.s':['Every number here has a reason. These are the main ones.','Jede Zahl hier hat einen Grund. Das sind die wichtigsten.'],
  'ev.noteB':['Not medical advice.','Keine medizinische Beratung.'],
- 'ev.note':['These references support the training principles, not any promise about your individual result. Persistent pain, illness or a known condition goes to a doctor, not to a checklist.','Die Quellen stützen die Trainingsprinzipien, nicht ein Versprechen über dein persönliches Ergebnis. Anhaltender Schmerz, Krankheit oder eine bekannte Vorerkrankung gehören zum Arzt, nicht auf eine Checkliste.'],
- 'learn.s':['Twelve chapters, short enough to look up mid-session.','Zwölf Kapitel, kurz genug zum Nachschlagen zwischendurch.'],
+ 'ev.note':['The references support the principles, not your result. Pain, illness or a known condition goes to a doctor.','Die Quellen stützen die Prinzipien, nicht dein Ergebnis. Schmerz, Krankheit oder Vorerkrankung gehören zum Arzt.'],
+ 'learn.s':['Twelve chapters, short enough to look up.','Zwölf Kapitel, kurz zum Nachschlagen.'],
  'acc.faq':['Common questions','Häufige Fragen'],'acc.notes':['Notes on the current state','Hinweise zum Stand'],
- 'acc.h':['Book or hub?','Buch oder Hub?'],'acc.s':['Same knowledge in both. The difference is whether you read it once, or use it every session.','Gleiches Wissen in beidem. Der Unterschied ist, ob du es einmal liest oder jede Einheit benutzt.'],
+ 'acc.h':['Book or hub?','Buch oder Hub?'],'acc.s':['Same knowledge: read it once, or use it every session.','Gleiches Wissen: einmal lesen oder jede Einheit nutzen.'],
  'acc.get':['What you get','Was du bekommst'],'acc.once':['one payment','einmalig'],'acc.forever':['one payment, keep forever','einmalig, für immer'],'acc.later':['not open yet','noch nicht offen'],
  'set.h':['Settings','Einstellungen'],'set.s':['Everything here is stored in your browser only.','Alles hier wird nur in deinem Browser gespeichert.'],
  'you.blocks':['Your blocks so far','Deine Blöcke bisher'],
- 'you.blocksNote':['Each block is twelve weeks. Your ladder steps carry over, so block two starts where block one finished — that is where the long-term progress actually shows.','Ein Block sind zwölf Wochen. Die Leiterstufen wandern mit, Block zwei beginnt also da, wo Block eins aufgehört hat — dort wird der Fortschritt über Monate erst sichtbar.'],
+ 'you.blocksNote':['A block is twelve weeks. Ladder steps carry over, so block two starts where block one finished.','Ein Block sind zwölf Wochen. Die Leiterstufen wandern mit — Block zwei beginnt, wo Block eins aufhörte.'],
  'set.theme':['Theme','Design'],
  'set.hue':['Accent colour','Akzentfarbe'],
  'set.dev':['Developer','Entwickler'],
  'btn.devOn':['Unlock','Freischalten'],
- 'set.hueNote':['Overrides the accent of whichever theme is active. Backgrounds stay as they are — only the highlight colour moves.','Überschreibt den Akzent des aktiven Themes. Die Hintergründe bleiben, nur die Signalfarbe wandert.'],
- 'set.motionNote':['Calm keeps the scenery quiet in the background and turns floating particles off. Full brings both back.','Ruhig laesst die Kulisse weit zuruecktreten und schaltet die schwebenden Partikel ab. Voll bringt beides zurueck.'],
- 'set.themeNote':['Each theme changes the palette and the ambient effect — snow, fireflies, pollen, bubbles or embers. Auto follows your system light or dark setting.','Jedes Design ändert Farben und Hintergrundeffekt — Schnee, Glühwürmchen, Pollen, Blasen oder Funken. Auto folgt deiner Systemeinstellung.'],
+ 'set.hueNote':['Overrides the active theme accent. Backgrounds stay.','Überschreibt den Akzent des Themes. Hintergründe bleiben.'],
+ 'set.motionNote':['Calm quiets the scenery and turns particles off. Full brings both back.','Ruhig nimmt Kulisse und Partikel zurück. Voll bringt beides wieder.'],
+ 'set.themeNote':['Each theme changes palette and ambient effect. Auto follows your system.','Jedes Design ändert Farben und Hintergrund. Auto folgt dem System.'],
  'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],'set.clock':['Time format','Zeitformat'],
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.spar':['Performance mode','Sparmodus'],
  'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],'set.hooks':['Rotating quotes','Rotierende Sprüche'],
- 'set.langNote':['The interface translates fully. Chapter text and technique cues stay English in this prototype — the German edition follows with the book.','Die Oberfläche ist vollständig übersetzt. Kapiteltexte und Technikhinweise bleiben im Prototyp englisch — die deutsche Fassung kommt mit dem Buch.'],
+ 'set.langNote':['Interface fully translated. Chapter text stays English in this prototype.','Oberfläche vollständig übersetzt. Kapiteltexte bleiben im Prototyp englisch.'],
  'ob.h':['Your plan — five quick questions','Dein Plan — fünf schnelle Fragen'],
- 'ob.s':['Answer once, get a plan that fits your gear and your body. Everything stays changeable later — every exercise can be swapped.','Einmal beantworten, und der Plan passt zu deinem Equipment und deinem Körper. Alles bleibt später änderbar — jede Übung lässt sich tauschen.'],
+ 'ob.s':['Answer once. Everything stays changeable.','Einmal beantworten. Später alles änderbar.'],
  'ob.goal':['Goal','Ziel'],'ob.days':['Training days per week','Trainingstage pro Woche'],
  'ob.eq':['What do you have? (tap all that apply)','Was hast du da? (alles Zutreffende antippen)'],
  'ob.avoid':['Anything to protect? (optional)','Etwas zu schonen? (optional)'],
  'ob.exp':['Training experience','Trainingserfahrung'],
- 'ob.note':['No gear at all is fine — wall, table and chair cover every pattern until a pull-up bar arrives.','Gar kein Equipment ist okay — Wand, Tisch und Stuhl decken jedes Muster ab, bis eine Klimmzugstange da ist.'],
+ 'ob.note':['No gear? Wall, table and chair cover every pattern.','Ohne Equipment reichen Wand, Tisch und Stuhl.'],
  'ob.testH':['One more thing: the strength test','Noch eine Sache: der Krafttest'],
- 'ob.testS':['Ten minutes, four simple moves, stop when your form breaks. Your reps are saved and set every ladder to the right step — so day one is neither too easy nor too hard.','Zehn Minuten, vier einfache Übungen, Schluss sobald die Form bricht. Deine Wiederholungen werden gespeichert und stellen jede Leiter auf die richtige Stufe — Tag eins ist damit weder zu leicht noch zu schwer.'],
+ 'ob.testS':['Ten minutes, four moves, stop when your form breaks. Your reps set every ladder to the right step.','Zehn Minuten, vier Übungen, Schluss wenn die Form bricht. Deine Wiederholungen stellen jede Leiter richtig ein.'],
  'btn.obSave':['Create my plan','Meinen Plan erstellen'],
  'btn.obTest':['Take the test now','Jetzt zum Krafttest'],
  'btn.obLater':['Later','Später'],
  'cat.h':['Exercise library','Übungskatalog'],
- 'cat.s':['Every exercise the plan can draw from. Difficulty runs Beginner to Elite; the tags show what you need and which joints work hardest. Swap any plan exercise from the Today view.','Alle Übungen, aus denen der Plan schöpfen kann. Schwierigkeit von Anfang bis Elite; die Tags zeigen, was du brauchst und welche Gelenke am meisten arbeiten. Getauscht wird in der Heute-Ansicht.'],
+ 'cat.s':['Every exercise the plan can use. Swap one on Today.','Alle Übungen des Plans. Getauscht wird auf HEUTE.'],
  'set.conn':['Connections','Verbindungen'],
  'set.health':['Apple Health','Apple Health'],
- 'set.healthHow':['One-time setup on the iPhone: open the Shortcuts app, tap plus, name the shortcut exactly "VALKR Health", add the action "Log workout", set type "Traditional Strength Training", duration: Shortcut Input, unit minutes. After every finished session the hub offers a button that sends the real duration across.','Einmalige Einrichtung am iPhone: Kurzbefehle-App öffnen, Plus antippen, den Kurzbefehl exakt „VALKR Health" nennen, Aktion „Training protokollieren" hinzufügen, Art „Traditionelles Krafttraining", Dauer: Kurzbefehl-Eingabe, Einheit Minuten. Nach jeder beendeten Einheit bietet das Hub einen Knopf an, der die echte Dauer rüberschickt.'],
- 'set.connNote':['Works via an iOS shortcut — browsers are not allowed to write to Apple Health directly. Samsung Health and Google Fit have no such door at all: writing there requires a native app from the store. Honest answer — that connection only comes with a native version.','Läuft über einen iOS-Kurzbefehl — Browser dürfen nicht direkt in Apple Health schreiben. Samsung Health und Google Fit haben gar keine solche Tür: Schreiben geht dort nur mit einer nativen App aus dem Store. Ehrliche Ansage — diese Anbindung kommt erst mit einer nativen Version.'],
+ 'set.healthHow':['One-time iPhone setup: Shortcuts app, plus, name it exactly "VALKR Health", action "Log workout", type "Traditional Strength Training", duration: Shortcut Input, minutes.','Einmalig am iPhone: Kurzbefehle-App, Plus, exakt „VALKR Health" nennen, Aktion „Training protokollieren", Art „Traditionelles Krafttraining", Dauer: Kurzbefehl-Eingabe, Minuten.'],
+ 'set.connNote':['Works via an iOS shortcut — browsers cannot write to Apple Health directly. Samsung Health and Google Fit need a native app; that comes later.','Läuft über einen iOS-Kurzbefehl — Browser dürfen nicht direkt in Apple Health schreiben. Samsung Health und Google Fit brauchen eine native App; die kommt später.'],
  'btn.healthTest':['Send test (5 min)','Test senden (5 min)'],
  'set.data':['Your data','Deine Daten'],
- 'set.dataNote':['Nothing is uploaded anywhere. Clearing your browser data clears this too, so copy it out before you switch device.','Nichts wird hochgeladen. Browserdaten löschen löscht auch das hier — vor einem Gerätewechsel kopieren.'],
+ 'set.dataNote':['Nothing is uploaded. Clearing browser data clears this too.','Nichts wird hochgeladen. Browserdaten löschen löscht auch das.'],
  'foot':['Prototype · not a live product · data stays in your browser','Prototyp · kein Live-Produkt · Daten bleiben im Browser']
 };
 function T(k){var e=DICT[k];return e?(cfg.lang==='de'?e[1]:e[0]):k;}
@@ -4997,6 +5048,79 @@ function cvar(n){
   CVC[n]=v;return v;
 }
 function cvarFlush(){CVC={};}
+/* ---------- Bewegungsdemos: nur auf Anforderung -------------------------
+   Sechs Demos gleichzeitig sind 29 Einzelanimationen. Der Browser rechnet
+   jede in jedem Bild neu -- auf einem 120-Hz-Telefon 120 Mal je Sekunde.
+   Das war die Ursache der Bildraten-Einbrueche, nicht die Zahl der Kacheln.
+
+   pauseAnimations() haette nur die Zeitachse angehalten; die Animationen
+   staenden weiter im Dokument. moveSvg(...,true) laesst die <animate>-
+   Elemente ganz weg -- es gibt also nicht nur nichts zu sehen, sondern auch
+   nichts zu rechnen. Erst ein Tipp baut EINE animierte Fassung.
+
+   Sie haelt an, sobald man sie wegscrollt, eine andere antippt, dieselbe noch
+   einmal antippt oder den Bereich verlaesst. Mehr als eine laufende Demo kann
+   es dadurch nicht geben. */
+var DMOK={},DMOCUR=null,dmoObs=null;
+function dmoRuht(){return SYSRED||cfg.motion==='off';}
+/* k ist ein fester Schluessel je Platz, kein laufender Zaehler: beim
+   Neuzeichnen ueberschreibt derselbe Platz seinen Eintrag, die Tabelle
+   waechst also nicht mit jedem Rendern.
+   o.id setzt eine Kennung, wenn anderer Code die Huelle wiederfinden muss.
+   o.fokus macht sie tastaturbedienbar -- nur dort erlaubt, wo sie NICHT in
+   einem Knopf sitzt: ein fokussierbares Element in einem <button> ist
+   ungueltiges HTML und bricht die Tabulator-Reihenfolge. */
+function demoHost(k,d,c,cls,o){
+  if(!d)return '';
+  DMOK[k]={d:d,c:c};o=o||{};
+  var ruht=dmoRuht();
+  return '<span class="'+(cls?cls+' ':'')+'dmo'+(ruht?' ruht':'')+'" data-dmo="'+k+'"'+
+    (o.id?' id="'+o.id+'"':'')+
+    ((o.fokus&&!ruht)?' role="button" tabindex="0" aria-label="'+(cfg.lang==='de'?'Bewegung abspielen':'Play movement')+'"':'')+'>'+
+    moveSvg(d,c,true)+(ruht?'':'<i class="dmoGo" aria-hidden="true"></i>')+'</span>';
+}
+function dmoStill(el){
+  var r=el&&DMOK[el.getAttribute('data-dmo')];if(!r)return;
+  el.innerHTML=moveSvg(r.d,r.c,true)+(dmoRuht()?'':'<i class="dmoGo" aria-hidden="true"></i>');
+  el.classList.remove('an');
+}
+function dmoStop(){
+  if(!DMOCUR)return;
+  if(document.contains(DMOCUR))dmoStill(DMOCUR);
+  DMOCUR=null;
+}
+function dmoPlay(el){
+  if(dmoRuht()||!el)return;
+  var r=DMOK[el.getAttribute('data-dmo')];if(!r)return;
+  var war=(DMOCUR===el);
+  dmoStop();
+  if(war)return;
+  el.innerHTML=moveSvg(r.d,r.c,false);
+  el.classList.add('an');
+  DMOCUR=el;
+  if(!dmoObs&&window.IntersectionObserver){
+    dmoObs=new IntersectionObserver(function(es){
+      for(var i=0;i<es.length;i++)if(!es[i].isIntersecting&&es[i].target===DMOCUR)dmoStop();
+    },{threshold:.3});
+  }
+  if(dmoObs)dmoObs.observe(el);
+}
+/* Die Demo sitzt in einer Kachel, die selbst etwas oeffnet. Der Tipp auf die
+   Figur gehoert der Figur -- sonst spielt sie ab und die Ansicht wechselt im
+   selben Moment. Deshalb in der Erfassungsphase abfangen. */
+document.addEventListener('click',function(e){
+  var el=e.target&&e.target.closest?e.target.closest('.dmo'):null;
+  if(!el||el.classList.contains('ruht'))return;
+  e.preventDefault();e.stopPropagation();
+  dmoPlay(el);
+},true);
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Enter'&&e.key!==' ')return;
+  var el=e.target&&e.target.closest?e.target.closest('.dmo[role]'):null;
+  if(!el||el.classList.contains('ruht'))return;
+  e.preventDefault();dmoPlay(el);
+},true);
+
 var PAT=[
  {id:'push',name:'Push',kind:'Horizontal push',cv:'--aurora',blurb:'Chest, shoulders and triceps.',media:'Push-up · full range',
   ladder:['Wall push-up','Hands on a table','Hands on a chair','Full push-up','Feet elevated','Archer push-up','One-arm push-up'],
@@ -5362,6 +5486,7 @@ function show(n,fromBack){
   /* Die Bewegungsdemo aus dem Speicher nehmen, sobald man die Ansicht verlaesst.
      Eine SVG-Animation laeuft auch in einem display:none-Bereich weiter -- man
      sieht sie nicht, der Browser rechnet sie trotzdem in jedem Bild. */
+  dmoStop();
   if(n!=='detail'){var dm=$('d-demo');if(dm&&dm.firstChild)dm.innerHTML='';}
   /* v19 Push: auf dem Handy legt sich die Ansicht ueber den Bereich, der
      darunter sichtbar bleibt (Parallax im Stil). Am Rechner normaler
@@ -5909,7 +6034,7 @@ function buildTiles(){
   PAT.forEach(function(p){
     var b=document.createElement('button');b.className='tile';
     var s=steps[p.id]||0,pct=Math.round((s+1)/p.ladder.length*100);
-    b.innerHTML='<span class="tdemo">'+moveSvg(p.id,cvar(p.cv))+'</span><b>'+p.name+'</b><span class="k">'+p.kind+'</span><span class="lvl">'+(cfg.lang==='de'?'Stufe ':'Step ')+(s+1)+' / '+p.ladder.length+'</span><span class="prog"><i style="width:'+pct+'%"></i></span>';
+    b.innerHTML=demoHost('p:'+p.id,p.id,cvar(p.cv),'tdemo')+'<b>'+p.name+'</b><span class="k">'+p.kind+'</span><span class="lvl">'+(cfg.lang==='de'?'Stufe ':'Step ')+(s+1)+' / '+p.ladder.length+'</span><span class="prog"><i style="width:'+pct+'%"></i></span>';
     b.addEventListener('click',function(){openDetail(p.id);});
     t.appendChild(b);});
 }
@@ -5919,7 +6044,7 @@ function openDetail(id){
   $('d-icon').innerHTML=sv(p.id,cvar(p.cv),44);
   $('d-name').innerHTML=p.name+' · <span style="font-size:.7em;color:var(--ink3)">'+p.kind+'</span>';
   $('d-blurb').textContent=p.blurb;$('d-media').textContent=p.media;
-  $("d-demo").innerHTML=moveSvg(p.id,cvar(p.cv)||cvar('--aurora'));
+  $("d-demo").innerHTML=demoHost('h:'+p.id,p.id,cvar(p.cv)||cvar('--aurora'),'hdemo',{fokus:1});
   ladder();fill('d-cues',p.cues);fill('d-bad',p.bad);
   var ph=phase(Math.min(12,Math.max(1,wkOf(TODAY))));
   var f=$('d-facts');f.innerHTML='';
@@ -6046,7 +6171,7 @@ function openSkill(id){
     var w=14+(i*(58/Math.max(1,s.steps.length-1)));
     var b=document.createElement('button');b.className='rung '+cls;
     var pose=skPose(s.id,i);
-    var demo=pose?('<span class="rdemo">'+moveSvg(pose,cvar(s.cv),i!==prog)+'</span>'):'';
+    var demo=pose?demoHost('r:'+s.id+':'+i,pose,cvar(s.cv),'rdemo'):'';
     var stTxt=i<prog?(DE?'Geschafft':'Cleared'):(i===prog?(DE?'Du bist hier':'You are here'):(DE?'Gesperrt':'Locked'));
     b.innerHTML=demo+'<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+stTxt+'</span>';
     b.querySelector('.lb').textContent=(SD&&SD.steps[i])?SD.steps[i]:st;
@@ -6065,7 +6190,7 @@ function buildMob(){
   $('mobList').innerHTML=MOB.map(function(m,i){
     var d=DE&&MOBDE[i]?MOBDE[i]:m;
     var demo=(typeof MOBDEMO!=='undefined'&&MOBDEMO[i])
-      ?'<span class="mobdemo" id="mobdemo'+i+'">'+moveSvg(MOBDEMO[i],cvar('--ice'),true)+'</span>':'';
+      ?demoHost('m:'+i,MOBDEMO[i],cvar('--ice'),'mobdemo',{id:'mobdemo'+i,fokus:1}):'';
     return '<div class="drill" id="drill'+i+'"><div class="drillHead"><div style="flex:1;min-width:0"><span class="t">'+d.t+'</span><b>'+d.n+'</b></div>'+demo+'</div><p><b>Test:</b> '+d.test+'</p><p><b>'+(DE?'Übung:':'Fix:')+'</b> '+d.fix+'</p><span class="dose">'+d.dose+'</span></div>';
   }).join('');
   if(typeof pauseHiddenSvg==='function')pauseHiddenSvg();
@@ -6082,7 +6207,10 @@ function mobPaint(){
     [mobLast,mobI].forEach(function(ix){
       if(ix<0||ix>=MOB.length||!MOBDEMO[ix])return;
       var el=$('mobdemo'+ix);
-      if(el)el.innerHTML=moveSvg(MOBDEMO[ix],cvar('--ice'),ix!==mobI);
+      if(!el)return;
+      if(ix===mobI)dmoPlay(el);
+      else if(el===DMOCUR)dmoStop();
+      else dmoStill(el);
     });
     mobLast=mobI;
     if(typeof pauseHiddenSvg==='function')pauseHiddenSvg();
@@ -8964,6 +9092,24 @@ function drawStat(){
    Hero mit der naechsten Einheit, Gewohnheiten als 2x2, Verbessern als
    Zeilenkarten. Alles klickbar, alles aus vorhandenen Datenquellen --
    hier wird nichts erfunden, nur gebuendelt. */
+/* Zaehlt eine Zahl hoch, statt sie zu setzen -- wie MCI.
+   Nur wenn sich der Wert wirklich geaendert hat: renderHome() laeuft bei
+   jedem refresh(), und eine Kachel, die bei jeder Kleinigkeit von vorn
+   zaehlt, ist Unruhe statt Rueckmeldung. */
+var ZLAST={};
+function zaehlAuf(el,schluessel,bis){
+  if(!el)return;
+  var von=(schluessel in ZLAST)?ZLAST[schluessel]:0;
+  ZLAST[schluessel]=bis;
+  if(von===bis||SYSRED||cfg.motion==='off'){el.textContent=String(bis);return;}
+  var t0=0;
+  requestAnimationFrame(function schritt(t){
+    if(!t0)t0=t;
+    var u=Math.min(1,(t-t0)/620),e=1-Math.pow(1-u,3);
+    el.textContent=String(Math.round(von+(bis-von)*e));
+    if(u<1)requestAnimationFrame(schritt);
+  });
+}
 function renderHome(){
   var heroEl=$('homeHero'),habEl=$('homeHabits'),upEl=$('homeCards');
   if(!heroEl)return;
@@ -8976,7 +9122,11 @@ function renderHome(){
     var muster={};its.forEach(function(x){if(x.id&&pid[x.id])muster[pid[x.id].name]=1;});
     var wd=DE?['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()]:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
     var tag=off===0?(DE?'Heute':'Today'):(DE?'Nächste Einheit · '+wd:'Next session · '+wd);
-    var thumbs=its.slice(0,4).map(function(x){return x.id?exThumb(x.l,x.id):'';}).join('');
+    /* Alle Uebungen des Tages, nicht die ersten vier -- und unten in einer
+       Reihe statt rechts untereinander. Eine Spalte neben dem Text traegt
+       vier Symbole, dann ist die Kachelhoehe alle; eine Reihe unter dem Text
+       traegt den ganzen Tag. */
+    var thumbs=its.map(function(x){return x.id?exThumb(x.l,x.id):looseThumb(x.l);}).join('');
     /* Heute: der Knopf startet die Einheit sofort. Vorher fuehrte er in eine
        Uebersicht und von dort in einen Check-in -- zwei Bildschirme zwischen
        "ich will jetzt trainieren" und dem ersten Satz.
@@ -8997,15 +9147,17 @@ function renderHome(){
   /* Gewohnheiten. */
   var k=iso(TODAY),ms=mealsOf(k),kcal=0;ms.forEach(function(m){kcal+=mealKcal(m);});
   var ziel=curMacro('cal')||0;
-  var teil=ziel?Math.min(1,kcal/ziel):0,C=125.7;
-  var ringSub=ziel?(kcal+' / '+ziel+' kcal'):(DE?'Rechner einrichten':'set up the calculator');
+  var teil=ziel?Math.min(1,kcal/ziel):0;
+  var uebrig=Math.max(0,ziel-kcal);
+  var RR=52,RC=2*Math.PI*RR;
   var h='';
-  h+='<button type="button" class="habcard" data-go="fuel"><em>'+(DE?'Kalorien':'Calories')+'</em>'+
+  h+='<button type="button" class="habcard hcCal" data-go="fuel"><em>'+(DE?'Kalorien':'Calories')+'</em>'+
     '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
-    '<svg class="habring" width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">'+
-    '<circle cx="23" cy="23" r="20" fill="none" stroke="var(--surf2)" stroke-width="4.5"/>'+
-    '<circle cx="23" cy="23" r="20" fill="none" stroke="var(--aurora)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-teil)).toFixed(1)+'" transform="rotate(-90 23 23)"/></svg>'+
-    '<p class="sub">'+ringSub+'</p></button>';
+    '<div class="calring"><svg viewBox="0 0 128 128" aria-hidden="true">'+
+    '<circle cx="64" cy="64" r="'+RR+'" fill="none" stroke="var(--surf2)" stroke-width="10"/>'+
+    '<circle id="calArc" cx="64" cy="64" r="'+RR+'" fill="none" stroke="var(--aurora)" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+RC.toFixed(1)+'" stroke-dashoffset="'+RC.toFixed(1)+'" transform="rotate(-90 64 64)"/></svg>'+
+    '<div class="calmid"><b id="calNum">0</b><span>'+(ziel?(DE?'von ':'of ')+ziel:'kcal')+'</span></div></div>'+
+    '<p class="sub">'+(ziel?('<b id="calLeft">0</b> '+(DE?'übrig':'left')):(DE?'Rechner einrichten':'set up the calculator'))+'</p></button>';
   /* Trainings-Heatmap: 28 Tage, heute umrandet. */
   var zellen='',n=0,woSoll=0,woIst=0;
   for(var i=27;i>=0;i--){
@@ -9018,22 +9170,61 @@ function renderHome(){
     var dw=add(STD,(Math.min(12,Math.max(1,wkOf(TODAY)))-1)*7+j),pw=plan(dw);
     if(pw.kind==='train'){woSoll++;if(dayDone(iso(dw)))woIst++;}
   }
-  h+='<button type="button" class="habcard" data-go="train"><em>'+(DE?'Trainings':'Sessions')+'</em>'+
+  h+='<button type="button" class="habcard hcTrain" data-go="train"><em>'+(DE?'Trainings':'Sessions')+'</em>'+
     '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
     '<div class="habheat">'+zellen+'</div>'+
     '<p class="sub">'+woIst+'/'+woSoll+' '+(DE?'diese Woche':'this week')+'</p></button>';
-  /* Gewicht. */
-  var kg=profile&&profile.weight?profile.weight:null;
-  h+='<button type="button" class="habcard" data-go="fuel"><em>'+(DE?'Gewicht':'Weight')+'</em>'+
+  /* Gewicht als Kurve. Eine Zahl sagt, wo du stehst; eine Kurve sagt,
+     wohin du gehst -- und das ist beim Gewicht die einzige Frage.
+     Bei nur einem Wert eine glatte Linie ohne Punkte: ein Diagramm aus einem
+     Punkt ist kein Diagramm, sondern eine Zahl mit Rahmen. */
+  var kg=wlog.length?wlog[wlog.length-1].v:((profile&&profile.weight)||null);
+  function wz(v){return toDisp(v,'w').toFixed(1).replace('.',DE?',':'.');}
+  var wSpark='',wSub;
+  if(kg){
+    var WW=100,WH=30,WP=3;
+    if(wlog.length<2){
+      wSpark='<svg class="wspark" viewBox="0 0 '+WW+' '+WH+'" preserveAspectRatio="none" aria-hidden="true">'+
+        '<line x1="0" y1="'+(WH/2)+'" x2="'+WW+'" y2="'+(WH/2)+'" stroke="var(--aurora)" stroke-width="1.6" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+    }else{
+      var vs=wlog.map(function(x){return x.v;});
+      var mn=Math.min.apply(null,vs),mx=Math.max.apply(null,vs),rng=(mx-mn)||1;
+      function wy(v){return (WH-WP-((v-mn)/rng)*(WH-2*WP)).toFixed(1);}
+      var pts=wlog.map(function(x,i){return (i/(wlog.length-1)*WW).toFixed(1)+','+wy(x.v);}).join(' ');
+      wSpark='<svg class="wspark" viewBox="0 0 '+WW+' '+WH+'" preserveAspectRatio="none" aria-hidden="true">'+
+        '<line x1="0" y1="'+wy(wlog[0].v)+'" x2="'+WW+'" y2="'+wy(wlog[0].v)+'" stroke="var(--ink3)" stroke-width="1" stroke-dasharray="3 3" opacity=".55" vector-effect="non-scaling-stroke"/>'+
+        '<polyline points="'+pts+'" fill="none" stroke="var(--aurora)" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>';
+    }
+  }
+  if(wlog.length>1){
+    var dlt=toDisp(wlog[wlog.length-1].v-wlog[0].v,'w');
+    wSub=(dlt>0?'+':(dlt<0?'−':''))+Math.abs(dlt).toFixed(1).replace('.',DE?',':'.')+' '+uw()+(DE?' seit Start':' since start');
+  }else if(kg){wSub=DE?'Startwert '+wz(kg)+' '+uw():'Start '+wz(kg)+' '+uw();}
+  else{wSub=DE?'Noch kein Wert':'No entry yet';}
+  h+='<button type="button" class="habcard hcWeight" data-go="fuel"><em>'+(DE?'Gewicht':'Weight')+'</em>'+
     '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
-    '<b class="big">'+(kg?String(kg).replace('.',DE?',':'.')+'<small> kg</small>':'–')+'</b>'+
-    '<p class="sub">'+(DE?'im Ernährungs-Bereich pflegen':'kept in the fuel area')+'</p></button>';
+    '<b class="big">'+(kg?wz(kg)+'<small> '+uw()+'</small>':'–')+'</b>'+
+    wSpark+
+    '<p class="sub">'+wSub+'</p></button>';
   /* Serie. */
   var st=String(streakVal||0);
-  h+='<div class="habcard"><em>'+(DE?'Serie':'Streak')+'</em>'+
-    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?(st==='1'?'Tag':'Tage'):(st==='1'?'day':'days'))+'</small></b>'+
-    '<p class="sub">'+(DE?'Dranbleiben zählt doppelt':'showing up counts double')+'</p></div>';
+  h+='<div class="habcard hcStreak"><em>'+(DE?'Serie':'Streak')+'</em>'+
+    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?(st==='1'?'Tag':'Tage'):(st==='1'?'day':'days'))+'</small></b></div>';
   habEl.innerHTML=h;
+  /* Ring und Zahlen laufen erst nach dem Einhaengen los: ein frisch erzeugtes
+     Element hat keinen Vorzustand, aus dem heraus etwas ueberblenden koennte.
+     Zwei Bilder warten, sonst fasst der Browser beide Werte zu einem zusammen. */
+  var arc=$('calArc');
+  if(arc){
+    var arcZiel=(RC*(1-teil)).toFixed(1);
+    if(SYSRED||cfg.motion==='off')arc.setAttribute('stroke-dashoffset',arcZiel);
+    else requestAnimationFrame(function(){requestAnimationFrame(function(){
+      arc.style.transition='stroke-dashoffset .62s cubic-bezier(.22,.61,.36,1)';
+      arc.setAttribute('stroke-dashoffset',arcZiel);
+    });});
+  }
+  zaehlAuf($('calNum'),'cal',kcal);
+  zaehlAuf($('calLeft'),'calLeft',uebrig);
   /* Verbessern. */
   var offen=parseInt(($('coachBadge')&&$('coachBadge').textContent)||'0',10)||0;
   function up(go,farbe,icon,titel,sub,badge){
@@ -9047,9 +9238,9 @@ function renderHome(){
     mob:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 7.5v5M12 12.5 8 17M12 12.5l4 4.5M7 9.5l5-1.5 5 1.5"/></svg>',
     buch:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 20.5V5.5M8 7h8"/></svg>'};
   upEl.innerHTML=
-    up('coach','var(--ice)',ic.coach,'Coach',offen?(DE?offen+' offene Hinweise':offen+' open notes'):(DE?'Alles im grünen Bereich':'All clear'),offen)+
+    up('coach','var(--ice)',ic.coach,'Coach',offen?(DE?offen+' offen':offen+' open'):(DE?'Nichts offen':'Nothing open'),offen)+
     up('mobility','var(--aurora)',ic.mob,(DE?'Beweglichkeit':'Mobility'),(DE?'Fünf Tests, fünf Drills':'Five tests, five drills'),0)+
-    up('learn','var(--brass)',ic.buch,(DE?'Wissen':'Knowledge'),(DE?'Das Buch, Kapitel für Kapitel':'The book, chapter by chapter'),0);
+    up('learn','var(--brass)',ic.buch,(DE?'Wissen':'Knowledge'),(DE?'12 Kapitel':'12 chapters'),0);
 }
 /* Klicks der Dashboard-Karten. */
 ['homeHero','homeHabits','homeCards'].forEach(function(id){
