@@ -228,7 +228,6 @@
   @media (max-width:640px){
     .bar{flex-wrap:wrap;gap:.45rem}
     .barL,.barR{gap:.45rem}
-    .brand small{display:none}
     /* Kopfleiste auf dem Handy auf das Noetigste: Marke, Serie, Woche,
        Einstellungen. Rueckgaengig, Zuruecksetzen und Theme stehen alle in den
        Einstellungen -- sechs Bedienelemente ueber dem Inhalt sind auf einem
@@ -321,7 +320,6 @@
      liegt im Menue-Blatt oder in den Einstellungen, wo es hingehoert. */
   @media (max-width:640px){
     .bar #undoBtn,.bar #resetBtn,.bar #themeBtn{display:none}
-    .bar .brand small{display:none}
     /* Serie und Woche stehen nebeneinander statt untereinander -- zwei
        zweizeilige Bloecke am rechten Rand einer 360-Pixel-Leiste ergeben
        einen Klumpen, den man liest statt ueberfliegt. */
@@ -2682,7 +2680,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='20.3';
+var VERSION='20.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
