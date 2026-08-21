@@ -144,11 +144,17 @@
      Gummiband macht die App selbst -- gedaempft und ohne die feste Leiste
      mitzuziehen. */
   html{overscroll-behavior-y:none}
-  /* touch-action:manipulation nimmt dem Doppeltipp seine Zoom-Bedeutung.
-     Ohne das wartet der Browser nach jedem Tippen 300 ms ab, ob ein zweites
-     folgt -- die Verzoegerung, die eine Web-App traeger wirken laesst als
-     eine aus dem Store. */
-  body{overscroll-behavior-y:none;touch-action:manipulation}
+  /* iOS bringt sein eigenes Gummiband mit -- dort bleibt das native Verhalten
+     an, und das JS-Gummiband (unten) schaltet sich ab. Die Klasse setzt der
+     Start-Code. */
+  html.ios,html.ios body{overscroll-behavior-y:auto}
+  /* pan-x pan-y statt manipulation: manipulation nimmt nur dem Doppeltipp
+     seine Zoom-Bedeutung, ERLAUBT aber ausdruecklich das Aufziehen mit zwei
+     Fingern -- genau der Zoom, der auf Android trotz user-scalable=no
+     durchkam (Bedienungshilfen koennen die Viewport-Angabe uebersteuern,
+     touch-action nicht). pan-x pan-y laesst nur noch Wischen zu und nimmt
+     den Doppeltipp gleich mit. */
+  body{overscroll-behavior-y:none;touch-action:pan-x pan-y}
   *{box-sizing:border-box}
   /* 100 % statt fester 16 px: damit schlaegt die Schriftgroesse durch, die der
      Nutzer in den Systemeinstellungen gewaehlt hat. Wer schlecht sieht, stellt
@@ -355,6 +361,21 @@
   @media (max-width:640px){
     #subnav{margin-bottom:.85rem;gap:1rem}
     #subnav button{font-size:.8rem}
+    /* MCI-Scrollverhalten: der grosse Titel scrollt weg, Abschnittsleiste
+       und Wochenstreifen bleiben unter der Kopfleiste kleben. Volle Breite
+       ueber dieselbe Randformel wie .shell, Grund deckend (kein Glas --
+       das waere auf schwachen Geraeten eine staendige Unschaerfe-Rechnung),
+       darunter ein weicher Auslauf statt harter Kante. */
+    #subnav,#dstrip,#fstrip{
+      --gut:max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px));
+      position:sticky;z-index:25;background:var(--bg);
+      margin-left:calc(var(--gut)*-1);margin-right:calc(var(--gut)*-1);
+      padding-left:var(--gut);padding-right:var(--gut)}
+    #subnav{top:var(--barH,58px)}
+    #dstrip,#fstrip{top:calc(var(--barH,58px) + var(--subH,0px));padding-top:.25rem;padding-bottom:.45rem;margin-bottom:.55rem}
+    #subnav::after,#dstrip::after,#fstrip::after{content:"";position:absolute;
+      left:0;right:0;bottom:-10px;height:10px;pointer-events:none;
+      background:linear-gradient(var(--bg),transparent)}
   }
 
 
@@ -617,6 +638,19 @@
   .mlsugrow b{font-size:var(--t2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mlsugrow span{font-size:var(--t1);color:var(--ink3);font-family:var(--fm)}
   .mlsugrow:hover{border-color:var(--aurora)}
+
+  /* ── Leistung auf schwachen Geraeten: lange Listen und das eingebettete
+     Buch werden erst gerechnet, wenn sie ins Bild scrollen. Der Browser
+     ueberspringt Layout und Zeichnen fuer alles ausserhalb; die
+     intrinsische Groesse haelt die Scrollleiste ruhig. Das ist die
+     groesste einzelne Ersparnis auf Geraeten mit wenig Rechenleistung:
+     114 Katalogzeilen und zwoelf Buchkapitel kosten sonst bei JEDEM
+     Layout-Durchlauf. ── */
+  .catlist>*{content-visibility:auto;contain-intrinsic-size:auto 62px}
+  .statcard{content-visibility:auto;contain-intrinsic-size:auto 190px}
+  .accBody .book{content-visibility:auto;contain-intrinsic-size:auto 2400px}
+  .supgrid>*{content-visibility:auto;contain-intrinsic-size:auto 120px}
+  #weeks>*{content-visibility:auto;contain-intrinsic-size:auto 64px}
   /* Statistik-Karten (MCI): Kopf mit Titel + Delta-Chip, Chart darunter. */
   .statcard{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
     padding:.85rem .9rem;box-shadow:var(--sh);margin-bottom:.7rem}
@@ -2581,7 +2615,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='20.0';
+var VERSION='20.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -5238,12 +5272,13 @@ Object.keys(GROUP).forEach(function(g){GROUP[g].v.forEach(function(x){PARENT[x]=
 function drawSub(g,cur){
   var el=$('subnav');if(!el)return;
   var G=GROUP[g];
-  if(!G||!G.l){el.hidden=true;el.innerHTML='';return;}
+  if(!G||!G.l){el.hidden=true;el.innerHTML='';if(typeof stickyMess==='function')stickyMess();return;}
   var L=cfg.lang==='de'?1:0;
   el.hidden=false;
   el.innerHTML=G.v.map(function(x,i){
     return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+'</button>';
   }).join('');
+  if(typeof stickyMess==='function')stickyMess();
 }
 
 function show(n,fromBack){
@@ -8012,9 +8047,22 @@ function showTip(el){
   box.style.top=top+'px';box.style.left=left+'px';tipEl=el;
 }
 function hideTip(){
+  /* Laeuft an jedem Scroll-Ereignis -- ohne offenen Tipp sofort raus,
+     statt bei jedem Wisch Klassen und Attribute anzufassen. */
+  if(!tipEl&&!tipT)return;
   if(tipT){clearTimeout(tipT);tipT=null;}
   var box=$('tipbox');box.classList.remove('on');box.setAttribute('aria-hidden','true');tipEl=null;
 }
+/* Klebe-Koepfe (MCI-Scrollverhalten): Kopf- und Abschnittsleisten-Hoehe als
+   CSS-Variablen -- einmal gemessen beim Start, bei Groessenwechsel und beim
+   Bereichswechsel, nie waehrend des Scrollens. */
+function stickyMess(){
+  var b=document.querySelector('.bar');
+  if(b)document.documentElement.style.setProperty('--barH',b.offsetHeight+'px');
+  var s=$('subnav');
+  document.documentElement.style.setProperty('--subH',(s&&!s.hidden?s.offsetHeight:0)+'px');
+}
+window.addEventListener('resize',function(){requestAnimationFrame(stickyMess);},{passive:true});
 function buildSup(){
   var L=cfg.lang==='de'?1:0;
   $('supgrid').innerHTML=SUP.map(function(s){
@@ -10731,7 +10779,15 @@ function renderBoard(avgLp){
    einer Wischbewegung aendert sich die Seitenhoehe ohnehin nicht. */
 (function(){
   if(!('ontouchstart' in window))return;
-  var el=null,y0=0,zieh=0,soll=0,los=false,raf=0,maxScroll=0,fensterH=0;
+  /* iOS hat das Gummiband nativ -- dort ist dieses Skript doppelt und war
+     sogar schaedlich: das will-change bei jeder Beruehrung machte die ganze
+     Ansicht zu einer Safari-Kachel-Ebene, und beim Scrollen blieben
+     veraltete Kacheln als doppelte Textzeilen stehen (Liams iPhone-Video).
+     Die Klasse am html-Element stellt oben im CSS zusaetzlich das native
+     Ueberziehen wieder an. */
+  var istIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
+  if(istIOS){document.documentElement.classList.add('ios');return;}
+  var el=null,y0=0,zieh=0,soll=0,los=false,raf=0,maxScroll=0,fensterH=0,ebene=false;
   function sichtbareAnsicht(){
     var v=document.querySelector('.view.on');
     if(!v||getComputedStyle(v).position==='fixed')return null;
@@ -10756,19 +10812,20 @@ function renderBoard(avgLp){
     if(e.touches.length!==1)return;
     el=sichtbareAnsicht();
     if(!el)return;
-    y0=e.touches[0].clientY;zieh=0;soll=0;los=false;
+    y0=e.touches[0].clientY;zieh=0;soll=0;los=false;ebene=false;
     /* Einmal messen, dann nicht mehr anfassen. Das ist der teure Teil -- er
        gehoert hierher, wo noch nichts in Bewegung ist, nicht in die
-       Bewegung selbst. */
+       Bewegung selbst. Die Ebene (will-change) wird NICHT hier angemeldet,
+       sondern erst, wenn das Band wirklich greift: sonst laeuft jedes
+       normale Scrollen ueber eine Riesen-Kachel-Ebene. */
     fensterH=window.innerHeight;
     maxScroll=Math.max(0,document.documentElement.scrollHeight-fensterH);
-    el.style.transition='';
-    el.style.willChange='transform';
   },{passive:true});
   document.addEventListener('touchmove',function(e){
     if(!el||e.touches.length!==1)return;
     var d=e.touches[0].clientY-y0;
     if((d>0&&oben())||(d<0&&unten())){
+      if(!ebene){ebene=true;el.style.transition='';el.style.willChange='transform';}
       los=true;soll=daempfen(d);anfordern();
     }else if(los){
       los=false;soll=0;anfordern();
@@ -10805,10 +10862,18 @@ function renderBoard(avgLp){
    ignoriert sie seit iOS 10 bewusst. Safari schickt aber eigene Ereignisse
    fuer die Zwei-Finger-Geste, und die lassen sich abfangen. Beides zusammen
    deckt Android und iPhone ab.
-   Doppeltipp-Zoom faengt touch-action:manipulation im CSS ab. */
+   Doppeltipp- und Kniff-Zoom faengt touch-action:pan-x pan-y im CSS ab
+   (manipulation reichte nicht -- es erlaubt den Kniff ausdruecklich). */
 ['gesturestart','gesturechange','gestureend'].forEach(function(t){
   document.addEventListener(t,function(e){e.preventDefault();},{passive:false});
 });
+/* Android-Gegenstueck: sobald ein zweiter Finger aufsetzt, wird die Geste
+   abgebrochen, bevor ein Kniff daraus werden kann. Bewusst am touchstart und
+   nicht am touchmove -- ein blockierender move-Zuhoerer wuerde jedes normale
+   Scrollen ausbremsen, der start feuert nur einmal je Finger. */
+document.addEventListener('touchstart',function(e){
+  if(e.touches.length>1)e.preventDefault();
+},{passive:false});
 /* ---------- boot ---------- */
 /* Feste Felder bekommen ihren Regler einmal beim Start. Die Raster in Test,
    Massen und PR bauen ihre Felder selbst und rufen pairSlider dort.
@@ -10841,7 +10906,7 @@ if(profile){
   var bac=$('f-act');if(bac&&profile.act)bac.value=profile.act;
   var bgo=$('f-goal');if(bgo&&profile.ngoal!==undefined)bgo.value=String(profile.ngoal);
 }
-renderDay();streak();calc();drawW();volBar();
+renderDay();streak();calc();drawW();volBar();stickyMess();
 evalAch(true);
 refresh();mobStopF();
 clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
