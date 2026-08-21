@@ -277,21 +277,26 @@
      Die zweite Ebene innerhalb eines Bereichs. Bewusst als Segmentleiste und
      nicht als weitere Reiterzeile: sie soll sichtbar UNTERGEORDNET sein,
      sonst hat man wieder vierzehn gleichwertige Ziele, nur in zwei Reihen. */
-  #subnav{display:flex;gap:.25rem;margin:0 0 1rem;padding:.25rem;
-    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r2);
+  /* v19: Abschnitte als Text-Segmente mit Unterstrich (MCI-Statistiken-
+     Muster) statt Pillen auf grauer Flaeche -- weniger Chrom, die
+     Bereichsfarbe traegt die Markierung. */
+  #subnav{display:flex;gap:1.15rem;margin:0 0 1rem;padding:0 2px;
     overflow-x:auto;scrollbar-width:none}
   #subnav::-webkit-scrollbar{display:none}
   #subnav[hidden]{display:none}
-  #subnav button{flex:1 0 auto;min-height:38px;padding:.4rem .85rem;border:0;
+  #subnav button{flex:0 0 auto;min-height:40px;padding:.45rem .1rem .6rem;border:0;
     background:none;color:var(--ink3);cursor:pointer;white-space:nowrap;
-    border-radius:calc(var(--r2) - 3px);font-family:var(--fb);font-weight:600;
-    font-size:.8rem;letter-spacing:.01em;transition:.16s}
+    font-family:var(--fb);font-weight:600;
+    font-size:.86rem;letter-spacing:.01em;position:relative;transition:color .16s}
   #subnav button:hover{color:var(--ink)}
-  #subnav button[aria-selected="true"]{background:var(--surf);color:var(--ink);
-    box-shadow:var(--sh)}
+  #subnav button[aria-selected="true"]{color:var(--ink)}
+  #subnav button[aria-selected="true"]::after{content:"";position:absolute;
+    left:0;right:0;bottom:5px;height:2px;border-radius:999px;background:var(--aurora)}
+  body[data-view="train"] #subnav button[aria-selected="true"]::after{background:var(--ember)}
+  body[data-view="prog"] #subnav button[aria-selected="true"]::after{background:var(--brass)}
   @media (max-width:640px){
-    #subnav{margin-bottom:.85rem}
-    #subnav button{font-size:.78rem;padding:.4rem .7rem}
+    #subnav{margin-bottom:.85rem;gap:1rem}
+    #subnav button{font-size:.8rem}
   }
 
 
@@ -423,6 +428,192 @@
 
   .view{display:none;flex-direction:column;gap:1.3rem;padding-top:1.1rem}
   .view.on{display:flex;animation:fade .26s ease}
+
+  /* ── v19 Push-Navigation (MCI-Vorbild). Nur auf dem Handy: die Ansicht
+     schiebt sich von rechts ueber ihren Bereich, der darunter mit leichtem
+     Parallax und Abdunkelung stehen bleibt. Am Rechner sind Push-Ziele
+     normale Bereiche, der Kopf mit Zurueck-Pfeil entfaellt dort. ── */
+  .pushhead{display:none}
+  @media (max-width:640px){
+    .view.pushv{display:flex;position:fixed;inset:0;z-index:70;background:var(--bg);
+      overflow-y:auto;-webkit-overflow-scrolling:touch;
+      padding:0 14px calc(20px + env(safe-area-inset-bottom,0px));
+      transform:translateX(102%);visibility:hidden;
+      transition:transform .3s cubic-bezier(.2,.7,.2,1),visibility 0s .3s}
+    .view.pushv.on{transform:none;visibility:visible;animation:none;
+      transition:transform .3s cubic-bezier(.2,.7,.2,1),visibility 0s}
+    .view.on:not(.pushv){transition:transform .3s cubic-bezier(.2,.7,.2,1)}
+    body[data-pushed] .view.on:not(.pushv){transform:translateX(-28%)}
+    #pushdim{position:fixed;inset:0;z-index:65;pointer-events:none;opacity:0;
+      background:color-mix(in srgb,var(--night) 45%,transparent);
+      transition:opacity .3s ease}
+    body[data-pushed] #pushdim{opacity:1}
+    #tabbar{transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+    body[data-pushed] #tabbar{transform:translateY(130%)}
+    .pushhead{display:flex;align-items:center;gap:.7rem;position:sticky;top:0;z-index:6;
+      margin:0 -14px;padding:calc(.55rem + env(safe-area-inset-top,0px)) 14px .55rem;
+      background:color-mix(in srgb,var(--bg) 92%,transparent);
+      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+    .pushhead b{font-family:var(--fd);font-weight:800;font-size:var(--t5);
+      letter-spacing:.06em;text-transform:uppercase}
+    .pushback{width:34px;height:34px;border-radius:999px;border:1px solid var(--line);
+      background:var(--surf);color:var(--ink);display:flex;align-items:center;
+      justify-content:center;flex:none}
+  }
+  /* Sparmodus: Push wird hartes Umschalten, Glas faellt weg. */
+  :root[data-spar="1"] .view.pushv,
+  :root[data-spar="1"] .view.on:not(.pushv),
+  :root[data-spar="1"] #pushdim,
+  :root[data-spar="1"] #tabbar{transition:none}
+  :root[data-spar="1"] .pushhead{backdrop-filter:none;-webkit-backdrop-filter:none;background:var(--bg)}
+
+  /* ── v19 Bereichskopf und HEUTE-Dashboard (MCI-Grammatik, unsere
+     Farben). Grosser Versalien-Titel je Bereich; Karten: Hero mit
+     Startknopf und Figuren, Gewohnheiten als 2x2, Verbessern als
+     flache Zeilenkarten. ── */
+  .arehead{display:flex;align-items:center;gap:.6rem;margin:0 0 -.4rem}
+  .arehead b{font-family:var(--fd);font-weight:800;font-size:var(--t6);
+    letter-spacing:.05em;text-transform:uppercase}
+  .hcard{display:flex;align-items:stretch;gap:.8rem;width:100%;text-align:left;
+    background:var(--surf);border:1px solid var(--line);border-radius:var(--r3);
+    padding:1rem 1.05rem;box-shadow:var(--sh);cursor:pointer;transition:border-color .16s}
+  .hcard:hover{border-color:var(--ice)}
+  .hcard .hcMain{flex:1;min-width:0;display:flex;flex-direction:column;gap:.3rem}
+  .hcard .tag{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;
+    text-transform:uppercase;color:var(--ink3);margin:0}
+  .hcard h3{font-family:var(--fd);font-weight:700;font-size:var(--t6);margin:0}
+  .hcard .sub2{color:var(--ink2);font-size:var(--t3);margin:0}
+  .hcard .hcGo{align-self:flex-start;margin-top:.45rem;font-family:var(--fm);
+    font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--ember);border:1px solid color-mix(in srgb,var(--ember) 55%,transparent);
+    border-radius:var(--r1);padding:.34rem .7rem}
+  .hcard .hcThumbs{display:flex;flex-direction:column;justify-content:center;gap:.15rem}
+  .hcard .hcThumbs .swthumb{width:38px;height:38px}
+  .habgrid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+  .habcard{display:flex;flex-direction:column;gap:.45rem;text-align:left;min-height:118px;
+    background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.8rem .85rem;box-shadow:var(--sh);cursor:pointer;position:relative;
+    transition:border-color .16s}
+  .habcard:hover{border-color:var(--ice)}
+  .habcard em{font-style:normal;font-family:var(--fb);font-weight:600;font-size:var(--t3)}
+  .habcard .sub{font-size:var(--t1);color:var(--ink3);margin:0}
+  .habcard .go{position:absolute;top:.8rem;right:.7rem;width:14px;height:14px;
+    stroke:var(--ink3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .habcard b.big{font-family:var(--fd);font-weight:700;font-size:var(--t7);
+    font-variant-numeric:tabular-nums;line-height:1.05}
+  .habcard b.big small{font-size:var(--t2);font-weight:600;color:var(--ink3)}
+  .habheat{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:auto}
+  .habheat i{aspect-ratio:1;border-radius:3px;background:var(--surf2)}
+  .habheat i.tr{background:color-mix(in srgb,var(--ember) 75%,var(--surf))}
+  .habheat i.ms{background:color-mix(in srgb,var(--ink3) 30%,var(--surf2))}
+  .habheat i.td{outline:1.5px solid var(--ink);outline-offset:1px}
+  /* Zellen staffeln sich beim Aufbau ein (MCI); im Sparmodus stehen sie. */
+  .habheat i{animation:habpop .22s ease backwards;animation-delay:calc(var(--i)*12ms)}
+  @keyframes habpop{from{transform:scale(.4);opacity:0}}
+  :root[data-spar="1"] .habheat i{animation:none}
+  .habring{margin-top:auto;align-self:flex-start}
+  .upstack{display:flex;flex-direction:column;gap:.6rem}
+  .upcard{display:flex;align-items:center;gap:.75rem;width:100%;text-align:left;
+    background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.7rem .8rem;box-shadow:var(--sh);cursor:pointer;transition:border-color .16s}
+  .upcard:hover{border-color:var(--ice)}
+  .upcard .ucIc{width:36px;height:36px;border-radius:999px;flex:none;display:flex;
+    align-items:center;justify-content:center}
+  .upcard .ucTx{flex:1;min-width:0}
+  .upcard .ucTx b{display:block;font-family:var(--fb);font-weight:600;font-size:var(--t3)}
+  .upcard .ucTx span{display:block;font-size:var(--t1);color:var(--ink3)}
+  .upcard>svg{width:14px;height:14px;stroke:var(--ink3);fill:none;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;flex:none}
+  .upcard .badge2{min-width:19px;height:19px;line-height:19px;border-radius:999px;
+    background:var(--ember);color:var(--heroInk);font-family:var(--fm);
+    font-size:var(--t1);text-align:center;padding:0 5px;flex:none}
+
+  /* v19 Ernaehrung: Modus-Chip an der Ringkarte, Gewichts-Stepper,
+     Naehrstoff-Kacheln. */
+  .macroCard{position:relative}
+  .modechip{position:absolute;top:.8rem;right:.85rem;font-family:var(--fm);
+    font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;
+    color:var(--mc);border:1px solid color-mix(in srgb,var(--mc) 55%,transparent);
+    border-radius:var(--r1);padding:.26rem .55rem}
+  .wstep{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
+    background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.75rem .9rem;box-shadow:var(--sh)}
+  .wstep b{font-family:var(--fd);font-weight:700;font-size:var(--t7);
+    font-variant-numeric:tabular-nums}
+  .wstep b small{font-size:var(--t3);font-weight:600;color:var(--ink3)}
+  .wbtn{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);
+    background:var(--surf2);color:var(--ink);font-size:1.15rem;flex:none;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:border-color .16s}
+  .wbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  .habcard.mikro{min-height:0;cursor:default}
+  .habcard.mikro .track{height:4px;border-radius:999px;background:var(--surf2);
+    overflow:hidden;margin-top:.15rem}
+  .habcard.mikro .track i{display:block;height:100%;border-radius:999px}
+  /* Vorschlagsliste der Lebensmittel-Suche im Mahlzeit-Blatt. */
+  .mlsug{display:flex;flex-direction:column;gap:.3rem;margin:-.3rem 0 .5rem}
+  .mlsug[hidden]{display:none}
+  .mlsugrow{display:flex;flex-direction:column;text-align:left;gap:.1rem;
+    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);
+    padding:.45rem .6rem;cursor:pointer;transition:border-color .16s}
+  .mlsugrow b{font-size:var(--t2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .mlsugrow span{font-size:var(--t1);color:var(--ink3);font-family:var(--fm)}
+  .mlsugrow:hover{border-color:var(--aurora)}
+  /* Statistik-Karten (MCI): Kopf mit Titel + Delta-Chip, Chart darunter. */
+  .statcard{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.85rem .9rem;box-shadow:var(--sh);margin-bottom:.7rem}
+  .stathead{display:flex;align-items:flex-start;justify-content:space-between;gap:.6rem;margin-bottom:.35rem}
+  .stathead b{font-family:var(--fd);font-weight:700;font-size:var(--t4);display:block}
+  .stathead span{font-size:var(--t1);color:var(--ink3)}
+  .statdelta{font-family:var(--fm);font-size:var(--t2);font-variant-numeric:tabular-nums;
+    white-space:nowrap;padding-top:.15rem}
+  .statbars{display:flex;align-items:flex-end;gap:4px;height:96px;padding-top:.3rem}
+  .statbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
+  .statbar i{display:block;width:100%;max-width:16px;border-radius:3px 3px 0 0}
+  .statbar em{font-style:normal;font-family:var(--fm);font-size:var(--t1);color:var(--ink3)}
+
+  /* ── v19 Kamera-Ansicht: Vollbild-Sucher mit Eckklammern (MCI). Der
+     Grund ist absichtlich in jedem Theme Nacht -- eine Kamera ist dunkel. */
+  #v-kam{background:var(--night);color:#EFEAE0;padding-left:0;padding-right:0}
+  #v-kam .pushhead{background:color-mix(in srgb,var(--night) 92%,transparent)}
+  #v-kam .pushhead b{color:#EFEAE0}
+  #v-kam .pushback{background:color-mix(in srgb,#EFEAE0 10%,transparent);
+    border-color:color-mix(in srgb,#EFEAE0 25%,transparent);color:#EFEAE0}
+  .kamwrap{position:relative;flex:1;display:flex;flex-direction:column;min-height:70vh}
+  #kamVid{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:var(--night)}
+  .kamframe{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);
+    width:min(78vw,300px);aspect-ratio:1/0.96;pointer-events:none}
+  .kamframe i{position:absolute;width:34px;height:34px;border:2.5px solid #EFEAE0;border-radius:6px}
+  .kamframe i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0;border-radius:6px 0 0 0}
+  .kamframe i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0;border-radius:0 6px 0 0}
+  .kamframe i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0;border-radius:0 0 0 6px}
+  .kamframe i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0;border-radius:0 0 6px 0}
+  .kamstatus{position:absolute;left:14px;right:14px;top:calc(38% + min(39vw,150px) + 18px);
+    text-align:center;font-size:var(--t2);color:#EFEAE0;opacity:.85;margin:0;min-height:1.2em}
+  .kamctl{position:absolute;left:0;right:0;bottom:calc(18px + env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;align-items:center;gap:.8rem}
+  .kammode{display:flex;background:color-mix(in srgb,#EFEAE0 14%,transparent);
+    border-radius:999px;padding:4px;gap:2px}
+  .kammode button{display:flex;align-items:center;gap:.35rem;border:0;cursor:pointer;
+    background:none;color:#EFEAE0;border-radius:999px;padding:.45rem .8rem;
+    font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase}
+  .kammode button svg{width:16px;height:16px}
+  .kammode button[aria-pressed="true"]{background:#EFEAE0;color:var(--night)}
+  .kamshot{width:58px;height:58px;border-radius:999px;border:3px solid #EFEAE0;
+    background:none;cursor:pointer;display:flex;align-items:center;justify-content:center}
+  .kamshot i{width:44px;height:44px;border-radius:999px;background:#EFEAE0;display:block}
+  .kamshot[hidden]{display:none}
+  .kamtorch{position:absolute;right:18px;bottom:6px;width:42px;height:42px;border-radius:999px;
+    border:1px solid color-mix(in srgb,#EFEAE0 30%,transparent);cursor:pointer;
+    background:color-mix(in srgb,#EFEAE0 10%,transparent);color:#EFEAE0;
+    display:flex;align-items:center;justify-content:center}
+  .kamtorch svg{width:18px;height:18px}
+  .kamtorch[aria-pressed="true"]{background:#EFEAE0;color:var(--night)}
+  .kamfall,.kamres{position:relative;margin:auto 14px 96px;background:var(--surf);
+    color:var(--ink);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.9rem;box-shadow:var(--sh);z-index:3}
+  .kamfall[hidden],.kamres[hidden]{display:none}
+  #v-kam .kamres .hint,#v-kam .kamfall .hint{color:var(--ink2)}
   @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
   h2.sec{font-family:var(--fd);font-weight:600;font-size:1.2rem;margin:0}
   p.sub{margin:0;color:var(--ink2);font-size:var(--t4);max-width:64ch}
@@ -1457,14 +1648,6 @@
     color:var(--ink);font-size:var(--t5);line-height:1;flex:none;transition:.16s}
   .mslotHead .mslotAdd:hover{border-color:var(--aurora);color:var(--aurora)}
   .mslot .prrow{margin-bottom:.35rem}
-  #scanov{position:fixed;inset:0;z-index:320;background:color-mix(in srgb,var(--night) 78%,transparent);display:flex;align-items:center;justify-content:center;padding:1rem}
-  #scanov .scanbox{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);box-shadow:var(--sh);
-    width:100%;max-width:380px;padding:1rem}
-  #scanov .scanhead{display:flex;align-items:center;justify-content:space-between;gap:.6rem;margin-bottom:.5rem}
-  #scanov .scanhead b{font-family:var(--fd);font-weight:600;font-size:var(--t5);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  #scanov .scanvid{position:relative;border-radius:var(--r1);overflow:hidden;background:var(--night);aspect-ratio:4/3}
-  #scanov video{width:100%;height:100%;object-fit:cover;display:block}
-  #scanov .scanframe{position:absolute;inset:14% 10%;border:2px solid var(--aurora);border-radius:var(--r1);opacity:.75;pointer-events:none}
   /* ── v18: Uebungs-Tausch als Blatt-Liste. Zeilen mit Strichmaennchen-
      Vorschau, aktuelle Wahl markiert, Suche und Filter-Chips darueber. ── */
   .swapcur{display:flex;align-items:center;gap:.7rem;background:var(--surf3);border:1px solid var(--line);
@@ -1501,16 +1684,17 @@
     background:var(--surf2);border-radius:var(--r1);font-style:italic;color:var(--ink2)}
   .accBody .book blockquote p{margin:0}
   .accBody .book .tblwrap{margin:.8em 0;font-family:var(--fb)}
-  /* ── v16: Tabbar mit Farbe. Der aktive Bereich bekommt seine eigene
-     Kennfarbe -- Heute Aurora, Training Ember, Coach Ice, Du Gold. ── */
-  #tabbar button[data-view="today"][aria-current="true"] svg{stroke:var(--aurora)}
-  #tabbar button[data-view="today"][aria-current="true"] span{color:var(--aurora)}
+  /* ── v19: Tabbar mit Kennfarbe je Bereich (MCI-Prinzip: eine Akzentfarbe
+     pro Bereich) -- Heute Ice, Training Ember, Ernährung Aurora,
+     Fortschritt Gold. ── */
+  #tabbar button[data-view="today"][aria-current="true"] svg{stroke:var(--ice)}
+  #tabbar button[data-view="today"][aria-current="true"] span{color:var(--ice)}
   #tabbar button[data-view="train"][aria-current="true"] svg{stroke:var(--ember)}
   #tabbar button[data-view="train"][aria-current="true"] span{color:var(--ember)}
-  #tabbar button[data-view="coach"][aria-current="true"] svg{stroke:var(--ice)}
-  #tabbar button[data-view="coach"][aria-current="true"] span{color:var(--ice)}
-  #tabbar button[data-view="you"][aria-current="true"] svg{stroke:var(--brass)}
-  #tabbar button[data-view="you"][aria-current="true"] span{color:var(--brass)}
+  #tabbar button[data-view="fuel"][aria-current="true"] svg{stroke:var(--aurora)}
+  #tabbar button[data-view="fuel"][aria-current="true"] span{color:var(--aurora)}
+  #tabbar button[data-view="prog"][aria-current="true"] svg{stroke:var(--brass)}
+  #tabbar button[data-view="prog"][aria-current="true"] span{color:var(--brass)}
 </style>
 <!-- Startbild. iOS erzeugt fuer installierte Web-Apps nur dann eines, wenn man
      fuer jedes Geraetemass ein eigenes Bild hinterlegt -- ein Dutzend Dateien,
@@ -1646,28 +1830,37 @@
        der Coach zuerst, weil er die Lage liest und sagt, was ansteht.
        Skills, Beweglichkeit, Test, Raenge, Wochen und Zugang stehen nicht
        mehr hier -- sie sind Abschnitte in ihrem Bereich. -->
+  <!-- v19: dieselbe Ordnung wie die Tableiste, plus die Push-Ziele, die am
+       Rechner als normale Bereiche erscheinen. -->
   <nav id="nav" data-title="Weitere Bereiche">
-    <button data-view="coach" data-i18n="nav.coach">Coach<span class="badge" id="coachBadge">0</span></button>
     <button data-view="today" data-i18n="nav.today">Today</button>
     <button data-view="train" data-i18n="nav.train">Train</button>
     <button data-view="fuel" data-i18n="nav.fuel">Fuel</button>
-    <button data-view="you" data-i18n="nav.you">You<span class="badge" id="rankBadge">0</span></button>
+    <button data-view="prog" data-i18n="nav.prog">Progress<span class="badge" id="rankBadge">0</span></button>
+    <button data-view="coach" data-i18n="nav.coach">Coach<span class="badge" id="coachBadge">0</span></button>
     <button data-view="learn" data-i18n="nav.learn">Learn</button>
   </nav>
   <!-- Auf dem Handy eine feste Leiste unten statt zwölf umbrechender Knoepfe.
        Die vier meistgenutzten Ansichten plus "Mehr" fuer den Rest. -->
+  <!-- v19: vier Bereiche nach MCI-Vorbild. Coach und Du sind keine Reiter
+       mehr -- Coach wohnt auf HEUTE, Du im Bereich FORTSCHRITT; alles
+       Weitere erreichen Pushes (Detail, Wissen, Einstellungen). -->
+  <div id="pushdim" aria-hidden="true"></div>
   <nav id="tabbar" aria-label="Main">
-    <button data-view="today"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg><span data-i18n="nav.today">Today</span></button>
+    <button data-view="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7"/><path d="M6 9.8V19a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V9.8"/><path d="M10 20.5v-5h4v5"/></svg><span data-i18n="nav.today">Today</span></button>
     <button data-view="train"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M6 8v8M18 8v8M2.5 10v4M21.5 10v4"/></svg><span data-i18n="nav.train">Train</span></button>
-    <button data-view="coach"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5a2.5 2.5 0 0 1-2.5 2.5H8l-4 3.5V6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5Z"/></svg><span data-i18n="nav.coach">Coach</span><i class="badge" id="coachBadge2"></i></button>
-    <button data-view="you"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg><span data-i18n="nav.you">You</span></button>
-    <button id="moreBtn" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span data-i18n="nav.more">More</span></button>
+    <button data-view="fuel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v7.5M4.5 3v4.2a2.5 2.5 0 0 0 5 0V3M7 10.5V21"/><path d="M17 3c-1.9 1.6-3 4-3 6.5 0 1.7 1.2 2.7 3 2.7V21M17 3v9.2"/></svg><span data-i18n="nav.fuel">Fuel</span></button>
+    <button data-view="prog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16"/><path d="M6.5 20V12M12 20V5.5M17.5 20v-9.5"/></svg><span data-i18n="nav.prog">Progress</span><i class="badge" id="rankBadge2"></i></button>
   </nav>
 
   <!-- Abschnittsleiste. Zeigt die Unterbereiche des aktuellen Bereichs und
        steht bewusst ausserhalb der Bereiche selbst: so ist ihre Position
        immer dieselbe, egal welcher Abschnitt gerade sichtbar ist. Bereiche
        ohne Unterteilung blenden sie aus. -->
+  <!-- v19: EIN Bereichskopf fuer alle Reiter -- er bleibt stehen, wenn
+       innerhalb des Bereichs das Segment wechselt. Der Kamera-Knopf
+       gehoert zur Ernaehrung und zeigt sich nur dort. -->
+  <div class="arehead" id="areHead"><b id="areTitle">Heute</b><button type="button" class="iconbtn" id="fuelCam" title="Scanner" aria-label="Scanner" style="margin-left:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.3-1.8h5.2L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"/><circle cx="12" cy="12.4" r="3.4"/></svg></button></div>
   <div id="subnav" role="tablist" hidden></div>
 
   <!-- Warnung, wenn der Browser nichts dauerhaft speichert. Ohne diesen Hinweis
@@ -1676,12 +1869,31 @@
   <p class="warnstrip" id="storeWarn" hidden></p>
 
   <section class="view on" id="v-today">
-    <!-- Wochenstreifen statt Pfeiltasten. Vorher standen hier zwei Pfeile, ein
-         zweizeiliges Datum und ein "Zurueck zu heute" in eigener Zeile -- gut
-         130 Pixel, bevor irgendein Inhalt kam, und man sah immer nur EINEN Tag.
-         Der Streifen zeigt die ganze Woche auf einen Blick: welcher Tag erledigt
-         ist, welcher Ruhetag, wo man steht. Und er springt in einem Griff hin,
-         statt in vier Pfeilklicks. -->
+    <!-- v19: HEUTE ist ein Dashboard nach MCI-Vorbild -- die Tagesliste
+         wohnt jetzt im Bereich TRAINING. Hier: naechste Einheit,
+         Gewohnheiten, Verbessern. Inhalt baut renderHome(). -->
+    <div id="homeHero"></div>
+    <p class="eyebrow" data-i18n="home.habits">Habits</p>
+    <div class="habgrid" id="homeHabits"></div>
+    <p class="eyebrow" data-i18n="home.improve">Improve</p>
+    <div class="upstack" id="homeCards"></div>
+  </section>
+
+  <section class="view" id="v-plan">
+    <div><h2 class="sec">The twelve weeks</h2><p class="sub">One row per week. Open a week to see its days and jump to any of them.</p></div>
+    <div class="kpis" id="planKpis"></div>
+    <div class="weeks" id="weeks"></div>
+    <div class="noteblk">
+      <p class="eyebrow" data-i18n="plan.miles">Milestones</p>
+      <div class="savebar">
+        <div class="ctl" style="flex:1;min-width:180px"><input id="winTxt" type="text" placeholder="First full pull-up"></div>
+        <button class="tbtn go" id="winAdd" data-i18n="btn.logIt">Log it</button>
+      </div>
+      <div class="wins" id="winList"></div>
+    </div>
+  </section>
+
+  <section class="view" id="v-train">
     <div class="dstrip" id="dstrip" role="tablist" aria-label="Woche"></div>
     <div class="dbar">
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
@@ -1724,23 +1936,7 @@
       </div>
       <p class="hint" id="logRecall"></p>
     </div>
-  </section>
-
-  <section class="view" id="v-plan">
-    <div><h2 class="sec">The twelve weeks</h2><p class="sub">One row per week. Open a week to see its days and jump to any of them.</p></div>
-    <div class="kpis" id="planKpis"></div>
-    <div class="weeks" id="weeks"></div>
-    <div class="noteblk">
-      <p class="eyebrow" data-i18n="plan.miles">Milestones</p>
-      <div class="savebar">
-        <div class="ctl" style="flex:1;min-width:180px"><input id="winTxt" type="text" placeholder="First full pull-up"></div>
-        <button class="tbtn go" id="winAdd" data-i18n="btn.logIt">Log it</button>
-      </div>
-      <div class="wins" id="winList"></div>
-    </div>
-  </section>
-
-  <section class="view" id="v-train">
+  
     <div><h2 class="sec" data-i18n="train.h">The six patterns</h2><p class="sub" data-i18n="train.s">Everything you train is one of these. Open one for the ladder, the cues, and what usually goes wrong.</p></div>
     <div class="grid" id="tiles"></div>
     <div class="chartbox">
@@ -1760,7 +1956,8 @@
     </div>
   </section>
 
-  <section class="view" id="v-detail">
+  <section class="view pushv" id="v-detail">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Training</b></div>
     <button class="back" id="back">&larr; <span data-i18n="btn.allPatterns">All patterns</span></button>
     <div class="dhead"><span id="d-icon"></span><div><h3 id="d-name"></h3><p id="d-blurb"></p></div></div>
     <div class="media">
@@ -1773,6 +1970,13 @@
       <div class="card warn"><h4 data-i18n="train.wrong">What goes wrong</h4><ul id="d-bad"></ul></div>
       <div class="card"><h4 data-i18n="train.numbers">Numbers</h4><div class="facts" id="d-facts"></div></div>
     </div>
+  </section>
+
+  <!-- v19: Statistik (MCI-Vorbild) -- Verlaufskarten je Muster und
+       Uebung, Ernaehrungswochen. Ehrlich: nur echte Daten, Wiederholungen
+       statt erfundener Gewichte. Inhalt baut drawStat(). -->
+  <section class="view" id="v-stat">
+    <div id="statBody"></div>
   </section>
 
   <section class="view" id="v-ranks">
@@ -1916,8 +2120,29 @@
     </details>
   </section>
   <section class="view" id="v-fuel">
-    <div><h2 class="sec" data-i18n="fuel.h">Fuel</h2><p class="sub" data-i18n="fuel.s">Mifflin&ndash;St Jeor for the estimate. Then override anything &mdash; change calories or protein and the rest recalculates around it.</p></div>
+    <!-- v19 (MCI-Ordnung): erst das Tagebuch des gewaehlten Tages mit Ring
+         und Slots, dann Gewicht, Naehrstoffe, Rezepte. Rechner, Zielwerte,
+         Wasser und Supplemente bleiben vollstaendig -- als Ausklapper unten,
+         denn sie werden selten angefasst und oft nur gelesen. -->
+    <div class="dstrip" id="fstrip" role="tablist" aria-label="Tagebuch-Woche"></div>
     <div class="form">
+      <div class="savebar" style="justify-content:space-between;align-items:center">
+        <div class="gtitle" style="margin:0"><span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M2.5 20h19M12 8V5.5M9.5 4h5"/></svg></span>
+          <div class="gt"><b data-i18n="fuel.today">Eaten today</b></div></div>
+        <button class="tbtn go" id="mealAdd" data-i18n="btn.addMeal">Add meal</button>
+      </div>
+      <div class="cards" id="mealSum"></div>
+      <div class="prlist" id="mealList"></div>
+    </div>
+    <div id="fuelWeight"></div>
+    <p class="eyebrow" data-i18n="fuel.micro">Nutrients</p>
+    <div class="habgrid" id="mikroGrid"></div>
+    <p class="eyebrow" data-i18n="fuel.recipes">Recipes</p>
+    <div class="habgrid" id="recipeRow"></div>
+    <details class="fold" id="foldCalc">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="fuel.calcFold">Calculator &mdash; your data</span></summary>
+      <div class="foldBody"><div class="form">
       <div class="gtitle"><span class="ichip" style="--chip:var(--aurora)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg></span>
         <div class="gt"><b data-i18n="fuel.about">About you</b></div></div>
       <div class="fgrid">
@@ -1929,8 +2154,12 @@
         <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected data-i18n="f.g1">Build muscle</option><option value="0" data-i18n="f.g2">Maintain</option><option value="-450" data-i18n="f.g3">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
       <div class="out" id="est"></div>
-    </div>
-    <div class="form">
+    </div></div>
+    </details>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="fuel.targetFold">Targets &mdash; edit any of them</span></summary>
+      <div class="foldBody"><div class="form">
       <div class="savebar" style="justify-content:space-between">
         <p class="eyebrow" style="margin:0" data-i18n="fuel.targets">Your targets &mdash; edit any of them</p>
         <button class="tbtn" id="resetMacros" data-i18n="btn.auto">Reset to auto</button>
@@ -1946,34 +2175,54 @@
         <div class="mkey"><span><u style="background:var(--aurora)"></u>Protein</span><span><u style="background:var(--brass)"></u>Fat</span><span><u style="background:var(--ice)"></u>Carbs</span></div></div>
       <div class="out" id="perkg"></div>
       <p class="hint" id="f-note"></p>
-    </div>
-    <!-- Was heute gegessen wurde. Vorher standen hier vier feste Vorschlaege
-         ("Skyr mit Haferflocken") mit dem Tagesprotein geteilt durch vier --
-         das war eine Beispielrechnung, kein Tagebuch. Man konnte nichts
-         eintragen und sah nie, wo man steht.
-         Jetzt: eigene Mahlzeiten, Kalorien werden aus den Naehrwerten
-         gerechnet statt abgefragt. Wer Protein, Fett und Kohlenhydrate kennt,
-         kennt die Kalorien -- danach zu fragen waere eine Fehlerquelle mehr. -->
-    <div class="form">
-      <div class="savebar" style="justify-content:space-between;align-items:center">
-        <div class="gtitle" style="margin:0"><span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M2.5 20h19M12 8V5.5M9.5 4h5"/></svg></span>
-          <div class="gt"><b data-i18n="fuel.today">Eaten today</b></div></div>
-        <button class="tbtn go" id="mealAdd" data-i18n="btn.addMeal">Add meal</button>
-      </div>
-      <div class="cards" id="mealSum"></div>
-      <div class="prlist" id="mealList"></div>
-    </div>
-    <div class="form">
+    </div></div>
+    </details>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="fuel.hydr">Water and caffeine</span></summary>
+      <div class="foldBody"><div class="form">
       <div class="gtitle"><span class="ichip" style="--chip:#5B8DEF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 4.2 6 7.4 6 10.7a6 6 0 0 1-12 0c0-3.3 2.8-6.5 6-10.7Z"/></svg></span>
         <div class="gt"><b data-i18n="fuel.hydr">Water and caffeine</b></div></div>
       <div class="out" id="hydrOut"></div>
       <p class="hint" data-i18n="fuel.hydrNote">Thirst is a decent guide for most people. The number below is a rough floor, not a quota to force down. Caffeine cut-off is eight hours before bed.</p>
-    </div>
-    <div>
+    </div></div>
+    </details>
+    <details class="fold">
+      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
+        <span class="ft" data-i18n="fuel.supps">Supplements</span></summary>
+      <div class="foldBody"><div>
       <div class="gtitle"><span class="ichip" style="--chip:var(--brass)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.5 8.2l5 7.4"/></svg></span>
         <div class="gt"><b data-i18n="fuel.supps">Supplements &mdash; hover for the detail</b></div></div>
       <div class="supgrid" id="supgrid"></div>
       <p class="hint" style="margin-top:.7rem" data-i18n="fuel.suppNote">Green means the evidence is decent. Amber means it works for some people or in narrow cases. Orange means save your money. None of this is medical advice &mdash; if you take medication or have a condition, ask a doctor first.</p>
+    </div></div>
+    </details>
+  </section>
+
+  <!-- v19: Vollbild-Scanner (MCI-Kamera). Zwei Modi: Barcode liest live,
+       Tabelle friert das Bild ein und liest die Naehrwerttabelle per
+       Texterkennung. Logik in kamStart()/kamStop(). -->
+  <section class="view pushv" id="v-kam">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Kamera</b></div>
+    <div class="kamwrap">
+      <video id="kamVid" playsinline muted></video>
+      <canvas id="kamCv" hidden></canvas>
+      <div class="kamframe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <p class="kamstatus" id="kamMsg"></p>
+      <div class="kamctl">
+        <div class="kammode" id="kamMode" role="tablist">
+          <button type="button" data-mode="ean" aria-pressed="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7v10M8 7v10M11 7v10M15 7v10M19 7v10"/></svg><span>Barcode</span></button>
+          <button type="button" data-mode="ocr" aria-pressed="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><rect x="4.5" y="4" width="15" height="16.5" rx="2"/><path d="M8 8.5h8M8 12h8M8 15.5h5"/></svg><span>Tabelle</span></button>
+        </div>
+        <button type="button" class="kamshot" id="kamShot" hidden aria-label="Aufnehmen"><i></i></button>
+        <button type="button" class="kamtorch" id="kamTorch" hidden aria-pressed="false" aria-label="Licht"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l-1.5 5H16a1 1 0 0 1 .8 1.6L10 20v-7H8.5A1 1 0 0 1 7.6 11.5Z"/></svg></button>
+      </div>
+      <div class="kamfall" id="kamFall" hidden>
+        <p class="hint" id="kamFallMsg"></p>
+        <div class="ctl"><input id="kamEan" type="text" inputmode="numeric" placeholder="EAN, z. B. 4000417025005" autocomplete="off"></div>
+        <div class="savebar"><button type="button" class="tbtn go" id="kamEanGo">Nachschlagen</button></div>
+      </div>
+      <div class="kamres" id="kamRes" hidden></div>
     </div>
   </section>
 
@@ -2060,7 +2309,8 @@
     </div>
   </section>
 
-  <section class="view" id="v-coach">
+  <section class="view pushv" id="v-coach">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Coach</b></div>
     <div><h2 class="sec" data-i18n="coach.h">Coach</h2><p class="sub" data-i18n="coach.s">Reads everything you have entered and updates the moment you change a number. Ordered by what costs you the most.</p></div>
     <div class="coach" id="coachList"></div>
     <details class="fold">
@@ -2071,7 +2321,8 @@
     </details>
   </section>
 
-  <section class="view" id="v-learn">
+  <section class="view pushv" id="v-learn">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Wissen</b></div>
     <div><h2 class="sec" data-i18n="learn.h">The book, in short</h2><p class="sub" data-i18n="learn.s">Twelve chapters, short enough to look up mid-session.</p></div>
     <div class="acc" id="chapters"></div>
     <!-- Belege. Wettbewerber schreiben "wissenschaftliches Know-how" auf die
@@ -2090,7 +2341,8 @@
     </details>
   </section>
 
-  <section class="view" id="v-access">
+  <section class="view pushv" id="v-access">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Zugang</b></div>
     <div><h2 class="sec" data-i18n="acc.h">Book or hub?</h2><p class="sub" data-i18n="acc.s">Same knowledge in both. The difference is whether you read it once, or use it every session.</p></div>
       <div class="tblwrap"><table class="cmp">
         <thead><tr><th data-i18n="acc.get">What you get</th><th class="c">Book</th><th class="c">Hub</th></tr></thead>
@@ -2127,7 +2379,8 @@
     </details>
   </section>
 
-  <section class="view" id="v-settings">
+  <section class="view pushv" id="v-settings">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Einstellungen</b></div>
     <div><h2 class="sec" data-i18n="set.h">Settings</h2><p class="sub" data-i18n="set.s">Everything here is stored in your browser only.</p></div>
     <!-- v16: Profilgruppe. Die Werte aus der Einfuehrung sind hier sichtbar
          und direkt nachjustierbar; die Beschriftung malt paintSetProfile in
@@ -2210,7 +2463,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='18.0';
+var VERSION='19.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2392,7 +2645,11 @@ var DICT={
  'nav.skills':['Skills','Skills'],'nav.mobility':['Mobility','Mobilität'],'nav.test':['Test','Test'],
  'nav.fuel':['Fuel','Ernährung'],'nav.you':['You','Du'],'nav.coach':['Coach','Coach'],
  'nav.learn':['Learn','Wissen'],'nav.access':['Access','Zugang'],'nav.settings':['Settings','Einstellungen'],
- 'nav.ranks':['Ranks','Ränge'],'nav.more':['More','Mehr'],'nav.moreTitle':['More sections','Weitere Bereiche'],
+ 'nav.ranks':['Ranks','Ränge'],'nav.prog':['Progress','Fortschritt'],'nav.more':['More','Mehr'],'nav.moreTitle':['More sections','Weitere Bereiche'],
+ 'home.habits':['Habits','Gewohnheiten'],'home.improve':['Improve','Verbessern'],
+ 'fuel.micro':['Nutrients','Nährstoffe'],'fuel.recipes':['Recipes','Rezepte'],
+ 'fuel.calcFold':['Calculator — your data','Rechner — deine Daten'],
+ 'fuel.targetFold':['Targets — edit any of them','Zielwerte — alle änderbar'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
  'rk.s':['From where you stand on each ladder, not from how hard you sweat.','Aus deinem Stand auf jeder Leiter, nicht daraus wie sehr du schwitzt.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
@@ -4755,7 +5012,7 @@ function pauseHiddenSvg(){
     svgDecide(s);
   }
 }
-var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',fuel:'v-fuel',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
+var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',fuel:'v-fuel',kam:'v-kam',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
 
 /* ---------- oberste Ebene: sieben Ziele statt vierzehn -------------------
    Vierzehn Reiter bekommt kein Design aufgeraeumt -- das ist keine Frage von
@@ -4771,19 +5028,25 @@ var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',detail:'v-
    Abschnitt; die Leiste darueber wechselt zwischen ihnen. Dadurch bleibt jeder
    Bildschirm kurz -- ein Stapel aus vier Abschnitten waere zwar auch "ein
    Bereich", aber eben ein sehr langer, und gewonnen waere nichts. */
+/* v19: vier Bereiche nach MCI-Vorbild. Wochen wandert als Abschnitt zu
+   TRAINING, Ränge und Du bilden FORTSCHRITT. Coach, Wissen, Einstellungen
+   und das Muster-Detail sind auf dem Handy Push-Ansichten (schieben von
+   rechts über den Bereich), am Rechner normale Bereiche. */
 var GROUP={
-  today:   {v:['today','plan'],                     l:[['Today','Heute'],['Weeks','Wochen']]},
-  train:   {v:['train','skills','mobility','test'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Beweglichkeit'],['Test','Test']]},
+  today:   {v:['today']},
+  train:   {v:['train','skills','mobility','test','plan'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Beweglichkeit'],['Test','Test'],['Weeks','Wochen']]},
   coach:   {v:['coach']},
   fuel:    {v:['fuel']},
-  you:     {v:['you','ranks'],                      l:[['You','Du'],['Ranks','Ränge']]},
+  prog:    {v:['stat','ranks','you'],               l:[['Stats','Statistik'],['Ranks','Ränge'],['You','Du']]},
   learn:   {v:['learn']},
   settings:{v:['settings','access'],                l:[['Settings','Einstellungen'],['Access','Zugang']]}
 };
+var PUSHV={detail:1,coach:1,learn:1,settings:1,access:1,kam:1};
+function istHandy(){return window.matchMedia&&window.matchMedia('(max-width:640px)').matches;}
 /* Rueckwaerts: welcher Abschnitt gehoert zu welchem Bereich. Damit fuehrt
    jedes vorhandene show('test') weiterhin ans Ziel, ohne dass eine einzige
    Aufrufstelle angefasst werden musste. */
-var PARENT={detail:'train'};
+var PARENT={detail:'train',kam:'fuel'};
 Object.keys(GROUP).forEach(function(g){GROUP[g].v.forEach(function(x){PARENT[x]=g;});});
 
 function drawSub(g,cur){
@@ -4802,26 +5065,47 @@ function show(n,fromBack){
      Eine SVG-Animation laeuft auch in einem display:none-Bereich weiter -- man
      sieht sie nicht, der Browser rechnet sie trotzdem in jedem Bild. */
   if(n!=='detail'){var dm=$('d-demo');if(dm&&dm.firstChild)dm.innerHTML='';}
-  Object.keys(VS).forEach(function(k){$(VS[k]).classList.toggle('on',k===n);});
+  /* v19 Push: auf dem Handy legt sich die Ansicht ueber den Bereich, der
+     darunter sichtbar bleibt (Parallax im Stil). Am Rechner normaler
+     Wechsel. Der Wechsel auf einen Reiter raeumt jeden Push ab. */
+  var alsPush=!!PUSHV[n]&&istHandy();
+  if(alsPush){
+    Object.keys(VS).forEach(function(k){if(PUSHV[k])$(VS[k]).classList.toggle('on',k===n);});
+    document.body.dataset.pushed=n;
+    var pe=$(VS[n]);if(pe)pe.scrollTop=0;
+  }else{
+    Object.keys(VS).forEach(function(k){$(VS[k]).classList.toggle('on',k===n);});
+    delete document.body.dataset.pushed;
+  }
   var key=PARENT[n]||n;
-  /* Der aktuelle Bereich am body: gibt dem Stil einen Angriffspunkt fuer
-     Dinge, die nur in einem Bereich gelten sollen -- etwa der Leitspruch,
-     der auf dem Handy nur unter "Heute" Platz verdient. */
-  document.body.dataset.view=key;
-  drawSub(key,n);
-  [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
+  /* Bei einem Push bleibt der Bereich darunter der Bezugspunkt: Reiter,
+     Abschnittsleiste und body-Attribut wechseln nicht mit. */
+  if(!alsPush){
+    /* Der aktuelle Bereich am body: gibt dem Stil einen Angriffspunkt fuer
+       Dinge, die nur in einem Bereich gelten sollen -- etwa der Leitspruch,
+       der auf dem Handy nur unter "Heute" Platz verdient. */
+    document.body.dataset.view=key;
+    /* Bereichskopf: grosser Versalien-Titel, bleibt beim Segmentwechsel. */
+    var KOPFN={today:'nav.today',train:'nav.train',fuel:'nav.fuel',prog:'nav.prog',
+      coach:'nav.coach',learn:'nav.learn',settings:'nav.settings'};
+    var at=$('areTitle');
+    if(at&&DICT[KOPFN[key]])at.textContent=DICT[KOPFN[key]][cfg.lang==='de'?1:0];
+    var fc2=$('fuelCam');if(fc2)fc2.style.display=(key==='fuel')?'':'none';
+    drawSub(key,n);
+    [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
+    [].forEach.call(document.querySelectorAll('#tabbar button[data-view]'),function(b){
+      b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
+  }
   $('setBtn').setAttribute('aria-current',key==='settings'?'true':'false');
-  /* Die Tableiste markiert mit: liegt der Bereich nicht in den vier Reitern,
-     leuchtet "Mehr" -- sonst sieht es aus als waere man nirgends. */
-  var inTab=false;
-  [].forEach.call(document.querySelectorAll('#tabbar button[data-view]'),function(b){
-    var on=b.dataset.view===key;if(on)inTab=true;
-    b.setAttribute('aria-current',on?'true':'false');});
-  $('moreBtn').setAttribute('aria-current',inTab?'false':'true');
   closeMore();
+  if(n==='today')renderHome();
+  if(n==='fuel'){fuelOff=0;fuelPaint(true);}
+  if(n==='kam')kamStart();
+  else if(typeof kamAktiv!=='undefined'&&kamAktiv)kamStop();
   if(n==='plan')buildWeeks();
   if(n==='train')volBar();
   if(n==='ranks'){evalAch(false);renderRanks();}
+  if(n==='stat')drawStat();
   /* Coach und Du rechnen beim Oeffnen neu. Vorher liefen sie nur bei
      refresh() mit -- wer einen Test eintrug und dann auf Coach ging, sah
      noch den Stand von davor. */
@@ -4847,7 +5131,19 @@ function show(n,fromBack){
     if(vStack.length>14)vStack.shift();
     histArm();
   }
-  hideTip();window.scrollTo({top:0,behavior:'smooth'});
+  hideTip();
+  /* Beim Push bleibt die Seite darunter stehen, wo sie war -- wer
+     zurueckkommt, findet seinen Kontext wieder. */
+  if(!alsPush)window.scrollTo({top:0,behavior:'smooth'});
+}
+/* Push schliessen: zurueck zu dem Abschnitt, der darunter noch sichtbar
+   ist. show() raeumt das pushed-Attribut ab, die Ansicht gleitet hinaus. */
+function popPush(){
+  if(!document.body.dataset.pushed)return false;
+  var unten=null;
+  Object.keys(VS).forEach(function(k){if(!PUSHV[k]&&$(VS[k]).classList.contains('on'))unten=k;});
+  show(unten||'today');
+  return true;
 }
 /* Ein Klick auf einen Reiter der obersten Ebene fuehrt immer auf dessen
    ersten Abschnitt -- nicht dorthin, wo man beim letzten Mal aufgehoert hat.
@@ -4964,7 +5260,6 @@ function openSheet(html){
      zusammen und es gibt nichts zu animieren. */
   requestAnimationFrame(function(){b.classList.add('on');s.classList.add('on');});
   sheetOpen=true;
-  $('moreBtn').setAttribute('aria-expanded','true');
   document.body.style.overflow='hidden';
   histArm();
 }
@@ -4974,17 +5269,14 @@ function closeSheet(){
   s.classList.remove('on');b.classList.remove('on');
   s.style.transform='';
   sheetOpen=false;
-  $('moreBtn').setAttribute('aria-expanded','false');
   document.body.style.overflow='';
   setTimeout(function(){if(!sheetOpen){s.hidden=true;b.hidden=true;}},280);
 }
 /* closeMore() bleibt als Name bestehen, weil show() und die Zurueck-Taste ihn
    aufrufen -- er schliesst jetzt das Blatt statt der alten Schublade. */
 function closeMore(){closeSheet();}
-$('moreBtn').addEventListener('click',function(e){
-  e.stopPropagation();
-  if(sheetOpen)closeSheet();else openSheet();
-});
+/* v19: der Mehr-Reiter ist weg -- das Blatt dient nur noch Auswahl-Dialogen
+   (Tausch, Mahlzeit), geoeffnet von den jeweiligen Stellen. */
 $('sheetBg').addEventListener('click',closeSheet);
 $('sheetGrip').addEventListener('click',closeSheet);
 /* Escape schliesst das Blatt, und beim erneuten Einfuehrungs-Durchlauf auch
@@ -4994,7 +5286,12 @@ document.addEventListener('keydown',function(e){
   if(e.key!=='Escape')return;
   if(sheetOpen){closeSheet();return;}
   var ic=$('inClose');
-  if(ic&&!ic.hidden&&$('intro').classList.contains('on'))introShow(false);
+  if(ic&&!ic.hidden&&$('intro').classList.contains('on')){introShow(false);return;}
+  popPush();
+});
+/* Zurueck-Pfeil jedes Push-Kopfes. */
+[].forEach.call(document.querySelectorAll('.pushback'),function(b){
+  b.addEventListener('click',function(){popPush();});
 });
 $('sheetBody').addEventListener('click',function(e){
   var b=e.target.closest('button[data-view]');if(!b)return;
@@ -5739,12 +6036,19 @@ function runItems(){
    korrigiert von da an selbst). */
 function sessWrap(it){
   var xl=get('exlog',{}),calDone=false;
+  /* v19: zusaetzlich eine echte Historie je Uebung (letzte 20 Einheiten)
+     -- daraus zeichnet die Statistik ihre Verlaufskurven. */
+  var eh=get('exhist',{}),ehNeu=false;
   it.forEach(function(x,ei){
     if(!x.id||x.fixed)return;
     var reps=[];
     for(var si=1;si<=x.sets;si++){var v=run.reps[ei+'-'+si];if(v!==undefined)reps.push(v);}
     if(!reps.length)return;
     xl[x.l]={d:iso(TODAY),reps:reps};
+    if(!eh[x.l])eh[x.l]=[];
+    eh[x.l].push({d:iso(TODAY),r:reps.slice(),p:x.id});
+    if(eh[x.l].length>20)eh[x.l].shift();
+    ehNeu=true;
     if(x.cal){
       var best=Math.max.apply(null,reps);
       if(best>0){
@@ -5755,6 +6059,7 @@ function sessWrap(it){
     }
   });
   set('exlog',xl);
+  if(ehNeu)set('exhist',eh);
   if(calDone){
     set('prs',PRS);set('steps',steps);
     buildTiles();buildPR();
@@ -5964,8 +6269,14 @@ function calc(){
       ?'Trag Alter, Größe und Gewicht ein — dann rechnet das hier deine Werte. Vorher stünden hier nur fremde Zahlen.'
       :'Enter your age, height and weight — then this calculates your numbers. Anything before that would be somebody else&rsquo;s.')+'</p>';
     drawMacros({cal:0,pro:0,fat:0,carb:0},0);
+    /* Auch das gemerkte Ziel loeschen -- sonst zeigt die Statistik nach dem
+       Leeren der Koerperdaten bis zum Neuladen ein Ziel, das es nicht
+       mehr gibt. */
+    macroNow={};
     $('mbar').innerHTML='';$('perkg').innerHTML='';$('f-note').textContent='';
     drawMeals();
+    if(typeof drawMikro==='function')drawMikro();
+    if($('v-stat')&&$('v-stat').classList.contains('on')&&typeof drawStat==='function')drawStat();
     if($('hydrOut'))$('hydrOut').innerHTML='';
     slRetune();
     return;
@@ -6094,10 +6405,14 @@ var meals=get('meals',{});
 function mealKcal(m){return Math.round(m.p*4+m.f*9+m.c*4);}
 function mealsOf(k){return meals[k]||[];}
 function saveMeals(){set('meals',meals);}
+/* v19: das Tagebuch hat einen waehlbaren Tag (Wochenstreifen), nicht nur
+   heute. Alle Lese- und Schreibwege laufen ueber fuelTag(). */
+var fuelOff=0;
+function fuelTag(){return add(TODAY,fuelOff);}
 function drawMeals(){
   var listEl=$('mealList'),sumEl=$('mealSum');
   if(!listEl||!sumEl)return;
-  var DE=cfg.lang==='de',k=iso(TODAY),ms=mealsOf(k);
+  var DE=cfg.lang==='de',k=iso(fuelTag()),ms=mealsOf(k);
   var kcal=0,pro=0,fat=0,carb=0;
   ms.forEach(function(m){kcal+=mealKcal(m);pro+=m.p;fat+=m.f;carb+=m.c;});
   /* v17 (Baustelle 5): Ring in der Mitte, Gegessen links, Ziel rechts,
@@ -6111,14 +6426,20 @@ function drawMeals(){
   /* nicht "over" nennen -- so heisst der globale Override-Speicher */
   var drueber=zielK&&rest<0;
   var mitte=zielK
-    ?'<b class="'+(drueber?'over':'')+'">'+Math.abs(rest)+'</b><span>'+(drueber?(DE?'über Ziel':'over target'):(DE?'übrig':'left'))+'</span>'
-    :'<b>'+Math.round(kcal)+'</b><span>kcal</span>';
+    ?'<b id="ovRest" data-wert="'+Math.abs(rest)+'" class="'+(drueber?'over':'')+'">'+Math.abs(rest)+'</b><span>'+(drueber?(DE?'über Ziel':'over target'):(DE?'übrig':'left'))+'</span>'
+    :'<b id="ovRest" data-wert="'+Math.round(kcal)+'">'+Math.round(kcal)+'</b><span>kcal</span>';
+  /* Modus-Chip: das Ernaehrungsziel steht sichtbar an der Karte (MCI). */
+  var zielWert=(profile&&profile.ngoal!==undefined?String(profile.ngoal):($('f-goal')?$('f-goal').value:'300'));
+  var modus=zielWert==='-450'?[DE?'Abnehmen':'Lean out','var(--ember)']
+    :zielWert==='0'?[DE?'Halten':'Maintain','var(--ice)']
+    :[DE?'Aufbauen':'Build','var(--aurora)'];
   function mbar(lbl,wert,ziel,farbe){
     var pct=ziel?Math.min(100,wert/ziel*100):0;
     return '<div class="mbar"><div class="mtop"><b>'+lbl+'</b><span>'+Math.round(wert)+(ziel?' / '+Math.round(ziel):'')+' g</span></div>'+
       '<div class="track"><i style="width:'+pct.toFixed(0)+'%;background:'+farbe+'"></i></div></div>';
   }
   sumEl.innerHTML='<div class="macroCard">'+
+    '<span class="modechip" style="--mc:'+modus[1]+'">'+modus[0]+'</span>'+
     '<div class="macroRing">'+
       '<div class="mcol"><b>'+Math.round(kcal)+'</b><span>'+(DE?'Gegessen':'Eaten')+'</span></div>'+
       '<div class="ringWrap"><svg viewBox="0 0 118 118" aria-hidden="true">'+
@@ -6138,8 +6459,8 @@ function drawMeals(){
   '</div>';
   var oc=$('optCal');
   if(oc)oc.addEventListener('click',function(){
-    var ziel=document.querySelector('#v-fuel .form');
-    if(ziel)ziel.scrollIntoView({behavior:'smooth',block:'start'});
+    var ziel=$('foldCalc');
+    if(ziel){foldOpen(ziel);ziel.scrollIntoView({behavior:'smooth',block:'start'});}
   });
   /* v18: die vier Slots stehen auch leer da -- so sieht man sofort, WO man
      eintraegt, statt vor einer leeren Flaeche zu raten. */
@@ -6186,7 +6507,7 @@ function drawMeals(){
 /* Blatt zum Anlegen und Aendern. idx null heisst: neue Mahlzeit; slot ist
    der Ziel-Slot (b/l/d/s), beim Bearbeiten kommt er aus dem Eintrag. */
 function openMeal(idx,slot){
-  var DE=cfg.lang==='de',k=iso(TODAY),ms=mealsOf(k);
+  var DE=cfg.lang==='de',k=iso(fuelTag()),ms=mealsOf(k);
   var m=(idx===null||idx===undefined)?{n:'',p:0,f:0,c:0,s:slot||'s'}:ms[idx];
   if(!m)return;
   var neu=(idx===null||idx===undefined);
@@ -6204,8 +6525,11 @@ function openMeal(idx,slot){
           '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abendessen':'Dinner')+'</option>'+
           '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
         '</select></div></div>'+
-      '<div class="field"><label for="mlName">'+(DE?'Name':'Name')+'</label>'+
-        '<div class="ctl"><input id="mlName" type="text" maxlength="40" placeholder="'+(DE?'z. B. Skyr mit Haferflocken':'e.g. skyr with oats')+'"></div></div>'+
+      '<div class="field"><label for="mlName">'+(DE?'Name oder Suche':'Name or search')+'</label>'+
+        '<div class="ctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'"></div></div>'+
+      '<div class="mlsug" id="mlSug" hidden></div>'+
+      '<div class="field" id="mlGRow" hidden><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
+        '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
       '<div class="field hasSlide"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
         '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
       '<div class="field hasSlide"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
@@ -6217,11 +6541,14 @@ function openMeal(idx,slot){
         :'The hub works out the calories: protein and carbs times four, fat times nine. The macros are on every label.')+'</p>'+
       '<div class="savebar">'+
         '<button class="tbtn go" data-mlact="save">'+(neu?(DE?'Hinzufügen':'Add'):(DE?'Speichern':'Save'))+'</button>'+
+        '<button class="tbtn" data-mlact="rezept">'+(DE?'Als Rezept merken':'Save as recipe')+'</button>'+
         (neu?'':'<button class="tbtn dngr" data-mlact="del">'+(DE?'Löschen':'Delete')+'</button>')+
       '</div>'+
     '</div>';
   openSheet(html);
   $('sheetBody').dataset.meal=(neu?'neu':String(idx));
+  delete $('sheetBody').dataset.mikro;
+  if(!neu&&m.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:m.z,bl:m.bl,sa:m.sa,gf:m.gf});
   $('mlName').value=m.n;
   pairSlider('mlP',{min:0,max:120,step:1,empty:0});
   pairSlider('mlF',{min:0,max:80,step:1,empty:0});
@@ -6232,107 +6559,1187 @@ function openMeal(idx,slot){
   }
   ['mlP','mlF','mlC'].forEach(function(id){$(id).addEventListener('input',nach);});
   nach();
-}
-/* ---------- Barcode-Scanner (v18) ----------------------------------------
-   Ohne KI, mit Technik: Kamera + BarcodeDetector des Browsers lesen die EAN,
-   die Naehrwerte kommen aus Open Food Facts (freie Datenbank, braucht Netz).
-   Einmal gescannte Produkte liegen im lokalen Cache und funktionieren danach
-   offline. Ohne BarcodeDetector (aeltere iOS-Safaris) gibt es die manuelle
-   EAN-Eingabe -- gleiche Datenbank, gleicher Cache. */
-var foodCache=get('foods',{});
-var scanStream=null,scanLoop=null;
-function scanStop(){
-  if(scanLoop){clearInterval(scanLoop);scanLoop=null;}
-  if(scanStream){scanStream.getTracks().forEach(function(t){t.stop();});scanStream=null;}
-  var ov=$('scanov');if(ov)ov.remove();
-}
-function scanUI(inner){
-  scanStop();
-  var ov=document.createElement('div');ov.id='scanov';
-  ov.innerHTML='<div class="scanbox">'+inner+'</div>';
-  document.body.appendChild(ov);
-  var x=ov.querySelector('[data-scan="x"]');
-  if(x)x.addEventListener('click',scanStop);
-  return ov;
-}
-function scanStart(){
-  var DE=cfg.lang==='de';
-  var hasBD='BarcodeDetector' in window;
-  var ov=scanUI(
-    '<div class="scanhead"><b>'+(DE?'Barcode scannen':'Scan barcode')+'</b>'+
-    '<button type="button" class="iconbtn" data-scan="x" aria-label="Schließen">✕</button></div>'+
-    (hasBD?'<div class="scanvid"><video id="scanVid" playsinline muted></video><span class="scanframe"></span></div>':'')+
-    '<p class="hint" id="scanMsg">'+(hasBD
-      ?(DE?'Kamera auf den Strichcode halten.':'Point the camera at the barcode.')
-      :(DE?'Dieser Browser hat keinen Barcode-Leser — EAN unten eintippen (steht unter dem Strichcode).':'This browser has no barcode reader — type the EAN below (printed under the bars).'))+'</p>'+
-    '<div class="ctl" style="margin-top:.4rem"><input id="scanEan" type="text" inputmode="numeric" placeholder="EAN, z. B. 4311501659715" autocomplete="off"></div>'+
-    '<div class="savebar"><button type="button" class="tbtn go" id="scanGo">'+(DE?'Nachschlagen':'Look up')+'</button></div>'
-  );
-  ov.querySelector('#scanGo').addEventListener('click',function(){
-    var v=(ov.querySelector('#scanEan').value||'').replace(/\D+/g,'');
-    if(v.length>=8)foodLookup(v);
-  });
-  if(hasBD&&navigator.mediaDevices&&navigator.mediaDevices.getUserMedia){
-    navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(function(st){
-      scanStream=st;
-      var vid=ov.querySelector('#scanVid');if(!vid){st.getTracks().forEach(function(t){t.stop();});return;}
-      vid.srcObject=st;vid.play();
-      var det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});
-      scanLoop=setInterval(function(){
-        if(!vid.videoWidth)return;
-        det.detect(vid).then(function(codes){
-          if(codes&&codes.length){var raw=codes[0].rawValue.replace(/\D+/g,'');if(raw.length>=8)foodLookup(raw);}
-        }).catch(function(){});
-      },350);
-    }).catch(function(){
-      var m=$('scanMsg');if(m)m.textContent=DE?'Kamera nicht verfügbar — EAN unten eintippen.':'Camera unavailable — type the EAN below.';
+  /* Suche: lokale Grundnahrungsmittel sofort, Open Food Facts kurz danach.
+     Ein Treffer setzt die Basis je 100 g; das Mengenfeld skaliert. */
+  var sugBase=null,sugTimer=null;
+  function skala(){
+    if(!sugBase)return;
+    var g=Math.max(1,parseFloat($('mlG').value)||100)/100;
+    $('mlP').value=Math.round(sugBase.p*g*10)/10;
+    $('mlF').value=Math.round(sugBase.f*g*10)/10;
+    $('mlC').value=Math.round(sugBase.c*g*10)/10;
+    if(sugBase.z!==undefined||sugBase.bl!==undefined||sugBase.sa!==undefined||sugBase.gf!==undefined){
+      $('sheetBody').dataset.mikro=JSON.stringify({
+        z:sugBase.z!==undefined?Math.round(sugBase.z*g*10)/10:undefined,
+        bl:sugBase.bl!==undefined?Math.round(sugBase.bl*g*10)/10:undefined,
+        sa:sugBase.sa!==undefined?Math.round(sugBase.sa*g*100)/100:undefined,
+        gf:sugBase.gf!==undefined?Math.round(sugBase.gf*g*10)/10:undefined});
+    }
+    nach();
+  }
+  function sugZeigen(liste){
+    var el=$('mlSug');if(!el)return;
+    if(!liste.length){el.hidden=true;el.innerHTML='';return;}
+    el.hidden=false;
+    el.innerHTML=liste.map(function(x,i){
+      return '<button type="button" class="mlsugrow" data-sug="'+i+'">'+
+        '<b></b><span>'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal · '+x.p+' P · '+x.f+' F · '+x.c+' KH'+
+        (x.quelle==='off'?' · OFF':'')+'</span></button>';
+    }).join('');
+    var namen=el.querySelectorAll('.mlsugrow b');
+    [].forEach.call(el.querySelectorAll('.mlsugrow'),function(row,ri){
+      namen[ri].textContent=liste[+row.dataset.sug].n;
+      row.addEventListener('click',function(){
+        sugBase=liste[+row.dataset.sug];
+        $('mlName').value=sugBase.n.slice(0,40);
+        el.hidden=true;el.innerHTML='';
+        $('mlGRow').hidden=false;$('mlG').value=100;
+        skala();
+      });
     });
   }
+  $('mlG').addEventListener('input',skala);
+  $('mlName').addEventListener('input',function(){
+    var q=this.value.trim().toLowerCase();
+    sugBase=null;$('mlGRow').hidden=true;
+    if(q.length<2){sugZeigen([]);return;}
+    var lok=[];
+    if(typeof STAPLES!=='undefined'){
+      for(var i=0;i<STAPLES.length&&lok.length<6;i++){
+        if(STAPLES[i][0].toLowerCase().indexOf(q)>=0)
+          lok.push({n:STAPLES[i][0],p:STAPLES[i][1],f:STAPLES[i][2],c:STAPLES[i][3],
+            z:STAPLES[i][4],bl:STAPLES[i][5],sa:STAPLES[i][6],gf:STAPLES[i][7],quelle:'lokal'});
+      }
+    }
+    sugZeigen(lok);
+    clearTimeout(sugTimer);
+    sugTimer=setTimeout(function(){
+      fetch('https://de.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+
+        '&search_simple=1&action=process&json=1&page_size=7&fields=product_name,brands,nutriments')
+        .then(function(r){return r.json();})
+        .then(function(j){
+          if($('mlName').value.trim().toLowerCase()!==q)return;
+          var off=[];
+          ((j&&j.products)||[]).forEach(function(pr){
+            var nu=pr.nutriments;
+            if(!nu||nu['proteins_100g']===undefined)return;
+            off.push({n:(pr.product_name||'Produkt')+(pr.brands?' ('+String(pr.brands).split(',')[0]+')':''),
+              p:+nu['proteins_100g']||0,f:+nu['fat_100g']||0,c:+nu['carbohydrates_100g']||0,
+              z:nu['sugars_100g']!==undefined?+nu['sugars_100g']:undefined,
+              bl:nu['fiber_100g']!==undefined?+nu['fiber_100g']:undefined,
+              sa:nu['salt_100g']!==undefined?+nu['salt_100g']:undefined,
+              gf:nu['saturated-fat_100g']!==undefined?+nu['saturated-fat_100g']:undefined,quelle:'off'});
+          });
+          if(off.length)sugZeigen(lok.concat(off).slice(0,10));
+        })
+        .catch(function(){});
+    },450);
+  });
 }
-function foodLookup(ean){
-  var DE=cfg.lang==='de',m=$('scanMsg');
-  if(foodCache[ean]){foodResult(ean,foodCache[ean]);return;}
-  if(m)m.textContent=DE?'Suche '+ean+' …':'Looking up '+ean+' …';
-  fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=product_name,brands,nutriments')
+/* ---------- v19 Ernaehrungs-Bereich: Wochenstreifen, Zaehlwerk, Gewicht,
+   Naehrstoffe, Rezepte (MCI-Vorbild, eigene Datenquellen). ------------- */
+/* Zahl zaehlt beim Betreten hoch (Ease-out, ~0,8 s). Bewegung aus oder
+   Sparmodus: sofort der Endwert. */
+function zaehlHoch(el){
+  if(!el)return;
+  var ziel=parseInt(el.dataset.wert,10)||0;
+  if(SYSRED||cfg.motion==='off'||document.documentElement.dataset.spar==='1'){el.textContent=ziel;return;}
+  var t0=null;
+  function schritt(ts){
+    if(t0===null)t0=ts;
+    var u=Math.min(1,(ts-t0)/800),e=1-Math.pow(1-u,3);
+    el.textContent=Math.round(ziel*e);
+    if(u<1)requestAnimationFrame(schritt);
+  }
+  requestAnimationFrame(schritt);
+}
+function drawFstrip(){
+  var el=$('fstrip');if(!el)return;
+  var DE=cfg.lang==='de';
+  var wd=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var mo=monday(fuelTag()),html='';
+  for(var i=0;i<7;i++){
+    var d=add(mo,i),k=iso(d);
+    var cls=[];
+    if(k===iso(TODAY))cls.push('today');
+    if((meals[k]||[]).length)cls.push('done');
+    html+='<button type="button" role="tab" data-fd="'+k+'" aria-selected="'+(k===iso(fuelTag()))+'"'+
+      (cls.length?' class="'+cls.join(' ')+'"':'')+
+      ' aria-label="'+wd[i]+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
+      '<em>'+wd[i]+'</em><b>'+d.getDate()+'</b><i aria-hidden="true"></i></button>';
+  }
+  el.innerHTML=html;
+  var kopf=document.querySelector('#v-fuel .gtitle .gt b');
+  if(kopf)kopf.textContent=fuelOff===0?(DE?'Gegessen heute':'Eaten today')
+    :(DE?'Gegessen am ':'Eaten on ')+fuelTag().toLocaleDateString(DE?'de-DE':undefined,{weekday:'long'});
+}
+$('fstrip').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-fd]');if(!b)return;
+  var z=new Date(b.dataset.fd+'T00:00:00');
+  fuelOff=Math.round((sod(z)-TODAY)/86400000);
+  fuelPaint();
+});
+/* Gewicht: Stepper-Karte (MCI), schreibt ins bestehende Wiegelog. */
+function drawWeight(){
+  var el=$('fuelWeight');if(!el)return;
+  var DE=cfg.lang==='de';
+  var letzt=wlog.length?wlog[wlog.length-1].v:(profile&&profile.weight)||null;
+  var anz=letzt?toDisp(letzt,'w'):null;
+  el.innerHTML='<p class="eyebrow" style="margin-bottom:.45rem">'+(DE?'Gewicht eingeben':'Log weight')+'</p>'+
+    '<div class="wstep">'+
+    '<button type="button" class="wbtn" data-w="-0.5" aria-label="&minus;0,5">&minus;</button>'+
+    '<b>'+(anz?String(anz.toFixed(1)).replace('.',DE?',':'.')+'<small> '+uw()+'</small>':'–')+'</b>'+
+    '<button type="button" class="wbtn" data-w="0.5" aria-label="+0,5">+</button>'+
+    '</div>'+
+    '<p class="hint" style="margin:.35rem 0 0">'+(DE
+      ?'Antippen schreibt den Tageswert ins Wiegelog. Wochenmittel zählt, nie der einzelne Tag.'
+      :'Tapping writes today’s value to the log. Weekly averages matter, never a single day.')+'</p>';
+}
+$('fuelWeight').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-w]');if(!b)return;
+  var basis=wlog.length?wlog[wlog.length-1].v:((profile&&profile.weight)||75);
+  var neu=Math.max(35,Math.min(250,basis+parseFloat(b.dataset.w)));
+  var k=iso(TODAY);
+  if(wlog.length&&wlog[wlog.length-1].d===k)wlog[wlog.length-1].v=neu;
+  else{wlog.push({d:k,v:neu});if(wlog.length>60)wlog.shift();}
+  set('wlog',wlog);
+  if(profile){profile.weight=Math.round(neu*10)/10;set('profile',profile);}
+  var fw=$('f-w');if(fw){fw.value=toDisp(neu,'w');calc();}
+  drawWeight();if(typeof drawW==='function')drawW();
+});
+/* Naehrstoffe: Zucker, Ballaststoffe, Salz, gesaettigte Fette -- Summen aus
+   Eintraegen, die diese Werte tragen (Scanner, Suche, Rezepte). Ziele aus
+   dem Kalorienziel abgeleitet (WHO-Richtwerte), Salz fest 6 g. */
+function drawMikro(){
+  var el=$('mikroGrid');if(!el)return;
+  var DE=cfg.lang==='de',ms=mealsOf(iso(fuelTag()));
+  var s={z:0,bl:0,sa:0,gf:0},mit=0;
+  ms.forEach(function(m){if(m.z!==undefined||m.bl!==undefined||m.sa!==undefined||m.gf!==undefined){mit++;
+    s.z+=m.z||0;s.bl+=m.bl||0;s.sa+=m.sa||0;s.gf+=m.gf||0;}});
+  var zk=curMacro('cal')||2200;
+  var ziele={z:Math.round(zk*0.10/4),bl:Math.max(25,Math.round(zk/1000*14)),sa:6,gf:Math.round(zk*0.10/9)};
+  function karte(kk,name,farbe){
+    var w=Math.round(s[kk]*10)/10,zg=ziele[kk];
+    var pct=Math.min(100,w/zg*100);
+    return '<div class="habcard mikro"><em>'+name+'</em>'+
+      '<b class="big" style="font-size:var(--t5)">'+String(w).replace('.',DE?',':'.')+'<small> / '+zg+' g</small></b>'+
+      '<div class="track"><i style="width:'+pct.toFixed(0)+'%;background:'+farbe+'"></i></div></div>';
+  }
+  el.innerHTML=
+    karte('z',DE?'Zucker':'Sugar','var(--ember)')+
+    karte('bl',DE?'Ballaststoffe':'Fibre','var(--aurora)')+
+    karte('sa',DE?'Salz':'Salt','var(--ice)')+
+    karte('gf',DE?'Gesättigte':'Saturates','var(--brass)');
+  var alt=el.nextElementSibling;
+  if(!alt||!alt.classList||!alt.classList.contains('mikroHint')){
+    var p=document.createElement('p');p.className='hint mikroHint';p.style.margin='-.4rem 0 0';
+    el.parentNode.insertBefore(p,el.nextSibling);alt=p;
+  }
+  alt.textContent=DE
+    ?(mit?'Aus '+mit+' Einträgen mit Nährwertdaten (Scanner, Suche, Rezepte). Handeinträge ohne Detailwerte zählen hier nicht.'
+         :'Füllt sich, sobald Einträge aus Scanner, Suche oder Rezepten kommen — Handeinträge tragen keine Detailwerte.')
+    :(mit?'From '+mit+' entries with detailed data (scanner, search, recipes).'
+         :'Fills up once entries come from the scanner, search or recipes.');
+}
+/* Rezepte: eigene Mahlzeiten wiederverwenden. */
+function drawRecipes(){
+  var el=$('recipeRow');if(!el)return;
+  var DE=cfg.lang==='de',rz=get('recipes',[]);
+  el.innerHTML=
+    '<button type="button" class="habcard" id="rzAll"><em>'+(DE?'Alle Rezepte':'All recipes')+'</em>'+
+      '<b class="big" style="font-size:var(--t6)">'+rz.length+'</b>'+
+      '<p class="sub">'+(DE?'antippen zum Einfügen':'tap to insert')+'</p></button>'+
+    '<button type="button" class="habcard" id="rzNew"><em>'+(DE?'Neues Rezept':'New recipe')+'</em>'+
+      '<b class="big" style="font-size:var(--t6)">+</b>'+
+      '<p class="sub">'+(DE?'Name und Nährwerte anlegen':'name and macros')+'</p></button>';
+}
+$('recipeRow').addEventListener('click',function(e){
+  var DE=cfg.lang==='de';
+  if(e.target.closest('#rzNew')){openMeal(null,'s');return;}
+  if(!e.target.closest('#rzAll'))return;
+  var rz=get('recipes',[]);
+  var html='<h4>'+(DE?'Rezepte':'Recipes')+'</h4><div class="swaplist">'+
+    (rz.length?rz.map(function(r,i){
+      return '<button type="button" class="swaprow" data-rz="'+i+'">'+
+        '<span class="swnm"><b></b><span>'+mealKcal(r)+' kcal · '+r.p+' P · '+r.f+' F · '+r.c+' KH</span></span>'+
+        '<span class="swtick">＋</span></button>';
+    }).join(''):'<p class="hint" style="padding:.6rem 0">'+(DE
+      ?'Noch keine. In jeder Mahlzeit gibt es „Als Rezept merken".'
+      :'None yet. Every meal sheet has “Save as recipe”.')+'</p>')+'</div>';
+  openSheet(html);
+  var namen=$('sheetBody').querySelectorAll('.swaprow b');
+  [].forEach.call($('sheetBody').querySelectorAll('.swaprow'),function(row,ri){
+    var r=rz[+row.dataset.rz];if(r)namen[ri].textContent=r.n;
+    row.addEventListener('click',function(){
+      var r2=rz[+row.dataset.rz];if(!r2)return;
+      closeSheet();
+      openMeal(null,'s');
+      $('mlName').value=r2.n;$('mlP').value=r2.p;$('mlF').value=r2.f;$('mlC').value=r2.c;
+      if(r2.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:r2.z,bl:r2.bl,sa:r2.sa,gf:r2.gf});
+      var kb=$('mlKcal');if(kb)kb.textContent=mealKcal(r2)+' kcal';
+    });
+  });
+});
+/* Ein Pinselstrich fuer den ganzen Bereich. */
+function fuelPaint(mitZaehler){
+  drawFstrip();drawMeals();drawWeight();drawMikro();drawRecipes();
+  if(mitZaehler)zaehlHoch($('ovRest'));
+}
+/* ---------- v19 Scanner-Bausteine (generiert und numerisch validiert:
+   EAN 22/22, Staples 300/0 Probleme, Parser 15/15 -- jeweils unter
+   cscript nachgeprueft). --------------------------------------------- */
+function eanDecode(img) {
+    // EAN-13/EAN-8-Decoder fuer RGBA-Bilder (striktes ES5, JScript-kompatibel)
+    var W = img.width, H = img.height, data = img.data;
+    if (!W || !H || W < 60) return null;
+
+    // Breitenmuster der L-Codes (7 Module, 4 Laeufe); G = gespiegelt, R = identische Breiten
+    var LPAT = [
+        [3, 2, 1, 1], [2, 2, 2, 1], [2, 1, 2, 2], [1, 4, 1, 1], [1, 1, 3, 2],
+        [1, 2, 3, 1], [1, 1, 1, 4], [1, 3, 1, 2], [1, 2, 1, 3], [3, 1, 1, 2]
+    ];
+    // Paritaetsmuster der linken Haelfte -> erste Ziffer (nur EAN-13)
+    var FIRST = ["LLLLLL", "LLGLGG", "LLGGLG", "LLGGGL", "LGLLGG",
+                 "LGGLLG", "LGGGLL", "LGLGLG", "LGLGGL", "LGGLGL"];
+
+    function checkOk(num) {
+        // Pruefziffer: von rechts gezaehlt abwechselnd Gewicht 3 und 1
+        var n = num.length, sum = 0, k, d;
+        for (k = 0; k < n - 1; k++) {
+            d = num.charCodeAt(k) - 48;
+            sum += (((n - 1 - k) % 2) === 1) ? d * 3 : d;
+        }
+        return ((10 - (sum % 10)) % 10) === (num.charCodeAt(n - 1) - 48);
+    }
+
+    function classify(runs, i, withG) {
+        // 4 Laeufe auf 7 Module normieren, bestes Muster per L1-Distanz suchen
+        var total = runs[i] + runs[i + 1] + runs[i + 2] + runs[i + 3];
+        if (total <= 0) return null;
+        var w0 = runs[i] * 7 / total, w1 = runs[i + 1] * 7 / total;
+        var w2 = runs[i + 2] * 7 / total, w3 = runs[i + 3] * 7 / total;
+        var best = -1, bestD = 1e9, bestP = "L", d, p, dist;
+        for (d = 0; d < 10; d++) {
+            p = LPAT[d];
+            dist = Math.abs(w0 - p[0]) + Math.abs(w1 - p[1]) + Math.abs(w2 - p[2]) + Math.abs(w3 - p[3]);
+            if (dist < bestD) { bestD = dist; best = d; bestP = "L"; }
+            if (withG) { // G-Code = umgekehrte Breitenfolge
+                dist = Math.abs(w0 - p[3]) + Math.abs(w1 - p[2]) + Math.abs(w2 - p[1]) + Math.abs(w3 - p[0]);
+                if (dist < bestD) { bestD = dist; best = d; bestP = "G"; }
+            }
+        }
+        if (bestD > 1.7) return null; // zu weit weg von jedem gueltigen Muster
+        return { digit: best, par: bestP };
+    }
+
+    function guardMod(runs, i, n, mRef) {
+        // prueft n etwa gleich breite Laeufe (1:1:1...) und liefert die Modulbreite
+        var t = 0, k, m, r;
+        for (k = 0; k < n; k++) t += runs[i + k];
+        m = t / n;
+        if (m <= 0) return 0;
+        if (mRef > 0 && (m < mRef * 0.5 || m > mRef * 2)) return 0;
+        for (k = 0; k < n; k++) {
+            r = runs[i + k] / m;
+            if (r < 0.4 || r > 1.9) return 0;
+        }
+        return m;
+    }
+
+    function tryDecode(runs, firstDark, nDigits) {
+        var nsym = (nDigits === 13) ? 6 : 4;
+        var need = 3 + nsym * 4 + 5 + nsym * 4 + 3; // Start + links + Mitte + rechts + Ende
+        var n = runs.length, i, k, c, m0;
+        for (i = 0; i + need <= n; i++) {
+            var dark = ((i % 2) === 0) ? firstDark : !firstDark;
+            if (!dark) continue; // Startzeichen beginnt mit Balken
+            m0 = guardMod(runs, i, 3, 0);
+            if (!m0) continue;
+            if (i > 0 && runs[i - 1] < m0 * 3) continue;             // Ruhezone links
+            if (!guardMod(runs, i + 3 + nsym * 4, 5, m0)) continue;  // Mittezeichen 01010
+            if (!guardMod(runs, i + need - 3, 3, m0)) continue;      // Endzeichen 101
+            if (i + need < n && runs[i + need] < m0 * 3) continue;   // Ruhezone rechts
+            // linke Haelfte: Ziffern + Paritaet (EAN-13: L/G, EAN-8: nur L)
+            var digits = "", parKey = "", ok = true;
+            for (k = 0; k < nsym; k++) {
+                c = classify(runs, i + 3 + 4 * k, nDigits === 13);
+                if (!c) { ok = false; break; }
+                digits += c.digit;
+                parKey += c.par;
+            }
+            if (!ok) continue;
+            var num = "";
+            if (nDigits === 13) {
+                var f = -1;
+                for (k = 0; k < 10; k++) { if (FIRST[k] === parKey) { f = k; break; } }
+                if (f < 0) continue; // ungueltige Paritaetsfolge
+                num = "" + f + digits;
+            } else {
+                if (parKey !== "LLLL") continue;
+                num = digits;
+            }
+            // rechte Haelfte: nur R-Codes (gleiche Breitenmuster)
+            var base = i + 3 + nsym * 4 + 5;
+            for (k = 0; k < nsym; k++) {
+                c = classify(runs, base + 4 * k, false);
+                if (!c) { ok = false; break; }
+                num += c.digit;
+            }
+            if (!ok) continue;
+            if (checkOk(num)) return num;
+        }
+        return null;
+    }
+
+    function scanRuns(runs, firstDark) {
+        var r = tryDecode(runs, firstDark, 13);
+        if (r) return r;
+        var rev = [], k;
+        for (k = runs.length - 1; k >= 0; k--) rev[rev.length] = runs[k];
+        var lastDark = (((runs.length - 1) % 2) === 0) ? firstDark : !firstDark;
+        r = tryDecode(rev, lastDark, 13); // kopfstehender Code
+        if (r) return r;
+        r = tryDecode(runs, firstDark, 8);
+        if (r) return r;
+        return tryDecode(rev, lastDark, 8);
+    }
+
+    var tally = {}, li, LINES = 11;
+    for (li = 0; li < LINES; li++) {
+        // 11 Scanlinien gleichmaessig zwischen 30 % und 70 % der Hoehe
+        var y = Math.floor(H * (0.30 + 0.40 * li / (LINES - 1)));
+        if (y < 0) y = 0;
+        if (y >= H) y = H - 1;
+        var off = y * W * 4, x, p;
+        // Luminanz + leichte 3er-Glaettung gegen Pixelrauschen
+        var raw = [], lum = [];
+        for (x = 0; x < W; x++) {
+            p = off + x * 4;
+            raw[x] = 0.299 * data[p] + 0.587 * data[p + 1] + 0.114 * data[p + 2];
+        }
+        for (x = 0; x < W; x++) {
+            var la = (x > 0) ? raw[x - 1] : raw[x];
+            var lb = (x < W - 1) ? raw[x + 1] : raw[x];
+            lum[x] = (la + raw[x] + lb) / 3;
+        }
+        var mn = 255, mx = 0;
+        for (x = 0; x < W; x++) { if (lum[x] < mn) mn = lum[x]; if (lum[x] > mx) mx = lum[x]; }
+        if (mx - mn < 32) continue; // zu kontrastarm, Linie ueberspringen
+        // adaptive Schwelle: gleitender Mittelwert gemischt mit globaler Mitte
+        var mid = (mn + mx) / 2;
+        var pre = [0], s = 0;
+        for (x = 0; x < W; x++) { s += lum[x]; pre[x + 1] = s; }
+        var win = Math.floor(W / 16);
+        if (win < 8) win = 8;
+        var bits = [];
+        for (x = 0; x < W; x++) {
+            var lo = x - win;
+            if (lo < 0) lo = 0;
+            var hi = x + win + 1;
+            if (hi > W) hi = W;
+            var thr = ((pre[hi] - pre[lo]) / (hi - lo) + mid) / 2;
+            bits[x] = (lum[x] < thr) ? 1 : 0;
+        }
+        // Lauflaengen, abwechselnd dunkel/hell
+        var runs = [], firstDark = (bits[0] === 1), cur = bits[0], len = 1;
+        for (x = 1; x < W; x++) {
+            if (bits[x] === cur) { len++; }
+            else { runs[runs.length] = len; cur = bits[x]; len = 1; }
+        }
+        runs[runs.length] = len;
+        var found = scanRuns(runs, firstDark);
+        if (found) tally[found] = (tally[found] || 0) + 1;
+    }
+    // Mehrheitsentscheid: erst gueltig, wenn mindestens 2 Linien uebereinstimmen
+    var bestNum = null, bestCnt = 0, key;
+    for (key in tally) {
+        if (tally.hasOwnProperty(key) && tally[key] > bestCnt) { bestCnt = tally[key]; bestNum = key; }
+    }
+    return (bestCnt >= 2) ? bestNum : null;
+}
+var STAPLES=[
+["Ananas",0.5,0.2,12.4,10.3,1.0,0.0,0.0],
+["Apfel",0.3,0.2,11.4,10.3,2.0,0.0,0.0],
+["Apfelmus, ungesuesst",0.3,0.2,11.0,10.5,1.5,0.0,0.0],
+["Apfelsaft",0.1,0.1,10.4,10.0,0.1,0.0,0.0],
+["Apfelschorle",0.1,0.0,5.5,5.4,0.1,0.0,0.0],
+["Aprikose",0.9,0.1,8.5,7.7,1.5,0.0,0.0],
+["Aprikosen, getrocknet",4.8,0.5,48.0,38.0,7.3,0.0,0.0],
+["Artischocke",2.4,0.1,2.6,1.0,5.0,0.1,0.0],
+["Aubergine",1.2,0.2,2.5,2.3,2.8,0.0,0.0],
+["Avocado",1.9,15.0,1.8,0.7,6.7,0.0,2.1],
+["Baguette",8.5,1.3,55.0,2.5,3.0,1.4,0.3],
+["Balsamico-Essig",0.5,0.0,17.0,15.0,0.0,0.1,0.0],
+["Banane",1.1,0.2,20.0,17.0,2.0,0.0,0.1],
+["Basmatireis, roh",8.0,0.7,77.5,0.2,1.8,0.0,0.2],
+["Bergkaese",27.0,32.0,0.0,0.0,0.0,1.5,21.0],
+["Berliner (Krapfen)",6.0,14.0,48.0,16.0,2.0,0.7,5.0],
+["Bier, alkoholfrei",0.4,0.0,5.3,1.2,0.0,0.0,0.0],
+["Bier, Pils",0.5,0.0,2.9,0.1,0.0,0.0,0.0],
+["Birne",0.5,0.3,12.4,10.2,2.8,0.0,0.0],
+["Blumenkohl",2.5,0.3,2.3,2.2,2.9,0.0,0.1],
+["Bohnen, schwarz, roh",21.5,1.4,43.0,2.0,16.0,0.0,0.4],
+["Bohnen, weiss, roh",21.0,1.5,40.0,2.5,17.0,0.0,0.3],
+["Bratkartoffeln",2.5,6.5,20.0,0.8,2.0,0.8,0.8],
+["Bratwurst",12.5,25.0,1.0,0.5,0.0,1.8,9.5],
+["Broetchen (Weizen)",9.0,1.8,55.0,2.5,3.0,1.4,0.4],
+["Brokkoli",3.0,0.4,2.7,1.5,3.0,0.1,0.1],
+["Brombeeren",1.2,0.2,6.2,4.4,3.2,0.0,0.0],
+["Buchweizen, roh",9.5,1.7,71.0,1.0,3.7,0.0,0.4],
+["Bulgur, roh",12.0,1.5,66.0,0.8,8.0,0.0,0.3],
+["Butter",0.7,82.0,0.6,0.6,0.0,0.0,55.0],
+["Butterkekse",7.0,12.0,74.0,22.0,2.5,0.8,7.5],
+["Buttermilch",3.5,0.5,4.0,4.0,0.0,0.2,0.3],
+["Butterschmalz",0.3,99.5,0.0,0.0,0.0,0.0,66.0],
+["Camembert, 45% Fett i. Tr.",21.0,22.5,0.0,0.0,0.0,1.6,15.0],
+["Cashewkerne",18.2,44.0,26.9,5.9,3.3,0.0,7.8],
+["Champignons",3.0,0.3,0.6,0.3,2.0,0.0,0.1],
+["Chiasamen",16.5,30.7,7.7,0.8,34.4,0.0,3.3],
+["Chinakohl",1.2,0.2,1.2,1.1,1.9,0.0,0.0],
+["Clementine",0.9,0.3,9.0,8.9,1.7,0.0,0.0],
+["Cola",0.0,0.0,10.6,10.6,0.0,0.0,0.0],
+["Cola, zuckerfrei",0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+["Corned Beef",22.0,6.0,0.5,0.5,0.0,2.0,2.5],
+["Cornflakes",7.5,0.9,80.0,8.0,3.0,1.1,0.2],
+["Couscous, roh",12.0,1.5,68.0,1.5,5.0,0.0,0.3],
+["Creme fraiche",2.5,30.0,3.0,3.0,0.0,0.1,20.0],
+["Croissant",8.0,21.0,46.0,7.0,2.5,1.0,12.0],
+["Datteln, getrocknet",1.9,0.4,66.0,65.0,8.0,0.0,0.1],
+["Dinkelbrot",8.5,1.8,42.0,2.5,6.5,1.2,0.3],
+["Dinkelmehl, Type 630",12.0,1.5,68.0,0.8,4.5,0.0,0.3],
+["Edamame, TK",11.0,5.0,4.0,2.0,5.0,0.0,0.6],
+["Edamer",24.0,24.0,0.0,0.0,0.0,2.0,16.0],
+["Eigelb",16.0,31.5,0.3,0.3,0.0,0.1,9.5],
+["Eiklar",11.0,0.2,0.7,0.7,0.0,0.5,0.0],
+["Eisbergsalat",1.0,0.2,1.6,1.6,1.0,0.0,0.0],
+["Eistee",0.0,0.0,7.5,7.4,0.0,0.0,0.0],
+["Emmentaler",28.5,30.0,0.0,0.0,0.0,1.2,19.5],
+["Energydrink",0.0,0.0,11.0,11.0,0.0,0.1,0.0],
+["Erbsen, gruen, TK",5.5,0.5,9.5,4.5,5.5,0.0,0.1],
+["Erbseneintopf",4.5,2.5,9.0,1.5,3.0,0.8,0.9],
+["Erdbeeren",0.8,0.4,5.5,5.4,2.0,0.0,0.0],
+["Erdbeermarmelade",0.3,0.1,60.0,58.0,0.8,0.0,0.0],
+["Erdnuesse",25.8,49.2,7.5,4.0,8.5,0.0,6.8],
+["Erdnussmus",26.0,50.0,7.5,4.0,7.5,0.4,9.5],
+["Falafel, frittiert",13.3,17.8,25.8,1.5,4.9,1.2,2.5],
+["Feige, frisch",1.3,0.5,12.9,12.3,2.0,0.0,0.1],
+["Feldsalat",1.8,0.4,0.8,0.7,1.5,0.0,0.1],
+["Fenchel",1.4,0.3,2.8,2.5,3.3,0.1,0.0],
+["Feta",17.0,21.0,1.0,1.0,0.0,2.7,15.0],
+["Fischstaebchen",12.5,8.5,18.0,0.7,1.0,1.0,0.9],
+["Forelle, roh",19.5,2.7,0.0,0.0,0.0,0.1,0.6],
+["Frikadelle, gebraten",15.0,17.0,6.0,0.8,0.5,1.6,6.5],
+["Frischkaese, Doppelrahmstufe",6.0,25.0,3.0,3.0,0.0,0.8,16.0],
+["Fruehlingszwiebel",1.8,0.3,5.2,2.3,2.6,0.0,0.1],
+["Garnelen, roh",19.0,1.0,0.5,0.0,0.0,0.7,0.2],
+["Gemuesebruehe, zubereitet",0.3,0.3,0.5,0.3,0.0,1.1,0.1],
+["Gerstengraupen",9.5,1.5,71.0,0.8,9.0,0.0,0.3],
+["Gewuerzgurken",0.7,0.2,2.5,2.0,1.0,1.5,0.0],
+["Gnocchi",3.5,0.5,32.0,0.5,2.0,1.0,0.1],
+["Gouda, 48% Fett i. Tr.",22.5,29.0,0.0,0.0,0.0,2.0,19.0],
+["Granatapfel",1.0,0.6,16.7,13.7,2.2,0.0,0.1],
+["Grapefruit",0.6,0.2,8.0,7.4,1.6,0.0,0.0],
+["Griechischer Joghurt, 10% Fett",5.6,10.0,4.0,4.0,0.0,0.1,7.0],
+["Gruene Bohnen",1.8,0.2,3.2,2.0,2.9,0.0,0.0],
+["Gruenkohl",4.3,0.9,2.5,1.7,4.2,0.0,0.1],
+["Gummibaerchen",6.9,0.1,77.0,46.0,0.1,0.1,0.1],
+["Gurke",0.6,0.2,1.8,1.6,0.5,0.0,0.0],
+["Hackfleisch, gemischt",18.5,20.0,0.0,0.0,0.0,0.2,8.0],
+["Haehnchen, ganz, mit Haut, roh",18.5,9.5,0.0,0.0,0.0,0.1,2.7],
+["Haehnchenbrust, roh",22.5,1.5,0.0,0.0,0.0,0.1,0.4],
+["Haehnchenschenkel, mit Haut, roh",17.5,11.0,0.0,0.0,0.0,0.1,3.0],
+["Haferdrink",0.8,1.5,6.5,4.0,0.8,0.1,0.2],
+["Haferflocken",13.5,7.0,58.7,0.7,10.0,0.0,1.2],
+["Haferkleie",16.0,7.0,50.0,1.5,15.0,0.0,1.3],
+["Harzer Kaese",30.0,0.7,0.0,0.0,0.0,3.5,0.4],
+["Haselnuesse",15.0,61.5,6.0,4.3,8.2,0.0,4.5],
+["Heidelbeeren",0.6,0.6,7.4,6.1,4.9,0.0,0.0],
+["Himbeeren",1.3,0.3,4.8,4.5,4.7,0.0,0.0],
+["Hirse, roh",10.5,3.9,69.0,1.0,3.9,0.0,0.7],
+["Hokkaido-Kuerbis",1.5,0.3,8.5,3.5,2.5,0.0,0.1],
+["Honig",0.4,0.0,81.0,78.0,0.0,0.0,0.0],
+["Honigmelone",0.6,0.1,9.1,8.1,0.8,0.1,0.0],
+["Huehnerei",12.5,11.0,0.7,0.7,0.0,0.3,3.2],
+["Huettenkaese",12.5,4.3,2.5,2.5,0.0,0.9,2.8],
+["Hummus",7.5,17.0,12.0,1.0,6.0,1.2,2.3],
+["Ingwer",1.8,0.8,15.8,1.7,2.0,0.0,0.2],
+["Kabeljau, roh",17.5,0.6,0.0,0.0,0.0,0.2,0.1],
+["Kaffee, schwarz",0.2,0.0,0.0,0.0,0.0,0.0,0.0],
+["Kakao, mit Vollmilch zubereitet",3.3,3.4,10.0,9.5,0.2,0.1,2.1],
+["Kakaopulver, stark entoelt",22.0,11.0,10.0,0.5,33.0,0.1,6.7],
+["Karotte",1.0,0.2,6.8,4.8,3.6,0.1,0.0],
+["Karottensaft",0.9,0.2,6.1,5.5,0.5,0.1,0.0],
+["Kartoffelchips",6.0,34.0,50.0,1.0,4.0,1.5,3.5],
+["Kartoffelknoedel, zubereitet",2.5,0.5,22.0,1.0,1.5,0.8,0.1],
+["Kartoffeln, gekocht",2.0,0.1,15.5,0.8,1.8,0.0,0.0],
+["Kartoffelpueree, zubereitet",2.0,3.0,13.0,1.5,1.5,0.5,1.8],
+["Kartoffelpuffer",3.0,12.0,20.0,1.5,2.0,0.9,1.5],
+["Kartoffelsalat mit Mayonnaise",1.8,12.0,12.0,1.5,1.3,1.2,1.5],
+["Kasseler",18.0,8.0,0.5,0.5,0.0,2.5,3.0],
+["Kefir",3.4,3.5,4.1,4.1,0.0,0.1,2.3],
+["Ketchup",1.2,0.2,24.0,22.0,1.0,2.2,0.0],
+["Kichererbsen, Dose, abgetropft",7.0,2.7,13.5,0.5,6.5,0.6,0.3],
+["Kichererbsen, roh",19.0,6.0,44.0,2.5,15.5,0.1,0.6],
+["Kidneybohnen, Dose, abgetropft",7.5,0.6,13.0,1.0,6.5,0.7,0.1],
+["Kirschen, suess",0.9,0.3,13.3,12.8,1.3,0.0,0.1],
+["Kiwi",1.0,0.6,9.1,8.3,2.1,0.0,0.1],
+["Knaeckebrot (Roggen)",10.0,1.5,66.0,1.5,15.0,1.2,0.3],
+["Knoblauch",6.1,0.1,28.4,1.0,1.8,0.0,0.0],
+["Knollensellerie",1.6,0.3,2.3,1.8,4.2,0.3,0.1],
+["Kochschinken",20.0,3.0,1.0,0.8,0.0,2.2,1.1],
+["Kohlrabi",1.9,0.2,3.7,3.5,1.4,0.0,0.0],
+["Kokosoel",0.0,100.0,0.0,0.0,0.0,0.0,87.0],
+["Kokosraspeln",6.9,64.5,7.4,7.3,16.3,0.0,57.2],
+["Kopfsalat",1.2,0.2,1.1,1.1,1.5,0.0,0.0],
+["Kuerbiskerne",30.2,49.1,4.7,1.4,6.0,0.0,8.7],
+["Lachs, geraeuchert",22.0,10.5,0.0,0.0,0.0,3.0,2.2],
+["Lachs, roh",20.0,13.0,0.0,0.0,0.0,0.1,3.0],
+["Lammkeule, roh",20.0,6.5,0.0,0.0,0.0,0.1,2.9],
+["Lauch",2.1,0.3,3.3,2.5,2.3,0.0,0.1],
+["Laugenbrezel",10.0,3.5,58.0,2.0,3.0,2.5,0.5],
+["Leberkaese",12.5,25.0,3.0,0.5,0.0,2.0,9.5],
+["Leberwurst",12.0,28.0,2.0,1.0,0.0,2.0,10.5],
+["Lebkuchen",6.0,9.0,66.0,38.0,4.0,0.3,3.0],
+["Leinoel",0.0,100.0,0.0,0.0,0.0,0.0,9.0],
+["Leinsamen",18.3,42.2,1.6,1.5,27.3,0.0,3.7],
+["Linsen, braun, roh",23.5,1.5,49.0,1.5,17.0,0.0,0.2],
+["Linsen, gekocht",9.0,0.5,16.5,0.5,8.0,0.0,0.1],
+["Linsen, rot, roh",24.0,1.5,52.0,1.5,11.0,0.0,0.3],
+["Linseneintopf",4.5,2.0,10.0,1.0,3.0,0.8,0.7],
+["Lyoner",12.0,26.0,1.0,0.5,0.0,2.2,10.0],
+["Macadamianuesse",7.9,75.8,5.2,4.6,8.6,0.0,12.1],
+["Magermilch, 0,3% Fett",3.5,0.3,5.0,5.0,0.0,0.1,0.2],
+["Magerquark",12.0,0.3,4.0,4.0,0.0,0.1,0.2],
+["Mais, Dose",2.9,1.2,11.5,3.0,3.0,0.4,0.2],
+["Maisstaerke",0.4,0.1,86.0,0.0,0.9,0.0,0.0],
+["Makrele, geraeuchert",20.5,15.5,0.0,0.0,0.0,1.8,3.6],
+["Mandarine",0.7,0.3,10.1,9.4,1.7,0.0,0.0],
+["Mandeldrink, ungesuesst",0.5,1.2,0.3,0.1,0.4,0.1,0.1],
+["Mandelmus",21.0,55.5,5.0,4.5,10.0,0.0,4.3],
+["Mandeln",21.0,53.0,5.4,4.2,12.0,0.0,4.0],
+["Mango",0.6,0.4,12.5,12.4,1.7,0.0,0.1],
+["Mangold",2.1,0.3,2.9,1.1,2.1,0.2,0.0],
+["Margarine",0.2,80.0,0.4,0.4,0.0,0.5,22.0],
+["Marmorkuchen",6.0,20.0,48.0,27.0,1.5,0.6,8.0],
+["Marzipan",8.0,25.0,53.0,48.0,4.0,0.0,2.0],
+["Mascarpone",4.5,42.0,4.0,4.0,0.0,0.1,29.0],
+["Matjeshering",16.0,15.0,0.0,0.0,0.0,2.5,3.5],
+["Maultaschen",9.0,8.0,22.0,1.5,1.5,1.2,3.5],
+["Mayonnaise",1.0,75.0,2.5,1.5,0.0,1.0,6.5],
+["Milch, fettarm, 1,5% Fett",3.5,1.5,5.0,5.0,0.0,0.1,1.0],
+["Milchreis, zubereitet",3.5,3.0,21.0,8.0,0.3,0.1,1.9],
+["Mineralwasser",0.0,0.0,0.0,0.0,0.0,0.0,0.0],
+["Molkenproteinpulver",78.0,6.5,6.0,5.0,1.0,0.5,3.5],
+["Mortadella",12.5,27.0,1.0,0.5,0.0,2.3,10.0],
+["Mozzarella",18.5,19.0,1.0,1.0,0.0,0.5,13.0],
+["Muesli, ungesuesst",10.5,6.0,60.0,12.0,9.0,0.0,1.0],
+["Muesliriegel",7.0,12.0,63.0,30.0,5.0,0.3,4.0],
+["Naturjoghurt, 1,5% Fett",4.3,1.5,4.8,4.8,0.0,0.2,1.0],
+["Naturjoghurt, 3,5% Fett",3.9,3.5,4.5,4.5,0.0,0.1,2.3],
+["Naturreis, roh",7.8,2.8,74.0,0.9,3.5,0.0,0.6],
+["Nektarine",0.9,0.2,10.5,8.9,1.7,0.0,0.0],
+["Nudeln, gekocht",5.5,0.9,27.0,0.6,1.8,0.0,0.2],
+["Nudeln, Hartweizen, roh",12.5,1.8,71.0,3.0,3.2,0.0,0.4],
+["Nuss-Nougat-Creme",6.3,30.9,57.5,56.3,3.4,0.1,10.6],
+["Oliven, gruen, in Lake",1.0,13.5,0.5,0.2,3.0,4.0,1.9],
+["Oliven, schwarz",1.5,35.0,0.5,0.2,3.0,3.0,5.0],
+["Olivenoel",0.0,100.0,0.0,0.0,0.0,0.0,14.0],
+["Orange",1.0,0.2,8.3,8.2,2.2,0.0,0.0],
+["Orangenlimonade",0.0,0.0,9.5,9.5,0.0,0.0,0.0],
+["Orangensaft",0.7,0.2,8.8,8.5,0.2,0.0,0.0],
+["Paniermehl",10.0,1.5,70.0,3.5,4.5,1.0,0.3],
+["Paprika, gruen",1.2,0.3,2.9,2.4,2.0,0.0,0.1],
+["Paprika, rot",1.3,0.5,6.4,4.9,3.6,0.0,0.1],
+["Paranuesse",14.3,66.4,3.5,2.3,7.5,0.0,15.1],
+["Parmesan",35.5,28.0,0.0,0.0,0.0,1.7,18.5],
+["Pastinake",1.3,0.5,12.0,5.5,4.5,0.0,0.1],
+["Pekannuesse",9.2,72.0,4.3,4.0,9.6,0.0,6.2],
+["Pfannkuchen",7.5,8.0,25.0,5.0,1.2,0.6,3.0],
+["Pfirsich",0.8,0.1,8.9,8.4,1.9,0.0,0.0],
+["Pflaume",0.6,0.2,10.2,9.6,1.6,0.0,0.0],
+["Pflaumen, getrocknet",2.3,0.5,55.0,38.0,7.0,0.0,0.1],
+["Pistazien",20.2,45.3,15.0,7.7,10.6,0.0,5.6],
+["Pizza Margherita, TK",11.0,9.0,30.0,3.5,2.5,1.4,3.7],
+["Polenta (Maisgriess), roh",8.5,1.0,74.0,0.6,3.0,0.0,0.2],
+["Pommes frites, frittiert",3.3,14.0,35.0,0.5,3.5,0.9,1.5],
+["Popcorn, luftgepoppt",12.9,4.5,63.0,0.9,14.5,0.0,0.6],
+["Pumpernickel",6.0,1.0,40.0,5.0,9.0,1.0,0.2],
+["Putenbrust, roh",23.5,1.0,0.0,0.0,0.0,0.1,0.3],
+["Quinoa, roh",14.0,6.0,62.0,2.5,7.0,0.0,0.7],
+["Radieschen",1.1,0.1,2.1,1.9,1.6,0.1,0.0],
+["Rapsoel",0.0,100.0,0.0,0.0,0.0,0.0,7.0],
+["Ravioli, Dose",4.0,3.0,12.0,2.5,1.5,1.0,1.2],
+["Reis, weiss, gekocht",2.7,0.3,28.0,0.1,0.5,0.0,0.1],
+["Reis, weiss, roh",7.0,0.6,78.0,0.2,1.4,0.0,0.2],
+["Reiswaffeln",8.0,3.0,80.0,1.0,3.5,0.3,0.7],
+["Remoulade",1.0,65.0,4.0,3.0,0.2,1.2,5.5],
+["Ricotta",9.0,11.0,3.5,3.5,0.0,0.3,7.0],
+["Rinderfilet, roh",21.0,4.0,0.0,0.0,0.0,0.1,1.7],
+["Rinderhackfleisch",19.0,15.0,0.0,0.0,0.0,0.2,6.5],
+["Rinderhuefte, roh",21.5,3.0,0.0,0.0,0.0,0.1,1.2],
+["Rinderleber, roh",20.0,3.5,3.9,0.0,0.0,0.2,1.3],
+["Roggenmehl, Type 1150",8.5,1.2,67.0,1.0,8.0,0.0,0.2],
+["Roggenmischbrot",6.5,1.0,45.0,2.0,6.0,1.2,0.2],
+["Rosenkohl",4.5,0.3,3.3,2.2,4.4,0.0,0.1],
+["Rosinen",2.5,0.6,68.0,66.0,5.0,0.0,0.2],
+["Rote Bete",1.5,0.1,8.4,7.0,2.5,0.1,0.0],
+["Rotkohl, roh",1.5,0.2,3.5,3.2,2.5,0.0,0.0],
+["Rotwein",0.1,0.0,2.6,0.6,0.0,0.0,0.0],
+["Rucola",2.6,0.7,2.1,2.0,1.6,0.1,0.1],
+["Salami",20.0,33.0,1.0,0.5,0.0,3.5,13.0],
+["Salzstangen",10.0,3.0,74.0,2.5,3.0,3.5,0.3],
+["Sardinen in Oel, abgetropft",24.5,11.5,0.0,0.0,0.0,1.0,2.0],
+["Sauerkraut",1.5,0.3,0.8,0.6,2.5,1.0,0.1],
+["Saure Sahne, 10% Fett",3.0,10.0,3.5,3.5,0.0,0.1,6.5],
+["Schinken, roh, geraeuchert",25.0,12.0,0.5,0.5,0.0,4.5,4.4],
+["Schlagsahne, 30% Fett",2.5,30.0,3.2,3.2,0.0,0.1,19.0],
+["Schmand",2.5,24.0,3.5,3.5,0.0,0.1,15.0],
+["Schmelzkaese",13.0,22.0,3.0,3.0,0.0,3.0,14.0],
+["Schwarzer Tee, ungesuesst",0.1,0.0,0.3,0.0,0.0,0.0,0.0],
+["Schweinebauch, roh",13.0,30.0,0.0,0.0,0.0,0.1,11.0],
+["Schweinefilet, roh",22.0,2.0,0.0,0.0,0.0,0.1,0.7],
+["Schweineschnitzel, roh",22.0,2.5,0.0,0.0,0.0,0.1,0.9],
+["Seelachs, roh",18.5,0.9,0.0,0.0,0.0,0.2,0.2],
+["Semmelknoedel, zubereitet",5.0,3.5,24.0,1.5,1.8,0.9,1.2],
+["Senf, mittelscharf",6.5,4.5,5.5,2.5,2.0,3.0,0.3],
+["Sesam",17.7,49.7,10.2,0.3,11.8,0.0,7.0],
+["Skyr, natur",11.0,0.2,4.0,4.0,0.0,0.1,0.1],
+["Sojabohnen, roh",36.0,20.0,6.3,5.5,22.0,0.0,2.9],
+["Sojadrink, ungesuesst",3.3,1.8,0.6,0.3,0.5,0.1,0.3],
+["Sojasauce",8.0,0.6,4.9,0.6,0.8,14.5,0.1],
+["Sonnenblumenkerne",20.8,51.5,11.4,2.6,8.6,0.0,4.5],
+["Sonnenblumenoel",0.0,100.0,0.0,0.0,0.0,0.0,11.0],
+["Spaetzle, gekocht",6.5,3.0,28.0,0.8,1.5,0.6,1.0],
+["Spargel",1.9,0.2,2.0,1.8,1.5,0.0,0.0],
+["Speck, durchwachsen",9.0,45.0,0.5,0.5,0.0,3.0,17.0],
+["Speisequark, 20% Fett i. Tr.",11.0,5.0,3.5,3.5,0.0,0.1,3.3],
+["Speisequark, 40% Fett i. Tr.",9.0,11.0,3.5,3.5,0.0,0.1,7.0],
+["Spinat",2.7,0.4,0.6,0.5,2.6,0.2,0.1],
+["Studentenfutter",14.0,34.0,32.0,25.0,5.5,0.0,5.0],
+["Suesskartoffel, roh",1.6,0.1,20.0,4.2,3.0,0.1,0.0],
+["Teewurst",13.0,35.0,0.5,0.3,0.0,2.1,13.0],
+["Tempeh",19.0,11.0,7.0,1.5,6.5,0.0,2.2],
+["Thunfisch in Oel, Dose, abgetropft",26.0,9.0,0.0,0.0,0.0,1.0,1.4],
+["Thunfisch in Wasser, Dose",24.0,1.0,0.0,0.0,0.0,1.0,0.3],
+["Thunfisch, roh",23.0,1.0,0.0,0.0,0.0,0.1,0.3],
+["Toastbrot",8.5,3.5,48.0,4.0,3.0,1.2,0.6],
+["Tofu, geraeuchert",16.0,9.0,1.0,0.5,1.5,1.3,1.5],
+["Tofu, natur",13.5,8.0,1.0,0.5,1.0,0.0,1.3],
+["Tomate",1.0,0.2,2.6,2.5,1.2,0.0,0.0],
+["Tomaten, passiert",1.3,0.2,5.0,4.5,1.5,0.1,0.0],
+["Tomatenmark",4.8,0.5,14.0,13.5,4.0,0.4,0.1],
+["Tomatensaft",0.8,0.1,3.5,3.3,0.7,0.5,0.0],
+["Trauben, weiss",0.7,0.3,15.2,15.1,1.5,0.0,0.1],
+["Traubensaft",0.3,0.1,16.0,15.8,0.1,0.0,0.0],
+["Vanilleeis",3.5,11.0,23.0,21.0,0.3,0.2,7.0],
+["Vanillepudding, zubereitet",3.0,3.0,20.0,15.0,0.1,0.1,2.0],
+["Vollkornbroetchen",9.5,2.5,45.0,3.0,7.5,1.3,0.5],
+["Vollkornbrot",7.5,1.5,39.0,3.0,8.0,1.2,0.3],
+["Vollkornnudeln, roh",13.0,2.5,62.0,3.5,8.0,0.0,0.5],
+["Vollmilch, 3,5% Fett",3.4,3.5,4.8,4.8,0.0,0.1,2.3],
+["Vollmilchschokolade",7.5,31.0,57.0,55.5,2.5,0.2,19.0],
+["Walnuesse",14.3,65.2,3.3,2.6,6.7,0.0,6.1],
+["Wassermelone",0.6,0.2,8.3,8.1,0.2,0.0,0.0],
+["Weissbrot",8.0,1.2,49.0,3.0,3.0,1.3,0.3],
+["Weisse Schokolade",6.0,32.0,59.0,58.5,0.2,0.2,19.5],
+["Weisskohl",1.3,0.2,4.2,4.0,3.0,0.0,0.0],
+["Weisswein, trocken",0.1,0.0,2.6,1.0,0.0,0.0,0.0],
+["Weisswurst",11.0,25.0,0.5,0.5,0.0,1.8,9.5],
+["Weizengriess",10.5,1.0,71.0,0.7,3.5,0.0,0.2],
+["Weizenmehl, Type 405",10.0,1.0,72.0,0.7,4.0,0.0,0.2],
+["Weizentortilla (Wrap)",9.0,7.0,50.0,3.0,3.0,1.3,3.0],
+["Weizenvollkornmehl",11.5,2.0,60.0,1.0,10.0,0.0,0.3],
+["Wiener Wuerstchen",12.0,24.0,1.5,0.5,0.0,2.0,9.0],
+["Wirsing",2.8,0.4,3.0,2.5,2.8,0.0,0.1],
+["Zartbitterschokolade, 70%",9.0,42.0,34.0,29.0,10.0,0.0,25.0],
+["Ziegenkaese, weich",18.5,21.0,1.0,1.0,0.0,1.5,14.5],
+["Zitrone",0.7,0.6,3.2,2.5,1.3,0.0,0.1],
+["Zucchini",1.6,0.4,2.2,2.1,1.1,0.0,0.1],
+["Zucker, weiss",0.0,0.0,99.8,99.8,0.0,0.0,0.0],
+["Zwieback",10.0,4.5,72.0,8.0,3.5,0.5,2.0],
+["Zwiebel",1.2,0.2,4.9,4.3,1.8,0.0,0.0]
+];
+// ============================================================
+// parseNaehrwerte -- Parser fuer OCR-Text von Naehrwerttabellen
+// (deutsch und englisch), striktes ES5, JScript-tauglich.
+// Ergebnis: { kcal, p, f, c, zucker, ballast, salz, gesfett }
+// Werte je 100 g. Nur sicher erkannte Felder werden gesetzt.
+// Zusatzfeld basis: "100g" oder "portion" (wenn erkennbar).
+// ============================================================
+
+// Umlaute als Zeichencodes -- haelt den Quelltext reines ASCII
+var NW_AE = String.fromCharCode(228); // a-Umlaut
+var NW_OE = String.fromCharCode(246); // o-Umlaut
+var NW_UE = String.fromCharCode(252); // u-Umlaut
+var NW_SZ = String.fromCharCode(223); // scharfes s
+
+// Zahl aus String, Komma oder Punkt als Dezimaltrenner
+function nwZahl(s) {
+    return parseFloat(s.replace(",", "."));
+}
+
+// Energie-Rohwert: "1.085" / "1,085" = Tausendertrenner -> 1085
+function nwEnergieZahl(raw) {
+    if (/^\d{1,3}[.,]\d{3}$/.test(raw)) {
+        return parseFloat(raw.replace(/[.,]/g, ""));
+    }
+    return nwZahl(raw);
+}
+
+function parseNaehrwerte(txt) {
+    var out = {};
+    if (txt === null || typeof txt === "undefined" || txt === "") { return out; }
+    var t = String(txt);
+    var i, m, v, win;
+
+    // ---------- Normalisierung ----------
+    t = t.toLowerCase();
+    // Umlaute und scharfes S vereinheitlichen (ae, oe, ue, ss)
+    t = t.replace(new RegExp(NW_AE, "g"), "ae").replace(new RegExp(NW_OE, "g"), "oe");
+    t = t.replace(new RegExp(NW_UE, "g"), "ue").replace(new RegExp(NW_SZ, "g"), "ss");
+    // OCR-Varianten von kcal ("kcai", "kca1")
+    t = t.replace(/kca[i1l]/g, "kcal");
+    // OCR: o statt 0 hinter Ziffern, auch mehrfach ("1oo" -> "100")
+    t = t.replace(/(\d)o+/g, function (mm, d) {
+        var z = d, k;
+        for (k = 1; k < mm.length; k++) { z += "0"; }
+        return z;
+    });
+    // OCR: fuehrendes o vor Dezimaltrenner ("o,5" -> "0,5")
+    t = t.replace(/(^|[\s<:>(])o([.,]\d)/g, function (mm, a, b) { return a + "0" + b; });
+    // Zeilenumbrueche zu Leerzeichen -- Labels duerfen umbrechen
+    t = t.replace(/\s+/g, " ");
+
+    // ---------- Spaltenlage: pro 100 g vs. pro Portion ----------
+    var re100 = /\b100 ?(g|ml)\b/;
+    var rePort = /portion|serving/;
+    var has100 = re100.test(t);
+    var hasPort = rePort.test(t);
+    var col = 0; // Index der gewuenschten Zahlenspalte je Zeile
+    if (has100 && hasPort && t.search(rePort) < t.search(re100)) {
+        col = 1; // Portionsspalte steht vor der 100g-Spalte
+    }
+
+    // Portionsgroesse in g, z. B. "Portion (30 g)" oder "Portion = 45 g"
+    var portG = 0;
+    m = t.match(/(portion|serving)\D{0,12}?(\d+(?:[.,]\d+)?) ?g\b/);
+    if (m) { portG = nwZahl(m[2]); }
+
+    // ---------- Label-Definitionen (auf normalisiertem Text) ----------
+    var defs = [
+        { key: "energie", re: /brennwert|energie|energy/g },
+        { key: "gesfett", re: /(davon )?(ges\w*tigte|ges\.) ?fetts\w+|saturat\w*( fat)?/g },
+        { key: "fett", re: /\bfett\b|\bfat\b/g },
+        { key: "carb", re: /kohlen\w+|carboh\w*/g },
+        { key: "zucker", re: /(davon )?zucker|\bsugars?\b/g },
+        { key: "ballast", re: /ballastst\w*|\bfib(re|er)s?\b/g },
+        { key: "protein", re: /eiwei\w*|\bprotein\b/g },
+        { key: "salz", re: /\bsalz\b|\bsalt\b/g },
+        { key: "natrium", re: /natrium|sodium/g }
+    ];
+
+    // Alle Label-Treffer sammeln (liefern die Fenstergrenzen)
+    var marks = [];
+    for (i = 0; i < defs.length; i++) {
+        var re = defs[i].re;
+        re.lastIndex = 0;
+        while ((m = re.exec(t)) !== null) {
+            marks.push({ key: defs[i].key, start: m.index, end: m.index + m[0].length });
+            if (re.lastIndex === m.index) { re.lastIndex++; }
+        }
+    }
+    marks.sort(function (a, b) { return a.start - b.start; });
+
+    // Textfenster hinter einem Label, bis zum naechsten fremden Label (max. 90 Zeichen)
+    function nwFenster(key) {
+        var k, mk = null, ende, vor;
+        for (k = 0; k < marks.length; k++) {
+            if (marks[k].key !== key) { continue; }
+            if (key === "fett") {
+                // "saturated fat" / "trans fat" ist nicht die Fett-Zeile
+                vor = t.substring(marks[k].start >= 12 ? marks[k].start - 12 : 0, marks[k].start);
+                if (/saturat|trans/.test(vor)) { continue; }
+            }
+            mk = marks[k];
+            break;
+        }
+        if (mk === null) { return null; }
+        ende = mk.end + 90;
+        for (k = 0; k < marks.length; k++) {
+            if (marks[k].key !== key && marks[k].start >= mk.end && marks[k].start < ende) {
+                ende = marks[k].start;
+            }
+        }
+        if (ende > t.length) { ende = t.length; }
+        return t.substring(mk.end, ende);
+    }
+
+    // Zahl-Tokens eines Fensters einsammeln
+    function nwTokens(win2) {
+        var toks = [], mm, pre;
+        var reT = /(< ?)?(\d+(?:[.,]\d+)?) ?(mg|kcal|kj|g\b|%)?/g;
+        while ((mm = reT.exec(win2)) !== null) {
+            if (reT.lastIndex === mm.index) { reT.lastIndex++; }
+            // Zahlen direkt hinter "pro/per/je" sind Bezugsangaben, keine Werte
+            pre = win2.substring(mm.index >= 6 ? mm.index - 6 : 0, mm.index);
+            if (/(^|[^a-z])(pro|per|je) ?$/.test(pre)) { continue; }
+            toks.push({
+                raw: mm[2],
+                val: nwZahl(mm[2]),
+                unit: mm[3] ? mm[3] : "",
+                less: mm[1] ? true : false
+            });
+        }
+        return toks;
+    }
+
+    // Grammwert einer Zeile: mg -> g, "<x" -> 0.8*x, Spaltenwahl
+    function nwGramm(toks) {
+        var g = [], k, tk, w;
+        for (k = 0; k < toks.length; k++) {
+            tk = toks[k];
+            if (tk.unit === "kcal" || tk.unit === "kj" || tk.unit === "%") { continue; }
+            w = tk.val;
+            if (tk.unit === "mg") { w = w / 1000; }
+            if (tk.less) { w = w * 0.8; }
+            g.push(w);
+        }
+        if (g.length === 0) { return null; }
+        w = (col < g.length) ? g[col] : g[0];
+        if (w < 0 || w > 100) { return null; } // unplausibel fuer g je 100 g
+        return w;
+    }
+
+    // Energie: kcal bevorzugen, sonst kJ / 4.184
+    function nwEnergie(toks) {
+        var kc = [], kj = [], frei = [], k, tk, w;
+        for (k = 0; k < toks.length; k++) {
+            tk = toks[k];
+            if (tk.unit === "kcal") { kc.push(nwEnergieZahl(tk.raw)); }
+            else if (tk.unit === "kj") { kj.push(nwEnergieZahl(tk.raw)); }
+            else if (tk.unit === "") { frei.push(nwEnergieZahl(tk.raw)); }
+        }
+        if (kc.length > 0) { return (col < kc.length) ? kc[col] : kc[0]; }
+        if (kj.length > 0) {
+            w = (col < kj.length) ? kj[col] : kj[0];
+            return w / 4.184;
+        }
+        if (frei.length > 0) {
+            w = (col < frei.length) ? frei[col] : frei[0];
+            if (w > 900) { return w / 4.184; } // ohne Einheit, sehr gross: wohl kJ
+            return w;
+        }
+        return null;
+    }
+
+    // ---------- Felder fuellen ----------
+    win = nwFenster("energie");
+    if (win !== null) {
+        v = nwEnergie(nwTokens(win));
+        if (v !== null) { out.kcal = v; }
+    }
+    var felder = [
+        { key: "fett", ziel: "f" },
+        { key: "gesfett", ziel: "gesfett" },
+        { key: "carb", ziel: "c" },
+        { key: "zucker", ziel: "zucker" },
+        { key: "ballast", ziel: "ballast" },
+        { key: "protein", ziel: "p" },
+        { key: "salz", ziel: "salz" }
+    ];
+    for (i = 0; i < felder.length; i++) {
+        win = nwFenster(felder[i].key);
+        if (win !== null) {
+            v = nwGramm(nwTokens(win));
+            if (v !== null) { out[felder[i].ziel] = v; }
+        }
+    }
+    // Natrium nur als Ersatz, wenn kein Salz gefunden: Salz = Natrium * 2.5
+    if (typeof out.salz === "undefined") {
+        win = nwFenster("natrium");
+        if (win !== null) {
+            v = nwGramm(nwTokens(win));
+            if (v !== null) { out.salz = v * 2.5; }
+        }
+    }
+
+    // ---------- Basis und Portionsumrechnung ----------
+    if (has100) {
+        out.basis = "100g"; // 100g-Spalte wurde direkt gelesen
+    } else if (hasPort) {
+        if (portG > 0) {
+            // Nur Portionswerte, Groesse bekannt: auf 100 g hochrechnen
+            var fak = 100 / portG;
+            var keys = ["kcal", "p", "f", "c", "zucker", "ballast", "salz", "gesfett"];
+            for (i = 0; i < keys.length; i++) {
+                if (typeof out[keys[i]] !== "undefined") { out[keys[i]] = out[keys[i]] * fak; }
+            }
+            out.basis = "100g";
+        } else {
+            out.basis = "portion"; // Werte bleiben je Portion
+        }
+    }
+
+    // Auf 2 Nachkommastellen runden
+    var kk;
+    for (kk in out) {
+        if (typeof out[kk] === "number") {
+            out[kk] = Math.round(out[kk] * 100) / 100;
+        }
+    }
+    return out;
+}
+/* ---------- v19 Kamera: Barcode + Naehrwerttabelle -----------------------
+   Vollbild-Ansicht (v-kam) statt Overlay. Barcode liest live: mit
+   BarcodeDetector wo es ihn gibt (Android Chrome), sonst mit dem eigenen
+   EAN-Decoder (eanDecode) -- damit laeuft der Scanner auch auf iOS Safari.
+   Der Tabellen-Modus friert das Bild ein und liest die Naehrwerttabelle
+   per Texterkennung (Tesseract, wird beim ersten Mal aus dem Netz geladen).
+   Daten: lokale Grundnahrungsmittel (STAPLES), Open Food Facts, Cache. */
+var foodCache=get('foods',{});
+var kamStream=null,kamLoop=null,kamMode='ean',kamZiel=null,kamTrack=null,kamAktiv=false;
+function kamMsgSet(s){var m=$('kamMsg');if(m)m.textContent=s||'';}
+function kamStop(){
+  kamAktiv=false;
+  if(kamLoop){clearInterval(kamLoop);kamLoop=null;}
+  if(kamStream){kamStream.getTracks().forEach(function(tr){tr.stop();});kamStream=null;}
+  kamTrack=null;
+  var v=$('kamVid');if(v){v.pause();v.srcObject=null;}
+  var tb=$('kamTorch');if(tb){tb.hidden=true;tb.setAttribute('aria-pressed','false');}
+  var f=$('kamFall');if(f)f.hidden=true;
+  var r=$('kamRes');if(r){r.hidden=true;r.innerHTML='';}
+  kamMsgSet('');
+}
+function kamFallZeigen(text){
+  var DE=cfg.lang==='de';
+  var f=$('kamFall');if(!f)return;
+  f.hidden=false;
+  $('kamFallMsg').textContent=text;
+  $('kamEanGo').textContent=DE?'Nachschlagen':'Look up';
+}
+function kamSetMode(m){
+  kamMode=m;
+  [].forEach.call(document.querySelectorAll('#kamMode button'),function(b){
+    b.setAttribute('aria-pressed',b.dataset.mode===m?'true':'false');
+  });
+  var s=$('kamShot');if(s)s.hidden=(m!=='ocr');
+  var r=$('kamRes');if(r){r.hidden=true;r.innerHTML='';}
+  var v=$('kamVid');if(v&&v.paused&&kamStream)v.play();
+  kamLauf();
+}
+function kamStart(){
+  var DE=cfg.lang==='de';
+  kamStop();kamAktiv=true;
+  if(!(navigator.mediaDevices&&navigator.mediaDevices.getUserMedia)){
+    kamMsgSet('');
+    kamFallZeigen(DE?'Dieser Browser gibt keine Kamera frei — EAN unten eintippen (steht unter dem Strichcode).'
+                    :'No camera in this browser — type the EAN below.');
+    return;
+  }
+  kamMsgSet(DE?'Kamera startet …':'Starting camera …');
+  navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280},height:{ideal:720}}})
+    .then(function(st){
+      if(!kamAktiv){st.getTracks().forEach(function(tr){tr.stop();});return;}
+      kamStream=st;kamTrack=st.getVideoTracks()[0]||null;
+      var v=$('kamVid');v.srcObject=st;v.play();
+      /* Licht nur anbieten, wo die Kamera es kann. */
+      try{
+        var caps=kamTrack&&kamTrack.getCapabilities&&kamTrack.getCapabilities();
+        if(caps&&caps.torch)$('kamTorch').hidden=false;
+      }catch(e){}
+      kamLauf();
+    })
+    .catch(function(){
+      kamMsgSet('');
+      kamFallZeigen(DE?'Kamera nicht freigegeben — EAN unten eintippen. Der Rest geht genauso.'
+                      :'Camera not allowed — type the EAN below.');
+    });
+}
+function kamLauf(){
+  var DE=cfg.lang==='de';
+  if(kamLoop){clearInterval(kamLoop);kamLoop=null;}
+  if(!kamAktiv)return;
+  if(kamMode==='ocr'){
+    kamMsgSet(DE?'Nährwerttabelle scharf in den Rahmen, dann auslösen.':'Frame the nutrition label, then shoot.');
+    return;
+  }
+  var hatBD=('BarcodeDetector' in window),det=null;
+  if(hatBD){try{det=new BarcodeDetector({formats:['ean_13','ean_8','upc_a','upc_e']});}catch(e){det=null;}}
+  var eigen=(typeof eanDecode==='function');
+  if(!det&&!eigen){
+    kamFallZeigen(DE?'Kein Barcode-Leser in diesem Browser — EAN unten eintippen.':'No barcode reader here — type the EAN.');
+    return;
+  }
+  kamMsgSet(DE?'Kamera auf den Strichcode halten.':'Point the camera at the barcode.');
+  var v=$('kamVid'),cv=$('kamCv'),beschaeftigt=false;
+  kamLoop=setInterval(function(){
+    if(!v.videoWidth||beschaeftigt)return;
+    if(det){
+      beschaeftigt=true;
+      det.detect(v).then(function(codes){
+        beschaeftigt=false;
+        if(codes&&codes.length)kamTreffer(codes[0].rawValue);
+      }).catch(function(){beschaeftigt=false;});
+    }else{
+      /* iOS-Weg: Bild abgreifen, selbst dekodieren. */
+      var w=640,h=Math.round(v.videoHeight/v.videoWidth*640);
+      cv.width=w;cv.height=h;
+      var cx=cv.getContext('2d',{willReadFrequently:true});
+      cx.drawImage(v,0,0,w,h);
+      var erg=null;
+      try{erg=eanDecode(cx.getImageData(0,0,w,h));}catch(e){}
+      if(erg)kamTreffer(erg);
+    }
+  },340);
+}
+function kamTreffer(roh){
+  var ean=String(roh||'').replace(/\D+/g,'');
+  if(ean.length<8)return;
+  if(kamLoop){clearInterval(kamLoop);kamLoop=null;}
+  if(navigator.vibrate)try{navigator.vibrate(40);}catch(e){}
+  kamFood(ean);
+}
+/* Open Food Facts inklusive der Mikronaehrwerte und Portionsgroesse. */
+function kamFood(ean){
+  var DE=cfg.lang==='de';
+  if(foodCache[ean]){kamResult(foodCache[ean]);return;}
+  kamMsgSet(DE?'Suche '+ean+' …':'Looking up '+ean+' …');
+  fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=product_name,brands,nutriments,serving_size')
     .then(function(r){return r.json();})
     .then(function(j){
       var p=j&&j.product,nu=p&&p.nutriments;
-      if(!p||!nu||nu['proteins_100g']===undefined){
-        if(m)m.textContent=DE?'Nicht in der Datenbank — Nährwerte von der Packung eintragen.':'Not in the database — enter the label values.';
+      if(!p||!nu||(nu['proteins_100g']===undefined&&nu['energy-kcal_100g']===undefined)){
+        kamMsgSet(DE?'Nicht in der Datenbank. Tipp: Modus „Tabelle" liest die Packung direkt.':'Not in the database. Tip: “Label” mode reads the package.');
+        setTimeout(kamLauf,1600);
         return;
       }
       var food={n:(p.product_name||'Produkt')+(p.brands?' ('+String(p.brands).split(',')[0]+')':''),
-        p:+nu['proteins_100g']||0,f:+nu['fat_100g']||0,c:+nu['carbohydrates_100g']||0};
+        p:+nu['proteins_100g']||0,f:+nu['fat_100g']||0,c:+nu['carbohydrates_100g']||0,
+        z:nu['sugars_100g']!==undefined?+nu['sugars_100g']:undefined,
+        bl:nu['fiber_100g']!==undefined?+nu['fiber_100g']:undefined,
+        sa:nu['salt_100g']!==undefined?+nu['salt_100g']:undefined,
+        gf:nu['saturated-fat_100g']!==undefined?+nu['saturated-fat_100g']:undefined,
+        por:p.serving_size||null};
       foodCache[ean]=food;set('foods',foodCache);
-      foodResult(ean,food);
+      kamResult(food);
     })
     .catch(function(){
-      if(m)m.textContent=DE?'Datenbank nicht erreichbar — die Suche braucht Internet. Nährwerte stehen auch auf der Packung.':'Database unreachable — lookup needs internet. The label has the values too.';
+      kamMsgSet(DE?'Datenbank nicht erreichbar — dafür braucht es Internet. Modus „Tabelle" oder Handeingabe gehen offline.':'Database unreachable — needs internet.');
+      setTimeout(kamLauf,2200);
     });
 }
-function foodResult(ean,food){
+/* Ergebnis-Karte im Sucher: Menge waehlen, uebernehmen. */
+function kamResult(food){
   var DE=cfg.lang==='de';
-  if(scanLoop){clearInterval(scanLoop);scanLoop=null;}
-  if(scanStream){scanStream.getTracks().forEach(function(t){t.stop();});scanStream=null;}
-  var ov=scanUI(
-    '<div class="scanhead"><b>'+food.n+'</b><button type="button" class="iconbtn" data-scan="x" aria-label="Schließen">✕</button></div>'+
-    '<p class="hint">'+(DE?'Je 100 g: ':'Per 100 g: ')+food.p+' g P · '+food.f+' g F · '+food.c+' g '+(DE?'KH':'C')+'</p>'+
-    '<div class="field"><label for="scanG">'+(DE?'Menge':'Amount')+'</label>'+
-    '<div class="ctl hasunit"><input id="scanG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
-    '<div class="savebar"><button type="button" class="tbtn go" id="scanUse">'+(DE?'Übernehmen':'Use it')+'</button></div>'
-  );
-  ov.querySelector('#scanUse').addEventListener('click',function(){
-    var g=Math.max(1,parseFloat(ov.querySelector('#scanG').value)||100)/100;
-    if($('mlName')&&!$('mlName').value)$('mlName').value=food.n.slice(0,40);
-    if($('mlP'))$('mlP').value=Math.round(food.p*g*10)/10;
-    if($('mlF'))$('mlF').value=Math.round(food.f*g*10)/10;
-    if($('mlC'))$('mlC').value=Math.round(food.c*g*10)/10;
-    ['mlP','mlF','mlC'].forEach(function(id){var el=$(id);if(el)el.dispatchEvent(new Event('input'));});
-    scanStop();
+  kamMsgSet('');
+  var r=$('kamRes');if(!r)return;
+  var mikro=[];
+  if(food.z!==undefined)mikro.push((DE?'Zucker ':'sugar ')+food.z+' g');
+  if(food.bl!==undefined)mikro.push((DE?'Ballaststoffe ':'fibre ')+food.bl+' g');
+  if(food.sa!==undefined)mikro.push((DE?'Salz ':'salt ')+food.sa+' g');
+  r.hidden=false;
+  r.innerHTML='<b style="font-family:var(--fd);font-weight:700">'+food.n+'</b>'+
+    '<p class="hint" style="margin:.3rem 0 .55rem">'+(DE?'Je 100 g: ':'Per 100 g: ')+
+      Math.round(food.p*4+food.f*9+food.c*4)+' kcal · '+food.p+' P · '+food.f+' F · '+food.c+' '+(DE?'KH':'C')+
+      (mikro.length?'<br>'+mikro.join(' · '):'')+
+      (food.por?'<br>'+(DE?'Portion laut Packung: ':'Serving: ')+food.por:'')+'</p>'+
+    '<div class="field"><label for="kamG">'+(DE?'Menge':'Amount')+'</label>'+
+      '<div class="ctl hasunit"><input id="kamG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
+    '<div class="savebar">'+
+      '<button type="button" class="tbtn go" id="kamUse">'+(DE?'In Mahlzeit übernehmen':'Add to a meal')+'</button>'+
+      '<button type="button" class="tbtn" id="kamAgain">'+(DE?'Weiter scannen':'Scan again')+'</button></div>';
+  $('kamUse').addEventListener('click',function(){
+    var g=Math.max(1,parseFloat($('kamG').value)||100)/100;
+    kamUebernehmen(food,g);
   });
+  $('kamAgain').addEventListener('click',function(){r.hidden=true;r.innerHTML='';kamLauf();});
 }
+function kamUebernehmen(food,g){
+  var ziel=kamZiel;kamZiel=null;
+  show('fuel');
+  openMeal(ziel?ziel.idx:null,(ziel&&ziel.slot)||'s');
+  $('mlName').value=food.n.slice(0,40);
+  $('mlP').value=Math.round(food.p*g*10)/10;
+  $('mlF').value=Math.round(food.f*g*10)/10;
+  $('mlC').value=Math.round(food.c*g*10)/10;
+  if(food.z!==undefined||food.bl!==undefined||food.sa!==undefined||food.gf!==undefined){
+    $('sheetBody').dataset.mikro=JSON.stringify({
+      z:food.z!==undefined?Math.round(food.z*g*10)/10:undefined,
+      bl:food.bl!==undefined?Math.round(food.bl*g*10)/10:undefined,
+      sa:food.sa!==undefined?Math.round(food.sa*g*100)/100:undefined,
+      gf:food.gf!==undefined?Math.round(food.gf*g*10)/10:undefined});
+  }
+  ['mlP','mlF','mlC'].forEach(function(id){$(id).dispatchEvent(new Event('input'));});
+}
+/* Texterkennung: Tesseract kommt erst bei Bedarf aus dem Netz. */
+var ocrLaedt=null;
+function ocrLade(){
+  if(window.Tesseract)return Promise.resolve();
+  if(ocrLaedt)return ocrLaedt;
+  ocrLaedt=new Promise(function(res,rej){
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+    s.onload=function(){res();};
+    s.onerror=function(){ocrLaedt=null;rej(new Error('laden'));};
+    document.head.appendChild(s);
+  });
+  return ocrLaedt;
+}
+$('kamShot').addEventListener('click',function(){
+  var DE=cfg.lang==='de',v=$('kamVid'),cv=$('kamCv');
+  if(!v.videoWidth){kamMsgSet(DE?'Kamera noch nicht bereit.':'Camera not ready.');return;}
+  cv.width=v.videoWidth;cv.height=v.videoHeight;
+  cv.getContext('2d').drawImage(v,0,0);
+  v.pause();
+  kamMsgSet(DE?'Lese Tabelle … beim ersten Mal dauert das einen Moment (lädt die Texterkennung).':'Reading … first run downloads the reader.');
+  ocrLade().then(function(){
+    return window.Tesseract.recognize(cv,'deu+eng');
+  }).then(function(erg){
+    var txt=(erg&&erg.data&&erg.data.text)||'';
+    var w=(typeof parseNaehrwerte==='function')?parseNaehrwerte(txt):null;
+    if(w&&(w.kcal||w.p!==undefined||w.c!==undefined||w.f!==undefined)){
+      var food={n:DE?'Von der Packung':'From the label',
+        p:w.p||0,f:w.f||0,c:w.c||0,z:w.z!==undefined?w.z:w.zucker,bl:w.bl!==undefined?w.bl:w.ballast,
+        sa:w.sa!==undefined?w.sa:w.salz,gf:w.gf!==undefined?w.gf:w.gesfett,por:null};
+      /* Parser liefert ggf. andere Feldnamen -- beide Formen abfangen. */
+      if(w.zucker!==undefined)food.z=w.zucker;
+      if(w.ballast!==undefined)food.bl=w.ballast;
+      if(w.salz!==undefined)food.sa=w.salz;
+      if(w.gesfett!==undefined)food.gf=w.gesfett;
+      kamResult(food);
+    }else{
+      kamMsgSet(DE?'Nicht lesbar — näher heran, gerade halten, mehr Licht. Oder Werte von Hand eintragen.':'Could not read it — closer, straight, more light.');
+      v.play();
+    }
+  }).catch(function(){
+    kamMsgSet(DE?'Texterkennung nicht ladbar — dafür braucht es einmalig Internet.':'Reader failed to load — needs internet once.');
+    v.play();
+  });
+});
+$('kamMode').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-mode]');if(b)kamSetMode(b.dataset.mode);
+});
+$('kamTorch').addEventListener('click',function(){
+  var an=this.getAttribute('aria-pressed')==='true';
+  var neu2=!an,selbst=this;
+  if(!kamTrack)return;
+  try{
+    kamTrack.applyConstraints({advanced:[{torch:neu2}]}).then(function(){
+      selbst.setAttribute('aria-pressed',neu2?'true':'false');
+    }).catch(function(){});
+  }catch(e){}
+});
+$('kamEanGo').addEventListener('click',function(){
+  var v=($('kamEan').value||'').replace(/\D+/g,'');
+  if(v.length>=8)kamFood(v);
+});
+$('fuelCam').addEventListener('click',function(){kamZiel=null;show('kam');});
 $('sheetBody').addEventListener('click',function(e){
-  if(e.target.closest('#mlScan'))scanStart();
+  if(!e.target.closest('#mlScan'))return;
+  var roh=$('sheetBody').dataset.meal;
+  kamZiel={idx:(roh&&roh!=='neu')?+roh:null,slot:($('mlSlot')&&$('mlSlot').value)||'s'};
+  closeSheet();
+  show('kam');
 });
 $('mealAdd').addEventListener('click',function(){openMeal(null);});
 $('mealList').addEventListener('click',function(e){
@@ -6340,10 +7747,10 @@ $('mealList').addEventListener('click',function(e){
 });
 $('sheetBody').addEventListener('click',function(e){
   var b=e.target.closest('button[data-mlact]');if(!b)return;
-  var roh=$('sheetBody').dataset.meal,k=iso(TODAY);
+  var roh=$('sheetBody').dataset.meal,k=iso(fuelTag());
   if(!meals[k])meals[k]=[];
   if(b.dataset.mlact==='del'){
-    meals[k].splice(+roh,1);saveMeals();drawMeals();closeSheet();return;
+    meals[k].splice(+roh,1);saveMeals();fuelPaint();closeSheet();return;
   }
   var eintrag={
     n:($('mlName').value.trim()||(cfg.lang==='de'?'Mahlzeit':'Meal')),
@@ -6352,8 +7759,24 @@ $('sheetBody').addEventListener('click',function(e){
     c:Math.max(0,parseFloat($('mlC').value)||0),
     s:($('mlSlot')&&$('mlSlot').value)||'s'
   };
+  /* Mikronaehrwerte reisen unsichtbar mit, wenn der Eintrag aus Scanner,
+     Suche oder Rezept kam -- das Blatt fragt sie nie ab. */
+  var mk=$('sheetBody').dataset.mikro;
+  if(mk){try{var mo=JSON.parse(mk);eintrag.z=mo.z;eintrag.bl=mo.bl;eintrag.sa=mo.sa;eintrag.gf=mo.gf;}catch(err){}}
+  else if(roh!=='neu'&&meals[k][+roh]){
+    var altE=meals[k][+roh];
+    if(altE.z!==undefined){eintrag.z=altE.z;eintrag.bl=altE.bl;eintrag.sa=altE.sa;eintrag.gf=altE.gf;}
+  }
+  if(b.dataset.mlact==='rezept'){
+    var rz=get('recipes',[]);
+    rz.push({n:eintrag.n,p:eintrag.p,f:eintrag.f,c:eintrag.c,z:eintrag.z,bl:eintrag.bl,sa:eintrag.sa,gf:eintrag.gf});
+    if(rz.length>80)rz.shift();
+    set('recipes',rz);drawRecipes();
+    b.textContent=cfg.lang==='de'?'Gemerkt ✓':'Saved ✓';b.disabled=true;
+    return;
+  }
   if(roh==='neu')meals[k].push(eintrag);else meals[k][+roh]=eintrag;
-  saveMeals();drawMeals();closeSheet();
+  saveMeals();fuelPaint();closeSheet();
 });
 function bx(l,v,u,hi){return '<div class="obox'+(hi?' hi':'')+'"><em>'+l+'</em><b>'+v+' <i>'+u+'</i></b></div>';}
 ['f-sex','f-age','f-h','f-w','f-act','f-goal'].forEach(function(id){$(id).addEventListener('input',function(){calc();refresh();});$(id).addEventListener('change',function(){calc();refresh();});});
@@ -7064,7 +8487,212 @@ function coachPulse(){
    und frisch erzeugte SVG-Elemente starten immer laufend -- auch wenn der
    Bereich gerade nicht sichtbar ist. Ohne diese Zeile waeren die Auren nach
    jedem Neuaufbau wieder unterwegs, obwohl sie niemand sieht. */
-function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks();coachPulse();syncUndo();pauseHiddenSvg();}
+/* ---------- v19 Statistik (MCI-Vorbild) ----------------------------------
+   Verlaufskarten: orange Polyline, hohle Marker, Wert an jedem Punkt,
+   Delta-Chip. Ehrlich bleiben heisst hier: Wiederholungen, Saetze und
+   Kalorien aus echten Aufzeichnungen -- keine erfundenen Gewichte. */
+function statKarte(titel,unter,punkte,einheit,invers){
+  var DE=cfg.lang==='de';
+  var W=340,H=104,PAD=26;
+  var delta=null;
+  if(punkte.length>=2)delta=punkte[punkte.length-1].y-punkte[punkte.length-2].y;
+  var chip='';
+  if(delta!==null){
+    var gut=invers?delta<0:delta>0;
+    var farbe=delta===0?'var(--ink3)':(gut?'var(--aurora)':'var(--ember)');
+    chip='<span class="statdelta" style="color:'+farbe+'">'+(delta>0?'+':'')+
+      (Math.round(delta*10)/10)+' '+einheit+'</span>';
+  }
+  var svg='';
+  if(punkte.length){
+    var ys=[],i;
+    for(i=0;i<punkte.length;i++)ys.push(punkte[i].y);
+    var mn=Math.min.apply(null,ys),mx=Math.max.apply(null,ys);
+    var spanne=Math.max(1,mx-mn);
+    var xs=function(i2){return punkte.length===1?W/2:PAD+ (W-2*PAD)*i2/(punkte.length-1);};
+    var yv=function(v){return H-24-((v-mn)/spanne)*(H-52);};
+    var pts=[],labels='',xlab='';
+    for(i=0;i<punkte.length;i++){
+      var X=xs(i),Y=yv(punkte[i].y);
+      pts.push(X.toFixed(1)+','+Y.toFixed(1));
+      labels+='<text x="'+X.toFixed(1)+'" y="'+(Y-9).toFixed(1)+'" text-anchor="middle" fill="var(--ember)" style="font-family:var(--fm);font-size:12px">'+(Math.round(punkte[i].y*10)/10)+'</text>';
+      xlab+='<text x="'+X.toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle" fill="var(--ink3)" style="font-family:var(--fm);font-size:11px">'+punkte[i].x+'</text>';
+    }
+    var kreise='';
+    for(i=0;i<punkte.length;i++){
+      var X2=xs(i),Y2=yv(punkte[i].y);
+      kreise+='<circle cx="'+X2.toFixed(1)+'" cy="'+Y2.toFixed(1)+'" r="4" fill="var(--surf)" stroke="var(--ember)" stroke-width="2"/>';
+    }
+    svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block" aria-hidden="true">'+
+      (punkte.length>1?'<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--ember)" stroke-width="2" stroke-linejoin="round"/>':'')+
+      kreise+labels+xlab+'</svg>';
+  }else{
+    svg='<p class="hint" style="padding:1rem 0">'+(DE?'Noch keine Aufzeichnung — die erste geführte Einheit füllt diese Karte.':'No recording yet — your first guided session fills this card.')+'</p>';
+  }
+  return '<div class="statcard"><div class="stathead"><div><b>'+titel+'</b><span>'+unter+'</span></div>'+chip+'</div>'+svg+'</div>';
+}
+function drawStat(){
+  var el=$('statBody');if(!el)return;
+  var DE=cfg.lang==='de',L=DE?1:0,h='';
+  /* 1. Saetze je Woche und Muster (aus dem Erledigt-Speicher, 8 Wochen). */
+  h+='<p class="eyebrow">'+(DE?'Sätze je Woche':'Sets per week')+'</p>';
+  var woNow=Math.min(12,Math.max(1,wkOf(TODAY)));
+  PAT.forEach(function(pp){
+    var punkte=[];
+    for(var w=Math.max(1,woNow-7);w<=woNow;w++){
+      var summe=0;
+      for(var tg=0;tg<7;tg++){
+        var d=add(STD,(w-1)*7+tg),pl=plan(d);
+        if(pl.kind!=='train')continue;
+        var dn=doneMap[iso(d)]||{};
+        sessOf(pl).items.forEach(function(x,idx){
+          if(dn[idx]&&x.id===pp.id)summe+=pl.ph.sets;
+        });
+      }
+      punkte.push({x:'W'+w,y:summe});
+    }
+    /* Karten ohne jede Aktivitaet weglassen -- ausser beim ersten Muster,
+       damit der Bereich nie voellig leer wirkt. */
+    var aktiv=false;punkte.forEach(function(q){if(q.y)aktiv=true;});
+    if(aktiv||pp.id==='push')h+=statKarte(pp.name,DE?'erledigte Sätze':'sets done',punkte,DE?'Sätze':'sets',false);
+  });
+  /* 2. Uebungs-Verlaeufe aus der Historie (bester Satz je Einheit). */
+  var eh=get('exhist',{}),namen=Object.keys(eh);
+  h+='<p class="eyebrow">'+(DE?'Übungen — bester Satz':'Exercises — best set')+'</p>';
+  if(namen.length){
+    namen.sort();
+    namen.forEach(function(nm){
+      var reihen=eh[nm].slice(-7),punkte=[];
+      reihen.forEach(function(r){
+        var best=0;for(var q=0;q<r.r.length;q++)if(r.r[q]>best)best=r.r[q];
+        punkte.push({x:r.d.slice(8)+'.'+r.d.slice(5,7)+'.',y:best});
+      });
+      var anzeige=nm;
+      if(DE&&typeof exName==='function'){
+        for(var pk in EXDB){for(var xx=0;xx<EXDB[pk].length;xx++){if(EXDB[pk][xx][0]===nm){anzeige=exName(EXDB[pk][xx]);break;}}}
+      }
+      h+=statKarte(anzeige,(DE?'letzte ':'last ')+reihen.length+(DE?' Einheiten':' sessions'),punkte,DE?'Wdh':'reps',false);
+    });
+  }else{
+    h+=statKarte(DE?'Deine Übungen':'Your exercises',DE?'Wiederholungen je Einheit':'reps per session',[],'',false);
+  }
+  /* 3. Ernaehrung: 14 Tage Kalorien. */
+  h+='<p class="eyebrow">'+(DE?'Ernährung — 14 Tage':'Fuel — 14 days')+'</p>';
+  var zielK=curMacro('cal')||0,balken='';
+  var maxK=Math.max(zielK||0,1);
+  var tage=[];
+  for(var i2=13;i2>=0;i2--){
+    var dd=add(TODAY,-i2),kk=iso(dd),ms2=mealsOf(kk),kcal2=0;
+    ms2.forEach(function(m2){kcal2+=mealKcal(m2);});
+    tage.push({d:dd,kcal:kcal2});
+    if(kcal2>maxK)maxK=kcal2;
+  }
+  tage.forEach(function(tg2){
+    var hp=Math.round(tg2.kcal/maxK*100);
+    var voll=zielK&&tg2.kcal>=zielK*0.9&&tg2.kcal<=zielK*1.1;
+    balken+='<div class="statbar" title="'+iso(tg2.d)+': '+Math.round(tg2.kcal)+' kcal">'+
+      '<i style="height:'+Math.max(3,hp)+'%;background:'+(tg2.kcal?(voll?'var(--aurora)':'var(--ice)'):'var(--surf2)')+'"></i>'+
+      '<em>'+tg2.d.getDate()+'</em></div>';
+  });
+  h+='<div class="statcard"><div class="stathead"><div><b>'+(DE?'Kalorien':'Calories')+'</b>'+
+    '<span>'+(zielK?(DE?'grün = im Zielband (±10 %)':'green = within ±10 % of target'):(DE?'ohne Ziel — Rechner einrichten':'no target set'))+'</span></div>'+
+    (zielK?'<span class="statdelta" style="color:var(--ink3)">'+(DE?'Ziel ':'target ')+zielK+'</span>':'')+'</div>'+
+    '<div class="statbars">'+balken+'</div></div>';
+  el.innerHTML=h;
+}
+/* ---------- HEUTE-Dashboard (v19, MCI-Vorbild) ---------------------------
+   Hero mit der naechsten Einheit, Gewohnheiten als 2x2, Verbessern als
+   Zeilenkarten. Alles klickbar, alles aus vorhandenen Datenquellen --
+   hier wird nichts erfunden, nur gebuendelt. */
+function renderHome(){
+  var heroEl=$('homeHero'),habEl=$('homeHabits'),upEl=$('homeCards');
+  if(!heroEl)return;
+  var DE=cfg.lang==='de',L=DE?1:0;
+  /* Hero: heutige oder naechste Einheit. */
+  var off=0,d=TODAY,pl=plan(d);
+  while(pl.kind!=='train'&&off<14){off++;d=add(TODAY,off);pl=plan(d);}
+  if(pl.kind==='train'){
+    var its=sessOf(pl).items;
+    var muster={};its.forEach(function(x){if(x.id&&pid[x.id])muster[pid[x.id].name]=1;});
+    var wd=DE?['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()]:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    var tag=off===0?(DE?'Heute':'Today'):(DE?'Nächste Einheit · '+wd:'Next session · '+wd);
+    var thumbs=its.slice(0,4).map(function(x){return x.id?exThumb(x.l,x.id):'';}).join('');
+    heroEl.innerHTML='<button type="button" class="hcard" data-go="train">'+
+      '<span class="hcMain"><p class="tag">'+tag+'</p><h3>'+pl.title+'</h3>'+
+      '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+' · '+Object.keys(muster).join(' · ')+'</p>'+
+      '<span class="hcGo">'+(DE?'Starten':'Start')+' ▸</span></span>'+
+      '<span class="hcThumbs">'+thumbs+'</span></button>';
+  }else{
+    heroEl.innerHTML='<button type="button" class="hcard" data-go="train">'+
+      '<span class="hcMain"><p class="tag">'+(DE?'Heute':'Today')+'</p><h3>'+pl.title+'</h3>'+
+      '<p class="sub2">'+(pl.sub||'')+'</p>'+
+      '<span class="hcGo">'+(DE?'Ansehen':'View')+' ▸</span></span></button>';
+  }
+  /* Gewohnheiten. */
+  var k=iso(TODAY),ms=mealsOf(k),kcal=0;ms.forEach(function(m){kcal+=mealKcal(m);});
+  var ziel=curMacro('cal')||0;
+  var teil=ziel?Math.min(1,kcal/ziel):0,C=125.7;
+  var ringSub=ziel?(kcal+' / '+ziel+' kcal'):(DE?'Rechner einrichten':'set up the calculator');
+  var h='';
+  h+='<button type="button" class="habcard" data-go="fuel"><em>'+(DE?'Kalorien':'Calories')+'</em>'+
+    '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
+    '<svg class="habring" width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">'+
+    '<circle cx="23" cy="23" r="20" fill="none" stroke="var(--surf2)" stroke-width="4.5"/>'+
+    '<circle cx="23" cy="23" r="20" fill="none" stroke="var(--aurora)" stroke-width="4.5" stroke-linecap="round" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C*(1-teil)).toFixed(1)+'" transform="rotate(-90 23 23)"/></svg>'+
+    '<p class="sub">'+ringSub+'</p></button>';
+  /* Trainings-Heatmap: 28 Tage, heute umrandet. */
+  var zellen='',n=0,woSoll=0,woIst=0;
+  for(var i=27;i>=0;i--){
+    var dd=add(TODAY,-i),p2=plan(dd),cls='';
+    if(p2.w>=1&&p2.w<=12&&p2.kind==='train'){cls=dayDone(iso(dd))?'tr':(i>0?'ms':'');}
+    if(i===0)cls+=(cls?' ':'')+'td';
+    zellen+='<i style="--i:'+n+'"'+(cls?' class="'+cls+'"':'')+'></i>';n++;
+  }
+  for(var j=0;j<7;j++){
+    var dw=add(STD,(Math.min(12,Math.max(1,wkOf(TODAY)))-1)*7+j),pw=plan(dw);
+    if(pw.kind==='train'){woSoll++;if(dayDone(iso(dw)))woIst++;}
+  }
+  h+='<button type="button" class="habcard" data-go="train"><em>'+(DE?'Trainings':'Sessions')+'</em>'+
+    '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
+    '<div class="habheat">'+zellen+'</div>'+
+    '<p class="sub">'+woIst+'/'+woSoll+' '+(DE?'diese Woche':'this week')+'</p></button>';
+  /* Gewicht. */
+  var kg=profile&&profile.weight?profile.weight:null;
+  h+='<button type="button" class="habcard" data-go="fuel"><em>'+(DE?'Gewicht':'Weight')+'</em>'+
+    '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
+    '<b class="big">'+(kg?String(kg).replace('.',DE?',':'.')+'<small> kg</small>':'–')+'</b>'+
+    '<p class="sub">'+(DE?'im Ernährungs-Bereich pflegen':'kept in the fuel area')+'</p></button>';
+  /* Serie. */
+  var st=$('s-streak')?$('s-streak').textContent:'0';
+  h+='<div class="habcard"><em>'+(DE?'Serie':'Streak')+'</em>'+
+    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?'Tage':'days')+'</small></b>'+
+    '<p class="sub">'+(DE?'Dranbleiben zählt doppelt':'showing up counts double')+'</p></div>';
+  habEl.innerHTML=h;
+  /* Verbessern. */
+  var offen=parseInt(($('coachBadge')&&$('coachBadge').textContent)||'0',10)||0;
+  function up(go,farbe,icon,titel,sub,badge){
+    return '<button type="button" class="upcard" data-go="'+go+'">'+
+      '<span class="ucIc" style="color:'+farbe+';background:color-mix(in srgb,'+farbe+' 14%,transparent)">'+icon+'</span>'+
+      '<span class="ucTx"><b>'+titel+'</b><span>'+sub+'</span></span>'+
+      (badge?'<span class="badge2">'+badge+'</span>':'')+
+      '<svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>';
+  }
+  var ic={coach:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5a2.5 2.5 0 0 1-2.5 2.5H8l-4 3.5V6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5Z"/></svg>',
+    mob:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 7.5v5M12 12.5 8 17M12 12.5l4 4.5M7 9.5l5-1.5 5 1.5"/></svg>',
+    buch:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 20.5V5.5M8 7h8"/></svg>'};
+  upEl.innerHTML=
+    up('coach','var(--ice)',ic.coach,'Coach',offen?(DE?offen+' offene Hinweise':offen+' open notes'):(DE?'Alles im grünen Bereich':'All clear'),offen)+
+    up('mobility','var(--aurora)',ic.mob,(DE?'Beweglichkeit':'Mobility'),(DE?'Fünf Tests, fünf Drills':'Five tests, five drills'),0)+
+    up('learn','var(--brass)',ic.buch,(DE?'Wissen':'Knowledge'),(DE?'Das Buch, Kapitel für Kapitel':'The book, chapter by chapter'),0);
+}
+/* Klicks der Dashboard-Karten. */
+['homeHero','homeHabits','homeCards'].forEach(function(id){
+  var el=$(id);if(!el)return;
+  el.addEventListener('click',function(e){
+    var b=e.target.closest('[data-go]');if(b)show(b.dataset.go);
+  });
+});
+function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks();coachPulse();syncUndo();renderHome();pauseHiddenSvg();}
 ['y-sleep','y-mood','y-sore','y-stress'].forEach(function(id){$(id).addEventListener('input',function(){refresh();calc();});$(id).addEventListener('change',function(){refresh();calc();});});
 $('y-goal').addEventListener('input',function(){set('goal',this.value);});
 /* ---------- themes ---------- */
@@ -7840,7 +9468,19 @@ function looseThumb(label){
     '<circle cx="23" cy="23" r="2.3" fill="'+c+'"/></svg>';
   else if(/Schlaf|Sleep/i.test(l))inner='<svg viewBox="0 0 46 46" aria-hidden="true">'+
     '<path d="M28.5 8.5 A 14.5 14.5 0 1 0 37.5 29.5 A 12 12 0 0 1 28.5 8.5 Z" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linejoin="round"/></svg>';
-  return inner?'<span class="swthumb">'+inner+'</span>':'';
+  else if(/Wiege|Weigh/i.test(l))inner='<svg viewBox="0 0 46 46" aria-hidden="true">'+
+    '<rect x="8" y="10" width="30" height="26" rx="6" fill="none" stroke="'+c+'" stroke-width="2.4"/>'+
+    '<path d="M16 17.5a8.5 8.5 0 0 1 14 0" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M23 17.5 26.5 13.5" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  else if(/S(ä|ae)tze|sets/i.test(l))inner='<svg viewBox="0 0 46 46" aria-hidden="true">'+
+    '<path d="M12 12v22M19 12v22M26 12v22M33 12v22" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round"/>'+
+    '<path d="M8 31 37 15" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linecap="round"/></svg>';
+  /* Auffangzweig: keine Zeile bleibt ohne Kachel -- neue Etiketten
+     bekommen das Erholungs-Blatt, bis sie ein eigenes Zeichen haben. */
+  if(!inner)inner='<svg viewBox="0 0 46 46" aria-hidden="true">'+
+    '<path d="M23 38C14 34 10 27 12 17c8-3 16-3 22 2-1 11-5 16-11 19Z" fill="none" stroke="'+c+'" stroke-width="2.4" stroke-linejoin="round"/>'+
+    '<path d="M23 36c0-8 2-13 7-17" fill="none" stroke="'+c+'" stroke-width="2" stroke-linecap="round"/></svg>';
+  return '<span class="swthumb">'+inner+'</span>';
 }
 function openSwap(pl,idx,it,after){
   var DE=cfg.lang==='de',L=DE?1:0;
@@ -8683,6 +10323,8 @@ function renderRanks(){
      der Service Worker wurde nie registriert. */
   var rb=$('rankBadge');
   if(rb){rb.textContent=Object.keys(got).length;rb.style.display=Object.keys(got).length?'':'none';}
+  var rb2=$('rankBadge2');
+  if(rb2){rb2.textContent=Object.keys(got).length;rb2.style.display=Object.keys(got).length?'block':'none';}
   renderTierTable(t.t);renderAddons(t.t);
 }
 
@@ -8778,6 +10420,18 @@ buildLearn();buildAccess();renderWins();
    und show('plan') baut ihn ohnehin beim Oeffnen. Zwoelf Wochen mit allen
    Tagen im Voraus zu bauen kostet Startzeit fuer etwas, das niemand sieht. */
 applyProfile();buildCatalog();
+/* v19: Rechnerfelder beim Start aus dem Profil fuellen (gleiche Werte, die
+   die Einfuehrung geschrieben hat) -- sonst verliert jeder Neustart das
+   Kalorienziel, obwohl die Daten laengst im Profil liegen. Vorhandene
+   Feldwerte werden nie ueberschrieben. */
+if(profile){
+  var bfs=$('f-sex');if(bfs&&profile.sex)bfs.value=(profile.sex==='f'?'f':'m');
+  var bfa=$('f-age');if(bfa&&!bfa.value&&profile.age)bfa.value=profile.age;
+  var bfh=$('f-h');if(bfh&&!bfh.value&&profile.height)bfh.value=profile.height;
+  var bfw=$('f-w');if(bfw&&!bfw.value&&profile.weight)bfw.value=profile.weight;
+  var bac=$('f-act');if(bac&&profile.act)bac.value=profile.act;
+  var bgo=$('f-goal');if(bgo&&profile.ngoal!==undefined)bgo.value=String(profile.ngoal);
+}
 renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();paint();mobStopF();
