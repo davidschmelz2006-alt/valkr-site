@@ -1503,26 +1503,71 @@
   footer{margin-top:2.2rem;border-top:1px solid var(--line);padding-top:1rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
   /* Trainingsmodus. Bewusst gross und mit wenig drauf: das hier wird mit
      verschwitzten Haenden aus zwei Metern Entfernung bedient. */
-  #runner{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(1rem + env(safe-area-inset-top,0px)) 1rem calc(1rem + env(safe-area-inset-bottom,0px))}
+  /* ---- Trainingsmodus ---------------------------------------------------
+     Der Bildschirm, auf den man waehrend einer Einheit schaut -- oft
+     verschwitzt, aus einem Meter Abstand, zwischen zwei Saetzen. Alles hier
+     folgt daraus: grosse Zahl, ruhiger Rest, ein einziger lauter Knopf. */
+  #runner{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;
+    flex-direction:column;align-items:center;justify-content:center;
+    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.1rem calc(1rem + env(safe-area-inset-bottom,0px))}
   #runner.on{display:flex;animation:fade .2s ease}
-  #runner .rbox{width:100%;max-width:460px;display:flex;flex-direction:column;gap:1rem;text-align:center}
-  #runner .rtop{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
-  #runner .rprog{font-family:var(--fm);font-size:var(--t2);letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
-  #runner .rmain{display:flex;flex-direction:column;align-items:center;gap:.35rem}
-  #runner .ricon svg{width:56px;height:56px}
-  #runner h3{font-family:var(--fd);font-weight:600;font-size:1.5rem;margin:.2rem 0 0;line-height:1.2}
-  #runner .rstep{margin:0;font-size:var(--t4);color:var(--ink2)}
-  #runner .rbig{font-family:var(--fm);font-size:clamp(3rem,17vw,4.6rem);line-height:1;font-variant-numeric:tabular-nums;margin:.5rem 0 .1rem;color:var(--aurora)}
+  #runner .rbox{width:100%;max-width:460px;display:flex;flex-direction:column;
+    gap:.9rem;text-align:center}
+  #runner .rtop{display:flex;align-items:center;gap:.8rem}
+
+  /* Fortschritt als Segmente statt als Text. Eine Zeile "Uebung 2 von 5" muss
+     man lesen; fuenf Balken, von denen einer haelfte voll ist, sieht man. */
+  #runner .rsegs{flex:1;display:flex;gap:4px;min-width:0}
+  #runner .rsegs i{flex:1;height:4px;border-radius:2px;background:var(--line);
+    overflow:hidden;position:relative}
+  #runner .rsegs i::after{content:"";position:absolute;inset:0;width:var(--f,0%);
+    background:var(--aurora);border-radius:2px;transition:width .35s ease}
+  #runner .rwhere{margin:0;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+
+  #runner .rmain{display:flex;flex-direction:column;align-items:center;gap:.3rem}
+  #runner .ricon svg{width:64px;height:64px}
+  #runner h3{font-family:var(--fd);font-weight:600;font-size:1.6rem;margin:.35rem 0 0;
+    line-height:1.15;letter-spacing:-.01em}
+
+  /* Saetze als Punkte. Drei Punkte, einer davon leuchtet -- das beantwortet
+     "wo bin ich" schneller als "Satz 2 von 3". */
+  #runner .rdots{display:flex;gap:6px;margin-top:.5rem}
+  #runner .rdots u{width:8px;height:8px;border-radius:50%;background:var(--line);
+    text-decoration:none;transition:background .2s,transform .2s}
+  #runner .rdots u.done{background:var(--aurora);opacity:.5}
+  #runner .rdots u.now{background:var(--aurora);transform:scale(1.5)}
+
+  #runner .rstep{margin:.45rem 0 0;font-size:var(--t3);color:var(--ink3)}
+  #runner .rbig{font-family:var(--fd);font-weight:600;
+    font-size:clamp(3.4rem,19vw,5rem);line-height:1;
+    font-variant-numeric:tabular-nums;margin:.35rem 0 .1rem;color:var(--ink);
+    letter-spacing:-.02em}
+  /* In der Pause wechselt die Farbe: dieselbe grosse Zahl, andere Bedeutung.
+     Ohne den Wechsel sieht eine laufende Pause aus wie eine Wiederholungszahl. */
   #runner .rbig.rest{color:var(--brass)}
-  #runner .rhint{margin:0;font-size:var(--t3);color:var(--ink2);min-height:1.2em;max-width:34ch}
-  #runner .rreps{display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:2.2rem}
-  #runner .rreps label{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
-  #runner .rreps button{width:34px;height:34px;border:1px solid var(--line);border-radius:3px;color:var(--ink2);font-size:1.1rem;line-height:1}
+  #runner .rhint{margin:.2rem 0 0;font-size:var(--t3);color:var(--ink2);
+    min-height:1.2em;max-width:32ch;line-height:1.45}
+
+  #runner .rreps{display:flex;align-items:center;justify-content:center;gap:.55rem;
+    min-height:2.6rem;margin-top:.55rem}
+  #runner .rreps label{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink3)}
+  #runner .rreps button{width:44px;height:44px;border:1px solid var(--line);
+    border-radius:14px;background:var(--surf2);color:var(--ink2);font-size:1.25rem;line-height:1}
   #runner .rreps button:hover{border-color:var(--aurora);color:var(--ink)}
-  #runner .rreps input{width:64px;text-align:center;font-family:var(--fm);font-size:1.05rem;padding:.35rem;border:1px solid var(--line);border-radius:3px;background:var(--surf);color:var(--ink)}
-  #runner .rbtns{display:flex;gap:.5rem;align-items:stretch}
-  #runner .rbtns .tbtn{padding:.9rem .8rem;font-size:var(--t3)}
-  #runner .rmainbtn{flex:1;font-size:var(--t3);letter-spacing:.08em}
+  #runner .rreps input{width:74px;height:44px;text-align:center;font-family:var(--fd);
+    font-weight:600;font-size:1.2rem;padding:.3rem;border:1px solid var(--line);
+    border-radius:14px;background:var(--surf2);color:var(--ink)}
+
+  /* Ein lauter Knopf, zwei leise. Vor und Zurueck werden selten gebraucht --
+     wenn sie genauso aussehen wie "Satz fertig", muss man jedes Mal zielen. */
+  #runner .rbtns{display:flex;gap:.6rem;align-items:center;margin-top:.3rem}
+  #runner .rnav{width:52px;height:52px;border-radius:16px;border:1px solid var(--line);
+    background:var(--surf2);color:var(--ink2);flex:none}
+  #runner .rnav:hover{border-color:var(--aurora);color:var(--ink)}
+  #runner .rmainbtn{flex:1;min-height:58px;border-radius:16px;
+    font-size:var(--t4);letter-spacing:.06em}
   @media (max-width:420px){#runner h3{font-size:1.25rem}}
   #a2hs{position:fixed;left:0;right:0;bottom:0;z-index:70;display:none;align-items:center;gap:.7rem;
     background:var(--surf);border-top:1px solid var(--line);padding:.8rem clamp(.8rem,4vw,1.2rem);
@@ -1871,26 +1916,42 @@
 <!-- Trainingsmodus: der Bildschirm, den man waehrend der Einheit offen hat.
      Vorher gab es nur Haekchen und einen gemeinsamen Timer -- damit war der
      Hub etwas fuer davor und danach, nicht fuer dabei. -->
+<!-- Trainingsmodus.
+     Vorher: eine Textzeile "Uebung 2/5 - Satz 1/3", ein Symbol, eine grosse
+     Zahl, drei gleich aussehende Knoepfe. Es funktionierte, sah aber aus wie
+     ein Formular, nicht wie das, worauf man waehrend einer Einheit schaut.
+     Jetzt nach MCI-Vorbild: der Fortschritt ist eine Reihe von Segmenten --
+     eines je Uebung, gefuellt was erledigt ist. Man sieht auf einen Blick,
+     wie weit man ist und wie viel noch kommt, ohne eine Zahl zu lesen.
+     Darunter die Uebung gross, die Saetze als Punkte, der Zielwert riesig.
+     Unten ein breiter Hauptknopf; Vor und Zurueck sind Symbole, weil sie
+     seltener gebraucht werden und nicht gleich laut sein duerfen. -->
 <div id="runner" role="dialog" aria-modal="true" aria-hidden="true">
   <div class="rbox">
     <div class="rtop">
-      <span class="rprog" id="rnProg"></span>
-      <button class="iconbtn" id="rnClose" aria-label="Close">
-        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
+      <div class="rsegs" id="rnSegs" aria-hidden="true"></div>
+      <button class="iconbtn" id="rnClose" aria-label="Schliessen">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 4l8 8M12 4l-8 8"/></svg>
       </button>
     </div>
+    <p class="rwhere" id="rnProg"></p>
     <div class="rmain">
       <span class="ricon" id="rnIcon"></span>
       <h3 id="rnEx"></h3>
+      <div class="rdots" id="rnDots" aria-hidden="true"></div>
       <p class="rstep" id="rnStep"></p>
       <div class="rbig" id="rnBig"></div>
       <p class="rhint" id="rnHint"></p>
       <div class="rreps" id="rnReps"></div>
     </div>
     <div class="rbtns">
-      <button class="tbtn" id="rnPrev" aria-label="Previous">&larr;</button>
+      <button class="iconbtn rnav" id="rnPrev" aria-label="Zurück">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </button>
       <button class="tbtn go rmainbtn" id="rnMain"></button>
-      <button class="tbtn" id="rnNext" aria-label="Next">&rarr;</button>
+      <button class="iconbtn rnav" id="rnNext" aria-label="Weiter">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+      </button>
     </div>
   </div>
 </div>
@@ -2054,6 +2115,11 @@
     <div class="dbar">
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
       <button class="nb hot" id="jumpToday" style="display:none" data-i18n="btn.backToday">Back to today</button>
+      <!-- Leiser Eintrag, kein zweiter Startknopf. Er fuehrt in die Uebersicht
+           der Einheit: Uebungen tauschen und der kurze Check zu Form und
+           Schmerz. Ohne ihn waere beides nach dem Direktstart von HEUTE gar
+           nicht mehr erreichbar. -->
+      <button class="txtbtn" id="sessOvBtn" data-i18n="btn.sessOv">Session detail</button>
     </div>
     <div class="hero">
       <p class="tag" id="h-tag"></p>
@@ -2616,7 +2682,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='20.2';
+var VERSION='20.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2822,6 +2888,7 @@ var DICT={
  'rk.h5':['Every completely empty week costs rank. Long break, lower rank — the ladder remembers, the rank has to be re-earned.','Jede komplett leere Woche kostet Rang. Lange Pause, tieferer Rang — die Leiter merkt sich alles, der Rang will neu verdient werden.'],
  'streak':['Streak','Serie'],'week':['Week','Woche'],
  'btn.theme':['Theme','Design'],
+ 'btn.sessOv':['Session detail','Einheit ansehen'],
  'btn.runStart':['Start session','Einheit starten'],
  'btn.runHint':['Guided: one set at a time, rest starts by itself.','Geführt: ein Satz nach dem anderen, die Pause läuft von selbst.'],
  'btn.runResume':['Resume session','Einheit fortsetzen'],
@@ -6367,8 +6434,32 @@ function runRepsKey(){return run.ex+'-'+run.set;}
 function runPaint(){
   var it=runItems();if(!it){closeRun();return;}
   var DE=cfg.lang==='de',cur=it[run.ex],L=DE?1:0;
-  $('rnProg').textContent=(DE?'Übung ':'Exercise ')+(run.ex+1)+'/'+it.length+
-    ((run.ph==='done'||cur.fixed)?'':' · '+(DE?'Satz ':'Set ')+run.set+'/'+cur.sets);
+  /* Segmentleiste: ein Balken je Uebung. Erledigte voll, die laufende
+     anteilig nach Saetzen, kommende leer. Das ersetzt die Textzeile -- man
+     sieht den Stand, statt ihn zu lesen. */
+  var segs='';
+  for(var si=0;si<it.length;si++){
+    var f=0;
+    if(si<run.ex)f=100;
+    else if(si===run.ex){
+      if(run.ph==='done')f=100;
+      else if(it[si].fixed)f=50;
+      else f=Math.round(((run.set-1)/Math.max(1,it[si].sets))*100);
+    }
+    segs+='<i style="--f:'+f+'%"></i>';
+  }
+  $('rnSegs').innerHTML=segs;
+  $('rnProg').textContent=(DE?'Übung ':'Exercise ')+(run.ex+1)+' von '+it.length;
+  /* Saetze als Punkte statt als Bruch. Bei festen Bloecken (Mobility, Skill)
+     gibt es keine Saetze -- dann bleibt die Reihe leer statt einen einzelnen
+     sinnlosen Punkt zu zeigen. */
+  var dots='';
+  if(!cur.fixed&&run.ph!=='done'){
+    for(var di=1;di<=(cur.sets||1);di++){
+      dots+='<u class="'+(di<run.set?'done':(di===run.set?'now':''))+'"></u>';
+    }
+  }
+  $('rnDots').innerHTML=dots;
   $('rnIcon').innerHTML=cur.id?sv(cur.id,cvar(pid[cur.id].cv),56):'';
   $('rnEx').textContent=cur.l;
   $('rnStep').textContent=cur.id?stepName(cur.id):(cur.k||'');
@@ -6448,6 +6539,7 @@ function runPaint(){
     n=Math.max(0,n+d);e.value=n;run.reps[runRepsKey()]=n;saveRun();
   }
 }
+(function(){var s=$('sessOvBtn');if(s)s.addEventListener('click',openSessOv);})();
 (function(){var b=$('runStart');if(!b)return;
   b.addEventListener('click',function(){
     if(runValid()){openRun();return;}
@@ -8887,10 +8979,16 @@ function renderHome(){
     var wd=DE?['So','Mo','Di','Mi','Do','Fr','Sa'][d.getDay()]:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
     var tag=off===0?(DE?'Heute':'Today'):(DE?'Nächste Einheit · '+wd:'Next session · '+wd);
     var thumbs=its.slice(0,4).map(function(x){return x.id?exThumb(x.l,x.id):'';}).join('');
-    heroEl.innerHTML='<button type="button" class="hcard" data-go="train">'+
+    /* Heute: der Knopf startet die Einheit sofort. Vorher fuehrte er in eine
+       Uebersicht und von dort in einen Check-in -- zwei Bildschirme zwischen
+       "ich will jetzt trainieren" und dem ersten Satz.
+       An einem kuenftigen Tag waere Starten falsch; dort fuehrt er wie bisher
+       in den Trainings-Bereich zum Ansehen. */
+    var heute=(off===0);
+    heroEl.innerHTML='<button type="button" class="hcard" '+(heute?'data-run="1"':'data-go="train"')+'>'+
       '<span class="hcMain"><p class="tag">'+tag+'</p><h3>'+pl.title+'</h3>'+
       '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+' · '+Object.keys(muster).join(' · ')+'</p>'+
-      '<span class="hcGo">'+(DE?'Starten':'Start')+' ▸</span></span>'+
+      '<span class="hcGo">'+(heute?(DE?'Starten':'Start'):(DE?'Ansehen':'View'))+' ▸</span></span>'+
       '<span class="hcThumbs">'+thumbs+'</span></button>';
   }else{
     heroEl.innerHTML='<button type="button" class="hcard" data-go="train">'+
@@ -8959,6 +9057,9 @@ function renderHome(){
 ['homeHero','homeHabits','homeCards'].forEach(function(id){
   var el=$(id);if(!el)return;
   el.addEventListener('click',function(e){
+    /* data-run startet die heutige Einheit direkt; data-go navigiert nur. */
+    var r=e.target.closest('[data-run]');
+    if(r){ if(runValid()){openRun();} else { startRun(0); openRun(); } return; }
     var b=e.target.closest('[data-go]');if(b)show(b.dataset.go);
   });
 });
