@@ -248,18 +248,30 @@
     #tabbar{display:flex;position:fixed;z-index:60;
       left:max(.7rem,env(safe-area-inset-left,0px));
       right:max(.7rem,env(safe-area-inset-right,0px));
-      bottom:calc(.55rem + env(safe-area-inset-bottom,0px));
+      /* Auf dem iPhone meldet das System rund 34 Pixel Sicherheitsbereich fuer
+         den Gestenstrich. Rechnete man den Abstand ADDITIV dazu, schwebte die
+         Leiste dort ueber vierzig Pixel ueber dem Rand -- auf Android mit
+         Sicherheitsbereich null dagegen nur acht. Dieselbe Regel, zwei voellig
+         verschiedene Bilder.
+         Die Haelfte des Sicherheitsbereichs haelt die Leiste klar ueber dem
+         Gestenstrich und trotzdem unten, und der Mindestwert sorgt dafuer,
+         dass sie auf Geraeten ohne Sicherheitsbereich nicht am Rand klebt. */
+      bottom:max(.5rem,calc(env(safe-area-inset-bottom,0px) * .5));
       background:color-mix(in srgb,var(--surf) 88%,transparent);
       backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
-      border:1px solid var(--line2);border-radius:22px;
-      padding:5px 4px;
+      border:1px solid var(--line2);border-radius:26px;
+      /* Groesser: 5 Pixel Innenabstand und 60 Pixel hohe Reiter ergaben eine
+         schmale Leiste, die neben den grossen Kacheln darueber verloren wirkte.
+         Eine Tableiste ist das meistbenutzte Element der App -- sie darf Platz
+         beanspruchen. */
+      padding:7px 6px;
       box-shadow:0 10px 34px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.3)}
-    #tabbar button{flex:1;min-width:0;min-height:52px;display:flex;flex-direction:column;
+    #tabbar button{flex:1;min-width:0;min-height:60px;display:flex;flex-direction:column;
       align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
-      font-family:var(--fb);font-weight:600;font-size:var(--t1);letter-spacing:.01em;
+      font-family:var(--fb);font-weight:600;font-size:var(--t2);letter-spacing:.01em;
       text-transform:none;position:relative;transition:color .16s;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #tabbar svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    #tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     #tabbar button[aria-current="true"]{color:var(--aurora)}
     /* Das Abzeichen sass auf einem festen Abstand vom Reitermittelpunkt und
        rutschte dadurch bei schmalen Reitern in die Nachbarspalte. Jetzt haengt
@@ -271,7 +283,7 @@
     nav#nav{display:none!important}
     /* Platz fuer die feste Tableiste, sonst liegt das letzte Element darunter. */
     /* Platz fuer die schwebende Leiste: ihre Hoehe plus der Abstand zum Rand. */
-    body{padding-bottom:88px}
+    body{padding-bottom:104px}
     /* Der Trainingsmodus liegt ueber allem, sonst verdeckt die Leiste den Knopf. */
     #runner{z-index:90}
   }
@@ -1599,7 +1611,7 @@
        selbst -- und weil sie sich aus der Themenfarbe mischt, bleibt sie in
        jedem Theme zurueckhaltend statt weiss zu leuchten. */
     #tabbar button[aria-current="true"]::before{content:"";position:absolute;
-      left:6px;right:6px;top:5px;bottom:5px;border-radius:var(--r2);
+      left:5px;right:5px;top:3px;bottom:3px;border-radius:20px;
       background:color-mix(in srgb,var(--aurora) 14%,transparent);
       box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--aurora) 22%,transparent)}
     #tabbar svg,#tabbar span{position:relative}
@@ -2553,7 +2565,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.8';
+var VERSION='19.9';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -10686,27 +10698,37 @@ function renderBoard(avgLp){
       ein Schreckmoment. Abgeschaltet wird es im CSS mit overscroll-behavior.
 
    2. Dafuer fehlt Android das Gummiband, das iOS von selbst hat: zieht man
-      ueber den Rand hinaus, gibt der Inhalt nach und federt zurueck. Das ist
-      keine Spielerei -- es beantwortet die Frage "ist da noch mehr?" ohne ein
-      Wort. Ohne diese Antwort wirkt eine Liste, die einfach stehenbleibt, wie
-      eine, die haengt.
+      ueber den Rand hinaus, gibt der Inhalt nach und federt zurueck. Ohne
+      diese Antwort wirkt eine Liste, die einfach stehenbleibt, wie eine, die
+      haengt.
 
    Bewegt wird ausschliesslich die gerade sichtbare Ansicht, nicht die Huelle.
-   Die Huelle enthaelt Kopfleiste, Tableiste und alle Schiebeansichten -- und
-   eine Verschiebung darauf wuerde aus jedem "fixed" darin ein "relativ zur
-   Huelle" machen. Die Tableiste wanderte dann beim Ziehen mit. Auf iOS bleibt
-   sie stehen, und genau so soll es hier auch sein.
+   Die Huelle enthaelt Kopfleiste, Tableiste und alle Schiebeansichten -- eine
+   Verschiebung darauf wuerde aus jedem "fixed" darin ein "relativ zur Huelle"
+   machen, und die Tableiste wanderte beim Ziehen mit.
 
-   Der Zuhoerer laeuft passiv: overscroll-behavior hat dem Browser am Rand
-   ohnehin nichts mehr zu scrollen uebrig, also muss nichts abgefangen werden.
-   Das haelt das Scrollen selbst frei von Wartezeit. */
+   WARUM ES ZUERST GERUCKELT HAT (Android, v19.8):
+   Eine Ansicht ist ein grosser Baum -- Karten, Diagramme, Listen. Wird darauf
+   eine Verschiebung gesetzt, ohne dass der Browser vorher weiss, dass sich
+   dieses Element bewegen wird, muss er in JEDEM Bild den ganzen Baum neu
+   zeichnen. Auf einem Telefon sind das schnell 30 Millisekunden pro Bild, und
+   genau das fuehlt sich an wie Haengen.
+   Zwei Aenderungen beheben das:
+     - Beim Beruehren wird die Ansicht mit will-change angemeldet. Der Browser
+       legt sie EINMAL auf eine eigene Ebene, danach ist jede Verschiebung nur
+       noch ein Verschieben dieser Ebene -- ohne Neuzeichnen. Nach dem
+       Loslassen wird die Anmeldung zurueckgenommen, weil eine dauerhaft
+       eigene Ebene Speicher kostet.
+     - Gezeichnet wird im Bildtakt statt bei jedem Beruehrungsereignis.
+       touchmove feuert auf manchen Geraeten oefter als der Bildschirm
+       Bilder zeigt; jede zusaetzliche Verschiebung dazwischen ist verworfene
+       Arbeit. */
 (function(){
   if(!('ontouchstart' in window))return;
-  var el=null,y0=0,zieh=0,los=false;
+  var el=null,y0=0,zieh=0,soll=0,los=false,raf=0;
   function sichtbareAnsicht(){
     var v=document.querySelector('.view.on');
-    /* Schiebeansichten liegen fest im Fenster und scrollen in sich selbst --
-       die zu verschieben hiesse, die ganze Ansicht zu verschieben. */
+    /* Schiebeansichten liegen fest im Fenster und scrollen in sich selbst. */
     if(!v||getComputedStyle(v).position==='fixed')return null;
     return v;
   }
@@ -10716,48 +10738,56 @@ function renderBoard(avgLp){
     return s+window.innerHeight>=document.documentElement.scrollHeight-1;
   }
   /* Gedaempft und begrenzt: die ersten Pixel folgen dem Finger fast eins zu
-     eins, danach wird es zaeh und laeuft gegen 96 Pixel. Linear waere es ein
-     Schieberegler, nicht ein Gummiband. */
+     eins, danach wird es zaeh und laeuft gegen 84 Pixel. */
   function daempfen(d){
     var s=d<0?-1:1;
-    return s*96*(1-Math.exp(-Math.abs(d)/260));
+    return s*84*(1-Math.exp(-Math.abs(d)/250));
   }
+  function zeichne(){
+    raf=0;
+    if(!el)return;
+    zieh=soll;
+    el.style.transform=zieh?'translate3d(0,'+zieh.toFixed(1)+'px,0)':'';
+  }
+  function anfordern(){if(!raf)raf=requestAnimationFrame(zeichne);}
   document.addEventListener('touchstart',function(e){
     if(e.touches.length!==1)return;
     el=sichtbareAnsicht();
     if(!el)return;
-    y0=e.touches[0].clientY;zieh=0;los=false;
+    y0=e.touches[0].clientY;zieh=0;soll=0;los=false;
     el.style.transition='';
+    /* Ebene vorbereiten, solange noch nichts passiert -- der Browser hat so
+       ein Bild Zeit dafuer, statt es mitten in der Bewegung tun zu muessen. */
+    el.style.willChange='transform';
   },{passive:true});
   document.addEventListener('touchmove',function(e){
     if(!el||e.touches.length!==1)return;
     var d=e.touches[0].clientY-y0;
-    /* Nur am jeweiligen Rand und nur in die Richtung, in die es nicht
-       weitergeht. Sonst waere jedes normale Scrollen ein Ziehen. */
     if((d>0&&oben())||(d<0&&unten())){
-      los=true;
-      zieh=daempfen(d);
-      el.style.transform='translate3d(0,'+zieh.toFixed(1)+'px,0)';
+      los=true;soll=daempfen(d);anfordern();
     }else if(los){
-      los=false;zieh=0;el.style.transform='';
+      los=false;soll=0;anfordern();
     }
   },{passive:true});
   function zurueck(){
     if(!el)return;
-    if(zieh){
-      el.style.transition='transform .34s cubic-bezier(.22,1,.32,1)';
-      el.style.transform='';
-      var e2=el;
-      setTimeout(function(){if(e2)e2.style.transition='';},360);
-    }else{el.style.transform='';}
-    el=null;zieh=0;los=false;
+    var e2=el;
+    if(raf){cancelAnimationFrame(raf);raf=0;}
+    if(zieh||soll){
+      e2.style.transition='transform .34s cubic-bezier(.22,1,.32,1)';
+      e2.style.transform='';
+      setTimeout(function(){e2.style.transition='';e2.style.willChange='';},360);
+    }else{
+      e2.style.transform='';e2.style.willChange='';
+    }
+    el=null;zieh=0;soll=0;los=false;
   }
   document.addEventListener('touchend',zurueck,{passive:true});
   document.addEventListener('touchcancel',zurueck,{passive:true});
   /* Beim Ansichtswechsel darf keine Verschiebung stehenbleiben. */
   document.addEventListener('vkview',function(){
     var v=document.querySelector('.view.on');
-    if(v){v.style.transition='';v.style.transform='';}
+    if(v){v.style.transition='';v.style.transform='';v.style.willChange='';}
   });
 })();
 /* ---------- boot ---------- */
