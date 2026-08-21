@@ -712,6 +712,10 @@
   .clock.run{color:var(--aurora)}.clock.zero{color:var(--ember);animation:pulse .7s ease 3}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
   .tb{display:flex;gap:.32rem;flex-wrap:wrap}
+  /* Die Pausenuhr ist eine Nebenhandlung -- der Bildschirm gehoert dem
+     Starten der Einheit. Umriss statt Vollflaeche, damit ein Blick genuegt,
+     um den Hauptknopf zu finden. */
+  .tb .tbtn.go{background:transparent;color:var(--aurora);border-color:var(--aurora)}
   .tbtn{font-family:var(--fm);font-size:var(--t2);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:.4rem .6rem;border-radius:2px;color:var(--ink2);transition:.16s}
   .tbtn:hover{border-color:var(--ice);color:var(--ink);transform:translateY(-1px)}
   .tbtn.go{background:var(--aurora);border-color:var(--aurora);color:var(--bg)}
@@ -1001,7 +1005,15 @@
   .chips{display:flex;flex-wrap:wrap;gap:.34rem}
   .chip{border:1px solid var(--line);background:var(--surf2);padding:.38rem .64rem;border-radius:3px;font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);transition:.18s}
   .chip:hover{transform:translateY(-2px);border-color:var(--ice)}
-  .chip[aria-pressed="true"]{background:var(--aurora);color:var(--bg);border-color:var(--aurora)}
+  /* Gewaehlter Filter: getoent statt vollflaechig. Vorher trug er dieselbe
+     volle Akzentfarbe wie der Haupt-Handlungsknopf -- auf dem Trainings-
+     Bildschirm leuchteten dadurch drei Flaechen gleich stark ("Einheit
+     starten", "Start" der Pausenuhr, der aktive Filter). Wenn alles ruft,
+     ruft nichts: die Rangfolge war ohne Lesen nicht mehr erkennbar.
+     Der Filter bleibt deutlich als gewaehlt erkennbar, nimmt aber die Stufe
+     ein, die ihm zusteht. */
+  .chip[aria-pressed="true"]{background:color-mix(in srgb,var(--aurora) 18%,transparent);
+    color:var(--aurora);border-color:var(--aurora)}
 
   /* ---- Ausklapper -------------------------------------------------------
      Ein Element fuer alles, was zwar dazugehoert, aber nicht sofort gelesen
@@ -1845,12 +1857,20 @@
        mehr hier -- sie sind Abschnitte in ihrem Bereich. -->
   <!-- v19: dieselbe Ordnung wie die Tableiste, plus die Push-Ziele, die am
        Rechner als normale Bereiche erscheinen. -->
+  <!-- Reihenfolge am Rechner, wie mit David festgelegt: der Coach zuerst,
+       weil er die Lage liest und sagt, was ansteht. "Du" ist seit v19 kein
+       eigener Reiter mehr, sondern wohnt in FORTSCHRITT -- der Bereich steht
+       deshalb an der Stelle, die "Du" haben sollte: zwischen Ernaehrung und
+       Wissen.
+       Der v19-Umbau hatte diese Reihenfolge zurueckgesetzt (Coach war
+       Fuenfter). Wer die Reiter hier anfasst, prueft sie bitte gegen diese
+       Zeilen. -->
   <nav id="nav" data-title="Weitere Bereiche">
+    <button data-view="coach" data-i18n="nav.coach">Coach<span class="badge" id="coachBadge">0</span></button>
     <button data-view="today" data-i18n="nav.today">Today</button>
     <button data-view="train" data-i18n="nav.train">Train</button>
     <button data-view="fuel" data-i18n="nav.fuel">Fuel</button>
     <button data-view="prog" data-i18n="nav.prog">Progress<span class="badge" id="rankBadge">0</span></button>
-    <button data-view="coach" data-i18n="nav.coach">Coach<span class="badge" id="coachBadge">0</span></button>
     <button data-view="learn" data-i18n="nav.learn">Learn</button>
   </nav>
   <!-- Auf dem Handy eine feste Leiste unten statt zwölf umbrechender Knoepfe.
@@ -2476,7 +2496,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.1';
+var VERSION='19.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
