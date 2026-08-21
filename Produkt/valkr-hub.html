@@ -2496,7 +2496,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.2';
+var VERSION='19.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -5230,10 +5230,20 @@ function histBackStep(){
      beim Schieben absichtlich unangetastet. */
   if(document.body.dataset.pushed){
     /* Die Schiebeansicht auch vom Ansichts-Stapel nehmen. Bliebe sie dort,
-       liefe der naechste Druck ins Leere: er wuerde auf den Bereich
-       zurueckwollen, auf dem man ohnehin schon steht. */
+       liefe der naechste Druck ins Leere: er wollte auf den Bereich zurueck,
+       auf dem man ohnehin schon steht. */
     if(vStack[vStack.length-1]===document.body.dataset.pushed)vStack.pop();
-    show(document.body.dataset.view||"today",true);
+    /* Zurueck fuehrt auf den Abschnitt, der vor dem Schieben offen war --
+       nicht auf den Bereich. body.dataset.view traegt den BEREICH ("prog"),
+       und der ist kein Ansichtsschluessel: show("prog") schaltet nichts ein
+       und hinterlaesst einen leeren Bildschirm. Der Stapel weiss dagegen
+       genau, wo man herkam ("stat", "ranks", "you"). */
+    var ziel=vStack[vStack.length-1];
+    if(!ziel||!VS[ziel]){
+      var ber=document.body.dataset.view||'today';
+      ziel=(GROUP[ber]&&GROUP[ber].v[0])||'today';
+    }
+    show(ziel,true);
     return true;
   }
   if(vStack.length>1){vStack.pop();show(vStack[vStack.length-1],true);return true;}
@@ -5244,63 +5254,20 @@ window.addEventListener('popstate',function(){
   /* Kein neuer Eintrag im Grundzustand: das naechste Zurueck darf hinaus. */
 });
 
-/* ---------- Menue-Blatt ---------------------------------------------------
-   Was nicht in die Tableiste passt, steht hier -- gruppiert und mit einer
-   Zeile Erklaerung.
-   Die Einstellungen stehen als Zahnrad oben rechts und deshalb NICHT auch
-   hier: zweimal derselbe Weg war genau die Doppelung, die am alten Menue
-   gestoert hat. Ein Symbol ohne Beschriftung kostet oben fast nichts und ist
-   dort, wo man Einstellungen sucht. */
-/* Das Blatt fuehrt nicht nur zu den zwei uebrigen Bereichen, sondern zu JEDEM
-   Abschnitt der App. Nach dem Umbau waeren sonst zwei Eintraege uebrig
-   geblieben -- ein Menue mit zwei Zeilen wirkt kaputt, egal wie sauber die
-   Begruendung ist.
-   Das ist keine Rueckkehr zur alten Doppelung: doppelt waren frueher die vier
-   Ziele, die direkt daneben in der Tableiste standen. Was hier steht, ist eine
-   Ebene tiefer und sonst nur ueber den Umweg "Bereich oeffnen, dann Abschnitt
-   waehlen" erreichbar. Von hier aus geht es in einem Griff. */
-var SHEET=[
-  {h:['Training','Training'],it:[
-    {v:'skills',n:['Skills','Skills'],d:['Muscle-up, handstand, front lever','Muscle-up, Handstand, Front Lever'],
-     i:'<path d="M12 3v7"/><path d="M5 10h14"/><path d="M8 10l-2 5 3 6"/><path d="M16 10l2 5-3 6"/>'},
-    {v:'mobility',n:['Mobility','Beweglichkeit'],d:['Five targets, under thirty minutes a week','Fünf Ziele, unter dreißig Minuten die Woche'],
-     i:'<circle cx="12" cy="4.5" r="2"/><path d="M12 6.5v6M12 12.5l-3.5 8M12 12.5l3.5 8M6 9l6 1.5L18 9"/>'},
-    {v:'test',n:['Test','Test'],d:['Where you stand on each ladder','Wo du auf jeder Leiter stehst'],
-     i:'<path d="M4 20V9M10 20V4M16 20v-8M22 20H2"/>'}
-  ]},
-  {h:['Progress','Fortschritt'],it:[
-    {v:'plan',n:['Weeks','Wochen'],d:['Twelve weeks at a glance','Zwölf Wochen auf einen Blick'],
-     i:'<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/>'},
-    {v:'ranks',n:['Ranks','Ränge'],d:['Rank, achievements, leaderboard','Rang, Erfolge, Bestenliste'],
-     i:'<path d="M7 3h10v6a5 5 0 0 1-10 0Z"/><path d="M7 5H4v2a3 3 0 0 0 3 3M17 5h3v2a3 3 0 0 1-3 3"/><path d="M12 14v4M9 21h6"/>'}
-  ]},
-  {h:['More areas','Weitere Bereiche'],it:[
-    {v:'fuel',n:['Fuel','Ernährung'],d:['Calories, protein, weight trend','Kalorien, Protein, Gewichtsverlauf'],
-     i:'<path d="M6 3v8a3 3 0 0 0 6 0V3M9 11v10"/><path d="M18 3c-1.5 2-2 4-2 6s.7 3 2 3 2-1 2-3-.5-4-2-6Zm0 9v9"/>'},
-    {v:'learn',n:['Learn','Wissen'],d:['Why the numbers are what they are','Warum die Zahlen so sind, wie sie sind'],
-     i:'<path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z"/>'}
-  ]}
-];
-function buildSheet(){
-  var L=cfg.lang==='de'?1:0,el=$('sheetBody');if(!el)return;
-  el.innerHTML=SHEET.map(function(g){
-    return '<h4>'+g.h[L]+'</h4>'+g.it.map(function(x){
-      return '<button data-view="'+x.v+'">'+
-        '<svg viewBox="0 0 24 24" aria-hidden="true">'+x.i+'</svg>'+
-        '<span class="st"><b>'+x.n[L]+'</b><span>'+x.d[L]+'</span></span>'+
-        '<svg class="arw" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
-      '</button>';
-    }).join('');
-  }).join('');
-}
 var sheetOpen=false;
-/* Ohne Argument: das Menue. Mit HTML: ein Detailblatt (Umfaenge, spaeter mehr).
-   Dieselbe Flaeche fuer beides -- eine Form, die man einmal versteht, statt
-   zweier, die sich aehneln. */
+/* Das Blatt traegt Detailinhalte: Umfang, Zielwert, Rekord, Uebungstausch.
+   Bis v18 war es zusaetzlich das Hauptmenue -- seit dem v19-Umbau gibt es das
+   nicht mehr (vier Reiter, alles Weitere schiebt sich herein). Die Menue-
+   Definition und ihr Aufbau sind deshalb entfallen; sie beschrieben eine
+   Oberflaeche, die es nicht mehr gibt, und haetten den Naechsten glauben
+   lassen, sie sei noch verdrahtet. */
 function openSheet(html){
   var body=$('sheetBody');
-  if(html===undefined){delete body.dataset.meas;buildSheet();}
-  else body.innerHTML=html;
+  body.innerHTML=html;
+  /* Reste des vorigen Blatts wegraeumen: die Knopf-Zuhoerer unten lesen diese
+     Schluessel, und ein stehengebliebener wuerde auf den falschen Eintrag
+     zeigen. */
+  delete body.dataset.meas;delete body.dataset.macro;delete body.dataset.pr;
   if(sheetOpen){body.scrollTop=0;return;}
   var s=$('sheet'),b=$('sheetBg');
   b.hidden=false;s.hidden=false;
