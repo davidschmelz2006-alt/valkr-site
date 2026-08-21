@@ -112,17 +112,21 @@
     --p1:240,145,63;--p2:228,85,60;
     --sh:0 1px 2px rgba(0,0,0,.5),0 10px 26px rgba(0,0,0,.4);}
 
-  /* Onyx: fast schwarz, ein einziger Akzent in Violett. Das ist die
-     zurueckhaltendste Fassung -- gedacht fuer alle, denen jede Farbe im
-     Hintergrund zu viel ist. */
+  /* Onyx ist AMOLED-schwarz: der Hintergrund ist echtes #000, nicht
+     "sehr dunkelgrau". Auf einem OLED-Bildschirm bleiben diese Pixel
+     buchstaeblich aus -- das spart Strom und ergibt einen Schwarzwert, den
+     kein Grauton erreicht.
+     Die Flaechen darueber sind bewusst NICHT mitgezogen: waeren Karte und
+     Hintergrund beide schwarz, verschwaende jede Kante und die Oberflaeche
+     waere eine einzige Flaeche. Sie liegen knapp darueber, gerade genug, um
+     sich abzuheben. Farben und Bewegungen bleiben unveraendert. */
   :root[data-pack="onyx"]{
     --aurora:#A78BFA;--ice:#C4B5FD;--ember:#F472B6;--brass:#8B5CF6;
-    --bg:#08080C;--surf:#121218;--surf2:#0C0C11;--surf3:#191922;
-    --ink:#EDEDF2;--ink2:#9A9AA8;--ink3:#6A6A78;--line:#24242F;--line2:#1B1B24;
-    --hero:#0B0B11;--heroInk:#EDEDF2;--part:167,139,250;
+    --bg:#000000;--surf:#0E0E14;--surf2:#08080C;--surf3:#16161E;
+    --ink:#EDEDF2;--ink2:#9A9AA8;--ink3:#6A6A78;--line:#22222D;--line2:#17171F;
+    --hero:#08080E;--heroInk:#EDEDF2;--part:167,139,250;
     --p1:167,139,250;--p2:196,181,253;
-    --sh:0 1px 2px rgba(0,0,0,.6),0 12px 32px rgba(0,0,0,.5);}
-
+    --sh:0 1px 2px rgba(0,0,0,.7),0 12px 32px rgba(0,0,0,.6);}
   :root[data-pack="stone"]{
     --aurora:#2E7D6B;--ice:#4A7C94;--ember:#B4552F;--brass:#8A7333;
     --bg:#E6E4DF;--surf:#F1EFEA;--surf2:#DAD7D0;--surf3:#F8F6F2;
@@ -190,13 +194,11 @@
   /* Breite fuer den laengsten Theme-Namen reserviert: der Knopf zeigt nach dem
      Klick kurz den Namen an, ohne dass die halbe Leiste dabei verrutscht. */
   #themeBtn{min-width:6.1rem;justify-content:center}
-  #clockNow{font-family:var(--fm);font-size:var(--t3);color:var(--ink2);font-variant-numeric:tabular-nums;min-width:3.4rem;text-align:right}
   /* Tableiste unten -- nur auf dem Handy. Desktop behaelt die Reihe oben. */
   #tabbar{display:none}
   @media (max-width:640px){
     .bar{flex-wrap:wrap;gap:.45rem}
     .barL,.barR{gap:.45rem}
-    #clockNow{display:none}
     .brand small{display:none}
     /* Kopfleiste auf dem Handy auf das Noetigste: Marke, Serie, Woche,
        Einstellungen. Rueckgaengig, Zuruecksetzen und Theme stehen alle in den
@@ -256,7 +258,7 @@
      Geblieben sind Marke, Serie und Woche: Identitaet und Stand. Alles andere
      liegt im Menue-Blatt oder in den Einstellungen, wo es hingehoert. */
   @media (max-width:640px){
-    .bar #undoBtn,.bar #resetBtn,.bar #themeBtn,.bar #clockNow{display:none}
+    .bar #undoBtn,.bar #resetBtn,.bar #themeBtn{display:none}
     .bar .brand small{display:none}
     /* Serie und Woche stehen nebeneinander statt untereinander -- zwei
        zweizeilige Bloecke am rechten Rand einer 360-Pixel-Leiste ergeben
@@ -1860,8 +1862,15 @@
       </button>
     </div>
     <div class="barR">
-      <span id="clockNow"></span>
-      <div class="stat f" data-i18n-t="streak">Streak<b id="s-streak">0</b></div>
+      <!-- Uhr und Serie sind hier raus.
+           Die Uhr wiederholte, was das Telefon eine Zeile darueber schon
+           anzeigt -- die Statusleiste des Systems.
+           Die Serie stand an DREI Stellen: hier, als Kachel unter HEUTE und
+           als grosse Kennzahl im Fortschritt. Von den dreien war diese die
+           aermste: eine nackte Zahl ohne Einheit, ohne Einordnung, ohne den
+           Satz dazu. Geblieben sind die zwei, die etwas erklaeren.
+           Die Woche bleibt: sie steht sonst nirgends dauerhaft und beantwortet
+           die Frage "wo bin ich im Programm" auf jedem Bildschirm. -->
       <div class="stat" data-i18n-t="week">Week<b id="s-week">-</b></div>
       <button class="txtbtn" id="themeBtn" data-i18n="btn.theme" title="Switch to the next theme" aria-label="Switch to the next theme">Theme</button>
       <!-- Echtes Zahnrad mit Zaehnen. Der erste Versuch war ein Kreis mit acht
@@ -1977,23 +1986,18 @@
       <div class="exlist" id="today-list"></div>
       <div id="blockBox"></div>
     </div>
-    <div class="timer" id="timerBox">
-      <div class="clock" id="clock">2:00</div>
-      <div class="tb">
-        <button class="tbtn" data-sec="60">60 s</button><button class="tbtn" data-sec="90">90 s</button>
-        <button class="tbtn" data-sec="120">2 min</button><button class="tbtn" data-sec="180">3 min</button>
-        <button class="tbtn go" id="tStart" data-i18n="btn.start">Start</button><button class="tbtn" id="tReset" data-i18n="btn.reset">Reset</button>
-      </div>
-    </div>
 
+    <!-- Pausenuhr und "Ganzen Tag abhaken" standen hier. Beides gibt es im
+         gefuehrten Trainingsmodus schon: die Pause laeuft dort nach jedem Satz
+         von selbst an, und abgehakt wird Uebung fuer Uebung waehrend der
+         Einheit. Zwei Wege zur selben Sache sind kein Komfort -- man fragt sich
+         bei jedem, ob er dasselbe tut wie der andere.
+         "Ganzen Tag abhaken" war ausserdem der einzige Knopf, der eine Einheit
+         als erledigt melden konnte, ohne dass sie stattgefunden hat. -->
     <div class="noteblk">
-      <div class="savebar">
-        <button class="tbtn" id="markDone" data-i18n="btn.markDone">Mark whole day done</button>
-        <span class="saved" id="savedFlag">Saved</span>
-      </div>
       <p class="hint" id="logRecall"></p>
+      <span class="saved" id="savedFlag">Saved</span>
     </div>
-  
     <div><h2 class="sec" data-i18n="train.h">The six patterns</h2><p class="sub" data-i18n="train.s">Everything you train is one of these. Open one for the ladder, the cues, and what usually goes wrong.</p></div>
     <div class="grid" id="tiles"></div>
     <div class="chartbox">
@@ -2521,7 +2525,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.6';
+var VERSION='19.7';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2728,7 +2732,7 @@ var DICT={
  'btn.runHint':['Guided: one set at a time, rest starts by itself.','Geführt: ein Satz nach dem anderen, die Pause läuft von selbst.'],
  'btn.runResume':['Resume session','Einheit fortsetzen'],
  'btn.backToday':['Back to today','Zurück zu heute'],'btn.start':['Start','Start'],'btn.reset':['Reset','Zurück'],
- 'btn.save':['Save log','Log speichern'],'btn.markDone':['Mark whole day done','Ganzen Tag abhaken'],
+ 'btn.save':['Save log','Log speichern'],
  'btn.logIt':['Log it','Eintragen'],'btn.allPatterns':['All patterns','Alle Muster'],
  'btn.startRoutine':['Start routine','Routine starten'],'btn.stop':['Stop','Stopp'],
  'btn.applyTest':['Apply to my ladders','Auf Leitern übertragen'],'btn.setBaseline':['Save as week-1 baseline','Als Woche-1-Basis speichern'],
@@ -2913,7 +2917,10 @@ function fmtClock(d){
   if(cfg.clock==='12'){var ap=h<12?'AM':'PM';h=h%12;if(h===0)h=12;return h+':'+m+' '+ap;}
   return String(h).padStart(2,'0')+':'+m;
 }
-function tickClock(){$('clockNow').textContent=fmtClock(new Date());}
+/* Die Uhr in der Kopfleiste ist entfernt -- das Telefon zeigt die Zeit
+   ohnehin eine Zeile darueber. fmtClock() bleibt: der Trainingsmodus und die
+   Logs benutzen es weiter. */
+function tickClock(){var e=$('clockNow');if(e)e.textContent=fmtClock(new Date());}
 
 /* ---------- program ---------- */
 /* ---------- Bloecke ------------------------------------------------------
@@ -5597,8 +5604,6 @@ function renderDay(){
     heroEl.classList.toggle('go',heroGo);
     heroEl.onclick=heroGo?function(e){if(e.target.closest('button'))return;openSessOv();}:null;
   }
-  $('timerBox').style.display=pl.kind==='train'?'':'none';
-  if(pl.kind==='train')setT(pl.ph.rs);
   var tot=items.length,dc=0;for(var k in dn){if(dn[k])dc++;}
   var pct=tot?Math.round(dc/tot*100):0;
   $('ringArc').setAttribute('stroke-dashoffset',String(163.4*(1-pct/100)));
@@ -5645,19 +5650,16 @@ $('dstrip').addEventListener('click',function(e){
   sel=new Date(b.dataset.d+'T00:00:00');renderDay();
 });
 $('jumpToday').addEventListener('click',function(){sel=new Date(TODAY);renderDay();});
-$('markDone').addEventListener('click',function(){
-  if(iso(sel)!==iso(TODAY))return;
-  var k=iso(sel),pl=plan(sel),n=pl.kind==='train'?sessOf(pl).items.length:(pl.items||[]).length,dn={};
-  for(var i=0;i<n;i++)dn[i]=true;doneMap[k]=dn;set('done',doneMap);
-  if(pl.kind==='train')sessOf(pl).items.forEach(function(x){if(x.id)markTrained(x.id,k);});renderDay();streak();refresh();flash('savedFlag');});
 function flash(id){var f=$(id);f.classList.add('show');setTimeout(function(){f.classList.remove('show');},1300);}
 function dayDone(k){var dn=doneMap[k]||{};for(var i in dn){if(dn[i])return true;}return false;}
 function streak(){
   var n=0,d=new Date(TODAY);
   if(!dayDone(iso(d)))d=add(d,-1);
   for(var i=0;i<400;i++){if(dayDone(iso(d))){n++;d=add(d,-1);}else break;}
+  /* streakVal ist die einzige Quelle. Frueher lasen zwei Stellen die Zahl aus
+     dem geloeschten Kopfleisten-Element zurueck -- Anzeige als Datenquelle ist
+     immer eine Falle, spaetestens wenn die Anzeige verschwindet. */
   streakVal=n;
-  $('s-streak').textContent=n;
   var w=wkOf(TODAY);
   $('s-week').textContent=(w<1?'-':(w>12?(cfg.lang==='de'?'fertig':'done'):'B'+blockNo+' · '+w+'/12'));
   return n;
@@ -6089,13 +6091,11 @@ function buildAccess(){
   $('faqList').innerHTML=faq.map(function(f){return '<div class="qa"><b>'+f[0]+'</b><p>'+f[1]+'</p></div>';}).join('');
 }
 
-/* ---------- rest timer ---------- */
-var tl=120,ti=null,tb=120;
+
+/* fmt() und beep() bleiben -- der gefuehrte Trainingsmodus braucht beide fuer
+   seine eigene Pausenuhr. Die freistehende Uhr auf HEUTE ist weg: sie tat
+   dasselbe, nur ohne zu wissen, bei welchem Satz man gerade ist. */
 function fmt(s){return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
-function paint(){var c=$('clock');c.textContent=fmt(Math.max(0,tl));c.className='clock'+(ti?' run':'')+(tl<=0?' zero':'');}
-function setT(s){if(ti)return;tb=s;tl=s;paint();}
-[].forEach.call(document.querySelectorAll('.tbtn[data-sec]'),function(b){b.addEventListener('click',function(){stopT();tb=+b.dataset.sec;tl=tb;paint();});});
-function stopT(){if(ti){clearInterval(ti);ti=null;}$('tStart').textContent=T('btn.start');paint();}
 function beep(){
   if(cfg.sound!=='on')return;
   try{var C=window.AudioContext||window.webkitAudioContext;if(!C)return;var a=new C(),o=a.createOscillator(),g=a.createGain();
@@ -6103,11 +6103,6 @@ function beep(){
     g.gain.exponentialRampToValueAtTime(.22,a.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+.5);
     o.start();o.stop(a.currentTime+.52);}catch(e){}
 }
-$('tStart').addEventListener('click',function(){
-  if(ti){stopT();return;}
-  if(tl<=0)tl=tb;this.textContent=cfg.lang==='de'?'Pause':'Pause';
-  ti=setInterval(function(){tl--;paint();if(tl<=0){stopT();beep();burst(window.innerWidth/2,150,18);}},1000);paint();});
-$('tReset').addEventListener('click',function(){stopT();tl=tb;paint();});
 /* ---------- Trainingsmodus ----------------------------------------------
    Fuehrt durch die Einheit: eine Uebung, ein Satz, danach laeuft die Pause
    von selbst und springt weiter. Der Zustand liegt im Speicher, damit ein
@@ -8291,7 +8286,7 @@ function youKpis(){
   $('youKpis').innerHTML=kpi(cfg.lang==='de'?'Ø Rekordzuwachs':'Average PR gain',avg+'%',cfg.lang==='de'?'seit Woche 1':'since week 1')+
     kpi(cfg.lang==='de'?'Gewicht':'Weight change',wch==='-'?'-':((wch>0?'+':'')+wch+' '+uw()),wlog.length+'x')+
     kpi(cfg.lang==='de'?'Schlaf':'Sleep',$('y-sleep').value?($('y-sleep').value+' h'):'–','Ø')+
-    kpi(cfg.lang==='de'?'Serie':'Streak',$('s-streak').textContent,cfg.lang==='de'?'Tage':'days');
+    kpi(cfg.lang==='de'?'Serie':'Streak',String(streakVal||0),cfg.lang==='de'?'Tage':'days');
 }
 
 /* ---------- coach ---------- */
@@ -8823,9 +8818,9 @@ function renderHome(){
     '<b class="big">'+(kg?String(kg).replace('.',DE?',':'.')+'<small> kg</small>':'–')+'</b>'+
     '<p class="sub">'+(DE?'im Ernährungs-Bereich pflegen':'kept in the fuel area')+'</p></button>';
   /* Serie. */
-  var st=$('s-streak')?$('s-streak').textContent:'0';
+  var st=String(streakVal||0);
   h+='<div class="habcard"><em>'+(DE?'Serie':'Streak')+'</em>'+
-    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?'Tage':'days')+'</small></b>'+
+    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?(st==='1'?'Tag':'Tage'):(st==='1'?'day':'days'))+'</small></b>'+
     '<p class="sub">'+(DE?'Dranbleiben zählt doppelt':'showing up counts double')+'</p></div>';
   habEl.innerHTML=h;
   /* Verbessern. */
@@ -10100,11 +10095,22 @@ function tierOf(lp){
 }
 function tcol(t){return t<0?UNRANKED.c:TIERS[t].c;}
 function tname(t){return t<0?UNRANKED.n[cfg.lang==='de'?1:0]:TIERS[t].n[cfg.lang==='de'?1:0];}
+/* Jeder Verlauf braucht eine eigene Kennung. Vorher hiess sie schlicht "bg"
+   plus Rangstufe -- bei vierzehn Abzeichen derselben Stufe auf einem Bildschirm
+   stand dieselbe Kennung also vierzehnmal im Dokument.
+   Sichtbar war davon nichts, weil die Farbe an derselben Stufe haengt und alle
+   vierzehn folglich gleich aussahen. Aber url(#...) nimmt in SVG immer den
+   ERSTEN Treffer: sobald der Verlauf jemals von etwas anderem als der Stufe
+   abhinge -- Groesse, Zustand, Theme --, zeichneten alle Abzeichen ploetzlich
+   wie das erste. Ein Fehler, der stillliegt, bis jemand eine harmlose
+   Aenderung macht. */
+var badgeNr=0;
 function badgeSvg(t,size){
   size=size||60;var c=(t<0?'#6E767E':TIERS[t].c);var lbl=(t<0?'0':String(t+1));
+  var gid='bg'+t+'_'+(++badgeNr);
   return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 60 60" aria-hidden="true">'+
-    '<defs><linearGradient id="bg'+t+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c+'"/><stop offset="1" stop-color="'+c+'" stop-opacity=".45"/></linearGradient></defs>'+
-    '<path d="M30 3 L53 16 L53 42 L30 55 L7 42 L7 16 Z" fill="url(#bg'+t+')" stroke="'+c+'" stroke-width="1.6"/>'+
+    '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c+'"/><stop offset="1" stop-color="'+c+'" stop-opacity=".45"/></linearGradient></defs>'+
+    '<path d="M30 3 L53 16 L53 42 L30 55 L7 42 L7 16 Z" fill="url(#'+gid+')" stroke="'+c+'" stroke-width="1.6"/>'+
     '<path d="M30 11 L45.5 20 L45.5 38 L30 47 L14.5 38 L14.5 20 Z" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1"/>'+
     '<text x="30" y="35" text-anchor="middle" fill="#fff" style="font-family:ui-monospace,monospace;font-size:13px;font-weight:700;opacity:.92">'+lbl+'</text></svg>';
 }
@@ -10673,7 +10679,7 @@ if(profile){
 }
 renderDay();streak();calc();drawW();volBar();
 evalAch(true);
-refresh();paint();mobStopF();
+refresh();mobStopF();
 clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
 /* ---------- v16: Profilgruppe in den Einstellungen ----------
    Zeigt die Werte aus der Einfuehrung und laesst sie direkt nachjustieren.
