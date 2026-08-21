@@ -135,6 +135,13 @@
     --p1:46,125,107;--p2:74,124,148;
     --sh:0 1px 2px rgba(0,0,0,.06),0 8px 20px rgba(0,0,0,.08);}
 
+  /* Kein Pull-to-Refresh und kein Ueberzieh-Schimmer von Chrome. Beides ist
+     hier falsch: die App haelt alles lokal, ein Neuladen bringt nichts und
+     kostet im schlimmsten Fall mitten in einer Einheit den Schreck. Das
+     Gummiband macht die App selbst -- gedaempft und ohne die feste Leiste
+     mitzuziehen. */
+  html{overscroll-behavior-y:none}
+  body{overscroll-behavior-y:none}
   *{box-sizing:border-box}
   /* 100 % statt fester 16 px: damit schlaegt die Schriftgroesse durch, die der
      Nutzer in den Systemeinstellungen gewaehlt hat. Wer schlecht sieht, stellt
@@ -174,9 +181,18 @@
      Abstand klebt die Kopfzeile auf iPhones direkt unter Uhrzeit und Akku --
      genau der Fehler aus Liams Screenshot. Die Leiste zieht ihren Hintergrund
      mit unter die Statusleiste, das ist das saubere Verhalten. */
+  /* Kopfleiste nach MCI-Vorbild: keine Trennlinie, kein eigener Kasten.
+     Der Strich zog eine Grenze quer durch den Bildschirm und machte aus der
+     Leiste ein aufgesetztes Element. Ohne ihn geht sie in die Seite ueber und
+     der Inhalt beginnt einfach darunter -- das ist der Unterschied zwischen
+     "App mit Kopfzeile" und "App".
+     Die Unschaerfe bleibt: sie trennt beim Scrollen weich, wo vorher ein
+     harter Strich stand. */
   .bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
-    padding:calc(.85rem + env(safe-area-inset-top,0px)) 0 .7rem;
-    border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:30}
+    padding:calc(.8rem + env(safe-area-inset-top,0px)) 0 .6rem;
+    position:sticky;top:0;z-index:30;
+    background:color-mix(in srgb,var(--bg) 82%,transparent);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
   .barL,.barR{display:flex;align-items:center;gap:.7rem}
   .brand{display:flex;align-items:center;gap:.6rem}
   .brand p{margin:0;font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:var(--t5)}
@@ -223,10 +239,21 @@
     /* Die Leiste bekommt oben etwas Luft, damit die aktive Flaeche nicht an
        der Kante klebt, und die Schrift wird kleiner als das Symbol -- eine
        Beschriftung soll das Symbol erklaeren, nicht mit ihm konkurrieren. */
-    #tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:60;
-      background:var(--surf);border-top:1px solid var(--line);
-      padding:4px 2px calc(4px + env(safe-area-inset-bottom,0px));
-      box-shadow:0 -2px 14px rgba(0,0,0,.14)}
+    /* Tableiste schwebend, nicht angeschraubt. Vorher klebte sie mit einer
+       Trennlinie am unteren Bildschirmrand und lief ueber die volle Breite --
+       das sieht aus wie ein Fenster mit Fussleiste. MCI laesst sie als eigene
+       Flaeche ueber dem Inhalt stehen, mit Luft ringsum und ohne Kante.
+       Der Abstand unten rechnet den Sicherheitsbereich mit ein, damit sie auf
+       Geraeten mit Gestensteuerung nicht auf dem Strich sitzt. */
+    #tabbar{display:flex;position:fixed;z-index:60;
+      left:max(.7rem,env(safe-area-inset-left,0px));
+      right:max(.7rem,env(safe-area-inset-right,0px));
+      bottom:calc(.55rem + env(safe-area-inset-bottom,0px));
+      background:color-mix(in srgb,var(--surf) 88%,transparent);
+      backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
+      border:1px solid var(--line2);border-radius:22px;
+      padding:5px 4px;
+      box-shadow:0 10px 34px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.3)}
     #tabbar button{flex:1;min-width:0;min-height:52px;display:flex;flex-direction:column;
       align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
       font-family:var(--fb);font-weight:600;font-size:var(--t1);letter-spacing:.01em;
@@ -243,7 +270,8 @@
        uebernehmen unten die Tableiste und das Menue-Blatt. */
     nav#nav{display:none!important}
     /* Platz fuer die feste Tableiste, sonst liegt das letzte Element darunter. */
-    body{padding-bottom:64px}
+    /* Platz fuer die schwebende Leiste: ihre Hoehe plus der Abstand zum Rand. */
+    body{padding-bottom:88px}
     /* Der Trainingsmodus liegt ueber allem, sonst verdeckt die Leiste den Knopf. */
     #runner{z-index:90}
   }
@@ -1554,9 +1582,10 @@
        Damit die Flaechen dabei nicht duenner wirken, sind sie unten dichter
        gemischt. Am Rechner bleibt der volle Radius. */
     :root{--glass:blur(9px) saturate(1.4)}
-    #tabbar{background:color-mix(in srgb,var(--surf) 84%,transparent);
-      backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
-      border-radius:var(--r3) var(--r3) 0 0}
+    /* Die schwebende Fassung weiter oben legt Rundung, Rand und Schatten fest.
+       Hier bleibt nur die guenstigere Unschaerfe -- die Form nicht mehr
+       ueberschreiben, sonst klebt die Leiste wieder unten. */
+    #tabbar{backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
     /* Der aktive Reiter.
 
        Vorher lag dahinter eine 38 mal 30 Pixel grosse Flaeche, oben mit sechs
@@ -1871,7 +1900,6 @@
            Satz dazu. Geblieben sind die zwei, die etwas erklaeren.
            Die Woche bleibt: sie steht sonst nirgends dauerhaft und beantwortet
            die Frage "wo bin ich im Programm" auf jedem Bildschirm. -->
-      <div class="stat" data-i18n-t="week">Week<b id="s-week">-</b></div>
       <button class="txtbtn" id="themeBtn" data-i18n="btn.theme" title="Switch to the next theme" aria-label="Switch to the next theme">Theme</button>
       <!-- Echtes Zahnrad mit Zaehnen. Der erste Versuch war ein Kreis mit acht
            geraden Strahlen -- das ist die Zeichnung einer Sonne, nicht die
@@ -2525,7 +2553,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.7';
+var VERSION='19.8';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -5261,6 +5289,8 @@ function show(n,fromBack){
     if(vStack.length>14)vStack.shift();
     histArm();
   }
+  /* Eine stehengebliebene Verschiebung aus dem Gummiband aufloesen. */
+  try{document.dispatchEvent(new Event('vkview'));}catch(e){}
   hideTip();
   /* Beim Push bleibt die Seite darunter stehen, wo sie war -- wer
      zurueckkommt, findet seinen Kontext wieder. */
@@ -5660,8 +5690,8 @@ function streak(){
      dem geloeschten Kopfleisten-Element zurueck -- Anzeige als Datenquelle ist
      immer eine Falle, spaetestens wenn die Anzeige verschwindet. */
   streakVal=n;
-  var w=wkOf(TODAY);
-  $('s-week').textContent=(w<1?'-':(w>12?(cfg.lang==='de'?'fertig':'done'):'B'+blockNo+' · '+w+'/12'));
+  /* Die Woche steht im Kopf der HEUTE-Ansicht und in der Wochenuebersicht --
+     in der Kopfleiste war sie die dritte Wiederholung. */
   return n;
 }
 
@@ -10645,6 +10675,91 @@ function renderBoard(avgLp){
     ? '<b>Nur deine Zeile ist echt.</b> Die mit * markierten sind erfundene Beispiele, damit du das Layout siehst. Eine wirklich geteilte Bestenliste braucht einen Server — die Seite hier speichert alles nur lokal im Browser. Wertung bewusst nach <b>Planerfüllung, Serie und Level</b>, nicht nach Wiederholungen: selbst eingetragene Kraftwerte kann jeder erfinden, Dranbleiben nicht. Ein „Alles zurücksetzen" leert auch XP, Level und deine Zeile hier.'
     : '<b>Only your row is real.</b> The ones marked * are invented examples so you can see the layout. A genuinely shared board needs a server — this page stores everything locally in your browser. Ranked on <b>plan adherence, streak and level</b> rather than reps on purpose: self-reported strength is trivial to fake, showing up is not. "Reset everything" also clears XP, level and your row here.';
 }
+
+/* ---------- Ueberziehen am Rand ------------------------------------------
+   Zwei verschiedene Dinge, die David zusammen aufgefallen sind:
+
+   1. Chrome auf Android laedt die Seite neu, wenn man oben nach unten zieht
+      ("Pull to Refresh"). Safari kennt das nicht -- deshalb war es auf dem
+      iPhone kein Problem. In einer App, die alles lokal haelt, ist ein
+      versehentliches Neuladen bestenfalls laestig und mitten in einer Einheit
+      ein Schreckmoment. Abgeschaltet wird es im CSS mit overscroll-behavior.
+
+   2. Dafuer fehlt Android das Gummiband, das iOS von selbst hat: zieht man
+      ueber den Rand hinaus, gibt der Inhalt nach und federt zurueck. Das ist
+      keine Spielerei -- es beantwortet die Frage "ist da noch mehr?" ohne ein
+      Wort. Ohne diese Antwort wirkt eine Liste, die einfach stehenbleibt, wie
+      eine, die haengt.
+
+   Bewegt wird ausschliesslich die gerade sichtbare Ansicht, nicht die Huelle.
+   Die Huelle enthaelt Kopfleiste, Tableiste und alle Schiebeansichten -- und
+   eine Verschiebung darauf wuerde aus jedem "fixed" darin ein "relativ zur
+   Huelle" machen. Die Tableiste wanderte dann beim Ziehen mit. Auf iOS bleibt
+   sie stehen, und genau so soll es hier auch sein.
+
+   Der Zuhoerer laeuft passiv: overscroll-behavior hat dem Browser am Rand
+   ohnehin nichts mehr zu scrollen uebrig, also muss nichts abgefangen werden.
+   Das haelt das Scrollen selbst frei von Wartezeit. */
+(function(){
+  if(!('ontouchstart' in window))return;
+  var el=null,y0=0,zieh=0,los=false;
+  function sichtbareAnsicht(){
+    var v=document.querySelector('.view.on');
+    /* Schiebeansichten liegen fest im Fenster und scrollen in sich selbst --
+       die zu verschieben hiesse, die ganze Ansicht zu verschieben. */
+    if(!v||getComputedStyle(v).position==='fixed')return null;
+    return v;
+  }
+  function oben(){return (window.pageYOffset||document.documentElement.scrollTop||0)<=0;}
+  function unten(){
+    var s=(window.pageYOffset||document.documentElement.scrollTop||0);
+    return s+window.innerHeight>=document.documentElement.scrollHeight-1;
+  }
+  /* Gedaempft und begrenzt: die ersten Pixel folgen dem Finger fast eins zu
+     eins, danach wird es zaeh und laeuft gegen 96 Pixel. Linear waere es ein
+     Schieberegler, nicht ein Gummiband. */
+  function daempfen(d){
+    var s=d<0?-1:1;
+    return s*96*(1-Math.exp(-Math.abs(d)/260));
+  }
+  document.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1)return;
+    el=sichtbareAnsicht();
+    if(!el)return;
+    y0=e.touches[0].clientY;zieh=0;los=false;
+    el.style.transition='';
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!el||e.touches.length!==1)return;
+    var d=e.touches[0].clientY-y0;
+    /* Nur am jeweiligen Rand und nur in die Richtung, in die es nicht
+       weitergeht. Sonst waere jedes normale Scrollen ein Ziehen. */
+    if((d>0&&oben())||(d<0&&unten())){
+      los=true;
+      zieh=daempfen(d);
+      el.style.transform='translate3d(0,'+zieh.toFixed(1)+'px,0)';
+    }else if(los){
+      los=false;zieh=0;el.style.transform='';
+    }
+  },{passive:true});
+  function zurueck(){
+    if(!el)return;
+    if(zieh){
+      el.style.transition='transform .34s cubic-bezier(.22,1,.32,1)';
+      el.style.transform='';
+      var e2=el;
+      setTimeout(function(){if(e2)e2.style.transition='';},360);
+    }else{el.style.transform='';}
+    el=null;zieh=0;los=false;
+  }
+  document.addEventListener('touchend',zurueck,{passive:true});
+  document.addEventListener('touchcancel',zurueck,{passive:true});
+  /* Beim Ansichtswechsel darf keine Verschiebung stehenbleiben. */
+  document.addEventListener('vkview',function(){
+    var v=document.querySelector('.view.on');
+    if(v){v.style.transition='';v.style.transform='';}
+  });
+})();
 /* ---------- boot ---------- */
 /* Feste Felder bekommen ihren Regler einmal beim Start. Die Raster in Test,
    Massen und PR bauen ihre Felder selbst und rufen pairSlider dort.
