@@ -1,5 +1,8 @@
 <title>VALKR Training Hub</title><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- user-scalable=no und maximum-scale sperren den Zoom auf Android. Safari
+     ignoriert beides seit iOS 10 -- dort faengt der Zuhoerer fuer die
+     gesture-Ereignisse weiter unten die Zwei-Finger-Geste ab. -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <!-- Solange das Produkt nicht verkauft wird, hat es in keinem Suchindex etwas
      verloren. Das ist kein Zugangsschutz, es hält nur zufällige Funde fern. -->
 <meta name="robots" content="noindex,nofollow">
@@ -141,7 +144,11 @@
      Gummiband macht die App selbst -- gedaempft und ohne die feste Leiste
      mitzuziehen. */
   html{overscroll-behavior-y:none}
-  body{overscroll-behavior-y:none}
+  /* touch-action:manipulation nimmt dem Doppeltipp seine Zoom-Bedeutung.
+     Ohne das wartet der Browser nach jedem Tippen 300 ms ab, ob ein zweites
+     folgt -- die Verzoegerung, die eine Web-App traeger wirken laesst als
+     eine aus dem Store. */
+  body{overscroll-behavior-y:none;touch-action:manipulation}
   *{box-sizing:border-box}
   /* 100 % statt fester 16 px: damit schlaegt die Schriftgroesse durch, die der
      Nutzer in den Systemeinstellungen gewaehlt hat. Wer schlecht sieht, stellt
@@ -246,8 +253,8 @@
        Der Abstand unten rechnet den Sicherheitsbereich mit ein, damit sie auf
        Geraeten mit Gestensteuerung nicht auf dem Strich sitzt. */
     #tabbar{display:flex;position:fixed;z-index:60;
-      left:max(.7rem,env(safe-area-inset-left,0px));
-      right:max(.7rem,env(safe-area-inset-right,0px));
+      left:max(.55rem,env(safe-area-inset-left,0px));
+      right:max(.55rem,env(safe-area-inset-right,0px));
       /* Auf dem iPhone meldet das System rund 34 Pixel Sicherheitsbereich fuer
          den Gestenstrich. Rechnete man den Abstand ADDITIV dazu, schwebte die
          Leiste dort ueber vierzig Pixel ueber dem Rand -- auf Android mit
@@ -256,7 +263,16 @@
          Die Haelfte des Sicherheitsbereichs haelt die Leiste klar ueber dem
          Gestenstrich und trotzdem unten, und der Mindestwert sorgt dafuer,
          dass sie auf Geraeten ohne Sicherheitsbereich nicht am Rand klebt. */
-      bottom:max(.5rem,calc(env(safe-area-inset-bottom,0px) * .5));
+      /* Dritter Anlauf. Der Sicherheitsbereich auf dem iPhone ist mit rund
+         34 Pixeln absichtlich grosszuegig -- er soll Platz fuer den
+         Gestenstrich lassen, nicht die Leiste in die Bildschirmmitte schieben.
+         Der Strich selbst ist etwa fuenf Pixel hoch und sitzt acht Pixel ueber
+         der Kante. Alles ueber rund zwoelf Pixel Abstand ist also geschenkter
+         Platz, und genau das war zu sehen.
+         Jetzt: Sicherheitsbereich minus 1,3 rem, mit Untergrenze. Auf dem
+         iPhone bleiben rund 13 Pixel, auf Android 7 -- auf beiden sitzt die
+         Leiste unten, ohne den Strich zu beruehren. */
+      bottom:max(.45rem,calc(env(safe-area-inset-bottom,0px) - 1.3rem));
       background:color-mix(in srgb,var(--surf) 88%,transparent);
       backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
       border:1px solid var(--line2);border-radius:26px;
@@ -264,14 +280,14 @@
          schmale Leiste, die neben den grossen Kacheln darueber verloren wirkte.
          Eine Tableiste ist das meistbenutzte Element der App -- sie darf Platz
          beanspruchen. */
-      padding:7px 6px;
+      padding:8px 6px;
       box-shadow:0 10px 34px rgba(0,0,0,.45),0 2px 8px rgba(0,0,0,.3)}
-    #tabbar button{flex:1;min-width:0;min-height:60px;display:flex;flex-direction:column;
+    #tabbar button{flex:1;min-width:0;min-height:66px;display:flex;flex-direction:column;
       align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
       font-family:var(--fb);font-weight:600;font-size:var(--t2);letter-spacing:.01em;
       text-transform:none;position:relative;transition:color .16s;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    #tabbar svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     #tabbar button[aria-current="true"]{color:var(--aurora)}
     /* Das Abzeichen sass auf einem festen Abstand vom Reitermittelpunkt und
        rutschte dadurch bei schmalen Reitern in die Nachbarspalte. Jetzt haengt
@@ -283,7 +299,7 @@
     nav#nav{display:none!important}
     /* Platz fuer die feste Tableiste, sonst liegt das letzte Element darunter. */
     /* Platz fuer die schwebende Leiste: ihre Hoehe plus der Abstand zum Rand. */
-    body{padding-bottom:104px}
+    body{padding-bottom:112px}
     /* Der Trainingsmodus liegt ueber allem, sonst verdeckt die Leiste den Knopf. */
     #runner{z-index:90}
   }
@@ -2565,7 +2581,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.9';
+var VERSION='20.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -10689,54 +10705,40 @@ function renderBoard(avgLp){
 }
 
 /* ---------- Ueberziehen am Rand ------------------------------------------
-   Zwei verschiedene Dinge, die David zusammen aufgefallen sind:
+   1. Chrome auf Android laedt die Seite neu, wenn man oben nach unten zieht.
+      Safari kennt das nicht -- deshalb war es auf dem iPhone kein Problem.
+      Abgeschaltet wird es im CSS mit overscroll-behavior.
+   2. Dafuer fehlt Android das Gummiband, das iOS von selbst hat.
 
-   1. Chrome auf Android laedt die Seite neu, wenn man oben nach unten zieht
-      ("Pull to Refresh"). Safari kennt das nicht -- deshalb war es auf dem
-      iPhone kein Problem. In einer App, die alles lokal haelt, ist ein
-      versehentliches Neuladen bestenfalls laestig und mitten in einer Einheit
-      ein Schreckmoment. Abgeschaltet wird es im CSS mit overscroll-behavior.
+   WARUM ES ZWEIMAL GERUCKELT HAT -- und was diesmal wirklich die Ursache war:
 
-   2. Dafuer fehlt Android das Gummiband, das iOS von selbst hat: zieht man
-      ueber den Rand hinaus, gibt der Inhalt nach und federt zurueck. Ohne
-      diese Antwort wirkt eine Liste, die einfach stehenbleibt, wie eine, die
-      haengt.
+   Erster Versuch (v19.8): die Ansicht wurde verschoben, ohne dass der Browser
+   vorher wusste, dass sie sich bewegen wird. Behoben mit will-change.
 
-   Bewegt wird ausschliesslich die gerade sichtbare Ansicht, nicht die Huelle.
-   Die Huelle enthaelt Kopfleiste, Tableiste und alle Schiebeansichten -- eine
-   Verschiebung darauf wuerde aus jedem "fixed" darin ein "relativ zur Huelle"
-   machen, und die Tableiste wanderte beim Ziehen mit.
+   Zweiter Versuch (v19.9): immer noch starkes Ruckeln. Die eigentliche Ursache
+   sass an einer ganz anderen Stelle und war schlimmer, weil sie NICHT nur am
+   Rand wirkte:
 
-   WARUM ES ZUERST GERUCKELT HAT (Android, v19.8):
-   Eine Ansicht ist ein grosser Baum -- Karten, Diagramme, Listen. Wird darauf
-   eine Verschiebung gesetzt, ohne dass der Browser vorher weiss, dass sich
-   dieses Element bewegen wird, muss er in JEDEM Bild den ganzen Baum neu
-   zeichnen. Auf einem Telefon sind das schnell 30 Millisekunden pro Bild, und
-   genau das fuehlt sich an wie Haengen.
-   Zwei Aenderungen beheben das:
-     - Beim Beruehren wird die Ansicht mit will-change angemeldet. Der Browser
-       legt sie EINMAL auf eine eigene Ebene, danach ist jede Verschiebung nur
-       noch ein Verschieben dieser Ebene -- ohne Neuzeichnen. Nach dem
-       Loslassen wird die Anmeldung zurueckgenommen, weil eine dauerhaft
-       eigene Ebene Speicher kostet.
-     - Gezeichnet wird im Bildtakt statt bei jedem Beruehrungsereignis.
-       touchmove feuert auf manchen Geraeten oefter als der Bildschirm
-       Bilder zeigt; jede zusaetzliche Verschiebung dazwischen ist verworfene
-       Arbeit. */
+       return s+window.innerHeight >= document.documentElement.scrollHeight-1;
+
+   scrollHeight ist kein gespeicherter Wert. Wer ihn liest, zwingt den Browser,
+   sofort das gesamte Layout durchzurechnen -- mitten im Beruehrungsereignis,
+   bevor er weiterlaufen darf. Und diese Zeile lief bei JEDER Fingerbewegung
+   nach oben, also bei jedem normalen Herunterscrollen. Nicht das Gummiband war
+   langsam, sondern das Scrollen selbst, und zwar in der ganzen App.
+
+   Jetzt wird die Grenze EINMAL beim Aufsetzen des Fingers gemessen. Waehrend
+   einer Wischbewegung aendert sich die Seitenhoehe ohnehin nicht. */
 (function(){
   if(!('ontouchstart' in window))return;
-  var el=null,y0=0,zieh=0,soll=0,los=false,raf=0;
+  var el=null,y0=0,zieh=0,soll=0,los=false,raf=0,maxScroll=0,fensterH=0;
   function sichtbareAnsicht(){
     var v=document.querySelector('.view.on');
-    /* Schiebeansichten liegen fest im Fenster und scrollen in sich selbst. */
     if(!v||getComputedStyle(v).position==='fixed')return null;
     return v;
   }
   function oben(){return (window.pageYOffset||document.documentElement.scrollTop||0)<=0;}
-  function unten(){
-    var s=(window.pageYOffset||document.documentElement.scrollTop||0);
-    return s+window.innerHeight>=document.documentElement.scrollHeight-1;
-  }
+  function unten(){return (window.pageYOffset||document.documentElement.scrollTop||0)>=maxScroll-1;}
   /* Gedaempft und begrenzt: die ersten Pixel folgen dem Finger fast eins zu
      eins, danach wird es zaeh und laeuft gegen 84 Pixel. */
   function daempfen(d){
@@ -10755,9 +10757,12 @@ function renderBoard(avgLp){
     el=sichtbareAnsicht();
     if(!el)return;
     y0=e.touches[0].clientY;zieh=0;soll=0;los=false;
+    /* Einmal messen, dann nicht mehr anfassen. Das ist der teure Teil -- er
+       gehoert hierher, wo noch nichts in Bewegung ist, nicht in die
+       Bewegung selbst. */
+    fensterH=window.innerHeight;
+    maxScroll=Math.max(0,document.documentElement.scrollHeight-fensterH);
     el.style.transition='';
-    /* Ebene vorbereiten, solange noch nichts passiert -- der Browser hat so
-       ein Bild Zeit dafuer, statt es mitten in der Bewegung tun zu muessen. */
     el.style.willChange='transform';
   },{passive:true});
   document.addEventListener('touchmove',function(e){
@@ -10774,9 +10779,9 @@ function renderBoard(avgLp){
     var e2=el;
     if(raf){cancelAnimationFrame(raf);raf=0;}
     if(zieh||soll){
-      e2.style.transition='transform .34s cubic-bezier(.22,1,.32,1)';
+      e2.style.transition='transform .32s cubic-bezier(.22,1,.32,1)';
       e2.style.transform='';
-      setTimeout(function(){e2.style.transition='';e2.style.willChange='';},360);
+      setTimeout(function(){e2.style.transition='';e2.style.willChange='';},340);
     }else{
       e2.style.transform='';e2.style.willChange='';
     }
@@ -10784,12 +10789,26 @@ function renderBoard(avgLp){
   }
   document.addEventListener('touchend',zurueck,{passive:true});
   document.addEventListener('touchcancel',zurueck,{passive:true});
-  /* Beim Ansichtswechsel darf keine Verschiebung stehenbleiben. */
   document.addEventListener('vkview',function(){
     var v=document.querySelector('.view.on');
     if(v){v.style.transition='';v.style.transform='';v.style.willChange='';}
   });
 })();
+
+/* ---------- Kein Zoom ----------------------------------------------------
+   Eine App zoomt nicht. Ein versehentliches Aufziehen mit zwei Fingern
+   waehrend einer Einheit laesst die Oberflaeche verrutschen, und es gibt
+   keinen sichtbaren Weg zurueck -- man steht vor einer halb abgeschnittenen
+   Seite und weiss nicht warum.
+
+   Die Angabe user-scalable=no im Kopf der Seite reicht dafuer nicht: Safari
+   ignoriert sie seit iOS 10 bewusst. Safari schickt aber eigene Ereignisse
+   fuer die Zwei-Finger-Geste, und die lassen sich abfangen. Beides zusammen
+   deckt Android und iPhone ab.
+   Doppeltipp-Zoom faengt touch-action:manipulation im CSS ab. */
+['gesturestart','gesturechange','gestureend'].forEach(function(t){
+  document.addEventListener(t,function(e){e.preventDefault();},{passive:false});
+});
 /* ---------- boot ---------- */
 /* Feste Felder bekommen ihren Regler einmal beim Start. Die Raster in Test,
    Massen und PR bauen ihre Felder selbst und rufen pairSlider dort.
