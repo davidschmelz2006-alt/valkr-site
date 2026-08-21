@@ -621,6 +621,26 @@
      blosse Beschriftung. Bei einem Dutzend davon auf einem Bildschirm schreit
      die Oberflaeche, ohne etwas zu sagen. Akzentfarbe bleibt dem vorbehalten,
      was wirklich Aufmerksamkeit verdient. */
+  /* ---- Kennzahlen-Kopf --------------------------------------------------
+     Drei Zahlen, so gross wie moeglich, Beschriftung so klein wie noetig.
+     Das ist die Reihenfolge, die MCI durchzieht und die dieser Bereich vorher
+     genau umgekehrt hatte: dort war die Beschriftung gleich gross wie der Wert.
+     clamp() haelt die Zahl auch auf 320 Pixeln in einer Zeile -- drei Werte
+     nebeneinander, kein Umbruch, keine Ellipse. */
+  .bigkpis{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:0 0 1.1rem}
+  .bigkpi{display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;
+    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.75rem .7rem .7rem;min-width:0}
+  .bigkpi b{font-family:var(--fd);font-weight:600;line-height:1;
+    font-size:clamp(1.6rem,8.4vw,2rem);font-variant-numeric:tabular-nums;
+    color:var(--ink)}
+  .bigkpi em{font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);margin-top:.32rem}
+  .bigkpi span{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);line-height:1.3}
+  @media (min-width:641px){
+    .bigkpi b{font-size:2.1rem}
+    .bigkpi{padding:.9rem .95rem .8rem}
+  }
   .eyebrow{font-family:var(--fm);font-size:var(--t2);letter-spacing:.11em;text-transform:uppercase;color:var(--ink2);margin:0 0 .45rem}
   .hint{font-family:var(--fb);font-size:var(--t3);color:var(--ink2);margin:0}
   /* Serife nur dort, wo wirklich gelesen wird: die Kapitel im Wissens-Bereich.
@@ -2496,7 +2516,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.3';
+var VERSION='19.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8519,8 +8539,15 @@ function statKarte(titel,unter,punkte,einheit,invers){
     chip='<span class="statdelta" style="color:'+farbe+'">'+(delta>0?'+':'')+
       (Math.round(delta*10)/10)+' '+einheit+'</span>';
   }
+  /* Eine Kurve aus lauter Nullen ist keine Kurve. Vorher zeichnete die Karte
+     trotzdem ihr volles Raster -- 180 Pixel Hoehe fuer einen einzigen Punkt auf
+     der Grundlinie, was aussieht wie ein Fehler und nicht wie ein Anfang.
+     Ohne einen einzigen Wert ueber null zeigt sie denselben Satz wie eine
+     Karte ganz ohne Daten. */
+  var hatWert=false;
+  for(var q0=0;q0<punkte.length;q0++)if(punkte[q0].y>0)hatWert=true;
   var svg='';
-  if(punkte.length){
+  if(punkte.length&&hatWert){
     var ys=[],i;
     for(i=0;i<punkte.length;i++)ys.push(punkte[i].y);
     var mn=Math.min.apply(null,ys),mx=Math.max.apply(null,ys);
@@ -8547,9 +8574,38 @@ function statKarte(titel,unter,punkte,einheit,invers){
   }
   return '<div class="statcard"><div class="stathead"><div><b>'+titel+'</b><span>'+unter+'</span></div>'+chip+'</div>'+svg+'</div>';
 }
+/* ---------- Kopf des Fortschritt-Bereichs -------------------------------
+   Gemessen in v19.2: die groesste Schrift in diesem Bereich war 14 px, und im
+   Leerzustand standen drei fast leere Karten -- eine davon 180 px hoch mit
+   einem einzigen Punkt darin. Ein Bereich, der "Fortschritt" heisst, hatte
+   damit keine einzige Zahl, die man von zwei Metern Abstand lesen kann.
+
+   Liams MCI-Analyse sagt dazu das Gegenteil: Kennzahlen sind die groessten
+   Elemente der Seite, Beschriftungen die kleinsten. Genau so herum steht es
+   jetzt hier.
+
+   Auch bei null wird gezeigt: eine grosse "0" ist eine Aussage -- sie sagt
+   "hier faengt es an". Eine leere Karte sagt gar nichts und sieht aus wie ein
+   Fehler. */
+function statKopf(){
+  var DE=cfg.lang==='de';
+  var einheiten=trainDays();
+  var serie=streakVal||0;
+  var erfasst=Object.keys(logs).length;
+  function z(wert,label,zusatz){
+    return '<div class="bigkpi"><b>'+wert+'</b><em>'+label+'</em>'+
+      (zusatz?'<span>'+zusatz+'</span>':'')+'</div>';
+  }
+  return '<div class="bigkpis">'+
+    z(einheiten,DE?'Einheiten':'Sessions',DE?'insgesamt':'in total')+
+    z(serie,DE?'Serie':'Streak',DE?(serie===1?'Tag':'Tage'):(serie===1?'day':'days'))+
+    z(erfasst,DE?'Erfasst':'Logged',DE?(erfasst===1?'Tag':'Tage'):(erfasst===1?'day':'days'))+
+  '</div>';
+}
 function drawStat(){
   var el=$('statBody');if(!el)return;
   var DE=cfg.lang==='de',L=DE?1:0,h='';
+  h+=statKopf();
   /* 1. Saetze je Woche und Muster (aus dem Erledigt-Speicher, 8 Wochen). */
   h+='<p class="eyebrow">'+(DE?'Sätze je Woche':'Sets per week')+'</p>';
   var woNow=Math.min(12,Math.max(1,wkOf(TODAY)));

@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->21.08.2026, 04:14<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->21.08.2026, 15:05<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -126,13 +126,25 @@
     <h2>Die Seiten</h2>
     <div class="doors">
       <a class="door" href="Produkt/valkr-hub.html">
-        <span class="dt"><b>Training Hub</b><span class="v">v8.0</span></span>
-        <p>Das Produkt. 13 Bereiche, Live-Coach mit Popup-Hinweisen, Ränge und Bestenliste, Skills, Ernährung.</p>
+        <span class="dt"><b>Training Hub</b></span>
+        <p>Das Produkt. Vier Reiter, Zwölf-Wochen-Plan mit Einmessen im Training, Ernährungstagebuch mit Barcode-Scanner, Fortschritt und das komplette Buch.</p>
         <span class="go">Öffnen &rarr;</span>
       </a>
       <a class="door" href="Produkt/valkr-identity.html">
-        <span class="dt"><b>Cover &amp; Marke</b><span class="v">v8.1</span></span>
+        <span class="dt"><b>Cover &amp; Marke</b></span>
         <p>Die visuelle Identität und das Cover des eBooks.</p>
+        <span class="go">Öffnen &rarr;</span>
+      </a>
+      <a class="door" href="Produkt/valkr-kaufen.html">
+        <span class="dt"><b>Verkaufsseite</b><span class="v">Entwurf</span></span>
+        <p>Das Ziel für den Link in der Bio. Preis, Steuerhinweis und Kaufknopf
+          sind noch offen — alles andere steht.</p>
+        <span class="go">Öffnen &rarr;</span>
+      </a>
+      <a class="door" href="Produkt/impressum.html">
+        <span class="dt"><b>Rechtstexte</b><span class="v">Entwurf</span></span>
+        <p>Impressum, Datenschutz, AGB und Widerruf. Offene Stellen sind orange
+          markiert und müssen vor dem Livegang gefüllt werden.</p>
         <span class="go">Öffnen &rarr;</span>
       </a>
     </div>
@@ -150,8 +162,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v19.3</span>
-        <span class="fm"><b>10.664</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v19.4</span>
+        <span class="fm"><b>10.720</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -164,11 +176,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">59d03bb</span><div class="t"><b>Hub v19.3: eigener Fehler aus v19.1 behoben - Zurueck aus einer Schiebeansicht nahm den Bereichsschluessel statt des Abschnitts als Ziel und hinterliess einen leeren Bildschirm, sobald man vorher in Statistik, Raenge oder Du stand; jetzt fuehrt es auf den Abschnitt zurueck, in drei Faellen geprueft. Dazu dreissig Zeilen toter Menue-Code entfernt, den der v19-Umbau ueberfluessig gemacht hatte</b></div></div>
       <div class="row"><span class="h">fcf40c6</span><div class="t"><b>Nachpruefung von Liams v19-Umbau gegen die stehenden Anforderungen: v19.1 (Zurueck-Taste auf Schiebeansichten war tot, Startbildschirm war eine Unteransicht statt HEUTE, Wochentags-Knoepfe 27 statt 41 Pixel) und v19.2 (Reiterfolge am Rechner wiederhergestellt, MCI-Regel ein heller Handlungsknopf je Bildschirm durchgesetzt). Entscheidung zu FORTSCHRITT-Kennzahlen in OFFEN.md festgehalten, gebaut wird sie naechste Session</b></div></div>
       <div class="row"><span class="h">acd27e0</span><div class="t"><b>Hub v19.2: Reiterfolge am Rechner wiederhergestellt (Coach zuerst, Fortschritt zwischen Ernaehrung und Wissen) - der v19-Umbau hatte sie verloren, ein Kommentar haelt die Absprache jetzt fest; MCI-Regel ein heller Handlungsknopf je Bildschirm durchgesetzt: auf Training leuchteten drei Flaechen gleich stark, jetzt ist Filter getoent und Pausenuhr Umriss</b></div></div>
       <div class="row"><span class="h">6b23c84</span><div class="t"><b>Hub v19.1: Nachpruefung des v19-Umbaus. Zurueck-Taste war auf Schiebeansichten tot (Coach, Wissen, Einstellungen, Zugang, Detail, Kamera) - schliesst jetzt die Ansicht und nimmt sie vom Stapel; neue Kunden landeten auf der Coach-Schiebeansicht statt auf HEUTE, Start ist jetzt HEUTE und legt zugleich den ersten Historieneintrag an; Wochentags-Knoepfe in den Einstellungen von 27 auf 41 Pixel mit eigener Zeile</b></div></div>
       <div class="row"><span class="h">8b0c384</span><div class="t"><b>Hub v19.0: Komplettumbau nach MCI-Vorbild (Bildschirmaufnahme analysiert, 156 Frames). Vier Reiter mit Push-Navigation, HEUTE-Dashboard, Ernaehrung mit Tagebuch-Streifen, Gewichts-Stepper, Naehrstoffen und Rezepten, Vollbild-Kamera mit eigenem EAN-Decoder (iOS-faehig), Naehrwerttabellen-Scan per Texterkennung, 300 Grundnahrungsmittel offline plus Open-Food-Facts-Suche, Statistik mit Verlaufskurven. Gauntlet-Runden alle PASS; Altfehler behoben: Kalorienziel ging bei jedem Neuladen verloren</b></div></div>
-      <div class="row"><span class="h">d0b9282</span><div class="t"><b>Hub v19.0: Komplettumbau nach MCI-Vorbild - 4 Reiter mit Push-Navigation (Parallax), HEUTE-Dashboard, Ernaehrung mit Tagebuch-Streifen/Stepper/Naehrstoffen/Rezepten, Vollbild-Kamera mit eigenem EAN-Decoder (laeuft auch auf iOS), Naehrwerttabellen-Scan per Texterkennung, 300 Grundnahrungsmittel offline plus OFF-Suche, Statistik mit Verlaufskurven; Gauntlet-Schlussrunde alle Kritiker PASS, Altfehler Kalorienziel-Verlust beim Neuladen behoben</b></div></div>
     </div>
   </div>
 
@@ -181,8 +193,6 @@
       <li class="star"><b>Preis und Zugangsschutz entscheiden.</b> Grundlage steht in <code>Produkt/ZUGANGSSCHUTZ.md</code>, fällig mit der Verkaufsseite.</li>
       <li class="star"><b>Sieben Belege fachlich gegenlesen lassen</b>, dazu Satz-Autoregulation und Einmess-Heuristiken (v13.7). Vor kommerzieller Nutzung.</li>
       <li class="star"><b>Deutsche Buchfassung fachlich gegenlesen</b> (12 Kapitel in <code>02 Manuskript DE</code>, seit v17.0 auch komplett im Hub-Wissensbereich). Übersetzung ist durch drei Kritikerrunden, die fachliche Freigabe ist Menschensache.</li>
-      <li class="big">Entschieden, noch nicht gebaut</li>
-      <li class="star"><b>FORTSCHRITT: Kennzahlen nach oben.</b> Der Bereich hat keine einzige große Zahl — größte Schrift dort ist 14 px, im Leerzustand stehen drei fast leere Karten (eine 180 px hohe Karte mit einem winzigen Punkt). Liams MCI-Analyse fordert das Gegenteil: „Kennzahlen sind die größten Elemente der Seite (28–34 pt), Labels die kleinsten." <b>Entscheidung David, 2026-08-21:</b> drei große Zahlen als Kopf des Bereichs — Einheiten gesamt, aktuelle Serie, erfasste Tage — in rund 30 px, darunter erst die Verlaufskurven. Auch bei null: eine große „0" ist eine Aussage, eine leere Karte ist keine. Umfang bewusst auf den Kopf des Bereichs begrenzt; die drei Leerzustands-Karten bleiben vorerst, wie sie sind. Gemessen in v19.2, Datei <code>Produkt/valkr-hub.html</code>, Ansicht <code>v-stat</code>.</li>
       <li class="big">Produkt — offen, ohne Termin</li>
       <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16/v17-Wizard, Körperfett-Figur, Trainingstage-Pillen, Stufenbänder, Ernährungs-Ring).</li>
       <li class="star"><b>Ersatzübungen — Rest:</b> Seit v18.0 hat jede Übung ein Tausch-Blatt mit Filtern (Leichter/Schwerer/Ohne Gerät) — deckt „keine Stange" und Niveau ab. Offen bleibt gezielte Führung bei Schmerz (welcher Tausch bei welchem Zwicken) und Platzmangel/unterwegs als eigene Filter.</li>

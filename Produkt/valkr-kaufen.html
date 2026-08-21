@@ -1,0 +1,494 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<title>VALKR — Calisthenics, das dich mitrechnet</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<!-- Bis zum Verkaufsstart aus den Suchmaschinen heraushalten. Beim Livegang
+     diese Zeile entfernen -- vorher waere Reichweite nur Streuverlust. -->
+<meta name="robots" content="noindex,nofollow">
+<meta name="description" content="Ein Zwölf-Wochen-Calisthenics-Programm, das dich beim ersten Training einmisst und ab da mitrechnet. Läuft im Browser, offline, ohne Konto.">
+<meta name="theme-color" content="#08080C">
+<link rel="icon" href="valkr-icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="valkr-icon-180.png">
+
+<!-- Open Graph: entscheidet, wie der Link in TikTok, WhatsApp und Instagram
+     aussieht. Ohne diese Zeilen zeigt die Vorschau einen nackten Link, und
+     genau dort faellt die Haelfte der Klicks weg. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="VALKR — Calisthenics, das dich mitrechnet">
+<meta property="og:description" content="Zwölf Wochen, dein Körper, kein Studio. Der Plan misst dich im ersten Training ein und rechnet ab da mit.">
+<meta property="og:image" content="valkr-icon-512.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<style>
+  /* Farben aus dem Hub (Theme Onyx), damit Seite und Produkt sichtbar
+     zusammengehoeren. Wer hier klickt und dort landet, soll nicht das Gefuehl
+     haben, die Marke gewechselt zu haben. */
+  :root{
+    --bg:#08080C; --surf:#101019; --surf2:#15151F; --line:#22222E;
+    --ink:#ECECF2; --ink2:#A0A0B4; --ink3:#6E6E85;
+    --acc:#A78BFA; --acc2:#C4B5FD; --gold:#D4A73C; --warn:#F0913F;
+    --fd:"Segoe UI Semibold","Segoe UI",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;
+    --fb:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    --fm:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+    --r:14px; --r2:20px;
+    --wrap:min(100% - 2.2rem, 62rem);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--fb);
+    font-size:17px;line-height:1.6;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  .wrap{width:var(--wrap);margin-inline:auto}
+  a{color:var(--acc2)}
+  h1,h2,h3{font-family:var(--fd);font-weight:600;line-height:1.15;margin:0}
+  p{margin:0}
+  .eyebrow{font-family:var(--fm);font-size:.66rem;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--ink3);margin:0}
+
+  /* ---- Kopf ---- */
+  header{padding:1.1rem 0;position:sticky;top:0;z-index:20;
+    background:color-mix(in srgb,var(--bg) 88%,transparent);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line)}
+  .hrow{display:flex;align-items:center;justify-content:space-between;gap:1rem}
+  .brand{display:flex;align-items:center;gap:.6rem}
+  .brand b{font-family:var(--fd);font-weight:600;letter-spacing:.28em;
+    text-transform:uppercase;font-size:.9rem}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+    min-height:52px;padding:.8rem 1.5rem;border-radius:999px;border:0;
+    background:var(--acc);color:#14061F;font-family:var(--fd);font-weight:600;
+    font-size:1rem;text-decoration:none;cursor:pointer;
+    transition:transform .16s,filter .16s}
+  .btn:hover{filter:brightness(1.08)}
+  .btn:active{transform:scale(.98)}
+  .btn.ghost{background:none;color:var(--ink);border:1px solid var(--line);min-height:44px;
+    padding:.5rem 1rem;font-size:.85rem}
+  header .btn{min-height:40px;padding:.45rem 1rem;font-size:.82rem}
+
+  /* ---- Held ---- */
+  .hero{padding:3.4rem 0 2.6rem;text-align:center;position:relative}
+  .hero::before{content:"";position:absolute;inset:-30% -20% auto -20%;height:70%;
+    background:radial-gradient(50% 60% at 50% 40%,rgba(167,139,250,.20),transparent 70%);
+    pointer-events:none}
+  .hero>*{position:relative}
+  .hero h1{font-size:clamp(2rem,8.6vw,3.4rem);letter-spacing:-.015em}
+  .hero .lead{color:var(--ink2);font-size:clamp(1rem,4.4vw,1.18rem);
+    margin:1rem auto 0;max-width:34ch}
+  .hero .cta{margin-top:1.8rem;display:flex;flex-direction:column;align-items:center;gap:.7rem}
+  .hero .under{font-family:var(--fm);font-size:.7rem;color:var(--ink3);letter-spacing:.04em}
+
+  /* ---- Abschnitte ---- */
+  section{padding:2.8rem 0}
+  section.tint{background:var(--surf);border-block:1px solid var(--line)}
+  .sechead{max-width:44ch;margin-bottom:1.6rem;display:flex;flex-direction:column;gap:.5rem}
+  .sechead h2{font-size:clamp(1.4rem,5.6vw,2rem);letter-spacing:-.01em}
+  .sechead p{color:var(--ink2)}
+
+  .grid{display:grid;gap:.8rem;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .card{background:var(--surf2);border:1px solid var(--line);border-radius:var(--r2);
+    padding:1.3rem 1.25rem;display:flex;flex-direction:column;gap:.45rem}
+  section.tint .card{background:var(--bg)}
+  .card .ic{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;
+    background:rgba(167,139,250,.14);color:var(--acc);margin-bottom:.35rem;flex:none}
+  .card .ic svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;
+    stroke-linecap:round;stroke-linejoin:round}
+  .card h3{font-size:1.05rem}
+  .card p{color:var(--ink2);font-size:.94rem}
+  .card .num{font-family:var(--fd);font-weight:600;font-size:2rem;line-height:1;
+    font-variant-numeric:tabular-nums}
+  .card .num i{font-style:normal;font-size:.44em;color:var(--ink3);margin-left:.25em}
+
+  /* ---- Vorschau ---- */
+  .shots{display:grid;gap:1rem;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    align-items:start}
+  .shot{border:1px solid var(--line);border-radius:26px;overflow:hidden;background:var(--surf2);
+    aspect-ratio:9/19.5;display:grid;place-items:center;padding:1rem;text-align:center}
+  .shot img{width:100%;height:100%;object-fit:cover;border-radius:24px}
+  .shot .ph{font-family:var(--fm);font-size:.68rem;color:var(--ink3);line-height:1.5}
+  .shotcap{font-family:var(--fm);font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--ink3);text-align:center;margin-top:.5rem}
+
+  /* ---- Ehrlich-Block ---- */
+  .honest{display:grid;gap:.6rem}
+  .honest li{list-style:none;display:flex;gap:.7rem;align-items:flex-start;
+    background:var(--surf2);border:1px solid var(--line);border-left:3px solid var(--gold);
+    border-radius:var(--r);padding:.85rem 1rem}
+  section.tint .honest li{background:var(--bg)}
+  .honest b{font-family:var(--fd);font-weight:600;display:block;font-size:.98rem}
+  .honest span{color:var(--ink2);font-size:.92rem}
+  .honest ul{margin:0;padding:0}
+
+  /* ---- Preis ---- */
+  .price{max-width:34rem;margin-inline:auto;background:var(--surf2);
+    border:1px solid var(--acc);border-radius:var(--r2);padding:1.8rem 1.5rem;text-align:center;
+    box-shadow:0 20px 60px rgba(167,139,250,.10)}
+  section.tint .price{background:var(--bg)}
+  .price .tag{font-family:var(--fd);font-weight:600;line-height:1;
+    font-size:clamp(2.6rem,12vw,3.6rem);font-variant-numeric:tabular-nums}
+  .price .tag i{font-style:normal;font-size:.36em;color:var(--ink3);margin-left:.2em}
+  .price .once{font-family:var(--fm);font-size:.72rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--acc2);margin-top:.5rem}
+  .price ul{margin:1.3rem 0 0;padding:0;text-align:left;display:grid;gap:.5rem}
+  .price li{list-style:none;display:flex;gap:.6rem;align-items:flex-start;font-size:.95rem}
+  .price li svg{width:17px;height:17px;flex:none;margin-top:.28rem;color:var(--acc);
+    fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .price .btn{width:100%;margin-top:1.5rem}
+  .price .fine{font-size:.76rem;color:var(--ink3);margin-top:.9rem;line-height:1.5}
+
+  /* ---- FAQ ---- */
+  details.q{border:1px solid var(--line);border-radius:var(--r);background:var(--surf2);
+    overflow:hidden}
+  section.tint details.q{background:var(--bg)}
+  details.q+details.q{margin-top:.5rem}
+  details.q>summary{list-style:none;cursor:pointer;padding:.95rem 1.1rem;
+    display:flex;align-items:center;gap:.8rem;min-height:52px;
+    font-family:var(--fd);font-weight:600;font-size:.98rem}
+  details.q>summary::-webkit-details-marker{display:none}
+  details.q>summary::after{content:"";width:9px;height:9px;flex:none;margin-left:auto;
+    border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);
+    transform:rotate(45deg) translateY(-2px);transition:transform .22s}
+  details.q[open]>summary::after{transform:rotate(-135deg) translateY(-2px)}
+  details.q .a{padding:0 1.1rem 1.05rem;color:var(--ink2);font-size:.94rem}
+
+  /* ---- Fuss ---- */
+  footer{border-top:1px solid var(--line);padding:2rem 0 3rem;color:var(--ink3);font-size:.82rem}
+  /* Die Pflichtlinks sind die einzigen Links im Fuss -- und ausgerechnet die
+     waren 21 Pixel hoch. Wer sein Widerrufsrecht nachlesen will, soll nicht
+     zielen muessen. */
+  footer .flinks{display:flex;flex-wrap:wrap;gap:.2rem 1rem;margin-bottom:.6rem}
+  footer .flinks a{display:inline-flex;align-items:center;min-height:44px;padding:0 .1rem}
+  footer a{color:var(--ink2);text-decoration:none}
+  footer a:hover{color:var(--ink);text-decoration:underline}
+
+  /* Fester Kaufbalken auf dem Handy. Auf einer Verkaufsseite, die man mit dem
+     Daumen scrollt, darf der Knopf nicht am Ende auf einen warten. */
+  .sticky{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:.7rem 1.1rem;
+    padding-bottom:calc(.7rem + env(safe-area-inset-bottom,0px));
+    background:color-mix(in srgb,var(--bg) 92%,transparent);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+    border-top:1px solid var(--line);display:none;align-items:center;gap:.8rem}
+  .sticky .p{font-family:var(--fd);font-weight:600;font-size:1.05rem;white-space:nowrap}
+  .sticky .btn{flex:1;min-height:50px}
+  @media (max-width:760px){
+    .sticky{display:flex}
+    body{padding-bottom:84px}
+    header .btn{display:none}
+  }
+  :focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap hrow">
+    <div class="brand">
+      <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true">
+        <g fill="none" stroke="var(--gold)" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M136 122 H376" stroke-width="34"/>
+          <path d="M164 190 L256 380 L348 190" stroke-width="60"/>
+        </g>
+      </svg>
+      <b>Valkr</b>
+    </div>
+    <a class="btn" href="#preis">Holen</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <p class="eyebrow">Calisthenics · 12 Wochen · ohne Studio</p>
+    <h1>Dein Körper ist das Gym.</h1>
+    <p class="lead">Ein Plan, der dich im ersten Training einmisst und ab da
+      mitrechnet. Keine Ratespiele, kein Abo, kein Konto.</p>
+    <div class="cta">
+      <a class="btn" href="#preis">Zugang holen</a>
+      <span class="under">Einmalzahlung · läuft offline · auf jedem Handy</span>
+    </div>
+  </div>
+</div>
+
+<section class="tint">
+  <div class="wrap">
+    <div class="sechead">
+      <p class="eyebrow">Das Problem</p>
+      <h2>Du hast kein Disziplinproblem.</h2>
+      <p>Dir hat nur nie jemand gesagt, was tatsächlich Muskeln aufbaut — und
+        wann du schwerer machen musst. Deshalb hörst du nach sechs Wochen auf:
+        nicht weil du schwach bist, sondern weil nichts messbar passiert ist.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <p class="num">3</p>
+        <h3>Hebel, mehr nicht</h3>
+        <p>Nah ans Versagen, mit der Zeit schwerer, genug erholen. Alles andere
+          wird dir verkauft, weil man daran verdient.</p>
+      </div>
+      <div class="card">
+        <p class="num">6</p>
+        <h3>Muster statt 200 Übungen</h3>
+        <p>Drücken, Ziehen, Rudern, Überkopf, Beine, Rumpf. Jedes mit einer
+          Leiter von der ersten Wand-Liegestütze bis zum einarmigen Drücken.</p>
+      </div>
+      <div class="card">
+        <p class="num">0 <i>€ / Monat</i></p>
+        <h3>Kein Abo</h3>
+        <p>Einmal zahlen, dauerhaft nutzen. Es gibt keinen Server, der dir das
+          wieder wegnehmen könnte.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sechead">
+      <p class="eyebrow">Was drin ist</p>
+      <h2>Ein Trainingspartner, der rechnet.</h2>
+      <p>Kein Video-Kurs, kein PDF zum Wegklicken. Eine App, die deine Zahlen
+        liest und dir sagt, was als Nächstes dran ist.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M3 12h18M6 8v8M18 8v8M2.5 10v4M21.5 10v4"/></svg></span>
+        <h3>Einmessen im Training</h3>
+        <p>Kein Test vorweg. Beim ersten Kontakt mit einer Übung läufst du drei
+          Sätze bis zur sauberen Grenze — daraus setzt jede Leiter ihre Stufe.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 14.5a2.5 2.5 0 0 1-2.5 2.5H8l-4 3.5V6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5Z"/></svg></span>
+        <h3>Coach ohne Chatbot</h3>
+        <p>Er liest Schlaf, Volumen, Rekorde und deine Planerfüllung und sagt,
+          welcher Hebel klemmt. Feste Regeln, nachvollziehbar — nichts Erfundenes.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M7 10v5M10 10v5M14 10v5M17 10v5"/></svg></span>
+        <h3>Ernährung mit Scanner</h3>
+        <p>Barcode scannen — auch auf dem iPhone. Fehlt ein Produkt, fotografierst
+          du die Nährwerttabelle und die App füllt sie aus. 300 Grundnahrungsmittel
+          liegen offline bereit.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
+        <h3>Fortschritt, der zählt</h3>
+        <p>Verlaufskurven je Übung, Rang aus deinem Stand auf den Leitern, nicht
+          aus Schweiß. Ruhetage zählen als erledigt.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5Z"/><path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5Z"/></svg></span>
+        <h3>Das Buch, eingebaut</h3>
+        <p>Zwölf Kapitel — warum Training scheitert, wie Überlastung ohne Gewichte
+          geht, Technik, Ernährung, Schlaf, Rückschläge. Direkt in der App,
+          nicht als Datei nebenher.</p>
+      </div>
+      <div class="card">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l7.5 3.6v5.1c0 4.3-3 8.1-7.5 9.3-4.5-1.2-7.5-5-7.5-9.3V6.6Z"/><path d="M9.3 12.2l2 2 3.6-3.9"/></svg></span>
+        <h3>Deine Daten bleiben deine</h3>
+        <p>Kein Konto, keine Anmeldung, keine Werbung, kein Tracking. Alles liegt
+          in deinem Browser. Ohne Netz funktioniert sie weiter.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ====================================================================
+     VORSCHAU — noch ohne Bilder.
+     Hier gehoeren drei echte Screenshots hin, keine gezeichneten Attrappen.
+     Was gebraucht wird (Handy-Format, 1170x2532 oder groesser, PNG):
+       1. HEUTE mit einer geplanten Einheit und ein paar gesetzten Haken
+       2. Ernaehrung mit offenem Kamera-Scanner
+       3. FORTSCHRITT mit gefuellten Kennzahlen und einer Verlaufskurve
+     Ablegen als Produkt/shot-heute.png, shot-scan.png, shot-fortschritt.png,
+     dann in scripts/publish-site.sh in die Whitelist aufnehmen und unten die
+     drei <div class="ph"> durch <img> ersetzen.
+     Bewusst leer gelassen statt bebildert: eine erfundene Vorschau ist eine
+     Zusage, die das Produkt danach halten muss.
+     ==================================================================== -->
+<section class="tint">
+  <div class="wrap">
+    <div class="sechead">
+      <p class="eyebrow">Vorschau</p>
+      <h2>So sieht es aus.</h2>
+      <p>Auf dem Handy gebaut, nicht am Rechner und dann verkleinert.</p>
+    </div>
+    <div class="shots">
+      <div>
+        <div class="shot"><p class="ph">Screenshot<br>HEUTE</p></div>
+        <p class="shotcap">Heute</p>
+      </div>
+      <div>
+        <div class="shot"><p class="ph">Screenshot<br>Scanner</p></div>
+        <p class="shotcap">Ernährung</p>
+      </div>
+      <div>
+        <div class="shot"><p class="ph">Screenshot<br>Fortschritt</p></div>
+        <p class="shotcap">Fortschritt</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="sechead">
+      <p class="eyebrow">Ehrlich</p>
+      <h2>Was es nicht ist.</h2>
+      <p>Damit du es nicht kaufst und dich hinterher ärgerst.</p>
+    </div>
+    <ul class="honest">
+      <li><span></span><div>
+        <b>Keine Abkürzung.</b>
+        <span>Zwölf Wochen sind zwölf Wochen. Wer drei Einheiten die Woche nicht
+          unterbringt, wird auch hier nicht stärker.</span>
+      </div></li>
+      <li><div>
+        <b>Keine App aus dem Store.</b>
+        <span>Sie läuft im Browser und legt sich auf Wunsch aufs Startbild wie
+          eine App. Das ist Absicht: keine Store-Gebühr, kein Update-Zwang, kein Konto.</span>
+      </div></li>
+      <li><div>
+        <b>Kein Chatbot.</b>
+        <span>Der Coach folgt festen Regeln aus dem Buch. Er erfindet nichts und
+          redet nicht mit dir — er rechnet.</span>
+      </div></li>
+      <li><div>
+        <b>Keine Bestenliste.</b>
+        <span>Dafür bräuchte es einen Server. Dein Rang misst dich gegen deinen
+          eigenen Start, nicht gegen Fremde.</span>
+      </div></li>
+      <li><div>
+        <b>Keine ärztliche Beratung.</b>
+        <span>Bei anhaltendem Schmerz, Vorerkrankungen oder Medikamenten gehst du
+          zum Arzt — nicht in eine Checkliste.</span>
+      </div></li>
+    </ul>
+  </div>
+</section>
+
+<section class="tint" id="preis">
+  <div class="wrap">
+    <div class="sechead" style="margin-inline:auto;text-align:center">
+      <p class="eyebrow">Zugang</p>
+      <h2>Einmal zahlen. Fertig.</h2>
+    </div>
+
+    <!-- ================================================================
+         PREIS — EINE Stelle, hier.
+         Der Betrag steht bewusst nur an diesem einen Ort und im festen
+         Balken unten (data-preis), damit er nicht an zwei Stellen
+         auseinanderlaeuft.
+
+         DAVID MUSS VOR DEM LIVEGANG ENTSCHEIDEN:
+         1. Den Betrag. Marktueblich fuer ein deutschsprachiges
+            Digitalprodukt dieser Tiefe: 39-79 EUR einmalig.
+         2. Die Umsatzsteuer-Zeile. Zwei Faelle, nur einer stimmt:
+            - Kleinunternehmer nach Paragraf 19 UStG:
+              "Kein Ausweis der Umsatzsteuer gemaess Paragraf 19 UStG."
+            - Regelbesteuert: "inkl. MwSt." -- und bei Verkauf an
+              EU-Verbraucher gilt der Steuersatz des Kundenlandes,
+              ab 10.000 EUR EU-Umsatz ueber das OSS-Verfahren.
+            Ich kann das nicht fuer ihn entscheiden; falsch ausgewiesene
+            Preise sind abmahnfaehig.
+         3. Das Ziel des Kaufknopfes (href) -- der Shop, der die Zahlung
+            abwickelt und danach den Zugang ausliefert.
+         ================================================================ -->
+    <div class="price">
+      <p class="tag" data-preis>49<i>€</i></p>
+      <p class="once">Einmalig · kein Abo · keine Folgekosten</p>
+      <ul>
+        <li><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          Zwölf-Wochen-Programm, danach fortlaufend in Blöcken</li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          114 Übungen mit Bewegungsdemos und Tausch-Funktion</li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          Ernährungstagebuch mit Barcode- und Tabellen-Scanner</li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          Das komplette Buch, zwölf Kapitel, in der App</li>
+        <li><svg viewBox="0 0 24 24"><path d="M4 12.5l5 5L20 6.5"/></svg>
+          Läuft offline, ohne Konto, auf Handy und Rechner</li>
+      </ul>
+      <!-- href auf den Shop setzen, sobald er steht. -->
+      <a class="btn" href="#" data-kauf>Zugang holen</a>
+      <p class="fine">
+        <!-- Diese Zeile ersetzen, sobald die Steuerfrage entschieden ist. -->
+        <b style="color:var(--warn)">[Steuerhinweis einsetzen]</b><br>
+        Digitaler Inhalt. Mit dem Kauf stimmst du zu, dass die Ausführung sofort
+        beginnt, und bestätigst, dass dein Widerrufsrecht damit erlischt
+        (§&nbsp;356 Abs.&nbsp;5 BGB).
+      </p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap" style="max-width:46rem">
+    <div class="sechead">
+      <p class="eyebrow">Fragen</p>
+      <h2>Bevor du klickst.</h2>
+    </div>
+
+    <details class="q">
+      <summary>Brauche ich Geräte?</summary>
+      <div class="a">Für den Anfang nichts. Ab der Zug-Leiter hilft eine Stange —
+        eine Türreckstange, ein Spielplatz oder ein Tisch für Rudern reichen.
+        Jede Übung hat ein Tausch-Blatt mit Filtern für „leichter", „schwerer"
+        und „ohne Gerät".</div>
+    </details>
+
+    <details class="q">
+      <summary>Funktioniert das auf dem iPhone?</summary>
+      <div class="a">Ja, inklusive Barcode-Scanner — der Decoder ist selbst
+        gebaut, weil Safari die eingebaute Schnittstelle nicht anbietet. Du legst
+        die Seite über „Zum Home-Bildschirm" ab, danach startet sie wie eine App.</div>
+    </details>
+
+    <details class="q">
+      <summary>Was passiert mit meinen Daten?</summary>
+      <div class="a">Sie bleiben auf deinem Gerät. Es gibt kein Konto, keinen
+        Server, keine Werbung und kein Tracking. Der Preis dafür: Wenn du den
+        Browser-Speicher löschst, sind sie weg. Ein Export-Knopf in den
+        Einstellungen kopiert dir alles heraus.</div>
+    </details>
+
+    <details class="q">
+      <summary>Ich bin blutiger Anfänger. Zu schwer?</summary>
+      <div class="a">Nein. Jede Leiter beginnt bei der Wand-Liegestütze und dem
+        Hängen an der Stange. Die App misst dich im ersten Training ein und setzt
+        die Stufe dorthin, wo du wirklich stehst — nicht dorthin, wo du gern wärst.</div>
+    </details>
+
+    <details class="q">
+      <summary>Und wenn ich nach zwölf Wochen fertig bin?</summary>
+      <div class="a">Dann läuft der nächste Block an — mit anderem Schwerpunkt
+        und von den Stufen aus, die der Retest gerade gesetzt hat. Das Programm
+        hört nicht auf, es fängt auf höherem Niveau wieder an.</div>
+    </details>
+
+    <details class="q">
+      <summary>Kann ich das Geld zurückbekommen?</summary>
+      <div class="a">Bei digitalen Inhalten erlischt das Widerrufsrecht, sobald
+        die Ausführung mit deiner Zustimmung beginnt (§&nbsp;356 Abs.&nbsp;5 BGB).
+        Deshalb steht oben, was drin ist — und weiter oben, was nicht.</div>
+    </details>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="flinks">
+      <a href="impressum.html">Impressum</a>
+      <a href="datenschutz.html">Datenschutz</a>
+      <a href="agb.html">AGB &amp; Widerruf</a>
+    </div>
+    <p>VALKR — Calisthenics. Kein Ersatz für ärztlichen Rat.</p>
+  </div>
+</footer>
+
+<div class="sticky">
+  <span class="p" data-preis>49&nbsp;€</span>
+  <a class="btn" href="#preis" data-kauf-mobil>Zugang holen</a>
+</div>
+
+</body>
+</html>
