@@ -869,6 +869,10 @@
   .rung:hover{border-color:var(--ice);transform:translateX(2px)}
   .rung .n{font-family:var(--fm);font-size:var(--t2);color:var(--ink3);width:1.3rem;flex:none}
   .rung .bar{height:6px;background:var(--ink3);opacity:.28;flex:none;border-radius:2px;transition:.3s}
+  /* Katalogname unter der Beschreibung -- kleiner und ruhiger, damit die
+     Sprosse weiter die Hauptzeile ist. */
+  .rung .exn{display:block;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.04em;color:var(--ink3);margin-top:.14rem}
   .rung .lb{flex:1;font-family:var(--fd);font-weight:600;font-size:var(--t3)}
   .rung .st{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
   .rung.cur{border-color:var(--aurora);background:var(--surf3)}
@@ -2517,7 +2521,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.5';
+var VERSION='19.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3154,6 +3158,71 @@ var EXDB={
   ['Dragon flag',5,'an','l','Straight body lowers and rises from the shoulders.','Dragon Flag|Der gerade Körper senkt und hebt sich aus den Schultern.']
  ]
 };
+
+/* ---------- Leiterstufe -> Katalog-Uebung ------------------------------
+   Die Sprossen tragen beschreibende Etiketten ("Hands on a table"), der
+   Katalog fuehrt richtige Uebungsnamen ("Incline push-up (table)"). Beides ist
+   fuer sich richtig -- die Sprosse soll erklaeren, der Katalog benennen. Nur
+   hing dadurch die Bewegungsdemo an der falschen Seite: alle 114 Katalog-
+   Uebungen haben eine, die Sprossen keine.
+
+   Diese Tabelle verbindet die beiden. Wo eine Stufe keine genaue Entsprechung
+   hat, steht bewusst null statt einer ungefaehren -- eine falsche Demo ist
+   schlimmer als keine, weil sie eine Ausfuehrung zeigt, die nicht gemeint ist. */
+var LADEX={
+  push:['Wall push-up','Incline push-up (table)','Incline push-up (chair)',
+        'Full push-up','Decline push-up','Archer push-up','One-arm push-up'],
+  pull:['Dead hang','Scapular pull-up','Negative pull-up','Band-assisted pull-up',
+        'Pull-up','Weighted pull-up'],
+  row:['Bar row, chest height','Bar row, waist height','Bar row, hip height',
+       'Feet-elevated row','Pause row','One-arm row'],
+  press:['Pike push-up, hands elevated','Pike push-up','Feet-elevated pike push-up',
+         'Deficit pike push-up','Wall handstand push-up, partial','Wall handstand push-up'],
+  legs:['Box squat','Air squat','Paused squat','Split squat','Bulgarian split squat',
+        'Assisted pistol','Pistol squat'],
+  core:['Dead bug','Tuck hollow hold',null,null,'Hollow hold','Hollow rock',
+        'Hanging knee raise','Hanging leg raise']
+};
+/* Findet den Katalogeintrag zu einer Leiterstufe. Gibt null zurueck, wenn es
+   keinen gibt -- der Aufrufer zeigt dann einfach nichts. */
+function ladEx(patId,stufe){
+  var namen=LADEX[patId];
+  if(!namen||stufe<0||stufe>=namen.length)return null;
+  var n=namen[stufe];
+  if(!n)return null;
+  var liste=EXDB[patId]||[];
+  for(var i=0;i<liste.length;i++)if(liste[i][0]===n)return liste[i];
+  return null;
+}
+
+/* Deutsche Beschriftung der Leitersprossen. Die englischen Etiketten in
+   PAT.ladder bleiben stehen -- sie sind der Schluessel, an dem LADEX haengt,
+   und Reihenfolge und Index steuern den Stand des Nutzers. Uebersetzt wird
+   nur, was angezeigt wird.
+   Wo unten null steht, ist der englische Name auch im Deutschen der
+   gebraeuchliche (Dead Bug, Hollow Rock) -- eine erzwungene Eindeutschung
+   waere dort schlechter als das Original. */
+var LADDE={
+  push:['Liegestütz an der Wand','Hände auf einen Tisch','Hände auf einen Stuhl',
+        'Voller Liegestütz','Füße erhöht','Archer-Liegestütz','Einarmiger Liegestütz'],
+  pull:['Hängen auf Zeit','Schulterblatt-Zug','Negativer Klimmzug','Mit Band unterstützt',
+        'Voller Klimmzug','Klimmzug mit Zusatzgewicht'],
+  row:['Stange auf Brusthöhe','Stange auf Hüfthöhe','Stange auf Beckenhöhe',
+       'Füße erhöht','Oben halten','Einarmiges Rudern'],
+  press:['Pike mit erhöhten Händen','Pike am Boden','Pike mit erhöhten Füßen',
+         'Pike mit Defizit','Handstand an der Wand, teilweise','Handstand an der Wand, voll'],
+  legs:['Kniebeuge auf die Box','Kniebeuge','Kniebeuge mit Pause','Ausfallschritt',
+        'Bulgarischer Ausfallschritt','Pistol mit Hilfe','Pistol'],
+  core:['Dead Bug','Hollow Hold angehockt','Ein Bein gestreckt','Beide Beine, Arme unten',
+        'Arme über Kopf','Hollow Rock','Hängendes Knieheben','Hängendes Beinheben']
+};
+/* Beschriftung einer Sprosse in der eingestellten Sprache. */
+function ladLabel(patId,stufe,fallback){
+  if(cfg.lang!=='de')return fallback;
+  var a=LADDE[patId];
+  if(!a||stufe<0||stufe>=a.length||!a[stufe])return fallback;
+  return a[stufe];
+}
 var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Sofa-Halt']};
 var FLN={w:['wrists','Handgelenke'],s:['overhead shoulder','Schulter über Kopf'],k:['knee-dominant','knielastig'],e:['elbow-heavy','ellbogenlastig'],l:['lower back','unterer Rücken'],h:['hip-heavy','hüftlastig']};
 var profile=get('profile',null);
@@ -5695,12 +5764,29 @@ function openDetail(id){
 function fill(id,a){var u=$(id);u.innerHTML='';a.forEach(function(t){var li=document.createElement('li');li.textContent=t;u.appendChild(li);});}
 function ladder(){
   var p=pid[cur],c=steps[cur]||0,l=$('d-ladder');l.innerHTML='';
+  var DE=cfg.lang==='de';
   p.ladder.forEach(function(s,i){
     var cls=i<c?'done':(i===c?'cur':'');
     var w=14+(i*(58/Math.max(1,p.ladder.length-1)));
     var b=document.createElement('button');b.className='rung '+cls;
     b.innerHTML='<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+(i<c?'Cleared':(i===c?'You are here':'Locked'))+'</span>';
-    b.querySelector('.lb').textContent=s;
+    b.querySelector('.lb').textContent=ladLabel(cur,i,s);
+    /* Der Katalogname als zweite Zeile, wo es einen gibt. Die Sprosse erklaert
+       ("Hände auf einen Tisch"), der Katalogname benennt ("Liegestütz an der
+       Tischkante") -- und ueber ihn haengt die Bewegungsdemo, die es fuer die
+       Sprosse selbst nie gab. */
+    var ex=ladEx(cur,i);
+    if(ex){
+      var exn=(DE&&typeof exName==='function')?exName(ex):ex[0];
+      /* Nur zeigen, wenn er etwas hinzufuegt. "Liegestuetz an der Wand" unter
+         "Liegestuetz an der Wand" ist keine Information, sondern Rauschen. */
+      if(exn&&exn!==b.querySelector('.lb').textContent){
+        var nm=document.createElement('span');
+        nm.className='exn';
+        nm.textContent=exn;
+        b.querySelector('.lb').appendChild(nm);
+      }
+    }
     b.addEventListener('click',function(){steps[cur]=i;set('steps',steps);set('lastStepUp',iso(TODAY));ladder();buildTiles();refresh();});
     l.appendChild(b);});
 }
@@ -8271,7 +8357,8 @@ function lastSession(){
 }
 function stepName(id){
   var p=pid[id];if(!p)return '';
-  return p.ladder[Math.min(steps[id]||0,p.ladder.length-1)];
+  var st=Math.min(steps[id]||0,p.ladder.length-1);
+  return ladLabel(id,st,p.ladder[st]);
 }
 function listMusc(ids,L){
   var n=ids.map(function(i){return (MUSC[i]||['',''])[L];}).filter(Boolean);
