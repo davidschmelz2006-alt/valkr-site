@@ -2496,6 +2496,7 @@
       <div class="out" id="dataStats"></div>
       <div class="savebar">
         <button class="tbtn" id="exportBtn" data-i18n="btn.export">Copy my data</button>
+        <button class="tbtn" id="importBtn" data-i18n="btn.import">Restore from backup</button>
         <button class="tbtn" id="undoBtn2" data-i18n="btn.undo">Undo last change</button><button class="tbtn dngr" id="resetBtn2" data-i18n="btn.resetAll">Reset everything</button>
       </div>
       <p class="eyebrow" data-i18n="set.dev">Developer</p>
@@ -2516,7 +2517,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='19.4';
+var VERSION='19.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -2731,7 +2732,7 @@ var DICT={
  'btn.clear':['Clear','Leeren'],'btn.rebase':['Set today as baseline','Heute als Basis setzen'],
  'btn.addEx':['Add exercise','Übung hinzufügen'],'btn.add':['Add','Hinzufügen'],
  'btn.undo':['Undo last change','Letzte Änderung zurücknehmen'],
- 'btn.export':['Copy my data','Daten kopieren'],'btn.resetAll':['Reset everything','Alles zurücksetzen'],
+ 'btn.export':['Copy my data','Daten kopieren'],'btn.import':['Restore from backup','Daten einspielen'],'btn.resetAll':['Reset everything','Alles zurücksetzen'],
  'btn.getBook':['Get the book','Buch kaufen'],'btn.getHub':['Get lifetime access','Lifetime-Zugang'],'btn.later':['Opens later','Kommt später'],
  'today.tick':['Tick the box when a block is done · tap the name for technique','Haken setzen wenn ein Block fertig ist · Name antippen für Technik'],
  'log.effort':['How hard was it? (RPE)','Wie hart war es? (RPE)'],'log.energy':['Energy before','Energie vorher'],
@@ -9000,6 +9001,85 @@ $('exportBtn').addEventListener('click',function(){
   var txt=JSON.stringify(dump);
   try{navigator.clipboard.writeText(txt);}catch(e){}
   flash('expFlag');
+});
+
+/* ---------- Daten einspielen -------------------------------------------
+   Der Export kopierte seit jeher alles heraus, es gab aber keinen Weg zurueck.
+   Damit versprach der Knopf eine Sicherung, die keine war: eine Sicherung, aus
+   der man nicht wiederherstellen kann, ist eine Textdatei.
+
+   Drei Dinge sind hier bewusst so gebaut:
+
+   1. Es wird geprueft, BEVOR etwas geschrieben wird. Ein halb eingespielter
+      Stand waere schlimmer als gar keiner -- der Plan haette dann Daten aus
+      zwei verschiedenen Leben.
+   2. Der bisherige Stand wandert vorher in einen Rueckhalt. Wer sich vertut,
+      verliert nicht alles, was er hatte.
+   3. Es wird gefragt, mit Zahlen. "Ersetzt 34 Einheiten und 12 Logs" ist eine
+      Entscheidungsgrundlage, "Wirklich fortfahren?" ist keine. */
+var IMPKEYS=['start','steps','done','logs','wins','over','meas','measBase','prs','wlog',
+  'supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks',
+  'lastStepUp','run','profile','exlog','exhist','vrf','diary','fav','weights'];
+function importPruefen(txt){
+  var d;
+  try{d=JSON.parse(txt);}catch(e){return{ok:false,grund:'json'};}
+  if(!d||typeof d!=='object'||Array.isArray(d))return{ok:false,grund:'form'};
+  /* Mindestens ein bekannter Schluessel muss vorkommen, sonst ist es zwar
+     gueltiges JSON, aber nicht unsere Sicherung. */
+  var treffer=0;
+  for(var i=0;i<IMPKEYS.length;i++)if(d[IMPKEYS[i]]!==undefined&&d[IMPKEYS[i]]!==null)treffer++;
+  if(!treffer)return{ok:false,grund:'fremd'};
+  if(d.start!==undefined&&d.start!==null&&!isIso(d.start))return{ok:false,grund:'start'};
+  return{ok:true,daten:d,treffer:treffer,
+    einheiten:d.done?Object.keys(d.done).length:0,
+    logs:d.logs?Object.keys(d.logs).length:0};
+}
+function importAusfuehren(d){
+  /* Rueckhalt anlegen -- einmal, unter eigenem Schluessel, damit ein zweiter
+     Import den ersten Rueckhalt nicht ueberschreibt. */
+  var vorher={};
+  IMPKEYS.forEach(function(k){vorher[k]=get(k,null);});
+  try{localStorage.setItem('vk_backup_'+Date.now(),JSON.stringify(vorher));}catch(e){}
+  IMPKEYS.forEach(function(k){
+    if(d[k]===undefined)return;
+    if(d[k]===null)del(k);else set(k,d[k]);
+  });
+}
+$('importBtn').addEventListener('click',function(){
+  var DE=cfg.lang==='de';
+  var txt=prompt(DE
+    ? 'Sicherung einfügen (der kopierte Text aus „Daten kopieren"):'
+    : 'Paste your backup (the text from "Copy my data"):');
+  if(txt===null)return;
+  txt=String(txt).trim();
+  if(!txt)return;
+  var p=importPruefen(txt);
+  if(!p.ok){
+    var grund={
+      json:DE?'Das ist kein gültiger Text aus „Daten kopieren" — beim Einfügen ist etwas verlorengegangen.'
+             :'That is not valid text from "Copy my data" — something was lost while pasting.',
+      form:DE?'Der Text hat die falsche Form.':'The text has the wrong shape.',
+      fremd:DE?'Der Text ist zwar gültig, stammt aber nicht aus dieser App.'
+              :'The text is valid but does not come from this app.',
+      start:DE?'Das Startdatum in der Sicherung ist unbrauchbar. Nichts wurde geändert.'
+              :'The start date in the backup is unusable. Nothing was changed.'
+    }[p.grund];
+    openModal(DE?"Nicht eingespielt":"Not restored",grund,DE?"Verstanden":"Got it",null);
+    return;
+  }
+  openModal(
+    DE?'Daten ersetzen?':'Replace your data?',
+    (DE?'Die Sicherung enthält '+p.einheiten+(p.einheiten===1?' abgehakten Tag und ':' abgehakte Tage und ')+p.logs+(p.logs===1?' Log':' Logs')+'. Dein jetziger Stand wird ersetzt — eine Kopie davon bleibt im Browser, falls du dich vertan hast.'
+      :'The backup holds '+p.einheiten+(p.einheiten===1?' ticked day and ':' ticked days and ')+p.logs+(p.logs===1?' log.':' logs.')+' Your current state is replaced — a copy of it stays in the browser in case this was a mistake.'),
+    DE?'Einspielen':'Restore',
+    function(){
+      importAusfuehren(p.daten);
+      /* Neu laden statt nachziehen: der Import beruehrt Profil, Plan, Katalog,
+         Ernaehrung und Einstellungen gleichzeitig. Jeden dieser Zweige von Hand
+         nachzuziehen waere eine lange Liste, die beim naechsten neuen Schluessel
+         wieder unvollstaendig ist. */
+      location.reload();
+    });
 });
 function dataStats(){
   var DE=cfg.lang==='de';

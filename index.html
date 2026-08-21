@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->21.08.2026, 15:05<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->21.08.2026, 15:09<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -162,8 +162,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v19.4</span>
-        <span class="fm"><b>10.720</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v19.5</span>
+        <span class="fm"><b>10.800</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -176,11 +176,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
+      <div class="row"><span class="h">4b40639</span><div class="t"><b>Hub v19.4: drei grosse Kennzahlen als Kopf des Fortschritt-Bereichs (31,5 px Wert gegen 11 px Label, vorher war die groesste Schrift dort 14 px), Karten ohne einen Wert ueber null zeichnen kein leeres Raster mehr. Dazu die Verkaufsseite Produkt/valkr-kaufen.html sowie Impressum, Datenschutz und AGB als Entwuerfe mit sichtbar markierten Luecken; Cockpit zeigt beide neuen Tueren</b></div></div>
       <div class="row"><span class="h">59d03bb</span><div class="t"><b>Hub v19.3: eigener Fehler aus v19.1 behoben - Zurueck aus einer Schiebeansicht nahm den Bereichsschluessel statt des Abschnitts als Ziel und hinterliess einen leeren Bildschirm, sobald man vorher in Statistik, Raenge oder Du stand; jetzt fuehrt es auf den Abschnitt zurueck, in drei Faellen geprueft. Dazu dreissig Zeilen toter Menue-Code entfernt, den der v19-Umbau ueberfluessig gemacht hatte</b></div></div>
       <div class="row"><span class="h">fcf40c6</span><div class="t"><b>Nachpruefung von Liams v19-Umbau gegen die stehenden Anforderungen: v19.1 (Zurueck-Taste auf Schiebeansichten war tot, Startbildschirm war eine Unteransicht statt HEUTE, Wochentags-Knoepfe 27 statt 41 Pixel) und v19.2 (Reiterfolge am Rechner wiederhergestellt, MCI-Regel ein heller Handlungsknopf je Bildschirm durchgesetzt). Entscheidung zu FORTSCHRITT-Kennzahlen in OFFEN.md festgehalten, gebaut wird sie naechste Session</b></div></div>
       <div class="row"><span class="h">acd27e0</span><div class="t"><b>Hub v19.2: Reiterfolge am Rechner wiederhergestellt (Coach zuerst, Fortschritt zwischen Ernaehrung und Wissen) - der v19-Umbau hatte sie verloren, ein Kommentar haelt die Absprache jetzt fest; MCI-Regel ein heller Handlungsknopf je Bildschirm durchgesetzt: auf Training leuchteten drei Flaechen gleich stark, jetzt ist Filter getoent und Pausenuhr Umriss</b></div></div>
       <div class="row"><span class="h">6b23c84</span><div class="t"><b>Hub v19.1: Nachpruefung des v19-Umbaus. Zurueck-Taste war auf Schiebeansichten tot (Coach, Wissen, Einstellungen, Zugang, Detail, Kamera) - schliesst jetzt die Ansicht und nimmt sie vom Stapel; neue Kunden landeten auf der Coach-Schiebeansicht statt auf HEUTE, Start ist jetzt HEUTE und legt zugleich den ersten Historieneintrag an; Wochentags-Knoepfe in den Einstellungen von 27 auf 41 Pixel mit eigener Zeile</b></div></div>
-      <div class="row"><span class="h">8b0c384</span><div class="t"><b>Hub v19.0: Komplettumbau nach MCI-Vorbild (Bildschirmaufnahme analysiert, 156 Frames). Vier Reiter mit Push-Navigation, HEUTE-Dashboard, Ernaehrung mit Tagebuch-Streifen, Gewichts-Stepper, Naehrstoffen und Rezepten, Vollbild-Kamera mit eigenem EAN-Decoder (iOS-faehig), Naehrwerttabellen-Scan per Texterkennung, 300 Grundnahrungsmittel offline plus Open-Food-Facts-Suche, Statistik mit Verlaufskurven. Gauntlet-Runden alle PASS; Altfehler behoben: Kalorienziel ging bei jedem Neuladen verloren</b></div></div>
     </div>
   </div>
 
@@ -196,7 +196,6 @@
       <li class="big">Produkt — offen, ohne Termin</li>
       <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16/v17-Wizard, Körperfett-Figur, Trainingstage-Pillen, Stufenbänder, Ernährungs-Ring).</li>
       <li class="star"><b>Ersatzübungen — Rest:</b> Seit v18.0 hat jede Übung ein Tausch-Blatt mit Filtern (Leichter/Schwerer/Ohne Gerät) — deckt „keine Stange" und Niveau ab. Offen bleibt gezielte Führung bei Schmerz (welcher Tausch bei welchem Zwicken) und Platzmangel/unterwegs als eigene Filter.</li>
-      <li class="star"><b>Datenimport.</b> Der Export in den Einstellungen kopiert JSON, es gibt aber keinen Weg zurück. Das verspricht eine Sicherung, die es nicht gibt.</li>
       <li>Bewegungsdemos je Leiterstufe. Seit v18.0 haben alle 114 Katalog-Übungen Demos (EXA) — die Leiterstufen tragen aber beschreibende Etiketten („Hands on a table", „Feet elevated"), keine Katalognamen. Fehlt nur noch eine kleine Zuordnungstabelle Stufe→Katalogname plus Anzeige in den Sprossen.</li>
       <li>Bestenliste: aus der Oberfläche entfernt, weil neun von zehn Zeilen erfunden waren. Kommt zurück, wenn es einen Server gibt. Code liegt in <code>renderBoard()</code>.</li>
       <li class="big">Geprüft und bewusst abgelehnt</li>
