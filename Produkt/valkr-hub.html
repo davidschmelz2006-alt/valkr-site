@@ -1508,8 +1508,49 @@
   #intro .istep{display:flex;flex-direction:column;gap:.85rem;flex:1;min-height:0}
   #intro .istep.slide{animation:inslide .3s ease}
   @keyframes inslide{from{opacity:0;transform:translateX(26px)}to{opacity:1;transform:none}}
-  #intro .brandline{display:flex;align-items:center;gap:.6rem;justify-content:center;margin:1.6rem 0 .2rem}
-  #intro .brandline b{font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:1rem}
+  #intro .brandline{display:flex;align-items:center;gap:.7rem;justify-content:center;margin:1.4rem 0 .2rem}
+  #intro .brandline span{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15}
+  #intro .brandline b{font-family:var(--fd);font-weight:700;letter-spacing:.3em;text-transform:uppercase;font-size:1.05rem}
+  #intro .brandline em{font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.16em;text-transform:uppercase;color:var(--ink3);margin-top:2px}
+  /* Einheitenreihe: gleiche Form wie die Sprachwahl, nur etwas enger. */
+  #intro .iunit{margin-top:.5rem}
+  /* Erinnerungsschritt: die Uhrzeit steht ueber den beiden Antworten, damit
+     niemand zusagt und danach merkt, dass es die falsche Zeit war. */
+  #intro .ntask .ntTime{display:flex;align-items:center;justify-content:center;gap:.7rem;margin:.4rem 0 1rem}
+  #intro .ntask .ntTime label{font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.09em;text-transform:uppercase;color:var(--ink3)}
+  #intro .ntask .ntTime input{background:var(--surf2);border:1px solid var(--line);
+    color:var(--ink);border-radius:var(--r1);padding:.5rem .7rem;font-family:var(--fd);
+    font-weight:700;font-size:var(--t5);min-height:44px}
+
+  /* ---- Glas und Partikel in der Einfuehrung ----------------------------
+     Die Einfuehrung lag als deckende Flaeche ueber allem -- sie war damit der
+     einzige Teil der App, der weder die Atmosphaere im Hintergrund noch die
+     Glasoptik der Karten kannte. Wer sie durchlaeuft, sieht die App also
+     zuerst in einem Zustand, den sie danach nie wieder hat.
+     Die Partikel bekommen hier eine eigene, sehr ruhige Fassung: der
+     Hintergrund-Canvas liegt unter der Einfuehrung, deshalb bringt sie ihre
+     eigenen mit -- vier weiche Flecken, die nur atmen. Kein Canvas, keine
+     Bildrate, nichts, was waehrend des Tippens rechnet. */
+  #intro{position:relative;isolation:isolate}
+  #intro::before,#intro::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
+  #intro::before{
+    background:
+      radial-gradient(220px 220px at 18% 12%,rgba(var(--p1),.10),transparent 70%),
+      radial-gradient(260px 260px at 84% 26%,rgba(var(--p2),.08),transparent 72%),
+      radial-gradient(200px 200px at 72% 82%,rgba(var(--p1),.07),transparent 70%),
+      radial-gradient(180px 180px at 24% 74%,rgba(var(--p2),.06),transparent 70%);
+    animation:inDrift 26s ease-in-out infinite alternate}
+  @keyframes inDrift{from{transform:translate3d(0,0,0) scale(1)}to{transform:translate3d(0,-14px,0) scale(1.05)}}
+  #intro .ibox{
+    background:linear-gradient(165deg,
+      color-mix(in srgb,var(--surf3) 46%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 62%,transparent) 42%,
+      color-mix(in srgb,var(--bg) 78%,transparent) 100%);
+    backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3)}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){#intro .ibox{background:var(--bg)}}
+  @media (prefers-reduced-motion:reduce){#intro::before{animation:none}}
   #intro h2{font-family:var(--fd);font-weight:600;font-size:1.5rem;margin:0;line-height:1.18;text-wrap:balance}
   #intro .isub{margin:0;color:var(--ink2);font-size:.9rem;line-height:1.5;text-wrap:pretty}
   #intro .center h2,#intro .center .isub{text-align:center}
@@ -3145,7 +3186,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.2';
+var VERSION='23.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -10253,13 +10294,18 @@ var IT={
   n:['Next','Weiter']},
  exp:{t:['How long have you trained?','Wie lange trainierst du schon?'],
   s:['Sets your starting rungs — the strength test fine-tunes them next.','Setzt deine Startstufen — der Krafttest justiert gleich fein nach.']},
+notify:{t:['Should VALKR remind you?','Soll VALKR dich erinnern?'],  s:['A short nudge on training days, a warning when the streak is about to break. Changeable any time, and nothing leaves the device.','Ein kurzer Anstoß an Trainingstagen, ein Hinweis wenn die Serie zu reißen droht. Jederzeit änderbar, und nichts verlässt das Gerät.']},
  ready:{t:['Your plan is ready.','Dein Plan steht.'],
   s:['Today shows your session — every exercise has a swap button, and the coach reads your numbers. Your first session measures you in: three sets per exercise, you enter your reps, and every ladder starts at your level. No test before the training — the training is the test.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf, und der Coach liest deine Zahlen mit. Dein erstes Training misst dich ein: drei Sätze je Übung, du trägst deine Wiederholungen ein, und jede Leiter startet auf deinem Level. Kein Test vor dem Training — das Training ist der Test.'],
   n:['Start day one','Los mit Tag eins']}
 };
-var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','act','ngoal','b3','days','tdays','eq','avoid','ready'],inIdx=0;
+/* "notify" ist neu und steht bewusst am Ende, direkt vor dem Abschluss:
+   nach Erlaubnis fragt man, wenn klar ist, wofuer sie gut sein soll -- nicht
+   im ersten Bild, wo die Antwort reflexhaft Nein lautet. Und der Zeitpunkt
+   ist der richtige, weil hier gerade die Trainingstage festgelegt wurden. */
+var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','act','ngoal','b3','days','tdays','eq','avoid','notify','ready'],inIdx=0;
 /* Kapitel je Schritt (1 Profil, 2 Ziele, 3 Rahmen); Hallo und Fertig laufen ohne Chip. */
-var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,act:3,ngoal:3,b3:3,days:4,tdays:4,eq:4,avoid:4,ready:4};
+var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,act:3,ngoal:3,b3:3,days:4,tdays:4,eq:4,avoid:4,notify:4,ready:4};
 var ICHN=[null,['Your profile','Dein Profil'],['Your goals','Deine Ziele'],['Your fuel','Deine Ernährung'],['Your setup','Dein Rahmen']];
 var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['act','ngoal'],['days','tdays','eq','avoid']];
 /* Koerperfett-Schaetzung nach Deurenberg: BMI, Alter, Geschlecht. */
@@ -10466,9 +10512,21 @@ function renderIntro(){
   host.className='istep'+((k==='hello'||k==='ready')?' center':'');
   var h='';
   if(k==='hello'){
-    h+='<div class="brandline"><svg width="30" height="30" viewBox="0 0 46 46" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 10 h32"/><path d="M16 10 L18 17 M30 10 L28 17"/><circle cx="23" cy="20" r="3.2"/><path d="M23 23 v9"/><path d="M23 32 l-4.5 8 M23 32 l4.5 8"/></g></svg><b>Valkr</b></div>';
+    /* Hier stand noch das alte Zeichen -- die Strichfigur unter der Stange,
+       die wir als App-Symbol laengst ersetzt haben, weil sie bei kleiner
+       Groesse zu einem Fleck verschmolz. Der Einfuehrungsbereich war die
+       letzte Stelle, an der sie ueberlebt hat; wer die App zum ersten Mal
+       oeffnet, sah also ein anderes Zeichen als danach ueberall.
+       Jetzt dasselbe V unter der Stange wie im Symbol, im Startbild und im
+       Markenfuss auf HEUTE, mit "Calisthenics" darunter. */
+    h+='<div class="brandline"><svg width="40" height="40" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg><span><b>VALKR</b><em>Calisthenics</em></span></div>';
     h+='<h2></h2><p class="isub"></p>';
     h+='<div class="ilang"><button type="button" data-lang="de" aria-pressed="'+(L===1)+'">Deutsch</button><button type="button" data-lang="en" aria-pressed="'+(L===0)+'">English</button></div>';
+    /* Einheiten gehoeren VOR die Fragen nach Groesse und Gewicht -- sonst
+       tippt jemand mit imperialem System 180 in ein Feld, das Zentimeter
+       meint, und merkt es erst, wenn die App ihn fuer zwei Meter haelt.
+       Sie standen bisher nur in den Einstellungen. */
+    h+='<div class="ilang iunit"><button type="button" data-unit="metric" aria-pressed="'+(cfg.units!=='imperial')+'">kg · cm</button><button type="button" data-unit="imperial" aria-pressed="'+(cfg.units==='imperial')+'">lb · in</button></div>';
   }else if(k==='b1'||k==='b2'||k==='b3'){
     h+='<div class="bridge"><h2></h2><p class="isub lead"></p>'+
        (k==='b3'?fuelPreviewHtml(DE):'')+
@@ -10493,6 +10551,27 @@ function renderIntro(){
        '<input type="range" class="islide" id="bfSlide" min="8" max="45" step="1" value="'+obState.bf+'"></div>';
   }else if(k==='tdays'){
     h+=tdaysHtml(L);
+  }else if(k==='notify'){
+    /* Kein Auswahlfeld und kein Schalter, sondern zwei gleichwertige
+       Antworten -- an dieser Stelle ist "nein" eine ebenso richtige Antwort
+       wie "ja", und ein vorbelegter Schalter waere eine Suggestivfrage.
+       Die Uhrzeit steht dabei, damit niemand zusagt und dann feststellt,
+       dass es die falsche ist. */
+    var nz=(typeof ntGet==='function')?ntGet().time:'18:00';
+    var erlaubt=(typeof Notification!=='undefined')&&Notification.permission==='granted';
+    var gesperrt=(typeof Notification==='undefined')||Notification.permission==='denied';
+    h+='<div class="ntask">'+
+       '<div class="ntTime"><label for="obNtTime">'+(DE?'Uhrzeit':'Time')+'</label>'+
+       '<input id="obNtTime" type="time" value="'+nz+'"></div>'+
+       (gesperrt
+         ? '<p class="isub" style="margin-top:.8rem">'+(DE
+             ?'Dein Browser lässt hier keine Hinweise zu. Das lässt sich nur in seinen eigenen Einstellungen ändern.'
+             :'Your browser does not allow notifications here. That can only be changed in its own settings.')+'</p>'
+         : '<div class="opts">'+
+           '<button type="button" class="opt'+(erlaubt?' on':'')+'" data-nt="1"><b>'+(DE?'Ja, erinnere mich':'Yes, remind me')+'</b><span>'+(DE?'An Trainingstagen und wenn die Serie kippt':'On training days and when the streak is at risk')+'</span></button>'+
+           '<button type="button" class="opt" data-nt="0"><b>'+(DE?'Nein danke':'No thanks')+'</b><span>'+(DE?'Später in den Einstellungen nachholbar':'Can be turned on later in settings')+'</span></button>'+
+           '</div>')+
+       '</div>';
   }else if(OBL[k]&&k!=='sex'){
     h+=inOpts(k,L);
   }
@@ -10501,9 +10580,51 @@ function renderIntro(){
   host.querySelector('.isub').textContent=T.s[L];
   /* Uebergang neu anstossen */
   host.classList.remove('slide');void host.offsetWidth;host.classList.add('slide');
+  if(k==='notify'){
+    /* Erinnerungen. "Ja" fragt sofort die Erlaubnis an -- der Tipp auf den
+       Knopf ist die Nutzergeste, die der Browser dafuer verlangt. */
+    var tf=host.querySelector('#obNtTime');
+    if(tf)tf.addEventListener('change',function(){
+      if(typeof ntGet!=='function')return;
+      var c=ntGet();c.time=tf.value||c.time;ntSave(c);
+    });
+    [].forEach.call(host.querySelectorAll('[data-nt]'),function(b){
+      b.addEventListener('click',function(){
+        if(b.dataset.nt==='1'&&typeof Notification!=='undefined'){
+          if(typeof ntSave==='function')ntSave({train:1,streak:1,week:1,time:(tf&&tf.value)||'18:00'});
+          try{
+            var p=Notification.requestPermission(function(){});
+            if(p&&p.then)p.then(function(){if(typeof ntPaint==='function')ntPaint();inNext();});
+            else inNext();
+          }catch(e){inNext();}
+        }else{
+          if(typeof ntSave==='function')ntSave({train:0,streak:0,week:0,time:(tf&&tf.value)||'18:00'});
+          inNext();
+        }
+      });
+    });
+  }
   if(k==='hello'){
-    [].forEach.call(host.querySelectorAll('.ilang button'),function(b){
+    /* [data-lang] statt ".ilang button": die Einheiten-Reihe traegt dieselbe
+       Klasse fuer dasselbe Aussehen, und mit dem alten Selektor haette ein
+       Tipp auf "lb · in" die Sprache auf undefined gesetzt. */
+    [].forEach.call(host.querySelectorAll('[data-lang]'),function(b){
       b.addEventListener('click',function(){cfg.lang=b.dataset.lang;saveCfg();applyI18n();renderIntro();});
+    });
+    /* Ueber das vorhandene Auswahlfeld statt an ihm vorbei: so laeuft der
+       bestehende Zuhoerer mit, der die schon eingetragenen Werte umrechnet.
+       Ein eigener Pfad haette dieselbe Umrechnung ein zweites Mal gebraucht
+       -- und zwei Stellen, die dasselbe tun, laufen frueher oder spaeter
+       auseinander. */
+    [].forEach.call(host.querySelectorAll('[data-unit]'),function(b){
+      b.addEventListener('click',function(){
+        var sel=$('setUnits');
+        if(sel&&sel.value!==b.dataset.unit){
+          sel.value=b.dataset.unit;
+          sel.dispatchEvent(new Event('change',{bubbles:true}));
+        }
+        renderIntro();
+      });
     });
   }
   var opts=OBL[k];
