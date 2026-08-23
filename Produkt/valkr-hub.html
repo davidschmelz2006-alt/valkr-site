@@ -170,10 +170,12 @@
     --aurora:#3ED9A8;--ice:#7CC7EA;--ember:#F0803C;--brass:#E8BE51;
     --bg:#000000;--surf:#131318;--surf2:#0A0A0E;--surf3:#1C1C23;
     --ink:#F2F2F5;--ink2:#9E9EA8;--ink3:#6E6E78;--line:#26262F;--line2:#1B1B22;
-    --hero:#0C0C11;--heroInk:#F2F2F5;--part:232,190,81;
-    /* Die Partikel bleiben golden -- sie sind das Erkennungszeichen der App
-       und gehoeren zur Marke, nicht zur Bereichsfarbe. */
-    --p1:232,190,81;--p2:124,199,234;
+    --hero:#0C0C11;--heroInk:#F2F2F5;--part:167,139,250;
+    /* Partikel violett -- Davids Wahl. Sie liegen hinter allem und tragen
+       keine Bedeutung, koennen also frei von den vier Akzentfarben stehen.
+       Auf echtem Schwarz ist Violett der Ton, der am weitesten leuchtet,
+       ohne dass man ihn fuer eine Meldung haelt. */
+    --p1:167,139,250;--p2:196,181,253;
     --sh:none;}
   :root[data-pack="stone"]{
     --aurora:#2E7D6B;--ice:#4A7C94;--ember:#B4552F;--brass:#8A7333;
@@ -620,10 +622,23 @@
      Farben). Grosser Versalien-Titel je Bereich; Karten: Hero mit
      Startknopf und Figuren, Gewohnheiten als 2x2, Verbessern als
      flache Zeilenkarten. ── */
+  /* Die Karte der naechsten Einheit war als einzige noch deckend -- sie stand
+     als volle Flaeche zwischen lauter durchscheinenden. Jetzt dasselbe Glas
+     wie ueberall, dazu ein sehr schwacher Schimmer in der Trainingsfarbe:
+     die wichtigste Karte der App darf sich abheben, aber ueber die Farbe,
+     nicht ueber die Deckkraft. */
   .hcard{display:flex;flex-direction:column;gap:.7rem;width:100%;text-align:left;
-    background:var(--surf);border:1px solid var(--line);border-radius:var(--r3);
-    padding:1rem 1.05rem;box-shadow:var(--sh);cursor:pointer;transition:border-color .16s}
-  .hcard:hover{border-color:var(--ice)}
+    background:
+      radial-gradient(120% 90% at 82% 0%,color-mix(in srgb,var(--ember) 13%,transparent),transparent 62%),
+      linear-gradient(160deg,
+        color-mix(in srgb,var(--surf3) 62%,transparent) 0%,
+        color-mix(in srgb,var(--surf) 74%,transparent) 46%,
+        color-mix(in srgb,var(--surf2) 82%,transparent) 100%);
+    border:1px solid var(--line);border-radius:var(--r3);
+    padding:1rem 1.05rem;cursor:pointer;transition:border-color .16s;
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 8%,transparent),var(--sh)}
+  .hcard:hover{border-color:color-mix(in srgb,var(--ember) 45%,var(--line))}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){.hcard{background:var(--surf)}}
   .hcard .hcMain{flex:1;min-width:0;display:flex;flex-direction:column;gap:.3rem}
   .hcard .tag{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;
     text-transform:uppercase;color:var(--ink3);margin:0}
@@ -638,8 +653,12 @@
     border-radius:999px;padding:.72rem 1rem;min-height:48px;
     display:flex;align-items:center;justify-content:center;gap:.45rem;
     transition:transform .12s,filter .16s}
+  .hcard .hcGo{background:linear-gradient(180deg,
+    color-mix(in srgb,var(--ember) 100%,#fff 0%),
+    color-mix(in srgb,var(--ember) 82%,#000));
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 30%,transparent)}
   .hcard .hcGo:active{transform:scale(.98)}
-  .hcard .hcGo:hover{filter:brightness(1.07)}
+  .hcard .hcGo:hover{filter:brightness(1.08)}
   /* Die Uebungssymbole stehen unten in EINER Reihe. Als Spalte rechts neben
      dem Text passten vier -- ein Tag hat aber fuenf oder sechs Uebungen, und
      welche fehlten, sah man der Kachel nicht an. Quer ueber die volle Breite
@@ -659,8 +678,21 @@
     padding:.8rem .85rem;box-shadow:var(--sh);cursor:pointer;position:relative;
     transition:border-color .16s}
   .habcard:hover{border-color:var(--ice)}
+  /* Markenfuss unter HEUTE. Leise, mittig, in der Markenfarbe. */
+  .brandfoot{display:flex;align-items:center;justify-content:center;gap:.55rem;
+    margin:1.6rem 0 .4rem;color:var(--brass);opacity:.55}
+  .brandfoot span{display:flex;flex-direction:column;line-height:1.15}
+  .brandfoot b{font-family:var(--fd);font-weight:700;font-size:var(--t3);letter-spacing:.26em}
+  .brandfoot em{font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
   .habcard em{font-style:normal;font-family:var(--fb);font-weight:600;font-size:var(--t3)}
-  .habcard .sub{font-size:var(--t1);color:var(--ink3);margin:0}
+  /* Der Kleinsttext in den Uebersichtskacheln ist raus. Er stand in var(--t1)
+     -- knapp elf Pixel -- unter einer Zahl, die alles schon sagt: "2780
+     uebrig" unter der 2780, "Startwert 78,0 kg" unter 78,0 kg. Solche Zeilen
+     liest niemand, sie fuellen nur die Kachel. Wo der Text wirklich etwas
+     ergaenzt (die Kalorienkachel), bleibt er. */
+  .habcard .sub{display:none}
+  .habcard.hcCal .sub{display:block;font-size:var(--t1);color:var(--ink3);margin:0}
   .habcard .go{position:absolute;top:.8rem;right:.7rem;width:14px;height:14px;
     stroke:var(--ink3);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
   .habcard b.big{font-family:var(--fd);font-weight:700;font-size:var(--t7);
@@ -945,14 +977,31 @@
      .go bleibt der Hauptknopf (voll gefuellt), der schlichte .tbtn ist die
      leise Zweitwahl -- und auch die ist jetzt eine Flaeche statt eines
      Umrisses, nur eine ruhigere. */
+  /* Knoepfe als Glas: leichter Verlauf von oben nach unten, haarfeine helle
+     Oberkante, durchscheinender Grund. Dieselbe Logik wie bei den Karten --
+     eine Flaeche in einer einzigen Farbe sieht flach aus, eine mit Richtung
+     sieht nach Material aus. Der Hauptknopf (.go) bleibt voll deckend: er
+     soll das Gegenteil von zurueckhaltend sein. */
   .tbtn{font-family:var(--fd);font-size:var(--t4);font-weight:650;letter-spacing:0;
-    text-transform:none;border:0;padding:.62rem 1rem;border-radius:999px;
-    background:var(--surf3);color:var(--ink);transition:background .16s,transform .12s;
-    display:inline-flex;align-items:center;justify-content:center;gap:.4rem}
-  .tbtn:hover{background:var(--line);color:var(--ink)}
+    text-transform:none;border:1px solid color-mix(in srgb,#fff 8%,transparent);
+    padding:.62rem 1rem;border-radius:999px;
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--surf3) 88%,transparent),
+      color-mix(in srgb,var(--surf2) 82%,transparent));
+    color:var(--ink);transition:filter .16s,transform .12s;
+    display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 10%,transparent)}
+  .tbtn:hover{filter:brightness(1.35)}
   .tbtn:active{transform:scale(.97)}
-  .tbtn.go{background:var(--aurora);color:var(--bg);font-weight:700}
-  .tbtn.go:hover{background:color-mix(in srgb,var(--aurora) 85%,#fff)}
+  .tbtn.go{border-color:transparent;color:var(--bg);font-weight:700;
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--aurora) 100%,#fff 0%),
+      color-mix(in srgb,var(--aurora) 84%,#000));
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 28%,transparent)}
+  .tbtn.go:hover{filter:brightness(1.08)}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){
+    .tbtn{background:var(--surf3)}.tbtn.go{background:var(--aurora)}
+  }
   .tbtn.dngr{background:color-mix(in srgb,var(--ember) 16%,transparent);color:var(--ember)}
   .tbtn.dngr:hover{background:var(--ember);color:#fff}
 
@@ -2444,8 +2493,21 @@
     <div id="homeHero"></div>
     <p class="eyebrow" data-i18n="home.habits">Overview</p>
     <div class="habgrid" id="homeHabits"></div>
-    <p class="eyebrow" data-i18n="home.improve">Improve</p>
-    <div class="upstack" id="homeCards"></div>
+    <!-- "Verbessern" ist von hier in den Coach gewandert. Auf HEUTE stand es
+         als dritter Block unter der Einheit und der Uebersicht -- also unter
+         allem, weswegen man die App aufmacht, und mit Inhalten, die man
+         hoechstens einmal die Woche braucht. Verbesserungsvorschlaege sind
+         genau das, was der Coach tut; dort stehen sie neben seinen Hinweisen
+         statt in Konkurrenz zum heutigen Tag. -->
+
+    <!-- Marke. Sie war mit der neuen Kopfzeile ueberall verschwunden, weil
+         dort jetzt der Bereichsname steht. Am Fuss von HEUTE stoert sie
+         nichts und steht trotzdem auf dem Bildschirm, den man am haeufigsten
+         sieht -- so machen es auch Liftoff und MCI mit ihrem Zeichen. -->
+    <div class="brandfoot" aria-hidden="true">
+      <svg viewBox="0 0 512 512" width="22" height="22"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
+      <span><b>VALKR</b><em>Calisthenics</em></span>
+    </div>
   </section>
 
   <section class="view" id="v-plan">
@@ -2889,6 +2951,10 @@
     <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Coach</b></div>
     <div><p class="sub" data-i18n="coach.s">Reads everything you have entered and updates the moment you change a number. Ordered by what costs you the most.</p></div>
     <div class="coach" id="coachList"></div>
+    <!-- Von HEUTE hierher verschoben. renderHome() fuellt den Behaelter
+         weiterhin ueber seine Kennung -- er darf stehen, wo er will. -->
+    <p class="eyebrow" data-i18n="home.improve">Improve</p>
+    <div class="upstack" id="homeCards"></div>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="coach.how">How this works</span></summary>
       <div class="foldBody">
@@ -3079,7 +3145,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.1';
+var VERSION='23.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
