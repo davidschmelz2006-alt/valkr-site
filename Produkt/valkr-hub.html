@@ -217,6 +217,36 @@
      den Doppeltipp gleich mit. */
   body{touch-action:pan-x pan-y}
   *{box-sizing:border-box}
+  /* ---- Keine Bildlaufleisten -------------------------------------------
+     Eine App hat keine. Der graue Balken rechts ist ein Fenster-Element aus
+     der Zeit, als Seiten in Fenstern lagen -- auf einem Telefon zeigt er
+     nichts, was der Daumen nicht schon weiss, und er schneidet die Kante
+     jeder Karte an.
+     Beide Schreibweisen sind noetig: scrollbar-width ist der Standard
+     (Firefox, neuere Chrome), ::-webkit-scrollbar der aeltere Weg, den
+     Safari und Chrome weiterhin bedienen. Gescrollt wird selbstverstaendlich
+     weiter -- nur die Anzeige ist weg. */
+  html,body,*{scrollbar-width:none;-ms-overflow-style:none}
+  ::-webkit-scrollbar{width:0;height:0;display:none}
+
+  /* ---- Schaerfe --------------------------------------------------------
+     Was eine Oberflaeche "hochwertig" aussehen laesst, sind selten grosse
+     Effekte -- es sind Kanten, die wirklich Kanten sind, und Text, der
+     sitzt. Drei Stellschrauben:
+     1. Grosse Schrift braucht ENGERE Laufweite als kleine. Das ist optische
+        Korrektur, kein Geschmack: bei 28 Pixeln wirkt derselbe Abstand, der
+        bei 12 Pixeln richtig ist, wie eine Luecke. Jede gute Schriftfamilie
+        macht das, die Systemschrift ueberlaesst es uns.
+     2. Zahlen mit fester Breite ueberall dort, wo sie sich aendern -- sonst
+        springt die Zeile bei jedem Wechsel von 1 auf 8.
+     3. geometricPrecision fuer SVG-Striche: der Browser rundet Linien sonst
+        auf ganze Geraetepixel, was bei duennen Symbolen zu ungleich dicken
+        Strichen fuehrt. Auf einem Bildschirm mit 2,6-facher Dichte sieht man
+        genau das als "billig gezeichnet". */
+  h1,h2,h3,.hcard h3,#areTitle,.rankHero .tier,.bigkpi b{letter-spacing:-.015em}
+  .valrow b,.habcard b.big,.rankHero .tier,.xpRow b,.lpn,.statdelta,.strk b{
+    font-variant-numeric:tabular-nums}
+  svg{shape-rendering:geometricPrecision}
   /* 100 % statt fester 16 px: damit schlaegt die Schriftgroesse durch, die der
      Nutzer in den Systemeinstellungen gewaehlt hat. Wer schlecht sieht, stellt
      sein Telefon groesser -- eine App, die das ignoriert, ist unhoeflich. */
@@ -532,10 +562,10 @@
     color:var(--ink3);fill:none;stroke:currentColor;stroke-width:2;
     stroke-linecap:round;stroke-linejoin:round;transition:.16s}
   button.mcard:hover .go{color:var(--aurora);transform:translateX(2px)}
-  .mcard .meter{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:.55rem}
-  .mcard .meter i{display:block;height:100%;border-radius:3px;background:var(--aurora)}
+  .mcard .meter{height:5px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:.55rem}
+  .mcard .meter i{display:block;height:100%;border-radius:999px;background:var(--aurora)}
   .mcard .dots{display:flex;flex-wrap:wrap;gap:3px;margin-top:.55rem}
-  .mcard .dots u{width:9px;height:9px;border-radius:2px;background:var(--line);text-decoration:none}
+  .mcard .dots u{width:9px;height:9px;border-radius:999px;background:var(--line);text-decoration:none}
   .mcard .dots u.on{background:var(--aurora)}
   .mcard .dots u.rest{background:var(--line2)}
   @media (max-width:640px){
@@ -735,7 +765,7 @@
     font-variant-numeric:tabular-nums;line-height:1.05}
   .habcard b.big small{font-size:var(--t2);font-weight:600;color:var(--ink3)}
   .habheat{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:auto}
-  .habheat i{aspect-ratio:1;border-radius:3px;background:var(--surf2)}
+  .habheat i{aspect-ratio:1;border-radius:4px;background:var(--surf2)}
   .habheat i.tr{background:color-mix(in srgb,var(--ember) 75%,var(--surf))}
   .habheat i.ms{background:color-mix(in srgb,var(--ink3) 30%,var(--surf2))}
   .habheat i.td{outline:1.5px solid var(--ink);outline-offset:1px}
@@ -835,7 +865,7 @@
     white-space:nowrap;padding-top:.15rem}
   .statbars{display:flex;align-items:flex-end;gap:4px;height:96px;padding-top:.3rem}
   .statbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:3px}
-  .statbar i{display:block;width:100%;max-width:16px;border-radius:3px 3px 0 0}
+  .statbar i{display:block;width:100%;max-width:16px;border-radius:4px 4px 0 0}
   .statbar em{font-style:normal;font-family:var(--fm);font-size:var(--t1);color:var(--ink3)}
 
   /* ── v19 Kamera-Ansicht: Vollbild-Sucher mit Eckklammern (MCI). Der
@@ -962,7 +992,7 @@
   .nb.hot:hover{background:var(--ember);color:#fff}
 
   .hero{background:var(--hero);color:var(--heroInk);padding:clamp(1.05rem,3vw,1.6rem);display:flex;flex-direction:column;gap:.7rem;position:relative;overflow:hidden;border-radius:4px;box-shadow:var(--sh)}
-  .hero::before{content:"";position:absolute;inset:-45% -20% auto -20%;height:85%;background:radial-gradient(50% 80% at 28% 50%,rgba(var(--p1),.34),transparent 70%),radial-gradient(45% 70% at 72% 28%,rgba(var(--p2),.24),transparent 72%);filter:blur(10px)}
+  .hero::before{content:"";position:absolute;inset:-45% -20% auto -20%;height:85%;background:radial-gradient(50% 80% at 28% 50%,rgba(var(--p1),.34),transparent 70%),radial-gradient(45% 70% at 72% 28%,rgba(var(--p2),.24),transparent 72%)}
   .hero>*{position:relative}
   .hero .tag{font-family:var(--fm);font-size:var(--t2);letter-spacing:.2em;text-transform:uppercase;color:var(--aurora);margin:0}
   .hero h3{font-family:var(--fd);font-weight:600;font-size:clamp(1.3rem,4vw,1.9rem);margin:0;line-height:1.08}
@@ -973,13 +1003,13 @@
 
   .exlist{display:flex;flex-direction:column;gap:.4rem}
   .exrow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);padding:.58rem .72rem;border-radius:3px;transition:.18s}
-  .exrow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);font-size:.85rem;line-height:1;transition:.16s}
+  .exrow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:9px;color:var(--ink3);font-size:.85rem;line-height:1;transition:.16s}
   .exrow .swp:hover{border-color:var(--aurora);color:var(--ink)}
   /* Kein max-height, kein overflow: eine scrollende Liste in einer scrollenden
      Seite ist auf dem Telefon die haeufigste Bedienfalle. Die Laenge begrenzt
      jetzt die Anzahl der Zeilen, nicht ein Fensterausschnitt. */
   .catlist{display:flex;flex-direction:column;gap:.35rem}
-  .catrow{background:var(--surf2);border:1px solid var(--line2);border-radius:3px;padding:.5rem .65rem}
+  .catrow{background:var(--surf2);border:1px solid var(--line2);border-radius:var(--r1);padding:.5rem .65rem}
   .catrow b{font-family:var(--fd);font-weight:600;font-size:.84rem}
   .catrow .ct{display:block;font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);margin:.14rem 0 .18rem}
   .catrow .cc{display:block;font-size:.78rem;color:var(--ink2)}
@@ -988,14 +1018,14 @@
   .exrow.locked{opacity:.55}
   .exrow.locked .tick{cursor:default;opacity:.4}
   .exrow.locked:hover{border-color:var(--line);transform:none}
-  .tick{width:21px;height:21px;border:1.5px solid var(--line);border-radius:3px;flex:none;display:flex;align-items:center;justify-content:center;font-size:var(--t2);color:transparent;transition:.18s;cursor:pointer}
+  .tick{width:21px;height:21px;border:1.5px solid var(--line);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:var(--t2);color:transparent;transition:.18s;cursor:pointer}
   .exrow.done .tick{background:var(--aurora);border-color:var(--aurora);color:var(--bg);transform:scale(1.06)}
   .exrow .nm{flex:1;min-width:0;cursor:pointer}
   .exrow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
   .exrow .nm span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
   .exrow .sets{font-family:var(--fm);font-size:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
 
-  .timer{background:var(--surf);border:1px solid var(--line);border-radius:3px;padding:.8rem 1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
+  .timer{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);padding:.8rem 1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
   .clock{font-family:var(--fd);font-weight:600;font-size:1.95rem;font-variant-numeric:tabular-nums;min-width:5rem}
   .clock.run{color:var(--aurora)}.clock.zero{color:var(--ember);animation:pulse .7s ease 3}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
@@ -1085,12 +1115,12 @@
   .slide .ctl.hasunit .unit{right:.42rem}
   input[type=range].rng{flex:1;min-width:0;-webkit-appearance:none;appearance:none;
     height:28px;padding:0;border:0;background:transparent;cursor:pointer;touch-action:pan-y}
-  input[type=range].rng::-webkit-slider-runnable-track{height:6px;border-radius:3px;
+  input[type=range].rng::-webkit-slider-runnable-track{height:6px;border-radius:999px;
     background:linear-gradient(90deg,var(--aurora) var(--fill,0%),var(--line) var(--fill,0%))}
   input[type=range].rng::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-8px;
     border-radius:50%;background:var(--surf3);border:2px solid var(--aurora);box-shadow:var(--sh)}
-  input[type=range].rng::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
-  input[type=range].rng::-moz-range-progress{height:6px;border-radius:3px;background:var(--aurora)}
+  input[type=range].rng::-moz-range-track{height:6px;border-radius:999px;background:var(--line)}
+  input[type=range].rng::-moz-range-progress{height:6px;border-radius:999px;background:var(--aurora)}
   input[type=range].rng::-moz-range-thumb{width:20px;height:20px;border-radius:50%;
     background:var(--surf3);border:2px solid var(--aurora);box-shadow:var(--sh)}
   /* Leeres Feld: der Regler steht zwar irgendwo, hat aber keinen Wert. Ohne
@@ -1688,7 +1718,7 @@
   .rankHero{background:var(--hero);color:var(--heroInk);border-radius:var(--r3);
     padding:1.5rem 1.2rem 1.3rem;display:flex;flex-direction:column;align-items:center;
     gap:.3rem;text-align:center;position:relative;overflow:hidden;box-shadow:var(--sh)}
-  .rankHero::before{content:"";position:absolute;inset:-40% -20% auto -20%;height:110%;background:radial-gradient(50% 70% at 50% 30%,rgba(var(--p1),.28),transparent 70%),radial-gradient(45% 60% at 72% 20%,rgba(var(--p2),.18),transparent 72%);filter:blur(14px)}
+  .rankHero::before{content:"";position:absolute;inset:-40% -20% auto -20%;height:110%;background:radial-gradient(50% 70% at 50% 30%,rgba(var(--p1),.28),transparent 70%),radial-gradient(45% 60% at 72% 20%,rgba(var(--p2),.18),transparent 72%)}
   .rankHero>*{position:relative}
   .rankHero .tier{font-family:var(--fd);font-weight:800;font-size:clamp(1.5rem,6vw,2.1rem);margin:.5rem 0 0;line-height:1.05;letter-spacing:-.01em}
   .rankHero .sub{font-family:var(--fm);font-size:var(--t2);letter-spacing:.04em;opacity:.55;margin:.1rem 0 .8rem;max-width:34ch}
@@ -3289,7 +3319,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.5';
+var VERSION='23.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
