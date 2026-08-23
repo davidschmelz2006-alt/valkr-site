@@ -969,7 +969,30 @@
      sind absichtlich unterscheidbar OHNE Farbe allein: erledigt hat einen
      Punkt, heute einen Ring, Ruhetag eine gedaempfte Flaeche. Wer Farben
      schlecht unterscheidet, sieht trotzdem, wo er steht. */
-  .dstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.8rem}
+  /* ---- Kalender ---------------------------------------------------------
+     touch-action:none gibt dem Kalender die senkrechte Geste. Ohne das
+     scrollt die Seite waehrend des Ziehens mit, und man klappt den Monat auf,
+     waehrend der Kalender selbst nach oben aus dem Bild laeuft. */
+  .cal{margin-bottom:.8rem;touch-action:none}
+  .calhead{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.3rem}
+  .calhead span{text-align:center;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+  .calview{overflow:hidden;transition:height .34s cubic-bezier(.2,.8,.3,1)}
+  /* Der Griff: eine kurze Linie, die sagt "hier laesst sich ziehen". Beim
+     Aufklappen dreht sie sich in ein flaches Dach -- dieselbe Sprache wie
+     ein Blatt, das sich schliessen laesst. */
+  .calgrab{display:block;width:100%;padding:.5rem 0 .2rem;border:0;background:none;cursor:pointer}
+  .calgrab i{display:block;width:36px;height:3px;border-radius:2px;margin:0 auto;
+    background:var(--line);transition:background .16s,width .2s}
+  .calgrab:hover i{background:var(--ink3);width:44px}
+  .cal.offen .calgrab i{background:var(--ink3)}
+  .dstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;
+    transition:transform .34s cubic-bezier(.2,.8,.3,1)}
+  /* Tage ausserhalb des Monats bleiben lesbar, treten aber zurueck. */
+  .dstrip button.out{opacity:.32}
+  /* Der Tagebuch-Streifen in der Ernaehrung hat keinen Kalenderrahmen und
+     braucht seinen Abstand deshalb selbst. */
+  #fstrip{margin-bottom:.8rem}
   .dstrip button{position:relative;display:flex;flex-direction:column;align-items:center;
     gap:.1rem;padding:.5rem .1rem .62rem;border:1px solid transparent;border-radius:var(--r2);
     background:var(--surf2);color:var(--ink3);cursor:pointer;font-family:var(--fb);
@@ -2711,7 +2734,20 @@
   </section>
 
   <section class="view" id="v-train">
-    <div class="dstrip" id="dstrip" role="tablist" aria-label="Woche"></div>
+    <!-- Kalender nach MCI-Vorbild: zugeklappt die laufende Woche, mit dem
+         Finger nach unten gezogen der ganze Monat, nach oben wieder zu.
+         Gezeichnet wird IMMER der ganze Monat -- zugeklappt schiebt sich das
+         Raster nur so weit hoch, dass die aktuelle Woche im Fenster steht.
+         Dadurch ist der Wechsel eine einzige Verschiebung und kein Neuaufbau,
+         und er laeuft auf der Grafikeinheit. -->
+    <div class="cal" id="cal">
+      <div class="calhead" id="calhead" aria-hidden="true"></div>
+      <div class="calview" id="calview">
+        <div class="dstrip" id="dstrip" role="tablist" aria-label="Kalender"></div>
+      </div>
+      <button type="button" class="calgrab" id="calgrab" aria-expanded="false"
+              aria-controls="calview" aria-label="Monat anzeigen"><i aria-hidden="true"></i></button>
+    </div>
     <div class="dbar">
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
       <button class="nb hot" id="jumpToday" style="display:none" data-i18n="btn.backToday">Back to today</button>
@@ -3327,7 +3363,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.9';
+var VERSION='24.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6150,7 +6186,13 @@ function show(n,fromBack){
   if(n==='kam')kamStart();
   else if(typeof kamAktiv!=='undefined'&&kamAktiv)kamStop();
   if(n==='plan')buildWeeks();
-  if(n==='train')volBar();
+  if(n==='train'){volBar();
+    /* Der Kalender muss neu vermessen werden, sobald die Ansicht wirklich
+       sichtbar ist. Beim ersten Zeichnen liegt sie noch auf display:none,
+       und dann sind alle Hoehen null -- der Kalender waere zugeklappt
+       unsichtbar. */
+    if(typeof calLayout==='function')calLayout(false);
+  }
   if(n==='ranks'){evalAch(false);renderRanks();}
   if(n==='stat')drawStat();
   /* Coach und Du rechnen beim Oeffnen neu. Vorher liefen sie nur bei
@@ -6438,27 +6480,104 @@ function sessOf(pl){
    Streifen sehen und nicht ins Leere tippen.
    Beginn ist Montag, weil deutschsprachige Kalender so aussehen; der
    Trainingsplan selbst rechnet weiterhin ab Startdatum. */
+/* ---------- Kalender -----------------------------------------------------
+   Zugeklappt die laufende Woche, aufgeklappt der ganze Monat. Gezeichnet
+   wird IMMER der ganze Monat; zugeklappt schiebt sich das Raster nur so
+   weit nach oben, dass die Woche mit dem gewaehlten Tag im Fenster steht.
+   Deshalb ist das Auf- und Zuklappen eine einzige Verschiebung und kein
+   Neuaufbau -- es laeuft auf der Grafikeinheit und kostet nichts. */
+var calOffen=false,calZeile=0;
+function monatsRaster(d){
+  /* Vom Montag der Woche, in der der Monatserste liegt, bis zum Sonntag der
+     Woche, in der der Monatsletzte liegt. Dadurch sind es immer volle
+     Wochenzeilen -- fuenf oder sechs, je nach Monat. */
+  var erster=new Date(d.getFullYear(),d.getMonth(),1);
+  var letzter=new Date(d.getFullYear(),d.getMonth()+1,0);
+  var start=monday(erster),ende=monday(letzter),tage=[];
+  var n=Math.round((ende-start)/86400000)+7;
+  for(var i=0;i<n;i++)tage.push(add(start,i));
+  return tage;
+}
 function drawStrip(){
   var el=$('dstrip');if(!el)return;
   var DE=cfg.lang==='de';
   var wd=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  var mo=monday(sel),html='';
-  for(var i=0;i<7;i++){
-    var d=add(mo,i),k=iso(d);
+  var kopf=$('calhead');
+  if(kopf)kopf.innerHTML=wd.map(function(x){return '<span>'+x+'</span>';}).join('');
+  var tage=monatsRaster(sel),html='',mon=sel.getMonth();
+  for(var i=0;i<tage.length;i++){
+    var d=tage[i],k=iso(d);
     var pl=plan(d);
-    var istHeute=k===iso(TODAY);
-    var gewaehlt=k===iso(sel);
     var cls=[];
-    if(istHeute)cls.push('today');
+    if(k===iso(TODAY))cls.push('today');
     if(pl.kind==='rest')cls.push('rest');
     if(dayDone(k))cls.push('done');
-    html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+gewaehlt+'"'+
+    if(d.getMonth()!==mon)cls.push('out');
+    if(iso(monday(d))===iso(monday(sel)))calZeile=Math.floor(i/7);
+    html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+(k===iso(sel))+'"'+
       (cls.length?' class="'+cls.join(' ')+'"':'')+
       ' aria-label="'+dname(d)+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
-      '<em>'+wd[i]+'</em><b>'+d.getDate()+'</b><i aria-hidden="true"></i></button>';
+      '<b>'+d.getDate()+'</b><i aria-hidden="true"></i></button>';
   }
   el.innerHTML=html;
+  calLayout(false);
 }
+/* Hoehe und Verschiebung setzen. Beim ersten Zeichnen ohne Uebergang, sonst
+   faehrt der Kalender bei jedem Ansichtswechsel sichtbar an seinen Platz. */
+function calLayout(anim){
+  var view=$('calview'),grid=$('dstrip'),cal=$('cal'),grab=$('calgrab');
+  if(!view||!grid||!grid.children.length)return;
+  var zeilen=Math.ceil(grid.children.length/7);
+  var hoehe=grid.children[0].offsetHeight;
+  var luecke=parseFloat(getComputedStyle(grid).rowGap)||5;
+  var schritt=hoehe+luecke;
+  if(!anim){view.style.transition='none';grid.style.transition='none';}
+  if(calOffen){
+    view.style.height=(zeilen*schritt-luecke)+'px';
+    grid.style.transform='translateY(0)';
+  }else{
+    view.style.height=hoehe+'px';
+    grid.style.transform='translateY('+(-calZeile*schritt)+'px)';
+  }
+  if(cal)cal.classList.toggle('offen',calOffen);
+  if(grab){
+    grab.setAttribute('aria-expanded',calOffen?'true':'false');
+    grab.setAttribute('aria-label',calOffen
+      ?(cfg.lang==='de'?'Monat zuklappen':'Collapse month')
+      :(cfg.lang==='de'?'Monat anzeigen':'Show month'));
+  }
+  if(!anim){void view.offsetHeight;view.style.transition='';grid.style.transition='';}
+}
+function calToggle(auf){
+  calOffen=(auf===undefined)?!calOffen:!!auf;
+  calLayout(true);
+}
+(function(){
+  var cal=$('cal');if(!cal)return;
+  $('calgrab').addEventListener('click',function(){calToggle();});
+  /* Nach einer Groessenaenderung stimmen Zeilenhoehe und Luecke nicht mehr --
+     der Kalender wuerde falsch stehen bleiben. */
+  var rsz=null;
+  addEventListener('resize',function(){
+    clearTimeout(rsz);rsz=setTimeout(function(){calLayout(false);},160);
+  });
+  /* Senkrecht ziehen: nach unten auf, nach oben zu. Der Kalender hat
+     touch-action:none, die Geste gehoert also ihm -- die Seite scrollt
+     waehrenddessen nicht mit weg. */
+  var y0=0,x0=0,aktiv=false;
+  cal.addEventListener('touchstart',function(e){
+    if(e.touches.length!==1){aktiv=false;return;}
+    y0=e.touches[0].clientY;x0=e.touches[0].clientX;aktiv=true;
+  },{passive:true});
+  cal.addEventListener('touchend',function(e){
+    if(!aktiv)return;aktiv=false;
+    var t=e.changedTouches[0],dy=t.clientY-y0,dx=t.clientX-x0;
+    /* Deutlich senkrechter als waagerecht, sonst war es ein Wisch zwischen
+       den Abschnitten und nicht das Aufklappen. */
+    if(Math.abs(dy)<26||Math.abs(dy)<Math.abs(dx)*1.4)return;
+    calToggle(dy>0);
+  },{passive:true});
+})();
 function renderDay(){
   var d=sel,pl=plan(d),key=iso(d),isT=key===iso(TODAY);
   $('dayName').textContent=dname(d)+', '+d.toLocaleDateString(undefined,{day:'numeric',month:'long'});
