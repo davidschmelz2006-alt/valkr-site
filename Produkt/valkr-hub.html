@@ -973,7 +973,20 @@
      touch-action:none gibt dem Kalender die senkrechte Geste. Ohne das
      scrollt die Seite waehrend des Ziehens mit, und man klappt den Monat auf,
      waehrend der Kalender selbst nach oben aus dem Bild laeuft. */
-  .cal{margin-bottom:.8rem;touch-action:none}
+  /* Der Kalender bekommt einen eigenen Glaskasten. Vorher stand er nackt auf
+     dem Seitengrund und wirkte dadurch wie ein Rest, den man vergessen hat --
+     alles andere auf der Seite sitzt auf einer Flaeche.
+     Derselbe Verlauf und dieselbe Lichtkante wie die Karten, damit er dazu
+     gehoert und nicht wie ein Fremdkoerper aussieht. */
+  .cal{margin-bottom:.9rem;touch-action:none;
+    padding:.7rem .7rem .2rem;border-radius:var(--r3);
+    border:1px solid var(--line);
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 58%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 72%,transparent) 46%,
+      color-mix(in srgb,var(--surf2) 80%,transparent) 100%);
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 7%,transparent),var(--sh)}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){.cal{background:var(--surf)}}
   .calhead{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.3rem}
   .calhead span{text-align:center;font-family:var(--fm);font-size:var(--t1);
     letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
@@ -1025,9 +1038,40 @@
   /* Der Punkt sagt "erledigt". Er sitzt unter der Zahl, damit er die Zahl
      nicht verdeckt -- ein Haken im Feld waere bei sieben Feldern nebeneinander
      zu viel Zeichen auf zu wenig Platz. */
-  .dstrip button i{position:absolute;bottom:5px;width:5px;height:5px;border-radius:50%;
-    background:var(--aurora);opacity:0}
-  .dstrip button.done i{opacity:1}
+  /* Drei Markierungen, drei Bedeutungen -- und bewusst nicht mehr:
+       Punkt  = Trainingstag steht an   (die Tage aus der Einfuehrung)
+       Haken  = erledigt
+       Kreuz  = Trainingstag verstrichen, nichts eingetragen
+     Ruhetage bleiben leer. Eine Markierung fuer "heute nichts" waere keine
+     Information, sondern Rauschen -- und bei 42 Feldern wird Rauschen schnell
+     zu einer Wand aus Zeichen.
+     Der Punkt sitzt unter der Zahl, Haken und Kreuz ebenso: ein Zeichen IM
+     Feld wuerde bei dieser Feldgroesse mit der Zahl um den Platz streiten. */
+  .dstrip button i{position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+    width:5px;height:5px;border-radius:50%;background:var(--ink3);opacity:0;
+    font-style:normal;line-height:1;transition:opacity .18s,color .18s}
+  .dstrip button.plan i{opacity:.85;background:var(--ember)}
+  .dstrip button.ok i,.dstrip button.miss i{
+    width:auto;height:auto;background:none;border-radius:0;
+    font-size:9px;font-weight:700;opacity:1}
+  .dstrip button.ok i{color:var(--aurora)}
+  .dstrip button.miss i{color:var(--ember);opacity:.75}
+  /* Der ausgewaehlte Tag als Glasscheibe statt als flacher Kreis: ein
+     Verlauf von oben nach unten, eine haarfeine Lichtkante oben und ein
+     weicher Schein darunter. Dieselbe Sprache wie die Karten -- eine Flaeche
+     in einer einzigen Farbe sieht aus wie Farbe, eine mit Richtung wie
+     Material. */
+  .dstrip button[aria-selected="true"]{
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--aurora) 100%,#fff 22%) 0%,
+      var(--aurora) 48%,
+      color-mix(in srgb,var(--aurora) 82%,#000) 100%);
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 45%,transparent),
+               0 2px 10px -2px color-mix(in srgb,var(--aurora) 55%,transparent)}
+  .dstrip button[aria-selected="true"] i{color:var(--bg)!important;background:var(--bg)}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){
+    .dstrip button[aria-selected="true"]{background:var(--aurora)}
+  }
   @media (max-width:400px){
     .dstrip{gap:.22rem}
     .dstrip button{padding:.45rem .05rem .58rem}
@@ -3380,7 +3424,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='24.1';
+var VERSION='24.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6532,10 +6576,24 @@ function drawStrip(){
     if(d.getMonth()!==mon)cls.push('out');
     var inWoche=(iso(monday(d))===iso(monday(sel)));
     if(inWoche){calZeile=Math.floor(i/7);cls.push('inweek');}
+    /* Markierung je Tag. Gezaehlt wird erst ab Programmstart -- davor gab es
+       nichts zu verpassen, und ein Kreuz auf einem Tag vor dem Beginn waere
+       ein Vorwurf fuer etwas, das gar nicht anstand.
+         erledigt        -> Haken
+         Trainingstag vorbei, nicht erledigt -> Kreuz
+         Trainingstag steht noch an          -> Punkt
+       Ruhetage bleiben leer: eine Markierung fuer "heute nichts" ist keine
+       Information, sondern Rauschen. */
+    var mark='';
+    if(pl.kind==='train'&&d>=STD){
+      if(dayDone(k)){cls.push('ok');mark='✓';}
+      else if(d<TODAY){cls.push('miss');mark='✕';}
+      else cls.push('plan');
+    }
     html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+(k===iso(sel))+'"'+
       (cls.length?' class="'+cls.join(' ')+'"':'')+
       ' aria-label="'+dname(d)+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
-      '<b>'+d.getDate()+'</b><i aria-hidden="true"></i></button>';
+      '<b>'+d.getDate()+'</b><i aria-hidden="true">'+mark+'</i></button>';
   }
   el.innerHTML=html;
   calLayout(false);
