@@ -7,7 +7,10 @@
      verloren. Das ist kein Zugangsschutz, es hält nur zufällige Funde fern. -->
 <meta name="robots" content="noindex,nofollow">
 <link rel="manifest" href="valkr-manifest.json">
-<meta name="theme-color" content="#050F16">
+<!-- Schwarz, identisch zu background_color im Manifest und zum Grund der App.
+     Damit sind Systemleiste, Startbild des Betriebssystems, eigenes Startbild
+     und Oberflaeche dieselbe Farbe -- der Start hat keine sichtbare Kante mehr. -->
+<meta name="theme-color" content="#000000">
 <link rel="icon" href="valkr-icon.svg" type="image/svg+xml">
 <!-- iOS liest das Manifest-Symbol nicht. Ohne apple-touch-icon als PNG nimmt
      Safari einen Screenshot der Seite als App-Symbol -- das sieht billig aus. -->
@@ -69,7 +72,18 @@
        lebt davon, dass etwas durchscheint -- deshalb liegt die Atmosphaere
        hinter der ganzen Seite und nicht nur unten. */
     --glass:none;
-    --fm:ui-monospace,"SF Mono",Menlo,Consolas,"Courier New",monospace;
+    /* Beschriftungsschrift. Hier stand eine Schreibmaschinenschrift, und sie
+       hing an 122 Stellen: Knopfbeschriftungen, Feldnamen, Einheiten, Chips,
+       Karten-Untertitel. Eine feste Zeichenbreite ist genau fuer eine Sache
+       richtig -- Zahlen, die untereinander stehen sollen. Fuer alles andere
+       ist sie das staerkste Signal, das eine Oberflaeche senden kann: "hier
+       hat jemand ein Terminal nachgebaut". Beide Vorbild-Apps benutzen sie
+       nirgends.
+       Jetzt dieselbe Systemschrift wie der Rest, nur als eigene Rolle. Die
+       Stellen, an denen Zahlen wirklich untereinander stehen muessen, setzen
+       font-variant-numeric:tabular-nums -- das kann die Systemschrift auch,
+       und zwar ohne den Rest der Oberflaeche mitzuverunstalten. */
+    --fm:system-ui,-apple-system,"Segoe UI Variable Text","Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   }
   @media (prefers-color-scheme:dark){:root[data-pack="auto"]{
     --bg:#050F16;--surf:#0D212C;--surf2:#091820;--surf3:#112A37;
@@ -123,12 +137,43 @@
      Hintergrund beide schwarz, verschwaende jede Kante und die Oberflaeche
      waere eine einzige Flaeche. Sie liegen knapp darueber, gerade genug, um
      sich abzuheben. Farben und Bewegungen bleiben unveraendert. */
+  /* Onyx -- das Standard-Theme. Zwei Dinge waren hier falsch:
+
+     1. FARBE. Die vier Akzente sind nicht Dekoration, sie haben BEDEUTUNG,
+        und die zieht sich durch die ganze App:
+            aurora = gut, erledigt, positiv        (165 Verwendungen)
+            ember  = Alarm, hoch, dringend          (73)
+            brass  = Achtung, mittel, gesperrt      (55)
+            ice    = Hinweis, zweitrangig           (37)
+        In Onyx standen auf allen vier Plaetzen Violett- und Pinktoene.
+        Damit hiess Violett "gut" und Pink "Alarm" -- also nichts. Ein
+        Warnhinweis sah aus wie ein Erfolg. Das war der eigentliche Schaden,
+        nicht der Geschmack.
+        Jetzt dieselbe Bedeutung wie in allen anderen dunklen Themes, nur
+        heller abgestimmt, damit sie auf echtem Schwarz tragen. Nebenbei
+        bekommt jeder Bereich dadurch seine eigene Farbe -- Training orange,
+        Ernaehrung gruen, Fortschritt gold, Heute blau -- genau die
+        Abwechslung, die MCI und Liftoff auch fahren.
+        Gold (#E8BE51) ist der Markenton: identisch zum Symbol, zum
+        Startbild und zur Coverseite.
+
+     2. ABSTUFUNG. Karten lagen auf #0E0E14, der Grund auf #000 -- ein
+        Unterschied von fuenf Prozent Helligkeit. Auf Davids Video sind die
+        Karten deshalb praktisch unsichtbar, alles laeuft zu einer Flaeche
+        zusammen und nur die Haarlinie verraet, wo eine Karte endet. Beide
+        Vorbilder halten den Grund schwarz und heben die Karten deutlich ab
+        (MCI etwa #1C1C1E). Genau das ist der Grund, warum ihre Oberflaeche
+        sortiert wirkt und unsere nicht: nicht die Anordnung war das
+        Problem, sondern dass man die Kaesten nicht sieht.
+        Der Grund bleibt echtes #000 -- auf OLED bleiben diese Pixel aus. */
   :root[data-pack="onyx"]{
-    --aurora:#A78BFA;--ice:#C4B5FD;--ember:#F472B6;--brass:#8B5CF6;
-    --bg:#000000;--surf:#0E0E14;--surf2:#08080C;--surf3:#16161E;
-    --ink:#EDEDF2;--ink2:#9A9AA8;--ink3:#6A6A78;--line:#22222D;--line2:#17171F;
-    --hero:#08080E;--heroInk:#EDEDF2;--part:167,139,250;
-    --p1:167,139,250;--p2:196,181,253;
+    --aurora:#3ED9A8;--ice:#7CC7EA;--ember:#F0803C;--brass:#E8BE51;
+    --bg:#000000;--surf:#131318;--surf2:#0A0A0E;--surf3:#1C1C23;
+    --ink:#F2F2F5;--ink2:#9E9EA8;--ink3:#6E6E78;--line:#26262F;--line2:#1B1B22;
+    --hero:#0C0C11;--heroInk:#F2F2F5;--part:232,190,81;
+    /* Die Partikel bleiben golden -- sie sind das Erkennungszeichen der App
+       und gehoeren zur Marke, nicht zur Bereichsfarbe. */
+    --p1:232,190,81;--p2:124,199,234;
     --sh:none;}
   :root[data-pack="stone"]{
     --aurora:#2E7D6B;--ice:#4A7C94;--ember:#B4552F;--brass:#8A7333;
@@ -138,23 +183,37 @@
     --p1:46,125,107;--p2:74,124,148;
     --sh:none;}
 
-  /* Kein Pull-to-Refresh und kein Ueberzieh-Schimmer von Chrome. Beides ist
-     hier falsch: die App haelt alles lokal, ein Neuladen bringt nichts und
-     kostet im schlimmsten Fall mitten in einer Einheit den Schreck. Das
-     Gummiband macht die App selbst -- gedaempft und ohne die feste Leiste
-     mitzuziehen. */
-  html{overscroll-behavior-y:none}
-  /* iOS bringt sein eigenes Gummiband mit -- dort bleibt das native Verhalten
-     an, und das JS-Gummiband (unten) schaltet sich ab. Die Klasse setzt der
-     Start-Code. */
-  html.ios,html.ios body{overscroll-behavior-y:auto}
+  /* Ueberziehen am Rand -- "contain", nicht "none".
+     Der Unterschied ist der ganze Punkt, und er war vorher falsch verstanden:
+
+       none    = kein Weiterreichen an die Seite dahinter UND kein oertlicher
+                 Ueberzieh-Effekt. Damit war zwar das Neuladen weg, aber eben
+                 auch das Gummiband -- weshalb wir es in JavaScript nachgebaut
+                 haben. Rund neunzig Zeilen, die auf Android gerissen haben.
+       contain = kein Weiterreichen (also kein Neuladen beim Ziehen von oben),
+                 der oertliche Effekt bleibt aber: auf iOS das Gummiband, auf
+                 Android ab Version 12 das Dehnen des Inhalts.
+
+     Damit macht der Browser genau das, was wir wollten, auf der Grafikeinheit
+     und ohne eine einzige Zeile Skript. Der JS-Nachbau ist ersatzlos raus.
+
+     WARUM ER AUF ANDROID GERUCKELT HAT -- die Ursache, die drei Anlaeufe
+     ueberlebt hat: verschoben wurde die komplette sichtbare Ansicht, also
+     alles zwischen Kopfzeile und Tableiste, samt Karten, Grafiken und
+     Bewegungsbildern. Mit will-change:transform muss Android diesen ganzen
+     Baum vorher in eine einzige Textur zeichnen. Auf einem Telefon mit hoher
+     Aufloesung ist das eine Flaeche von mehreren Megabyte, angelegt in dem
+     Moment, in dem der Finger die Kante erreicht -- also genau dann, wenn es
+     fluessig sein muesste. Auf iOS lief das Skript gar nicht erst, deshalb
+     war dort nie etwas zu sehen. Genau so hat David es beschrieben. */
+  html,body{overscroll-behavior-y:contain}
   /* pan-x pan-y statt manipulation: manipulation nimmt nur dem Doppeltipp
      seine Zoom-Bedeutung, ERLAUBT aber ausdruecklich das Aufziehen mit zwei
      Fingern -- genau der Zoom, der auf Android trotz user-scalable=no
      durchkam (Bedienungshilfen koennen die Viewport-Angabe uebersteuern,
      touch-action nicht). pan-x pan-y laesst nur noch Wischen zu und nimmt
      den Doppeltipp gleich mit. */
-  body{overscroll-behavior-y:none;touch-action:pan-x pan-y}
+  body{touch-action:pan-x pan-y}
   *{box-sizing:border-box}
   /* 100 % statt fester 16 px: damit schlaegt die Schriftgroesse durch, die der
      Nutzer in den Systemeinstellungen gewaehlt hat. Wer schlecht sieht, stellt
@@ -180,8 +239,12 @@
   @keyframes glowP{0%,100%{opacity:.8}50%{opacity:1}}
   @media (prefers-reduced-motion:reduce){.glowA,.glowB{animation:none}}
   #bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block}
-  .shell{max-width:1120px;margin:0 auto;position:relative;z-index:1;
-    padding:0 max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-right,0px)) 4rem max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px))}
+  /* --pad ist der seitliche Rand der Seite. Er steht als Variable da, weil
+     der Kopfblock ihn wieder herausrechnen muss: er soll ueber die volle
+     Breite laufen, sein Inhalt aber auf derselben Linie stehen wie der Rest. */
+  .shell{--pad:max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));
+    max-width:1120px;margin:0 auto;position:relative;z-index:1;
+    padding:0 var(--pad) 4rem}
 
   /* viewport-fit=cover schiebt die Seite unter die Statusleiste. Ohne diesen
      Abstand klebt die Kopfzeile auf iPhones direkt unter Uhrzeit und Akku --
@@ -194,24 +257,65 @@
      "App mit Kopfzeile" und "App".
      Die Unschaerfe bleibt: sie trennt beim Scrollen weich, wo vorher ein
      harter Strich stand. */
+  /* ---- Kopfblock --------------------------------------------------------
+     Bei MCI ist das oben KEINE Leiste, sondern eine Flaeche: Titelzeile und
+     Segmentleiste sitzen zusammen auf einem Feld, das ueber die volle Breite
+     laeuft, minimal heller ist als die Seite und unten abgerundet endet. Es
+     haengt von oben herein und der Inhalt scrollt unscharf darunter durch.
+     Der Unterschied zu einer Leiste mit Trennstrich ist genau der Eindruck,
+     den David meint: eine Kante trennt zwei Bereiche, eine abgerundete
+     Flaeche liegt oben drauf.
+     Voll ausgebreitet ueber die negative Aussenkante, der Inhalt aber wieder
+     auf der Textlinie -- deshalb --pad hin und zurueck. */
+  .topwrap{position:sticky;top:0;z-index:30;
+    margin:0 calc(-1 * var(--pad)) .85rem;
+    padding:0 var(--pad);
+    /* Dunkel, nicht grau. Der erste Versuch mischte 62 % Kartenfarbe hinein
+       und wurde damit deutlich heller als der Inhalt -- eine helle Platte
+       ueber einer schwarzen Seite. Bei MCI ist der Kopf fast so schwarz wie
+       die Seite; sichtbar wird er nur durch die Haarlinie, die runde
+       Unterkante und den leichten Schimmer. Also: schwarz mit Durchlass,
+       damit die Unschaerfe ueberhaupt etwas zu tun hat. */
+    background:color-mix(in srgb,var(--bg) 78%,transparent);
+    backdrop-filter:blur(20px) saturate(1.4);-webkit-backdrop-filter:blur(20px) saturate(1.4);
+    border-bottom:1px solid var(--line2);
+    border-radius:0 0 22px 22px}
+  /* Browser ohne color-mix bekommen die volle Farbe statt gar keiner. */
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){.topwrap{background:var(--bg)}}
   .bar{display:flex;align-items:center;justify-content:space-between;gap:.8rem;
-    padding:calc(.8rem + env(safe-area-inset-top,0px)) 0 .6rem;
-    position:sticky;top:0;z-index:30;
-    background:var(--bg)}
-  .barL,.barR{display:flex;align-items:center;gap:.7rem}
-  .brand{display:flex;align-items:center;gap:.6rem}
-  .brand p{margin:0;font-family:var(--fd);font-weight:600;letter-spacing:.3em;text-transform:uppercase;font-size:var(--t5)}
-  .brand small{display:block;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase;margin-top:2px}
-  .stat{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);text-align:right;line-height:1.25}
-  .stat b{display:block;font-weight:400;font-size:var(--t3);color:var(--aurora)}
-  .stat.f b{color:var(--ember)}
-  .iconbtn{width:32px;height:32px;border:1px solid var(--line);border-radius:3px;display:flex;align-items:center;justify-content:center;color:var(--ink2);transition:.16s;flex:none}
-  .iconbtn:hover{border-color:var(--aurora);color:var(--ink);transform:translateY(-1px)}
-  .iconbtn.warn:hover{border-color:var(--ember);color:var(--ember)}
+    padding:calc(.7rem + env(safe-area-inset-top,0px)) 0 .65rem}
+  .barL,.barR{display:flex;align-items:center;gap:.5rem}
+  .barL{min-width:0}
+  /* Bereichsname. Gross, fett, in Versalien -- aber OHNE Sperrung: gesperrte
+     Versalien lesen sich als Beschriftung eines Geraets, nicht als Titel
+     eines Bildschirms. */
+  #areTitle{margin:0;font-family:var(--fd);font-weight:800;font-size:1.5rem;
+    letter-spacing:-.005em;text-transform:uppercase;line-height:1.15;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  /* Serien-Chip. Flamme plus Zahl, wie bei MCI und Liftoff. Bei null Tagen
+     grau -- eine Serie, die es nicht gibt, soll nicht leuchten. */
+  .strk{display:flex;align-items:center;gap:.3rem;height:34px;padding:0 .62rem;
+    border-radius:999px;background:var(--surf);color:var(--ember);
+    font-family:var(--fd);font-weight:700;font-size:var(--t4);flex:none;
+    transition:background .16s,color .16s}
+  .strk b{font-weight:700;font-variant-numeric:tabular-nums}
+  .strk.zero{color:var(--ink3)}
+  .strk:hover{background:var(--surf3)}
+  /* Symbolknoepfe ohne Kasten. Bei MCI stehen Flamme, Kamera und Mikrofon
+     nackt in der Kopfzeile -- kein Rahmen, kein Hintergrund. Ein Rahmen um
+     ein Symbol verdoppelt die Form und macht aus drei Zeichen drei Kaesten.
+     Die Trefferflaeche bleibt trotzdem gross, sie ist nur unsichtbar. */
+  .iconbtn{width:38px;height:38px;border:0;border-radius:999px;display:flex;
+    align-items:center;justify-content:center;color:var(--ink2);
+    transition:background .16s,color .16s;flex:none}
+  .iconbtn:hover{background:var(--surf3);color:var(--ink)}
+  .iconbtn.warn:hover{background:color-mix(in srgb,var(--ember) 18%,transparent);color:var(--ember)}
   /* Beschriftete Leistenknoepfe: Text statt Symbol, damit ohne Raten klar ist, was sie tun. */
-  .txtbtn{height:32px;padding:0 .6rem;border:1px solid var(--line);border-radius:3px;display:flex;align-items:center;color:var(--ink2);font-family:var(--fm);font-size:var(--t2);letter-spacing:.09em;text-transform:uppercase;transition:.16s;flex:none;white-space:nowrap}
-  .txtbtn:hover{border-color:var(--aurora);color:var(--ink);transform:translateY(-1px)}
-  .txtbtn[aria-current="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+  .txtbtn{height:38px;padding:0 .95rem;border:0;border-radius:999px;display:flex;align-items:center;
+    color:var(--ink);background:var(--surf3);font-family:var(--fd);font-size:var(--t3);font-weight:600;
+    letter-spacing:0;text-transform:none;transition:background .16s;flex:none;white-space:nowrap}
+  .txtbtn:hover{background:var(--line);color:var(--ink)}
+  .txtbtn[aria-current="true"]{background:var(--ink);color:var(--bg)}
   /* Breite fuer den laengsten Theme-Namen reserviert: der Knopf zeigt nach dem
      Klick kurz den Namen an, ohne dass die halbe Leiste dabei verrutscht. */
   #themeBtn{min-width:6.1rem;justify-content:center}
@@ -243,48 +347,53 @@
     /* Die Leiste bekommt oben etwas Luft, damit die aktive Flaeche nicht an
        der Kante klebt, und die Schrift wird kleiner als das Symbol -- eine
        Beschriftung soll das Symbol erklaeren, nicht mit ihm konkurrieren. */
-    /* Tableiste schwebend, nicht angeschraubt. Vorher klebte sie mit einer
-       Trennlinie am unteren Bildschirmrand und lief ueber die volle Breite --
-       das sieht aus wie ein Fenster mit Fussleiste. MCI laesst sie als eigene
-       Flaeche ueber dem Inhalt stehen, mit Luft ringsum und ohne Kante.
-       Der Abstand unten rechnet den Sicherheitsbereich mit ein, damit sie auf
-       Geraeten mit Gestensteuerung nicht auf dem Strich sitzt. */
+    /* Tableiste: schwebend, gerundet, sehr dunkel.
+       Ich hatte sie zwischendurch an die Kante geschraubt, weil sie in
+       meinen verkleinerten Standbildern angeschraubt AUSSAH. In voller
+       Aufloesung ist klar: bei MCI schwebt sie -- links und rechts bleibt
+       schwarzer Rand stehen, die Ecken sind rund, und die Flaeche selbst ist
+       nur eine Spur heller als der Grund. Genau daran lag der Irrtum: nicht
+       an der Form, sondern daran, dass sie so dunkel ist.
+       ABSTAENDE, an MCI nachgemessen (Aufnahme 392 px breit, also CSS-Pixel):
+       Leiste 65 px hoch, rund 6 px Luft nach unten, rund 30 px an den Seiten.
+       Der Seitenabstand ist absichtlich groesser als der des Inhalts (17 px)
+       -- dadurch liest sich die Leiste als eigenes Bedienelement und nicht
+       als unterer Rand der Seite.
+
+       Der Abstand nach unten in PIXELN, nicht in rem. In rem haengt er an der
+       Systemschriftgroesse: wer sein Telefon auf grosse Schrift stellt, haette
+       die Leiste weiter nach oben geschoben bekommen, ohne dass irgendetwas
+       daran groesser geworden waere.
+       Der Sicherheitsbereich wird abgezogen statt addiert. Auf dem iPhone
+       meldet das System rund 34 px fuer den Gestenstrich, obwohl der Strich
+       selbst nur etwa 5 px hoch ist und 8 px ueber der Kante sitzt. Additiv
+       schwebte die Leiste dort vierzig Pixel hoch, auf Android dagegen sechs
+       -- dieselbe Regel, zwei voellig verschiedene Bilder.
+       Was jetzt herauskommt:
+         Android, Tastenleiste (Einzug 0)      -> 6 px
+         Android, Gestensteuerung (Einzug ~24) -> 6 px
+         iPhone mit Gestenstrich (Einzug 34)   -> 14 px, also klar ueber dem
+                                                  Strich und trotzdem unten */
     #tabbar{display:flex;position:fixed;z-index:60;
-      left:max(.55rem,env(safe-area-inset-left,0px));
-      right:max(.55rem,env(safe-area-inset-right,0px));
-      /* Auf dem iPhone meldet das System rund 34 Pixel Sicherheitsbereich fuer
-         den Gestenstrich. Rechnete man den Abstand ADDITIV dazu, schwebte die
-         Leiste dort ueber vierzig Pixel ueber dem Rand -- auf Android mit
-         Sicherheitsbereich null dagegen nur acht. Dieselbe Regel, zwei voellig
-         verschiedene Bilder.
-         Die Haelfte des Sicherheitsbereichs haelt die Leiste klar ueber dem
-         Gestenstrich und trotzdem unten, und der Mindestwert sorgt dafuer,
-         dass sie auf Geraeten ohne Sicherheitsbereich nicht am Rand klebt. */
-      /* Dritter Anlauf. Der Sicherheitsbereich auf dem iPhone ist mit rund
-         34 Pixeln absichtlich grosszuegig -- er soll Platz fuer den
-         Gestenstrich lassen, nicht die Leiste in die Bildschirmmitte schieben.
-         Der Strich selbst ist etwa fuenf Pixel hoch und sitzt acht Pixel ueber
-         der Kante. Alles ueber rund zwoelf Pixel Abstand ist also geschenkter
-         Platz, und genau das war zu sehen.
-         Jetzt: Sicherheitsbereich minus 1,3 rem, mit Untergrenze. Auf dem
-         iPhone bleiben rund 13 Pixel, auf Android 7 -- auf beiden sitzt die
-         Leiste unten, ohne den Strich zu beruehren. */
-      bottom:max(.45rem,calc(env(safe-area-inset-bottom,0px) - 1.3rem));
-      background:var(--surf);
-      backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px) saturate(1.3);
+      left:max(14px,env(safe-area-inset-left,0px));
+      right:max(14px,env(safe-area-inset-right,0px));
+      bottom:max(6px,calc(env(safe-area-inset-bottom,0px) - 20px));
+      background:color-mix(in srgb,var(--bg) 62%,transparent);
+      backdrop-filter:blur(24px) saturate(1.4);-webkit-backdrop-filter:blur(24px) saturate(1.4);
       border:1px solid var(--line2);border-radius:26px;
-      /* Groesser: 5 Pixel Innenabstand und 60 Pixel hohe Reiter ergaben eine
-         schmale Leiste, die neben den grossen Kacheln darueber verloren wirkte.
-         Eine Tableiste ist das meistbenutzte Element der App -- sie darf Platz
-         beanspruchen. */
-      padding:8px 6px}
-    #tabbar button{flex:1;min-width:0;min-height:66px;display:flex;flex-direction:column;
-      align-items:center;justify-content:center;gap:.18rem;color:var(--ink3);
+      padding:7px 4px}
+    @supports not (background:color-mix(in srgb,red 50%,transparent)){#tabbar{background:var(--surf2)}}
+    #tabbar button{flex:1;min-width:0;min-height:56px;display:flex;flex-direction:column;
+      align-items:center;justify-content:center;gap:.2rem;color:var(--ink3);
       font-family:var(--fb);font-weight:600;font-size:var(--t2);letter-spacing:.01em;
       text-transform:none;position:relative;transition:color .16s;
       white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    #tabbar svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    #tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;
+      transition:transform .22s cubic-bezier(.34,1.56,.64,1)}
     #tabbar button[aria-current="true"]{color:var(--aurora)}
+    /* Kleiner Sprung beim Wechsel -- das einzige, was eine Tableiste an
+       Animation braucht. Beide Vorbilder machen genau das. */
+    #tabbar button[aria-current="true"] svg{transform:translateY(-1px) scale(1.08)}
     /* Das Abzeichen sass auf einem festen Abstand vom Reitermittelpunkt und
        rutschte dadurch bei schmalen Reitern in die Nachbarspalte. Jetzt haengt
        es am Symbol statt an einer geratenen Zahl. */
@@ -293,38 +402,27 @@
     /* Die obere Reihe verschwindet auf dem Handy ganz -- ihre Aufgabe
        uebernehmen unten die Tableiste und das Menue-Blatt. */
     nav#nav{display:none!important}
-    /* Platz fuer die feste Tableiste, sonst liegt das letzte Element darunter. */
-    /* Platz fuer die schwebende Leiste: ihre Hoehe plus der Abstand zum Rand. */
-    body{padding-bottom:112px}
+    /* Platz fuer die schwebende Tableiste: ihre Hoehe (70) plus der Abstand
+       zum Rand plus Luft, damit das letzte Element nicht darunter klebt.
+       Muss der Formel oben folgen -- sonst verschwindet auf dem iPhone die
+       letzte Karte hinter der Leiste. */
+    body{padding-bottom:calc(88px + max(6px,calc(env(safe-area-inset-bottom,0px) - 20px)))}
     /* Der Trainingsmodus liegt ueber allem, sonst verdeckt die Leiste den Knopf. */
     #runner{z-index:90}
   }
 
 
 
-  /* ---- Kopfleiste auf dem Handy: nur noch das Noetige ------------------
+  /* ---- Kopfleiste auf dem Handy -----------------------------------------
      Vorher standen dort acht Elemente nebeneinander: Marke, Rueckgaengig,
      Zuruecksetzen, Uhr, Serie, Woche, Theme, Einstellungen. Auf 360 Pixeln ist
-     das keine Kopfleiste mehr, sondern eine zweite Werkzeugleiste -- und vier
-     davon fuehren an Orte, die ohnehin in den Einstellungen stehen.
-     Geblieben sind Marke, Serie und Woche: Identitaet und Stand. Alles andere
-     liegt im Menue-Blatt oder in den Einstellungen, wo es hingehoert. */
+     das keine Kopfleiste mehr, sondern eine zweite Werkzeugleiste.
+     Jetzt drei: Bereichsname, Serie, Einstellungen -- plus der Scanner, und
+     der nur in der Ernaehrung. Rueckgaengig, Zuruecksetzen und Theme liegen
+     in den Einstellungen, wo sie hingehoeren. */
   @media (max-width:640px){
     .bar #undoBtn,.bar #resetBtn,.bar #themeBtn{display:none}
-    /* Serie und Woche stehen nebeneinander statt untereinander -- zwei
-       zweizeilige Bloecke am rechten Rand einer 360-Pixel-Leiste ergeben
-       einen Klumpen, den man liest statt ueberfliegt. */
-    .barR{gap:.75rem}
-    .stat{display:flex;align-items:baseline;gap:.3rem;text-align:left}
-    .stat b{display:inline}
-
-    /* Der Leitspruch stand ueber JEDEM Bereich -- also auch ueber der
-       Naehrwerttabelle und den Einstellungen. Ein Spruch, der immer da ist,
-       wird zu Tapete und kostet auf jedem Bildschirm die oberen sechzig Pixel.
-       Jetzt steht er dort, wo er hingehoert: beim Tag, den man vor sich hat. */
-    /* Die Regeln zum Leitspruch stehen weiter unten -- Medienabfragen erhoehen
-       die Spezifitaet nicht, und die allgemeinen .creed-Regeln kommen im
-       Dokument spaeter. Hier oben waeren sie wirkungslos. */
+    #areTitle{font-size:1.42rem}
   }
   /* ---- Abschnittsleiste -------------------------------------------------
      Die zweite Ebene innerhalb eines Bereichs. Bewusst als Segmentleiste und
@@ -333,7 +431,7 @@
   /* v19: Abschnitte als Text-Segmente mit Unterstrich (MCI-Statistiken-
      Muster) statt Pillen auf grauer Flaeche -- weniger Chrom, die
      Bereichsfarbe traegt die Markierung. */
-  #subnav{display:flex;gap:1.15rem;margin:0 0 1rem;padding:0 2px;
+  #subnav{display:flex;gap:1.15rem;margin:0;padding:0 2px .3rem;
     overflow-x:auto;scrollbar-width:none}
   #subnav::-webkit-scrollbar{display:none}
   #subnav[hidden]{display:none}
@@ -348,21 +446,13 @@
   body[data-view="train"] #subnav button[aria-selected="true"]::after{background:var(--ember)}
   body[data-view="prog"] #subnav button[aria-selected="true"]::after{background:var(--brass)}
   @media (max-width:640px){
-    #subnav{margin-bottom:.85rem;gap:1rem}
-    #subnav button{font-size:.8rem}
-    /* MCI-Scrollverhalten: nur die Abschnittsleiste bleibt unter der
-       Kopfleiste kleben. Der Wochenstreifen scrollt mit dem Inhalt weg und
-       verschwindet unter der deckenden Kopfleiste -- ein Kalender ist
-       Kontext, kein Werkzeug, und klebender Kontext frisst Bildschirm. */
-    #subnav{
-      --gut:max(clamp(.7rem,3vw,1.5rem),env(safe-area-inset-left,0px));
-      position:sticky;z-index:25;background:var(--bg);
-      margin-left:calc(var(--gut)*-1);margin-right:calc(var(--gut)*-1);
-      padding-left:var(--gut);padding-right:var(--gut)}
-    #subnav{top:var(--barH,58px)}
-    #subnav::after{content:"";position:absolute;
-      left:0;right:0;bottom:-10px;height:10px;pointer-events:none;
-      background:linear-gradient(var(--bg),transparent)}
+    #subnav{gap:1rem}
+    #subnav button{font-size:.82rem}
+    /* Kein eigenes sticky mehr: die Abschnittsleiste sitzt jetzt IM
+       Kopfblock, und der klebt als Ganzes. Vorher waren es zwei
+       uebereinander klebende Elemente, deren Abstand ueber --barH von Hand
+       nachgemessen werden musste -- eine Zahl, die bei jeder Aenderung an
+       der Kopfzeile still falsch wurde. */
   }
 
 
@@ -471,9 +561,6 @@
   #sheet .savebar .tbtn{flex:1 1 auto;min-height:44px}
   #sheet .hint{margin:0;font-size:var(--t2);color:var(--ink3);line-height:1.45}
   #sheet .field{gap:.3rem}
-  .creed{display:flex;flex-direction:column;align-items:center;gap:.22rem;padding:.7rem 0 .6rem;text-align:center}
-  .creed .motto{font-family:var(--fd);font-weight:600;font-size:var(--t5);margin:0;display:flex;align-items:center;gap:.7rem;justify-content:center;flex-wrap:wrap;letter-spacing:.01em}
-  .creed .motto i{display:block;width:clamp(14px,4vw,30px);height:1px;background:var(--brass);opacity:.7;flex:none}
 
   /* Diese vier Regeln gelten der oberen Reihe am Rechner. Sie mussten auf
      nav#nav eingegrenzt werden: die Tableiste unten ist ebenfalls ein <nav>,
@@ -533,9 +620,6 @@
      Farben). Grosser Versalien-Titel je Bereich; Karten: Hero mit
      Startknopf und Figuren, Gewohnheiten als 2x2, Verbessern als
      flache Zeilenkarten. ── */
-  .arehead{display:flex;align-items:center;gap:.6rem;margin:0 0 -.4rem}
-  .arehead b{font-family:var(--fd);font-weight:800;font-size:var(--t6);
-    letter-spacing:.05em;text-transform:uppercase}
   .hcard{display:flex;flex-direction:column;gap:.7rem;width:100%;text-align:left;
     background:var(--surf);border:1px solid var(--line);border-radius:var(--r3);
     padding:1rem 1.05rem;box-shadow:var(--sh);cursor:pointer;transition:border-color .16s}
@@ -545,10 +629,17 @@
     text-transform:uppercase;color:var(--ink3);margin:0}
   .hcard h3{font-family:var(--fd);font-weight:700;font-size:var(--t6);margin:0}
   .hcard .sub2{color:var(--ink2);font-size:var(--t3);margin:0}
-  .hcard .hcGo{align-self:flex-start;margin-top:.45rem;font-family:var(--fm);
-    font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;
-    color:var(--ember);border:1px solid color-mix(in srgb,var(--ember) 55%,transparent);
-    border-radius:var(--r1);padding:.34rem .7rem}
+  /* Der Startknopf auf der HEUTE-Karte ist die wichtigste Aktion der ganzen
+     App. Er war ein Umriss in gesperrten Versalien -- jetzt eine gefuellte
+     Flaeche, die man von oben sieht, ohne sie zu suchen. */
+  .hcard .hcGo{align-self:stretch;margin-top:.55rem;font-family:var(--fd);
+    font-size:var(--t5);font-weight:700;letter-spacing:0;text-transform:none;
+    color:var(--bg);background:var(--ember);border:0;
+    border-radius:999px;padding:.72rem 1rem;min-height:48px;
+    display:flex;align-items:center;justify-content:center;gap:.45rem;
+    transition:transform .12s,filter .16s}
+  .hcard .hcGo:active{transform:scale(.98)}
+  .hcard .hcGo:hover{filter:brightness(1.07)}
   /* Die Uebungssymbole stehen unten in EINER Reihe. Als Spalte rechts neben
      dem Text passten vier -- ein Tag hat aber fuenf oder sechs Uebungen, und
      welche fehlten, sah man der Kachel nicht an. Quer ueber die volle Breite
@@ -795,9 +886,11 @@
   .dbar .now{flex:1;min-width:170px}
   .dbar .now b{display:block;font-family:var(--fd);font-weight:600;font-size:1.02rem}
   .dbar .now span{font-family:var(--fb);font-size:var(--t2);color:var(--ink3);letter-spacing:0}
-  .nb{font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);border:1px solid var(--line);padding:.4rem .66rem;border-radius:2px;transition:.16s}
-  .nb:hover{border-color:var(--aurora);color:var(--ink)}
-  .nb.hot{border-color:var(--ember);color:var(--ember)}
+  .nb{font-family:var(--fd);font-size:var(--t3);font-weight:600;letter-spacing:0;text-transform:none;
+    color:var(--ink2);border:0;background:var(--surf3);padding:.44rem .8rem;border-radius:999px;
+    transition:background .16s,color .16s}
+  .nb:hover{background:var(--line);color:var(--ink)}
+  .nb.hot{background:color-mix(in srgb,var(--ember) 18%,transparent);color:var(--ember)}
   .nb.hot:hover{background:var(--ember);color:#fff}
 
   .hero{background:var(--hero);color:var(--heroInk);padding:clamp(1.05rem,3vw,1.6rem);display:flex;flex-direction:column;gap:.7rem;position:relative;overflow:hidden;border-radius:4px;box-shadow:var(--sh)}
@@ -843,10 +936,24 @@
      Starten der Einheit. Umriss statt Vollflaeche, damit ein Blick genuegt,
      um den Hauptknopf zu finden. */
   .tb .tbtn.go{background:transparent;color:var(--aurora);border-color:var(--aurora)}
-  .tbtn{font-family:var(--fm);font-size:var(--t2);letter-spacing:.1em;text-transform:uppercase;border:1px solid var(--line);padding:.4rem .6rem;border-radius:2px;color:var(--ink2);transition:.16s}
-  .tbtn:hover{border-color:var(--ice);color:var(--ink);transform:translateY(-1px)}
-  .tbtn.go{background:var(--aurora);border-color:var(--aurora);color:var(--bg)}
-  .tbtn.dngr{border-color:var(--ember);color:var(--ember)}
+  /* Knoepfe. Vorher: gesperrte Versalien in Schreibmaschinenschrift, in einem
+     Haarrahmen mit 2 Pixel Rundung. Das liest sich als Beschriftung eines
+     Geraets, nicht als etwas, das man antippt -- und auf dem Telefon war der
+     Unterschied zwischen "Knopf" und "Text mit Kasten" nicht mehr zu sehen.
+     Beide Vorbilder machen es umgekehrt: gefuellte Flaeche, runde Ecken,
+     normale Schreibweise, halbfett. Ein Knopf ist eine Flaeche, kein Rahmen.
+     .go bleibt der Hauptknopf (voll gefuellt), der schlichte .tbtn ist die
+     leise Zweitwahl -- und auch die ist jetzt eine Flaeche statt eines
+     Umrisses, nur eine ruhigere. */
+  .tbtn{font-family:var(--fd);font-size:var(--t4);font-weight:650;letter-spacing:0;
+    text-transform:none;border:0;padding:.62rem 1rem;border-radius:999px;
+    background:var(--surf3);color:var(--ink);transition:background .16s,transform .12s;
+    display:inline-flex;align-items:center;justify-content:center;gap:.4rem}
+  .tbtn:hover{background:var(--line);color:var(--ink)}
+  .tbtn:active{transform:scale(.97)}
+  .tbtn.go{background:var(--aurora);color:var(--bg);font-weight:700}
+  .tbtn.go:hover{background:color-mix(in srgb,var(--aurora) 85%,#fff)}
+  .tbtn.dngr{background:color-mix(in srgb,var(--ember) 16%,transparent);color:var(--ember)}
   .tbtn.dngr:hover{background:var(--ember);color:#fff}
 
   /* Kennzahlen sind Kacheln wie alle anderen auch. Vorher hatten sie ein
@@ -1437,47 +1544,180 @@
   #modal .ctl input{text-align:center;letter-spacing:.2em}
 
   /* ---- ranks and achievements ---- */
-  .rankHero{background:var(--hero);color:var(--heroInk);border-radius:5px;padding:1.2rem;display:flex;align-items:center;gap:1.2rem;flex-wrap:wrap;position:relative;overflow:hidden;box-shadow:var(--sh)}
-  .rankHero::before{content:"";position:absolute;inset:-40% -20% auto -20%;height:90%;background:radial-gradient(50% 80% at 30% 45%,rgba(var(--p1),.3),transparent 70%),radial-gradient(45% 70% at 72% 30%,rgba(var(--p2),.22),transparent 72%);filter:blur(12px)}
+  /* Rangkarte, mittig aufgebaut wie bei Liftoff: Abzeichen, Stufenname,
+     Balken, Zahl. Alles untereinander und zentriert -- damit hat jedes Stueck
+     die volle Breite und nichts bricht um. */
+  .rankHero{background:var(--hero);color:var(--heroInk);border-radius:var(--r3);
+    padding:1.5rem 1.2rem 1.3rem;display:flex;flex-direction:column;align-items:center;
+    gap:.3rem;text-align:center;position:relative;overflow:hidden;box-shadow:var(--sh)}
+  .rankHero::before{content:"";position:absolute;inset:-40% -20% auto -20%;height:110%;background:radial-gradient(50% 70% at 50% 30%,rgba(var(--p1),.28),transparent 70%),radial-gradient(45% 60% at 72% 20%,rgba(var(--p2),.18),transparent 72%);filter:blur(14px)}
   .rankHero>*{position:relative}
-  .rankHero .txt{flex:1;min-width:180px}
-  .rankHero .tier{font-family:var(--fd);font-weight:600;font-size:clamp(1.4rem,4.5vw,2rem);margin:0;line-height:1.05;letter-spacing:.02em}
-  .rankHero .sub{font-family:var(--fm);font-size:var(--t2);letter-spacing:.2em;text-transform:uppercase;opacity:.6;margin:.15rem 0 .6rem}
-  .lpbar{height:9px;background:rgba(150,150,150,.25);border-radius:5px;overflow:hidden;max-width:320px}
-  .lpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--aurora),var(--ice));transition:width .8s cubic-bezier(.2,.8,.3,1)}
-  .lpnum{font-family:var(--fm);font-size:var(--t2);letter-spacing:.1em;opacity:.72;margin-top:.35rem;display:block}
-  .xpRow{display:flex;gap:1.4rem;flex-wrap:wrap;font-family:var(--fm);font-size:var(--t2);letter-spacing:.1em;text-transform:uppercase;opacity:.72;margin-top:.6rem}
-  .xpRow b{font-weight:400;opacity:1}
-
-  /* Koerperkarte: links die Figur, rechts die Rangliste */
-  .bodyWrap{display:grid;grid-template-columns:minmax(190px,250px) 1fr;gap:1rem;align-items:center}
-  @media (max-width:640px){.bodyWrap{grid-template-columns:1fr}}
-  .bodyFig{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.8rem;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;gap:.5rem}
+  .rankHero .tier{font-family:var(--fd);font-weight:800;font-size:clamp(1.5rem,6vw,2.1rem);margin:.5rem 0 0;line-height:1.05;letter-spacing:-.01em}
+  .rankHero .sub{font-family:var(--fm);font-size:var(--t2);letter-spacing:.04em;opacity:.55;margin:.1rem 0 .8rem;max-width:34ch}
+  .lpbar{height:8px;background:rgba(150,150,150,.22);border-radius:999px;overflow:hidden;width:100%;max-width:320px}
+  .lpbar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--aurora),var(--ice));transition:width .8s cubic-bezier(.2,.8,.3,1)}
+  .lpnum{font-family:var(--fm);font-size:var(--t3);opacity:.75;margin-top:.45rem;display:block}
+  /* Die drei Kennzahlen als gleich breite Spalten mit Trennlinien -- so wie
+     MCI die Ernaehrungszahlen unter dem Ring setzt. Vorher eine umbrechende
+     Reihe aus gesperrten Versalien. */
+  .xpRow{display:grid;grid-template-columns:repeat(3,1fr);width:100%;max-width:340px;
+    margin-top:1.05rem;padding-top:.85rem;border-top:1px solid rgba(150,150,150,.18)}
+  .xpRow span{display:flex;flex-direction:column-reverse;gap:.1rem;
+    font-family:var(--fm);font-size:var(--t1);letter-spacing:.05em;text-transform:uppercase;opacity:.55}
+  .xpRow span+span{border-left:1px solid rgba(150,150,150,.18)}
+  .xpRow b{font-family:var(--fd);font-weight:700;font-size:var(--t6);opacity:1;letter-spacing:0;
+    text-transform:none;font-variant-numeric:tabular-nums}
+  .bodyFig{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);padding:.9rem;box-shadow:var(--sh);display:flex;flex-direction:column;align-items:center;gap:.5rem}
   .bodyFig svg{width:100%;height:auto;max-height:280px;overflow:visible}
-  .bodyCap{margin:0;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);text-align:center;line-height:1.5}
-  .bodySide{display:flex;flex-direction:column;gap:.35rem;min-width:0}
+  .bodyCap{margin:0;font-family:var(--fm);font-size:var(--t2);color:var(--ink3);text-align:center;line-height:1.5}
   .bz{transition:fill .45s ease}
   .bz:hover{filter:brightness(1.25)}
   @keyframes bestGlow{0%,100%{opacity:.25;r:15}50%{opacity:.6;r:19}}
   @keyframes bestSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-  /* Rang je Muster kompakt. Vorher sechs Zeilen mit je 34-Pixel-Abzeichen,
-     zweizeiligem Namen und 120 Pixel breitem Balkenblock -- gut 400 Pixel fuer
-     sechs Zahlen, die alle dasselbe sagen, solange man am Anfang steht.
-     Jetzt zwei Spalten, eine Zeile je Muster, Balken darunter. */
-  .rankList{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.42rem}
-  .rankRow{display:flex;flex-direction:column;gap:.3rem;background:var(--surf2);
-    border:1px solid var(--line);border-radius:var(--r2);padding:.55rem .65rem;
-    transition:border-color .16s}
-  .rankRow:hover{border-color:var(--aurora)}
-  .rankRow .rtop{display:flex;align-items:center;gap:.45rem}
-  .rankRow .rtop svg{flex:none}
-  .rankRow .nm{flex:1;min-width:0;display:flex;align-items:baseline;gap:.35rem;flex-wrap:wrap}
-  .rankRow .nm b{font-family:var(--fd);font-weight:600;font-size:var(--t4)}
-  .rankRow .nm span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;
-    text-transform:uppercase;color:var(--ink3)}
+  /* Rang je Muster als Kartenraster -- Liftoffs "Dein Rang".
+     Aufbau je Karte: Stufenname klein und in der Stufenfarbe ganz oben, dann
+     der Name des Musters, dann das Abzeichen, unten Balken und LP. Genau die
+     Reihenfolge, in der man es liest: "welche Stufe -- wovon -- wie weit".
+     Vorher waren es duenne Zeilen mit 22-Pixel-Abzeichen; das las sich wie
+     eine Tabelle und niemand sieht sich freiwillig eine Tabelle an. */
+  .rankList{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:.55rem}
+  .rankRow{display:flex;flex-direction:column;align-items:center;gap:.15rem;
+    background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
+    padding:.75rem .6rem .7rem;text-align:center;transition:border-color .16s,transform .16s}
+  .rankRow:hover{border-color:var(--aurora);transform:translateY(-2px)}
+  .rankRow .tl{font-family:var(--fm);font-size:var(--t1);font-weight:700;
+    letter-spacing:.09em;text-transform:uppercase;line-height:1.2}
+  .rankRow b{font-family:var(--fd);font-weight:700;font-size:var(--t4);line-height:1.2}
+  .rankRow .bdg{margin:.4rem 0 .5rem;line-height:0}
   .rankRow .lpbar{height:5px;max-width:none;margin:0}
   .rankRow .lpn{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);
-    text-align:right;font-variant-numeric:tabular-nums}
+    margin-top:.3rem;font-variant-numeric:tabular-nums}
+
+  /* ---- Leiste der laufenden Einheit -------------------------------------
+     Sitzt direkt ueber der Tableiste und teilt deren Seitenabstand, damit
+     beide als ein Block unten stehen. Auf dem Rechner unnoetig -- dort ist
+     der Trainingsmodus ohnehin nie weiter weg als ein Klick. */
+  #rundock{display:none}
+  @media (max-width:640px){
+    #rundock{display:flex;position:fixed;z-index:59;align-items:center;gap:.8rem;
+      left:max(14px,env(safe-area-inset-left,0px));
+      right:max(14px,env(safe-area-inset-right,0px));
+      bottom:calc(max(6px,calc(env(safe-area-inset-bottom,0px) - 20px)) + 78px);
+      padding:.6rem .6rem .6rem .95rem;border-radius:20px;text-align:left;
+      background:color-mix(in srgb,var(--surf) 88%,transparent);
+      backdrop-filter:blur(20px) saturate(1.3);-webkit-backdrop-filter:blur(20px) saturate(1.3);
+      border:1px solid var(--line2);
+      animation:rdIn .3s cubic-bezier(.2,.9,.3,1) both}
+    #rundock[hidden]{display:none}
+    @supports not (background:color-mix(in srgb,red 50%,transparent)){#rundock{background:var(--surf)}}
+    /* Ein schmaler Streifen in der Bereichsfarbe des Trainings am linken
+       Rand: er sagt ohne ein Wort, wozu die Leiste gehoert. */
+    #rundock::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;
+      border-radius:0 3px 3px 0;background:var(--ember)}
+    #rundock .rd{flex:1;min-width:0;display:flex;flex-direction:column;gap:.05rem}
+    #rundock .rd b{font-family:var(--fd);font-weight:700;font-size:var(--t5);
+      line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #rundock .rd em{font-style:normal;font-size:var(--t2);color:var(--ink3);
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    #rundock .rdGo{flex:none;background:var(--ember);color:var(--bg);
+      font-family:var(--fd);font-weight:700;font-size:var(--t3);
+      padding:.5rem .95rem;border-radius:999px}
+    #rundock:active{transform:scale(.985)}
+    @keyframes rdIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+    /* Steht eine Einheit an, rutscht der Inhalt entsprechend weiter hoch. */
+    body.hasrun{padding-bottom:calc(152px + max(6px,calc(env(safe-area-inset-bottom,0px) - 20px)))}
+    body[data-pushed] #rundock{transform:translateY(220%);transition:transform .28s cubic-bezier(.2,.7,.2,1)}
+  }
+
+  /* ---- Einstellungen als Menue -----------------------------------------
+     Vorher lagen alle sechs Gruppen offen untereinander: ueber 900 Pixel
+     Formular am Stueck, in dem man das Gesuchte scrollend sucht. Und jede
+     Wahl war ein Auswahlfeld -- sieben Stueck, alle gleich aussehend. Auf
+     einem Telefon ist das keine Einstellungsseite, das ist ein Formular aus
+     einem Buerorechner.
+
+     Jetzt: eine Uebersicht mit sechs Zeilen, jede zeigt schon den aktuellen
+     Stand, und dahinter je eine eigene Seite. Genau das Muster, das jede
+     ordentliche App benutzt -- nur dass bei uns der Stand direkt in der
+     Zeile steht, statt dass man erst hineingehen muss, um ihn zu sehen. */
+  .srows{display:flex;flex-direction:column;gap:1px;background:var(--line2);
+    border-radius:var(--r2);overflow:hidden}
+  .srow{display:flex;align-items:center;gap:.85rem;width:100%;
+    padding:.85rem .9rem;background:var(--surf);border:0;text-align:left;
+    transition:background .16s}
+  .srow:hover{background:var(--surf3)}
+  .srow:active{background:var(--line2)}
+  .srow .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:.1rem}
+  .srow .st b{font-family:var(--fd);font-weight:650;font-size:var(--t5);line-height:1.25}
+  .srow .st em{font-style:normal;font-size:var(--t3);color:var(--ink3);
+    line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .srow .chev{flex:none;color:var(--ink3);transition:transform .16s}
+  .srow:hover .chev{transform:translateX(2px)}
+  .setPane[hidden]{display:none}
+
+  /* ---- Segmentleiste statt Auswahlfeld ---------------------------------
+     Ein Auswahlfeld verlangt zwei Handgriffe (aufklappen, treffen) und
+     versteckt dabei genau die Information, um die es geht: was man haette
+     waehlen koennen. Bei zwei oder drei Moeglichkeiten ist das reine
+     Schikane. Die Segmentleiste zeigt alles auf einmal und braucht einen
+     Tipp.
+     Der laufende Balken ist eine einzige transform-Animation -- er bewegt
+     sich auf der Grafikeinheit und kostet kein Neuzeichnen. */
+  .segc{position:relative;display:flex;background:var(--surf2);border-radius:999px;
+    padding:3px;width:100%;isolation:isolate}
+  .segc i{position:absolute;top:3px;bottom:3px;left:3px;border-radius:999px;
+    background:var(--surf3);width:var(--segw,50%);
+    transform:translateX(var(--segx,0px));
+    transition:transform .28s cubic-bezier(.34,1.25,.5,1),width .28s cubic-bezier(.34,1.25,.5,1);
+    z-index:-1}
+  .segc button{flex:1;min-width:0;min-height:40px;padding:0 .5rem;border:0;background:none;
+    border-radius:999px;font-family:var(--fd);font-weight:600;font-size:var(--t3);
+    color:var(--ink3);cursor:pointer;white-space:nowrap;overflow:hidden;
+    text-overflow:ellipsis;transition:color .18s}
+  .segc button[aria-checked="true"]{color:var(--ink)}
+  .segc.busy i{transition:none}
+
+  /* ---- Schalter --------------------------------------------------------
+     Fuer echtes An/Aus. "An | Aus" als zwei Segmente waere korrekt, aber ein
+     Schalter sagt dasselbe in einem Drittel der Breite und ist die Form, die
+     jeder von seinem Telefon kennt. */
+  .swrow{display:flex;align-items:center;gap:.9rem;padding:.72rem 0}
+  .swrow .lb{flex:1;min-width:0;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
+  .sw{width:50px;height:30px;border-radius:999px;background:var(--surf3);
+    position:relative;flex:none;border:0;cursor:pointer;transition:background .22s}
+  .sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;
+    border-radius:50%;background:var(--ink3);
+    transition:transform .26s cubic-bezier(.34,1.4,.5,1),background .22s}
+  .sw[aria-checked="true"]{background:color-mix(in srgb,var(--aurora) 32%,var(--surf3))}
+  .sw[aria-checked="true"]::after{transform:translateX(20px);background:var(--aurora)}
+  /* Das urspruengliche Auswahlfeld bleibt im Dokument, nur unsichtbar: die
+     neue Bedienung setzt seinen Wert und loest change aus, sodass alle
+     bestehenden Zuhoerer unveraendert weiterlaufen.
+     Der Selektor greift bewusst OHNE .field davor -- nicht jedes Auswahlfeld
+     steht in einem .field (das Profil baut seine Zeilen selbst), und dann
+     stand das alte Feld sichtbar neben der neuen Bedienung. data-up setzt
+     nur die Umbaufunktion, der Selektor kann also nichts anderes treffen. */
+  select[data-up]{position:absolute;left:0;top:0;width:1px;height:1px;min-height:0;opacity:0;pointer-events:none;margin:0;padding:0;border:0}
+  /* hidden allein reicht bei .form nicht: das Attribut wirkt ueber
+     display:none aus dem Browser-Standard, und jede eigene display-Regel
+     schlaegt den Standard. .form hat display:flex -- die Gruppen blieben
+     also sichtbar, obwohl sie als versteckt markiert waren. */
+  .form[hidden]{display:none}
+  /* Dasselbe Problem, dieselbe Loesung: .gtitle hat display:flex. In einer
+     Unterseite steht ihr Titel schon oben im Kopf, sie wird dort also
+     ausgeblendet -- was ohne diese Zeile nicht passiert waere. */
+  .gtitle[hidden]{display:none}
+  /* Ein Bedienfeld, das eine Segmentleiste traegt, braucht die volle Breite --
+     und das Feld darum auch: im zweispaltigen Raster blieben sonst rund
+     150 Pixel fuer drei Segmente, und jede Beschriftung wurde abgeschnitten. */
+  .ctl.hasSeg{display:block;width:100%}
+  .ctl.hasSeg .chev{display:none}
+  .fgrid .field.segf{grid-column:1/-1}
+  /* Ein Feld mit Schalter ist eine Zeile, keine Spalte: Beschriftung links,
+     Schalter rechts. */
+  .field.swf{flex-direction:row;align-items:center;gap:.9rem}
+  .field.swf label{flex:1;min-width:0;margin:0}
+  .field.swf .ctl{flex:none;width:auto;position:relative}
 
   .achGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:.5rem}
   .ach{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.75rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;transition:.2s;position:relative;overflow:hidden}
@@ -1537,12 +1777,30 @@
      Der Bildschirm, auf den man waehrend einer Einheit schaut -- oft
      verschwitzt, aus einem Meter Abstand, zwischen zwei Saetzen. Alles hier
      folgt daraus: grosse Zahl, ruhiger Rest, ein einziger lauter Knopf. */
+  /* Der Trainingsmodus war senkrecht zentriert. Auf einem 812 Pixel hohen
+     Bildschirm standen dadurch oben UND unten rund 140 Pixel leer, waehrend
+     die Fortschrittsbalken und der Schliessen-Knopf mitten in der Luft
+     hingen -- man sucht sie oben, sie sind aber auf einem Drittel Hoehe.
+     Jetzt verteilt: Fortschritt oben, Uebung in der Mitte, Bedienung unten.
+     Dieselbe Aufteilung wie im Trainingsmodus von MCI, und sie hat einen
+     handfesten Grund: die Knoepfe, die man bei jedem Satz drueckt, gehoeren
+     in Daumenreichweite, nicht in die Bildschirmmitte.
+     Die Akzentfarbe ist die des Bereichs Training (Ember), nicht mehr Gruen
+     -- Reiter, Leiste der laufenden Einheit und Trainingsmodus sprechen jetzt
+     dieselbe Farbe. */
   #runner{position:fixed;inset:0;z-index:80;background:var(--bg);display:none;
-    flex-direction:column;align-items:center;justify-content:center;
-    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.1rem calc(1rem + env(safe-area-inset-bottom,0px))}
+    flex-direction:column;align-items:center;justify-content:flex-start;
+    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.1rem calc(1.1rem + env(safe-area-inset-bottom,0px))}
   #runner.on{display:flex;animation:fade .2s ease}
-  #runner .rbox{width:100%;max-width:460px;display:flex;flex-direction:column;
-    gap:.9rem;text-align:center}
+  #runner .rbox{width:100%;max-width:460px;flex:1;display:flex;flex-direction:column;
+    justify-content:space-between;gap:.9rem;text-align:center}
+  /* Der mittlere Teil nimmt den uebrigen Platz und zentriert sich darin. */
+  #runner .rmain{flex:1;justify-content:center}
+  /* Der Hauptknopf traegt .tbtn.go und war damit gruen -- die einzige gruene
+     Flaeche in einem sonst orangen Bereich. Die Regel steht hier statt in
+     .tbtn.go, weil Gruen ueberall sonst richtig ist ("erledigt, gut"). */
+  #runner .tbtn.go{background:var(--ember)}
+  #runner .tbtn.go:hover{background:color-mix(in srgb,var(--ember) 85%,#fff)}
   #runner .rtop{display:flex;align-items:center;gap:.8rem}
 
   /* Fortschritt als Segmente statt als Text. Eine Zeile "Uebung 2 von 5" muss
@@ -1551,7 +1809,7 @@
   #runner .rsegs i{flex:1;height:4px;border-radius:2px;background:var(--line);
     overflow:hidden;position:relative}
   #runner .rsegs i::after{content:"";position:absolute;inset:0;width:var(--f,0%);
-    background:var(--aurora);border-radius:2px;transition:width .35s ease}
+    background:var(--ember);border-radius:2px;transition:width .35s ease}
   #runner .rwhere{margin:0;font-family:var(--fm);font-size:var(--t1);
     letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
 
@@ -1565,8 +1823,8 @@
   #runner .rdots{display:flex;gap:6px;margin-top:.5rem}
   #runner .rdots u{width:8px;height:8px;border-radius:50%;background:var(--line);
     text-decoration:none;transition:background .2s,transform .2s}
-  #runner .rdots u.done{background:var(--aurora);opacity:.5}
-  #runner .rdots u.now{background:var(--aurora);transform:scale(1.5)}
+  #runner .rdots u.done{background:var(--ember);opacity:.5}
+  #runner .rdots u.now{background:var(--ember);transform:scale(1.5)}
 
   #runner .rstep{margin:.45rem 0 0;font-size:var(--t3);color:var(--ink3)}
   #runner .rbig{font-family:var(--fd);font-weight:600;
@@ -1585,7 +1843,7 @@
     text-transform:uppercase;color:var(--ink3)}
   #runner .rreps button{width:44px;height:44px;border:1px solid var(--line);
     border-radius:14px;background:var(--surf2);color:var(--ink2);font-size:1.25rem;line-height:1}
-  #runner .rreps button:hover{border-color:var(--aurora);color:var(--ink)}
+  #runner .rreps button:hover{border-color:var(--ember);color:var(--ink)}
   #runner .rreps input{width:74px;height:44px;text-align:center;font-family:var(--fd);
     font-weight:600;font-size:1.2rem;padding:.3rem;border:1px solid var(--line);
     border-radius:14px;background:var(--surf2);color:var(--ink)}
@@ -1595,7 +1853,7 @@
   #runner .rbtns{display:flex;gap:.6rem;align-items:center;margin-top:.3rem}
   #runner .rnav{width:52px;height:52px;border-radius:16px;border:1px solid var(--line);
     background:var(--surf2);color:var(--ink2);flex:none}
-  #runner .rnav:hover{border-color:var(--aurora);color:var(--ink)}
+  #runner .rnav:hover{border-color:var(--ember);color:var(--ink)}
   #runner .rmainbtn{flex:1;min-height:58px;border-radius:16px;
     font-size:var(--t4);letter-spacing:.06em}
   @media (max-width:420px){#runner h3{font-size:1.25rem}}
@@ -1607,32 +1865,51 @@
   #a2hs .a2txt b{font-family:var(--fd);font-weight:600;font-size:var(--t3)}
   #a2hs .a2txt span{font-size:var(--t2);color:var(--ink2)}
   @media (max-width:640px){#a2hs{bottom:56px}}
-  /* Startbild: erscheint sofort, zeichnet die Marke Strich fuer Strich und
-     verschwindet, sobald die App steht. Die Striche werden ueber
-     stroke-dasharray gezeichnet -- das laeuft auf der Grafikeinheit. */
-  /* Der Grund ist fest dunkel und nicht var(--bg). Das Startbild des
-     Betriebssystems ist dunkel -- stuende hier die Themefarbe, blitzte bei
-     hellen Themes zwischen Systemstart und App ein Wechsel auf. So laeuft das
-     eine Bild in das andere, und erst danach kommt die App. */
+  /* ---- Start ------------------------------------------------------------
+     Vorher waren zwei Startbilder hintereinander zu sehen, zusammen rund
+     dreieinhalb Sekunden, und beim Uebergang stand das V kurz UEBER dem
+     Inhalt. Genau das hat David gemeldet ("sie hat irgendwie 2").
+
+     Was wirklich passiert ist:
+       1. Android zeigt beim Oeffnen der installierten App ein eigenes
+          Startbild aus dem Manifest -- Symbol, Name, Hintergrundfarbe.
+          Darauf haben wir keinen Einfluss, ausser ueber das Manifest.
+       2. Danach kam DIESES Startbild, mit einem anderen Hintergrund als das
+          erste, und zeichnete die Marke ein zweites Mal -- in 620 ms, mit
+          einer zusaetzlich im Skript eingebauten Mindestdauer von 700 ms.
+
+     Gemessen ist die Seite nach 60 ms fertig. Es wurden also mehr als
+     sechshundert Millisekunden lang absichtlich Daumen gedreht, um eine
+     Animation zu zeigen, die niemand angefordert hat.
+
+     Jetzt:
+       - Der Grund ist exakt dieselbe Farbe wie im Manifest und wie die App
+         selbst (Schwarz). Damit gibt es zwischen Systemstart, Startbild und
+         App keine sichtbare Kante mehr -- es sieht aus wie EIN Vorgang.
+       - Die Marke erscheint erst nach 260 ms. Ist die App vorher fertig --
+         der Normalfall -- wird sie nie gezeichnet. Nur auf einem langsamen
+         Geraet oder beim allerersten Laden aus dem Netz blendet sie auf,
+         und dann ist sie eine Antwort und keine Verzoegerung.
+       - Der Inhalt kommt mit einem kurzen Aufziehen herein statt hart zu
+         erscheinen. Das ist die eigentliche Startanimation. */
   #splash{position:fixed;inset:0;z-index:500;display:flex;flex-direction:column;
-    align-items:center;justify-content:center;gap:1.2rem;
-    background:linear-gradient(160deg,#0D2434,#050D14);
-    transition:opacity .45s ease,visibility .45s}
+    align-items:center;justify-content:center;gap:1.1rem;
+    background:#000;
+    transition:opacity .28s ease,visibility .28s}
   #splash.gone{opacity:0;visibility:hidden;pointer-events:none}
+  #splash svg,#splash span{opacity:0;animation:spIn .4s ease .26s forwards}
   #splash span{font-family:var(--fd);font-weight:600;letter-spacing:.34em;
     text-transform:uppercase;font-size:var(--t3);color:rgba(232,190,81,.8);
-    opacity:0;animation:spName .5s ease .5s forwards}
-  /* 460 liegt ueber der Laenge beider Pfade (Stange 240, V 422) -- die
-     Strichmuster-Laenge muss den Pfad ueberdecken, sonst erscheint der Rest
-     schon vor dem Zeichnen. */
-  #splash path{stroke-dasharray:460;stroke-dashoffset:460;
-    animation:spDraw .62s cubic-bezier(.3,.7,.3,1) forwards}
-  #splash .sp2{animation-delay:.16s}
-  @keyframes spDraw{to{stroke-dashoffset:0}}
-  @keyframes spName{to{opacity:1}}
+    animation-delay:.34s}
+  @keyframes spIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  /* Startanimation des Inhalts: einmalig, 320 ms, nur beim ersten Aufbau.
+     Kein will-change und keine Dauerbelegung -- die Animation raeumt sich
+     ueber die Klasse selbst wieder ab. */
+  body.booting .shell{animation:appIn .34s cubic-bezier(.2,.7,.2,1) both}
+  @keyframes appIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
   @media (prefers-reduced-motion:reduce){
-    #splash path{animation:none;stroke-dashoffset:0}
-    #splash span{animation:none;opacity:1}
+    #splash svg,#splash span{animation:none;opacity:1}
+    body.booting .shell{animation:none}
   }
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.flake{display:none}#bgfx{display:none}}
@@ -1652,14 +1929,45 @@
      neu rechnen -- das ist genau die Bremse, die man auf dem Telefon spuert
      und die auf dem Desktop niemand bemerkt. Die Karten bleiben trotzdem
      durchscheinend, sie verwischen den Hintergrund nur nicht mehr. */
-  .card,.chartbox,.form,.acc>div{background:color-mix(in srgb,var(--surf) 78%,transparent)}
-  .exrow,.tile{background:color-mix(in srgb,var(--surf) 76%,transparent)}
+  /* Glas statt flacher Flaeche.
+     Vorher war jede Karte EINE Farbe mit 78 % Deckung -- durchscheinend zwar,
+     aber optisch tot: eine Flaeche ohne Richtung sieht aus wie Papier, nicht
+     wie Glas. Was den Unterschied macht, ist ein sehr schwacher Verlauf von
+     oben nach unten. Glas ist oben heller, weil dort Licht einfaellt; das
+     Auge liest daraus eine Woelbung, ohne dass man den Verlauf bewusst
+     bemerkt. MCI faehrt genau das.
+     Bewusst OHNE backdrop-filter: eine Unschaerfe muss der Browser bei jeder
+     scrollenden Karte in jedem Bild neu rechnen. Bei rund vierzig Karten ist
+     das genau die Bremse, die man auf dem Telefon spuert. Die Durchsicht
+     allein reicht -- dahinter liegen die Partikel, und die sind weiche
+     Punkte, die auch unscharf nicht schaerfer wuerden.
+     Etwas dunkler als vorher (72 statt 78 Prozent Deckung oben, 84 unten),
+     damit die Partikel wirklich durchkommen. */
+  .card,.chartbox,.form,.acc>div,.mcard,.habcard,.srow,.rankRow{
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 62%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 74%,transparent) 46%,
+      color-mix(in srgb,var(--surf2) 82%,transparent) 100%)}
+  .exrow,.tile{background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 52%,transparent),
+      color-mix(in srgb,var(--surf2) 76%,transparent))}
+  /* Eine haarfeine helle Kante an der Oberkante -- der zweite Teil des
+     Glaseindrucks. Ohne sie bleibt der Verlauf ein Verlauf; mit ihr bekommt
+     die Karte einen Rand, an dem sich Licht bricht. */
+  .card,.chartbox,.form,.mcard,.habcard,.rankRow{
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 7%,transparent),var(--sh)}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){
+    .card,.chartbox,.form,.acc>div,.mcard,.habcard,.srow,.rankRow{background:var(--surf)}
+    .exrow,.tile{background:var(--surf2)}
+  }
   /* Kein will-change. Das war ein Fehler: jede so markierte Flaeche bekommt
      eine eigene Compositor-Ebene, und bei 55 Elementen frisst allein deren
      Verwaltung mehr, als die angebliche Optimierung bringt. Browser
      beschleunigen transform-Animationen ohnehin von selbst. */
   .hero{border-radius:var(--r3)}
-  .tbtn,.nb,input,select,textarea{border-radius:var(--r1)}
+  /* Knoepfe sind hier bewusst NICHT mehr dabei: sie sind jetzt Pillen
+     (border-radius:999px), und diese Zeile hat das vorher ueberschrieben. */
+  input,select,textarea{border-radius:var(--r1)}
   .iconbtn,.txtbtn{border-radius:var(--r1)}
   .tick{border-radius:8px}
   .hueRow{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:.7rem 0 .4rem}
@@ -1699,13 +2007,6 @@
   /* Leitspruch nur auf "Heute" -- steht hier unten, weil Medienabfragen die
      Spezifitaet nicht erhoehen und die allgemeinen .creed-Regeln weiter oben
      im Dokument stehen. Weiter oben waere diese Regel wirkungslos gewesen. */
-  @media (max-width:640px){
-    body:not([data-view="today"]) .creed{display:none}
-    .creed{padding:.4rem 0 .5rem}
-    /* Der wechselnde Merksatz entfaellt auf dem Handy: zwei Zeilen Zierat
-       ueber dem, weswegen man die App geoeffnet hat. Am Rechner ist Platz. */
-    .creed .motto{font-size:var(--t4)}
-  }
 
   /* Tableiste als schwebende Glasleiste. Die abgerundete Oberkante und der
      Abstand zum Rand nehmen ihr das Klebrige -- sie sitzt auf der Seite,
@@ -1717,26 +2018,21 @@
        mit dem Radius -- 9 statt 16 Pixel ist knapp die Haelfte davon.
        Damit die Flaechen dabei nicht duenner wirken, sind sie unten dichter
        gemischt. Am Rechner bleibt der volle Radius. */
-        /* Die schwebende Fassung weiter oben legt Rundung, Rand und Schatten fest.
-       Hier bleibt nur die guenstigere Unschaerfe -- die Form nicht mehr
-       ueberschreiben, sonst klebt die Leiste wieder unten. */
-    #tabbar{backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
-    /* Der aktive Reiter.
+    /* Der aktive Reiter -- dritter und letzter Anlauf.
 
-       Vorher lag dahinter eine 38 mal 30 Pixel grosse Flaeche, oben mit sechs
-       Pixeln Abstand festgenagelt. Sie war schmaler als der Reiter, hoeher als
-       das Symbol und kuemmerte sich nicht um die Beschriftung darunter -- das
-       ist der "aufgeklebt"-Eindruck: eine Form, die zu nichts gehoert, was sie
-       umgibt.
-
-       Jetzt umschliesst die Flaeche den ganzen Reiter mit gleichem Abstand auf
-       allen Seiten. Sie ist damit kein Aufkleber mehr, sondern der Reiter
-       selbst -- und weil sie sich aus der Themenfarbe mischt, bleibt sie in
-       jedem Theme zurueckhaltend statt weiss zu leuchten. */
-    #tabbar button[aria-current="true"]::before{content:"";position:absolute;
-      left:5px;right:5px;top:3px;bottom:3px;border-radius:20px;
-      background:color-mix(in srgb,var(--aurora) 14%,transparent);
-      box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--aurora) 22%,transparent)}
+       Anlauf 1: eine 38x30-Flaeche, oben festgenagelt. Schmaler als der
+       Reiter, hoeher als das Symbol, kuemmerte sich nicht um die Beschriftung
+       -- der klassische Aufkleber.
+       Anlauf 2: dieselbe Flaeche, aber um den ganzen Reiter gelegt. Besser,
+       aber sie war IMMER gruen (aus --aurora gemischt), obwohl jeder Bereich
+       seine eigene Farbe hat. Auf "Heute" leuchtete also eine gruene Pille
+       hinter einem blauen Symbol.
+       Anlauf 3, jetzt: gar keine Flaeche. MCI markiert den aktiven Reiter nur
+       ueber die Farbe, und das reicht vollkommen -- eine Leiste mit vier
+       Eintraegen braucht keinen zweiten Hinweis darauf, welcher davon
+       leuchtet. Dazu der kleine Sprung des Symbols weiter oben. Damit ist die
+       Leiste leiser, die Bereichsfarben stimmen wieder, und eine Flaeche pro
+       Bild weniger muss gezeichnet werden. */
     #tabbar svg,#tabbar span{position:relative}
     nav#nav{border-radius:var(--r3) var(--r3) 0 0;background:var(--surf)}
 
@@ -1765,10 +2061,14 @@
      eine moderne App-Einstellungsliste. Farbe kommt pro Chip inline als
      --chip; Grundflaeche ist eine abgeschwaechte Variante derselben Farbe. */
   .gtitle{display:flex;align-items:center;gap:.65rem;margin:0 0 .35rem}
-  .gtitle .ichip{width:34px;height:34px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  /* Bewusst OHNE .gtitle davor: dasselbe Zeichen steht jetzt auch in den
+     Zeilen des Einstellungsmenues, und dort war es an die Gruppenueberschrift
+     gebundene Regel nicht sichtbar -- es stand als nacktes SVG ohne Groesse
+     und ohne Farbe da. */
+  .ichip{width:34px;height:34px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center;
     color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
     border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
-  .gtitle .ichip svg{width:19px;height:19px}
+  .ichip svg{width:19px;height:19px}
   .gtitle .gt{flex:1;min-width:0}
   .gtitle .gt b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t5);letter-spacing:.03em}
   .gtitle .gt span{display:block;font-size:var(--t2);color:var(--ink3);margin-top:.05rem}
@@ -2024,12 +2324,21 @@
 </div></div>
 
 <div class="shell">
+  <!-- Kopfzeile nach MCI-Vorbild.
+       Vorher stand hier auf JEDER Seite derselbe Markenblock (Zeichen,
+       "Valkr", "Calisthenics") und darunter ein Leitspruch. Zusammen rund
+       ein Fuenftel der Bildschirmhoehe, auf jedem Bildschirm identisch --
+       also null Information darueber, wo man gerade ist. Der Bereichsname
+       stand stattdessen weiter unten als eigene Zeile, was die Hoehe ein
+       drittes Mal verbraucht hat.
+       Jetzt traegt die Kopfzeile den Bereichsnamen. Die Marke steht auf dem
+       Symbol, dem Startbild und in den Einstellungen -- dort gehoert sie
+       hin. Rechts nur noch, was man von ueberall braucht: die Serie als
+       Motivation, der Scanner in der Ernaehrung, die Einstellungen. -->
+  <header class="topwrap">
   <div class="bar">
     <div class="barL">
-      <div class="brand">
-        <svg width="27" height="27" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" style="color:var(--brass)"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
-        <div><p>Valkr</p><small>Calisthenics</small></div>
-      </div>
+      <h1 id="areTitle">Heute</h1>
       <button class="iconbtn" id="undoBtn" title="Undo last change" aria-label="Undo last change" disabled>
         <svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 8a5.5 5.5 0 1 1 1.6 3.9"/><path d="M2.4 4.1v2.9h2.9"/></svg>
       </button>
@@ -2048,16 +2357,29 @@
            Die Woche bleibt: sie steht sonst nirgends dauerhaft und beantwortet
            die Frage "wo bin ich im Programm" auf jedem Bildschirm. -->
       <button class="txtbtn" id="themeBtn" data-i18n="btn.theme" title="Switch to the next theme" aria-label="Switch to the next theme">Theme</button>
+      <!-- Serie. Sie war aus der Kopfzeile geflogen, weil sie dort als nackte
+           Zahl ohne Einordnung stand. Als Chip mit Flamme ist sie das, was
+           sie in beiden Vorbild-Apps ist: der eine Wert, der von ueberall
+           sichtbar sein muss, weil er der Grund zum Wiederkommen ist.
+           Tippen fuehrt in den Fortschritt, wo die Serie erklaert wird. -->
+      <button type="button" class="strk" id="strkChip" data-go="prog" title="Serie" aria-label="Serie">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c.5 3 2.4 4 3.8 5.6A6.6 6.6 0 0 1 17.5 13a5.5 5.5 0 0 1-11 0c0-1.6.7-2.9 1.6-4 .3 1 .9 1.6 1.7 1.9C9.4 8.4 10.6 5.9 12 3Z"/></svg>
+        <b id="strkNum">0</b>
+      </button>
+      <!-- Scanner: nur in der Ernaehrung sichtbar, show() blendet ihn um. -->
+      <button type="button" class="iconbtn" id="fuelCam" title="Scanner" aria-label="Scanner" style="display:none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.3-1.8h5.2L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"/><circle cx="12" cy="12.4" r="3.4"/></svg></button>
       <!-- Echtes Zahnrad mit Zaehnen. Der erste Versuch war ein Kreis mit acht
            geraden Strahlen -- das ist die Zeichnung einer Sonne, nicht die
            eines Zahnrads. Zaehne haben eine Breite; Strahlen nicht. -->
       <button class="iconbtn" id="setBtn" data-i18n-title="nav.settings" title="Settings" aria-label="Settings"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.1 14.6a1.6 1.6 0 0 0 .32 1.77l.06.06a1.95 1.95 0 1 1-2.76 2.76l-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-.97 1.47v.16a1.95 1.95 0 0 1-3.9 0v-.08a1.6 1.6 0 0 0-1.05-1.47 1.6 1.6 0 0 0-1.77.32l-.06.06a1.95 1.95 0 1 1-2.76-2.76l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.47-.97H3.1a1.95 1.95 0 0 1 0-3.9h.08a1.6 1.6 0 0 0 1.47-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a1.95 1.95 0 1 1 2.76-2.76l.06.06a1.6 1.6 0 0 0 1.77.32h.08a1.6 1.6 0 0 0 .97-1.47V3.1a1.95 1.95 0 0 1 3.9 0v.08a1.6 1.6 0 0 0 .97 1.47 1.6 1.6 0 0 0 1.77-.32l.06-.06a1.95 1.95 0 1 1 2.76 2.76l-.06.06a1.6 1.6 0 0 0-.32 1.77v.08a1.6 1.6 0 0 0 1.47.97h.16a1.95 1.95 0 0 1 0 3.9h-.08a1.6 1.6 0 0 0-1.47.97Z"/></svg></button>
     </div>
   </div>
+  <!-- Abschnittsleiste: die zweite Ebene innerhalb eines Bereichs. Sie sitzt
+       IM Kopfblock, nicht darunter -- bei MCI bilden Titelzeile und
+       Segmentleiste zusammen eine Flaeche, die als Ganzes stehen bleibt. -->
+  <div id="subnav" role="tablist" hidden></div>
+  </header>
 
-  <div class="creed">
-    <p class="motto"><i aria-hidden="true"></i><span id="mottoTxt">Show up. Add one rep.</span><i aria-hidden="true"></i></p>
-  </div>
   <!-- Oberste Ebene, sieben Ziele. Reihenfolge am Rechner nach Nutzung:
        der Coach zuerst, weil er die Lage liest und sagt, was ansteht.
        Skills, Beweglichkeit, Test, Raenge, Wochen und Zugang stehen nicht
@@ -2086,6 +2408,22 @@
        mehr -- Coach wohnt auf HEUTE, Du im Bereich FORTSCHRITT; alles
        Weitere erreichen Pushes (Detail, Wissen, Einstellungen). -->
   <div id="pushdim" aria-hidden="true"></div>
+  <!-- Laufende Einheit. Die beste Idee, die MCI hat und uns gefehlt hat:
+       eine gestartete Einheit bleibt ueber der Tableiste sichtbar und ist von
+       jedem Bildschirm aus mit einem Tipp wieder da. Vorher war eine
+       begonnene Einheit unsichtbar, sobald man den Trainingsmodus verliess --
+       wer zwischendurch etwas in der Ernaehrung nachsah, musste den Weg
+       ueber HEUTE suchen und wusste nicht einmal sicher, ob noch etwas
+       laeuft.
+       Steht nur, wenn wirklich eine Einheit laeuft; sonst ist sie nicht im
+       Weg. -->
+  <button type="button" id="rundock" hidden>
+    <span class="rd">
+      <b id="rdName">—</b>
+      <em><span id="rdProg"></span></em>
+    </span>
+    <span class="rdGo" id="rdGo">Weiter</span>
+  </button>
   <nav id="tabbar" aria-label="Main">
     <button data-view="today"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11.2 12 4.5l8 6.7"/><path d="M6 9.8V19a1.5 1.5 0 0 0 1.5 1.5h9A1.5 1.5 0 0 0 18 19V9.8"/><path d="M10 20.5v-5h4v5"/></svg><span data-i18n="nav.today">Today</span></button>
     <button data-view="train"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12h18M6 8v8M18 8v8M2.5 10v4M21.5 10v4"/></svg><span data-i18n="nav.train">Train</span></button>
@@ -2093,15 +2431,6 @@
     <button data-view="prog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20.5h16"/><path d="M6.5 20V12M12 20V5.5M17.5 20v-9.5"/></svg><span data-i18n="nav.prog">Progress</span><i class="badge" id="rankBadge2"></i></button>
   </nav>
 
-  <!-- Abschnittsleiste. Zeigt die Unterbereiche des aktuellen Bereichs und
-       steht bewusst ausserhalb der Bereiche selbst: so ist ihre Position
-       immer dieselbe, egal welcher Abschnitt gerade sichtbar ist. Bereiche
-       ohne Unterteilung blenden sie aus. -->
-  <!-- v19: EIN Bereichskopf fuer alle Reiter -- er bleibt stehen, wenn
-       innerhalb des Bereichs das Segment wechselt. Der Kamera-Knopf
-       gehoert zur Ernaehrung und zeigt sich nur dort. -->
-  <div class="arehead" id="areHead"><b id="areTitle">Heute</b><button type="button" class="iconbtn" id="fuelCam" title="Scanner" aria-label="Scanner" style="margin-left:auto"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8.5A2.5 2.5 0 0 1 6.5 6h1.6l1.3-1.8h5.2L15.9 6h1.6A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5Z"/><circle cx="12" cy="12.4" r="3.4"/></svg></button></div>
-  <div id="subnav" role="tablist" hidden></div>
 
   <!-- Warnung, wenn der Browser nichts dauerhaft speichert. Ohne diesen Hinweis
        sieht die App voellig normal aus und vergisst trotzdem beim Schliessen
@@ -2120,7 +2449,7 @@
   </section>
 
   <section class="view" id="v-plan">
-    <div><h2 class="sec">The twelve weeks</h2><p class="sub">One row per week. Open a week to see its days and jump to any of them.</p></div>
+    <div><p class="sub">One row per week. Open a week to see its days and jump to any of them.</p></div>
     <div class="kpis" id="planKpis"></div>
     <div class="weeks" id="weeks"></div>
     <div class="noteblk">
@@ -2221,31 +2550,37 @@
   </section>
 
   <section class="view" id="v-ranks">
-    <div><h2 class="sec" data-i18n="rk.h">Ranks and achievements</h2><p class="sub" data-i18n="rk.s">Your rank comes from where you stand on each ladder, not from how much you sweat. Rest days count as followed — this system will never reward you for skipping recovery.</p></div>
+    <!-- Ueberschrift "Raenge und Erfolge" entfernt: die Kopfzeile sagt FORTSCHRITT,
+         die Abschnittsleiste sagt Raenge, und die Rangkarte direkt darunter zeigt
+         den Rang. Drei Ansagen fuer eine Information. -->
+    <!-- Rangkarte nach Liftoff-Vorbild: das Abzeichen steht mittig und gross,
+         darunter der Stufenname, der Balken und die Zahl bis zur naechsten
+         Stufe. Vorher lag das Abzeichen links und der Text rechts daneben --
+         auf 360 Pixeln blieben fuer den Text 200 uebrig, in die drei Zeilen
+         umbrachen. Ein Rang ist das Schaustueck des Bereichs; er darf die
+         volle Breite haben. -->
     <div class="rankHero">
       <span id="rkBadge"></span>
-      <div class="txt">
-        <p class="tier" id="rkTier">-</p>
-        <p class="sub" id="rkSub">-</p>
-        <div class="lpbar"><i id="rkBar" style="width:0%"></i></div>
-        <span class="lpnum" id="rkLp"></span>
-        <div class="xpRow">
-          <span data-i18n-t="rk.level">Level<b id="rkLevel"> 1</b></span>
-          <span data-i18n-t="rk.xp">XP<b id="rkXp"> 0</b></span>
-          <span data-i18n-t="rk.badges">Badges<b id="rkGot"> 0</b></span>
-        </div>
+      <p class="tier" id="rkTier">-</p>
+      <p class="sub" id="rkSub">-</p>
+      <div class="lpbar"><i id="rkBar" style="width:0%"></i></div>
+      <span class="lpnum" id="rkLp"></span>
+      <div class="xpRow">
+        <span data-i18n-t="rk.level">Level<b id="rkLevel"> 1</b></span>
+        <span data-i18n-t="rk.xp">XP<b id="rkXp"> 0</b></span>
+        <span data-i18n-t="rk.badges">Badges<b id="rkGot"> 0</b></span>
       </div>
     </div>
     <div class="coach"><div id="rkIntegrity" class="cnote md"></div></div>
-    <div class="bodyWrap">
-      <div class="bodyFig">
-        <svg id="bodySvg" viewBox="0 0 240 268" aria-hidden="true"></svg>
-        <p class="bodyCap" id="bodyCap"></p>
-      </div>
-      <div class="bodySide">
-        <p class="eyebrow" data-i18n="rk.perPat">Rank per pattern</p>
-        <div class="rankList" id="rankList"></div>
-      </div>
+    <!-- Rang je Muster. Das ist unser Gegenstueck zu Liftoffs Rang je Uebung:
+         sechs Muster, jedes mit eigener Stufe und eigenem Abzeichen. Als
+         Kartenraster statt als duenne Zeilen -- die Zeilen sahen aus wie eine
+         Tabelle, und eine Tabelle schaut sich niemand freiwillig an. -->
+    <p class="eyebrow" data-i18n="rk.perPat">Rank per pattern</p>
+    <div class="rankList" id="rankList"></div>
+    <div class="bodyFig">
+      <svg id="bodySvg" viewBox="0 0 240 268" aria-hidden="true"></svg>
+      <p class="bodyCap" id="bodyCap"></p>
     </div>
     <!-- Erklaerung, Rangverteilung und Extras stehen zugeklappt: alles drei ist
          Nachschlagestoff, das man einmal liest und danach kennt. Offen machten
@@ -2297,7 +2632,7 @@
   </section>
 
   <section class="view" id="v-skills">
-    <div><h2 class="sec" data-i18n="skills.h">Skills</h2><p class="sub" data-i18n="skills.s">These are why most people start calisthenics. Each one has an entry requirement &mdash; the hub checks yours against it.</p></div>
+    <div><p class="sub" data-i18n="skills.s">These are why most people start calisthenics. Each one has an entry requirement &mdash; the hub checks yours against it.</p></div>
     <div class="grid" id="skillTiles"></div>
     <div id="skillDetail"></div>
     <details class="fold">
@@ -2309,7 +2644,7 @@
   </section>
 
   <section class="view" id="v-mobility">
-    <div><h2 class="sec" data-i18n="mob.h">Mobility that earns its place</h2><p class="sub" data-i18n="mob.s">Under thirty minutes a week, aimed at the five restrictions that actually limit bodyweight training. Test yourself, then fix what fails.</p></div>
+    <div><p class="sub" data-i18n="mob.s">Under thirty minutes a week, aimed at the five restrictions that actually limit bodyweight training. Test yourself, then fix what fails.</p></div>
     <div class="card">
       <h4 data-i18n="mob.guided">Guided routine</h4>
       <div class="savebar">
@@ -2468,7 +2803,7 @@
   </section>
 
   <section class="view" id="v-you">
-    <div><h2 class="sec" data-i18n="you.h">You</h2><p class="sub" data-i18n="you.s">Baseline is week 1. Everything here is measured against your own start, not against anyone else.</p></div>
+    <div><p class="sub" data-i18n="you.s">Baseline is week 1. Everything here is measured against your own start, not against anyone else.</p></div>
     <div class="kpis" id="youKpis"></div>
     <div class="chartbox" id="blockHist" style="display:none">
       <h4 data-i18n="you.blocks">Your blocks so far</h4>
@@ -2552,7 +2887,7 @@
 
   <section class="view pushv" id="v-coach">
     <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Coach</b></div>
-    <div><h2 class="sec" data-i18n="coach.h">Coach</h2><p class="sub" data-i18n="coach.s">Reads everything you have entered and updates the moment you change a number. Ordered by what costs you the most.</p></div>
+    <div><p class="sub" data-i18n="coach.s">Reads everything you have entered and updates the moment you change a number. Ordered by what costs you the most.</p></div>
     <div class="coach" id="coachList"></div>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="coach.how">How this works</span></summary>
@@ -2622,7 +2957,11 @@
 
   <section class="view pushv" id="v-settings">
     <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Einstellungen</b></div>
-    <div><h2 class="sec" data-i18n="set.h">Settings</h2><p class="sub" data-i18n="set.s">Everything here is stored in your browser only.</p></div>
+    <!-- Uebersicht der Untermenues. Der Inhalt wird beim Start aus den
+         .form-Gruppen weiter unten erzeugt (setMenuBuild) -- so bleibt das
+         Menue automatisch richtig, wenn jemand spaeter eine Gruppe ergaenzt
+         oder entfernt. Von Hand gepflegte Menues laufen genau daran auf. -->
+    <div id="setIndex"></div>
     <!-- v16: Profilgruppe. Die Werte aus der Einfuehrung sind hier sichtbar
          und direkt nachjustierbar; die Beschriftung malt paintSetProfile in
          der jeweiligen Sprache. -->
@@ -2650,17 +2989,54 @@
         <div class="gt"><b data-i18n="set.display">Display and units</b></div></div>
       <div class="fgrid">
         <div class="field"><label data-i18n="set.lang">Language</label><div class="ctl"><select id="setLang"><option value="en">English</option><option value="de">Deutsch</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label data-i18n="set.units">Units</label><div class="ctl"><select id="setUnits"><option value="metric">Metric (kg, cm)</option><option value="imperial">Imperial (lb, in)</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label data-i18n="set.units">Units</label><div class="ctl"><select id="setUnits"><option value="metric" data-i18n="opt.metric">kg · cm</option><option value="imperial" data-i18n="opt.imperial">lb · in</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.start">Programme start</label><div class="ctl"><input id="setStart" type="date"></div></div>
-        <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="3">3 days - full body</option><option value="4">4 days - upper / lower</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected>Calm</option><option value="full">Full</option><option value="off">Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="3" data-i18n="opt.d3">3 Tage</option><option value="4" data-i18n="opt.d4">4 Tage</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected data-i18n="opt.calm">Ruhig</option><option value="full" data-i18n="opt.full">Voll</option><option value="off" data-i18n="opt.off">Aus</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <!-- Der Sparmodus laeuft automatisch nach Geraeteleistung. Hier laesst
              er sich erzwingen oder abschalten -- zum Testen, und fuer den Fall,
              dass ein Geraet sich staerker meldet als es ist. -->
-        <div class="field"><label data-i18n="set.spar">Performance mode</label><div class="ctl"><select id="setSpar"><option value="auto" selected>Automatic</option><option value="on">Always on</option><option value="off">Always off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="hint" id="sparNote"></span></div>
+        <div class="field"><label data-i18n="set.spar">Performance mode</label><div class="ctl"><select id="setSpar"><option value="auto" selected data-i18n="opt.auto">Auto</option><option value="on" data-i18n="opt.on">An</option><option value="off" data-i18n="opt.off">Aus</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="hint" id="sparNote"></span></div>
         <div class="field"><label data-i18n="set.sound">Timer sound</label><div class="ctl"><select id="setSound"><option value="on">On</option><option value="off" selected>Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
       <p class="hint" data-i18n="set.langNote">The interface translates fully. Chapter text and technique cues stay English in this prototype &mdash; the German edition follows with the book.</p>
+    </div>
+    <!-- ---- Erinnerungen ---------------------------------------------------
+         Was hier moeglich ist und was nicht, steht auch in der App selbst --
+         eine Erinnerung, die nicht kommt, ist schlimmer als gar keine:
+         Eine Web-App kann OHNE eigenen Server keine Benachrichtigung zu einer
+         festen Uhrzeit garantieren, waehrend sie geschlossen ist. Dafuer
+         braeuchte es Web Push mit einem Dienst, der die Nachricht schickt --
+         also einen Server, laufende Kosten und personenbezogene Daten
+         (Push-Adresse) bei einem Dritten. Beides haben wir bewusst nicht.
+         Was ohne Server geht, ist hier gebaut:
+           1. Ist die App offen, kommt der Hinweis auf die Minute genau.
+           2. Ist sie installiert und Chrome gewaehrt periodische
+              Hintergrundsynchronisierung, prueft der Service Worker im
+              Hintergrund mit. Der Browser bestimmt den Takt, nicht wir --
+              das kann eine Stunde daneben liegen.
+           3. Sonst kommt der Hinweis beim naechsten Oeffnen, sobald die
+              Uhrzeit ueberschritten ist ("du hast heute noch nicht ...").
+         Jeder Hinweis feuert hoechstens einmal pro Tag. -->
+    <div class="form">
+      <div class="gtitle"><span class="ichip" style="--chip:var(--brass)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg></span>
+        <div class="gt"><b data-i18n="set.notif">Reminders</b><span data-i18n="set.notifSub">A short nudge, nothing more.</span></div></div>
+      <div class="savebar" id="ntAskRow">
+        <button class="tbtn go" id="ntAllow" data-i18n="btn.ntAllow">Turn reminders on</button>
+      </div>
+      <div id="ntOpts" hidden>
+        <div class="fgrid">
+          <div class="field"><label data-i18n="set.ntTrain">Training reminder</label><div class="ctl"><select id="ntTrain"><option value="1" data-i18n="opt.on">On</option><option value="0" data-i18n="opt.off">Off</option></select></div></div>
+          <div class="field"><label data-i18n="set.ntTime">Time</label><div class="ctl"><input id="ntTime" type="time"></div></div>
+          <div class="field"><label data-i18n="set.ntStreak">Streak at risk</label><div class="ctl"><select id="ntStreak"><option value="1" data-i18n="opt.on">On</option><option value="0" data-i18n="opt.off">Off</option></select></div></div>
+          <div class="field"><label data-i18n="set.ntWeek">Weekly recap</label><div class="ctl"><select id="ntWeek"><option value="1" data-i18n="opt.on">On</option><option value="0" data-i18n="opt.off">Off</option></select></div></div>
+        </div>
+        <div class="savebar">
+          <button class="tbtn" id="ntTest" data-i18n="btn.ntTest">Send a test</button>
+          <button class="tbtn dngr" id="ntOff" data-i18n="btn.ntOff">Turn all off</button>
+        </div>
+      </div>
+      <p class="hint" id="ntNote"></p>
     </div>
     <div class="form">
       <div class="gtitle"><span class="ichip" style="--chip:#5B8DEF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.7 12 20 12 20Z"/><path d="M8 12h2.4l1.3-2.2 2 4 1.3-1.8H17"/></svg></span>
@@ -2703,7 +3079,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='22.2';
+var VERSION='23.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3013,6 +3389,26 @@ var DICT={
  'btn.obLater':['Later','Später'],
  'cat.h':['Exercise library','Übungskatalog'],
  'cat.s':['Every exercise the plan can use. Swap one on Today.','Alle Übungen des Plans. Getauscht wird auf HEUTE.'],
+ /* Erinnerungen. Bewusst kurz gehalten -- "Trainingserinnerung" statt
+    "Erinnerung an die heutige Trainingseinheit". */
+ 'set.notif':['Reminders','Erinnerungen'],
+ 'set.notifSub':['A short nudge, nothing more.','Ein kurzer Anstoß, mehr nicht.'],
+ 'set.ntTrain':['Training reminder','Trainingserinnerung'],
+ 'set.ntTime':['Time','Uhrzeit'],
+ 'set.ntStreak':['Streak at risk','Serie in Gefahr'],
+ 'set.ntWeek':['Weekly recap','Wochenrückblick'],
+ 'btn.ntAllow':['Turn reminders on','Erinnerungen einschalten'],
+ 'btn.ntTest':['Send a test','Test senden'],
+ 'btn.ntOff':['Turn all off','Alle aus'],
+ /* Beschriftungen der Segmente. Kurz, weil sie nebeneinander stehen und
+    sonst abgeschnitten werden -- und uebersetzt, was sie vorher nicht waren:
+    die deutsche Oberflaeche zeigte hier "Metric (kg, cm)", "3 days - full
+    body" und "Automatic". Die Einheiten kommen jetzt ganz ohne Wort aus,
+    "kg · cm" versteht jeder in jeder Sprache. */
+ 'opt.on':['On','An'],'opt.off':['Off','Aus'],
+ 'opt.metric':['kg · cm','kg · cm'],'opt.imperial':['lb · in','lb · in'],
+ 'opt.d3':['3 days','3 Tage'],'opt.d4':['4 days','4 Tage'],
+ 'opt.auto':['Auto','Auto'],'opt.calm':['Calm','Ruhig'],'opt.full':['Full','Voll'],
  'set.conn':['Connections','Verbindungen'],
  'set.health':['Apple Health','Apple Health'],
  'set.healthHow':['One-time iPhone setup: Shortcuts app, plus, name it exactly "VALKR Health", action "Log workout", type "Traditional Strength Training", duration: Shortcut Input, minutes.','Einmalig am iPhone: Kurzbefehle-App, Plus, exakt „VALKR Health" nennen, Aktion „Training protokollieren", Art „Traditionelles Krafttraining", Dauer: Kurzbefehl-Eingabe, Minuten.'],
@@ -3037,6 +3433,10 @@ function applyI18n(){
     var s=T(el.dataset.i18nTitle);el.title=s;el.setAttribute('aria-label',s);
   });
   var nv=$('nav');if(nv)nv.dataset.title=T('nav.moreTitle');
+  /* Segmentknoepfe und das Einstellungsmenue tragen kopierten Text -- beide
+     muessen nach jedem Sprachwechsel nachgezogen werden. */
+  if(typeof segcRelabel==='function')segcRelabel();
+  if(typeof setMenuPaint==='function')setMenuPaint();
   if(typeof paintSetProfile==='function')paintSetProfile();
   if(typeof devSync==='function')devSync();
   storeNote();
@@ -5420,7 +5820,12 @@ var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-st
    rechts über den Bereich), am Rechner normale Bereiche. */
 var GROUP={
   today:   {v:['today']},
-  train:   {v:['train','skills','mobility','test','plan'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Beweglichkeit'],['Test','Test'],['Weeks','Wochen']]},
+  /* "Beweglichkeit" ist ein deutsches Wort mit vierzehn Buchstaben, das in
+     einer Segmentleiste die halbe Breite frisst. "Mobility" versteht jeder,
+     der sich fuer Calisthenics interessiert -- es steht so in jedem Programm,
+     jedem Video und jeder anderen App. Dieselbe Ueberlegung wie bei Push,
+     Pull und Legs. */
+  train:   {v:['train','skills','mobility','test','plan'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Mobility'],['Test','Test'],['Weeks','Wochen']]},
   coach:   {v:['coach']},
   fuel:    {v:['fuel']},
   prog:    {v:['stat','ranks','you'],               l:[['Stats','Statistik'],['Ranks','Ränge'],['You','Du']]},
@@ -5478,6 +5883,8 @@ function show(n,fromBack){
       coach:'nav.coach',learn:'nav.learn',settings:'nav.settings'};
     var at=$('areTitle');
     if(at&&DICT[KOPFN[key]])at.textContent=DICT[KOPFN[key]][cfg.lang==='de'?1:0];
+    if(typeof strkPaint==='function')strkPaint();
+    if(typeof dockPaint==='function')dockPaint();
     var fc2=$('fuelCam');if(fc2)fc2.style.display=(key==='fuel')?'':'none';
     drawSub(key,n);
     [].forEach.call(document.querySelectorAll('#nav button'),function(b){b.setAttribute('aria-current',b.dataset.view===key?'true':'false');});
@@ -5487,6 +5894,10 @@ function show(n,fromBack){
   $('setBtn').setAttribute('aria-current',key==='settings'?'true':'false');
   closeMore();
   if(n==='today')renderHome();
+  /* Die Einstellungen oeffnen immer mit dem Menue, nie mit der zuletzt
+     besuchten Unterseite. Wer sie aufruft, sucht in der Regel etwas anderes
+     als beim letzten Mal. */
+  if(n==='settings'&&typeof setIndexShow==='function')setIndexShow();
   if(n==='fuel'){fuelOff=0;fuelPaint(true);}
   if(n==='kam')kamStart();
   else if(typeof kamAktiv!=='undefined'&&kamAktiv)kamStop();
@@ -5577,6 +5988,13 @@ function histBackStep(){
   el=$('modal');
   if(el&&el.classList.contains('on')){closeModal();return true;}
   if(sheetOpen){closeSheet();return true;}
+  /* Einstellungen: erst von der Unterseite zurueck ins Menue. Dieselbe
+     Reihenfolge wie beim Pfeil oben links -- die Zuruecktaste des Telefons
+     und der Pfeil muessen dasselbe tun, sonst raet man bei jedem Schritt. */
+  if(typeof setOffen!=='undefined'&&setOffen>=0){
+    el=$('v-settings');
+    if(el&&el.classList.contains('on')){setIndexShow();return true;}
+  }
   /* Schiebeansicht (Coach, Wissen, Einstellungen, Zugang, Detail, Kamera).
      Sie liegt als Vollbild ueber ihrem Bereich; zurueck heisst hier: wieder
      der Bereich darunter. Ohne diesen Zweig lief die Taste ins Leere -- die
@@ -5664,7 +6082,17 @@ document.addEventListener('keydown',function(e){
 });
 /* Zurueck-Pfeil jedes Push-Kopfes. */
 [].forEach.call(document.querySelectorAll('.pushback'),function(b){
-  b.addEventListener('click',function(){popPush();});
+  b.addEventListener('click',function(){
+    /* In den Einstellungen fuehrt der Pfeil erst eine Ebene hoch -- von der
+       Unterseite zurueck ins Menue -- und erst von dort aus der Ansicht
+       heraus. Ohne das waere jede Unterseite eine Sackgasse, aus der man nur
+       mit zwei Schritten zurueck an dieselbe Stelle kaeme. */
+    if(typeof setOffen!=='undefined'&&setOffen>=0){
+      var sv=$('v-settings');
+      if(sv&&sv.classList.contains('on')){setIndexShow();return;}
+    }
+    popPush();
+  });
 });
 $('sheetBody').addEventListener('click',function(e){
   var b=e.target.closest('button[data-view]');if(!b)return;
@@ -5785,11 +6213,16 @@ function renderDay(){
     ?' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+curBlock().n[cfg.lang==='de'?1:0]:'');
   $('jumpToday').style.display=isT?'none':'';
   drawStrip();
-  $('h-tag').textContent=(pl.w>=1&&pl.w<=12)?((cfg.lang==='de'?'Tag ':'Day ')+(((dIdx(d)%7)+7)%7+1)+(cfg.lang==='de'?' der Woche':' of the week')):(pl.note||'');
+  /* Ausserhalb der zwoelf Wochen traegt schon die Kopfzeile der Karte die
+     Notiz ("Programm beginnt am ..."). Sie stand danach ein zweites Mal in
+     der Fusszeile derselben Karte -- zweimal derselbe Satz, sechs Zeilen
+     auseinander. Deshalb merkt sich tagNote, wo sie hingekommen ist. */
+  var tagNote=!(pl.w>=1&&pl.w<=12);
+  $('h-tag').textContent=tagNote?(pl.note||''):((cfg.lang==='de'?'Tag ':'Day ')+(((dIdx(d)%7)+7)%7+1)+(cfg.lang==='de'?' der Woche':' of the week'));
   $('h-title').textContent=pl.title;$('h-sub').textContent=pl.sub||'';
   $('h-meta').innerHTML=pl.kind==='train'
     ?'<span>'+(cfg.lang==='de'?'Sätze':'Sets')+' <b>'+pl.ph.sets+'</b></span><span>'+(cfg.lang==='de'?'Wdh':'Reps')+' <b>'+pl.ph.reps+'</b></span><span>'+(cfg.lang==='de'?'Pause':'Rest')+' <b>'+pl.ph.rest+'</b></span>'
-    :(pl.note?'<span>'+pl.note+'</span>':'');
+    :((pl.note&&!tagNote)?'<span>'+pl.note+'</span>':'');
   var list=$('today-list');list.innerHTML='';
   var dn=doneMap[key]||{};
   var items=pl.kind==='train'?sessOf(pl).items.map(function(x){return{id:x.id,l:x.l,k:x.k,v:x.v||(pl.ph.sets+' x '+pl.ph.reps)};}):(pl.items||[]).map(function(x){return{id:null,l:x.l,v:x.v};});
@@ -6477,14 +6910,33 @@ function openRun(){
   $('runner').classList.add('on');histArm();$('runner').setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
   fxPause();
-  runPaint();
+  runPaint();dockPaint();
 }
 function closeRun(){
   $('runner').classList.remove('on');$('runner').setAttribute('aria-hidden','true');
   document.body.style.overflow='';
   fxResume();
-  runStopTi();renderDay();refresh();
+  runStopTi();renderDay();refresh();dockPaint();
 }
+/* Leiste der laufenden Einheit unten. Sie liest denselben Zustand wie der
+   Trainingsmodus -- keine zweite Quelle, keine Gefahr, dass beide etwas
+   anderes behaupten. */
+function dockPaint(){
+  var d=$('rundock');if(!d)return;
+  var it=runValid()?runItems():null;
+  var offen=$('runner')&&$('runner').classList.contains('on');
+  if(!it||offen){d.hidden=true;document.body.classList.remove('hasrun');return;}
+  var DE=cfg.lang==='de',pl=plan(TODAY);
+  for(var vz=1;vz<=14&&pl.kind!=='train';vz++)pl=plan(add(TODAY,vz));
+  $('rdName').textContent=pl.title||(DE?'Einheit':'Session');
+  $('rdProg').textContent=(DE?'Übung ':'Exercise ')+Math.min(run.ex+1,it.length)+'/'+it.length;
+  $('rdGo').textContent=DE?'Weiter':'Resume';
+  d.hidden=false;document.body.classList.add('hasrun');
+}
+(function(){
+  var d=$('rundock');if(!d)return;
+  d.addEventListener('click',function(){if(runValid())openRun();else dockPaint();});
+})();
 function runStopTi(){if(runTi){clearInterval(runTi);runTi=null;}}
 function runStartTi(){
   runStopTi();
@@ -6610,7 +7062,7 @@ function runPaint(){
   hint.textContent=cur.fixed
     ?(DE?'Frisch und kurz halten, deutlich vor dem Versagen aufhören.':'Keep it fresh and brief, stop well short of failure.')
     :cur.cal
-    ?(DE?'Einmessen, Satz '+run.set+' von '+cur.sets+': so viele saubere Wiederholungen wie drin sind, Zahl eintragen. Damit stellt sich deine Leiter.':'Calibration, set '+run.set+' of '+cur.sets+': as many clean reps as you have, then enter the number. This sets your ladder.')
+    ?(DE?'Satz '+run.set+' von '+cur.sets+' · so viele saubere Wiederholungen wie möglich':'Set '+run.set+' of '+cur.sets+' · as many clean reps as possible')
     :(DE?'Satz '+run.set+' von '+cur.sets+' · Pause danach '+fmt(cur.rest):'Set '+run.set+' of '+cur.sets+' · rest after: '+fmt(cur.rest))+
      (run.adj<0?(DE?' · heute reduziert':' · reduced today'):'');
   if(cur.fixed){reps.innerHTML='';}
@@ -9103,7 +9555,10 @@ function renderHome(){
     heroEl.innerHTML='<button type="button" class="hcard" data-run="1">'+
       '<span class="hcMain"><p class="tag">'+tag+'</p><h3>'+pl.title+'</h3>'+
       '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+' · '+Object.keys(muster).join(' · ')+'</p>'+
-      '<span class="hcGo">'+(DE?'Starten':'Start')+' ▸</span></span>'+
+      /* Laeuft die Einheit schon, heisst der Knopf "Weiter". "Starten" auf
+         etwas Laufendes zu schreiben ist die Art kleiner Unehrlichkeit, an
+         der man merkt, dass eine App ihren eigenen Zustand nicht kennt. */
+      '<span class="hcGo">'+(runValid()?(DE?'Weiter':'Resume'):(DE?'Starten':'Start'))+' ▸</span></span>'+
       '<span class="hcThumbs">'+thumbs+'</span></button>';
   }else{
     heroEl.innerHTML='<button type="button" class="hcard" data-go="train">'+
@@ -9219,12 +9674,26 @@ function renderHome(){
     var b=e.target.closest('[data-go]');if(b)show(b.dataset.go);
   });
 });
-function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks();coachPulse();syncUndo();renderHome();pauseHiddenSvg();}
+/* Serien-Chip in der Kopfzeile. Eine einzige Quelle -- streak(). Vorher stand
+   die Zahl an drei Stellen und zwei davon lasen sie aus der Anzeige zurueck. */
+function strkPaint(){
+  var c=$('strkChip'),el=$('strkNum');if(!c||!el)return;
+  var n=streak(),DE=cfg.lang==='de';
+  el.textContent=n;
+  c.classList.toggle('zero',n===0);
+  c.setAttribute('aria-label',(DE?'Serie: ':'Streak: ')+n+(DE?' Tage':' days'));
+  c.title=c.getAttribute('aria-label');
+}
+$('strkChip').addEventListener('click',function(){showTop('prog');});
+function refresh(){youKpis();runCoach();dataStats();evalAch(false);renderRanks();coachPulse();syncUndo();renderHome();strkPaint();dockPaint();pauseHiddenSvg();}
 ['y-sleep','y-mood','y-sore','y-stress'].forEach(function(id){$(id).addEventListener('input',function(){refresh();calc();});$(id).addEventListener('change',function(){refresh();calc();});});
 $('y-goal').addEventListener('input',function(){set('goal',this.value);});
 /* ---------- themes ---------- */
 var PACKS=[
- {id:'onyx',n:['Onyx','Onyx'],fx:'pollen',d:['Dust','Staub'],c:['#08080C','#A78BFA','#C4B5FD']},
+ /* Die drei Farbtupfer sind die Vorschau des Themes in der Auswahl. Fuer
+    Onyx standen hier noch die alten violetten Werte -- die Vorschau zeigte
+    also eine Farbgebung, die es seit dem Umbau nicht mehr gibt. */
+ {id:'onyx',n:['Onyx','Onyx'],fx:'pollen',d:['Dust','Staub'],c:['#000000','#E8BE51','#3ED9A8']},
  {id:'auto',n:['Auto','Auto'],fx:'snow',d:['Follows your system','Folgt dem System'],c:['#35C39C','#7FCDE4','#D4A73C']},
  {id:'aurora',n:['Aurora night','Polarnacht'],fx:'snow',d:['Snow','Schnee'],c:['#08151E','#35C39C','#7FCDE4']},
  {id:'jungle',n:['Jungle','Dschungel'],fx:'fireflies',d:['Fireflies','Glühwürmchen'],c:['#07130D','#57D07C','#C9E265']},
@@ -10301,7 +10770,16 @@ $('setStart').addEventListener('change',function(){
 var cv=$('bgfx'),cx=cv.getContext('2d'),W=0,H=0,parts=[],shots=[],mouse={x:-999,y:-999},raf=null;
 /* „Ruhig" heisst weniger Partikel, nicht keine -- ein paar driftende Punkte
    und ein seltener Lichtstreif sind das, was Atmosphaere ausmacht. */
-function fxOn(){return !SYSRED&&cfg.motion==='full'&&fxOf()!=='none';}
+/* Die Partikel waren im Auslieferungszustand AUS -- und niemand hat es
+   gemerkt, weil es genau so aussieht wie "es gibt keine".
+   Der Grund: die Voreinstellung fuer Bewegung ist "ruhig", und diese Zeile
+   verlangte "voll". Zwei Zeilen weiter unten steht aber seit jeher eine
+   eigene, halbierte Partikelzahl fuer den ruhigen Modus (14 bis 30 statt 24
+   bis 64) -- die war damit toter Code. Es gab also einen fertigen leisen
+   Modus, den niemand je zu Gesicht bekommen hat.
+   Jetzt: Partikel laufen bei "ruhig" und bei "voll", nur "aus" ist aus. Wer
+   sie nicht will, schaltet sie in den Einstellungen ab. */
+function fxOn(){return !SYSRED&&cfg.motion!=='off'&&fxOf()!=='none';}
 function fxCalm(){return cfg.motion==='calm';}
 function pcol(){return cvar('--part')||'200,220,230';}
 function sizeCv(){
@@ -10838,13 +11316,17 @@ function renderRanks(){
   var lps=PAT.map(patLP),avg=Math.round(lps.reduce(function(a,b){return a+b;},0)/lps.length);
   var t=tierOf(avg);
   if(t.t!==curTier){curTier=t.t;buildTiles();buildSkills();renderDay();}
-  $('rkBadge').innerHTML=badgeSvg(t.t,72);
+  $('rkBadge').innerHTML=badgeSvg(t.t,96);
   $('rkTier').textContent=t.label;
   $('rkTier').style.color=t.col;
   var wks=wkStats();
+  /* Kurz gefasst. Vorher: "Gesamtrang · 0 aktive Wochen · Limit 40 LP" --
+     drei Begriffe, von denen zwei erklaerungsbeduerftig sind, in einer Zeile,
+     die auf dem Telefon dreimal umbrach. "Gesamtrang" sagt ausserdem nichts:
+     dass das der Gesamtrang ist, sieht man daran, dass er ganz oben steht. */
   $('rkSub').textContent=(cfg.lang==='de'
-    ?('Gesamtrang · '+wks.active+(wks.active===1?' aktive Woche':' aktive Wochen')+' · Limit '+wks.cap+' LP')
-    :('Overall rank · '+wks.active+(wks.active===1?' active week':' active weeks')+' · cap '+wks.cap+' LP'));
+    ?(wks.active+(wks.active===1?' aktive Woche':' aktive Wochen')+' · max. '+wks.cap+' LP')
+    :(wks.active+(wks.active===1?' active week':' active weeks')+' · max '+wks.cap+' LP'));
   $('rkBar').style.width=Math.round(t.within/100*100)+'%';
   $('rkLp').textContent = t.t<0
     ? (cfg.lang==='de'?('Noch ohne Rang — '+Math.max(0,25-avg)+' LP bis Holz III'):('Unranked — '+Math.max(0,25-avg)+' LP to Wood III'))
@@ -10880,8 +11362,10 @@ function renderRanks(){
   $('rankList').innerHTML=PAT.map(function(p,i){
     var pt=tierOf(lps[i]);
     return '<div class="rankRow">'+
-      '<span class="rtop">'+badgeSvg(pt.t,22)+'<span class="nm"><b>'+p.name+'</b><span>'+pt.label+'</span></span></span>'+
-      '<span class="lpbar"><i style="width:'+pt.within+'%"></i></span>'+
+      '<span class="tl" style="color:'+pt.col+'">'+pt.label+'</span>'+
+      '<b>'+p.name+'</b>'+
+      '<span class="bdg">'+badgeSvg(pt.t,48)+'</span>'+
+      '<span class="lpbar"><i style="width:'+pt.within+'%;background:'+pt.col+'"></i></span>'+
       '<span class="lpn">'+lps[i]+' LP</span></div>';
   }).join('');
   /* Abzeichen nach Kategorie, jede zugeklappt. Vorher standen alle achtund-
@@ -10988,106 +11472,6 @@ function renderBoard(avgLp){
     ? '<b>Nur deine Zeile ist echt.</b> Die mit * markierten sind erfundene Beispiele, damit du das Layout siehst. Eine wirklich geteilte Bestenliste braucht einen Server — die Seite hier speichert alles nur lokal im Browser. Wertung bewusst nach <b>Planerfüllung, Serie und Level</b>, nicht nach Wiederholungen: selbst eingetragene Kraftwerte kann jeder erfinden, Dranbleiben nicht. Ein „Alles zurücksetzen" leert auch XP, Level und deine Zeile hier.'
     : '<b>Only your row is real.</b> The ones marked * are invented examples so you can see the layout. A genuinely shared board needs a server — this page stores everything locally in your browser. Ranked on <b>plan adherence, streak and level</b> rather than reps on purpose: self-reported strength is trivial to fake, showing up is not. "Reset everything" also clears XP, level and your row here.';
 }
-
-/* ---------- Ueberziehen am Rand ------------------------------------------
-   1. Chrome auf Android laedt die Seite neu, wenn man oben nach unten zieht.
-      Safari kennt das nicht -- deshalb war es auf dem iPhone kein Problem.
-      Abgeschaltet wird es im CSS mit overscroll-behavior.
-   2. Dafuer fehlt Android das Gummiband, das iOS von selbst hat.
-
-   WARUM ES ZWEIMAL GERUCKELT HAT -- und was diesmal wirklich die Ursache war:
-
-   Erster Versuch (v19.8): die Ansicht wurde verschoben, ohne dass der Browser
-   vorher wusste, dass sie sich bewegen wird. Behoben mit will-change.
-
-   Zweiter Versuch (v19.9): immer noch starkes Ruckeln. Die eigentliche Ursache
-   sass an einer ganz anderen Stelle und war schlimmer, weil sie NICHT nur am
-   Rand wirkte:
-
-       return s+window.innerHeight >= document.documentElement.scrollHeight-1;
-
-   scrollHeight ist kein gespeicherter Wert. Wer ihn liest, zwingt den Browser,
-   sofort das gesamte Layout durchzurechnen -- mitten im Beruehrungsereignis,
-   bevor er weiterlaufen darf. Und diese Zeile lief bei JEDER Fingerbewegung
-   nach oben, also bei jedem normalen Herunterscrollen. Nicht das Gummiband war
-   langsam, sondern das Scrollen selbst, und zwar in der ganzen App.
-
-   Jetzt wird die Grenze EINMAL beim Aufsetzen des Fingers gemessen. Waehrend
-   einer Wischbewegung aendert sich die Seitenhoehe ohnehin nicht. */
-(function(){
-  if(!('ontouchstart' in window))return;
-  /* iOS hat das Gummiband nativ -- dort ist dieses Skript doppelt und war
-     sogar schaedlich: das will-change bei jeder Beruehrung machte die ganze
-     Ansicht zu einer Safari-Kachel-Ebene, und beim Scrollen blieben
-     veraltete Kacheln als doppelte Textzeilen stehen (Liams iPhone-Video).
-     Die Klasse am html-Element stellt oben im CSS zusaetzlich das native
-     Ueberziehen wieder an. */
-  var istIOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(/Mac/.test(navigator.userAgent)&&navigator.maxTouchPoints>1);
-  if(istIOS){document.documentElement.classList.add('ios');return;}
-  var el=null,y0=0,zieh=0,soll=0,los=false,raf=0,maxScroll=0,fensterH=0,ebene=false;
-  function sichtbareAnsicht(){
-    var v=document.querySelector('.view.on');
-    if(!v||getComputedStyle(v).position==='fixed')return null;
-    return v;
-  }
-  function oben(){return (window.pageYOffset||document.documentElement.scrollTop||0)<=0;}
-  function unten(){return (window.pageYOffset||document.documentElement.scrollTop||0)>=maxScroll-1;}
-  /* Gedaempft und begrenzt: die ersten Pixel folgen dem Finger fast eins zu
-     eins, danach wird es zaeh und laeuft gegen 84 Pixel. */
-  function daempfen(d){
-    var s=d<0?-1:1;
-    return s*84*(1-Math.exp(-Math.abs(d)/250));
-  }
-  function zeichne(){
-    raf=0;
-    if(!el)return;
-    zieh=soll;
-    el.style.transform=zieh?'translate3d(0,'+zieh.toFixed(1)+'px,0)':'';
-  }
-  function anfordern(){if(!raf)raf=requestAnimationFrame(zeichne);}
-  document.addEventListener('touchstart',function(e){
-    if(e.touches.length!==1)return;
-    el=sichtbareAnsicht();
-    if(!el)return;
-    y0=e.touches[0].clientY;zieh=0;soll=0;los=false;ebene=false;
-    /* Einmal messen, dann nicht mehr anfassen. Das ist der teure Teil -- er
-       gehoert hierher, wo noch nichts in Bewegung ist, nicht in die
-       Bewegung selbst. Die Ebene (will-change) wird NICHT hier angemeldet,
-       sondern erst, wenn das Band wirklich greift: sonst laeuft jedes
-       normale Scrollen ueber eine Riesen-Kachel-Ebene. */
-    fensterH=window.innerHeight;
-    maxScroll=Math.max(0,document.documentElement.scrollHeight-fensterH);
-  },{passive:true});
-  document.addEventListener('touchmove',function(e){
-    if(!el||e.touches.length!==1)return;
-    var d=e.touches[0].clientY-y0;
-    if((d>0&&oben())||(d<0&&unten())){
-      if(!ebene){ebene=true;el.style.transition='';el.style.willChange='transform';}
-      los=true;soll=daempfen(d);anfordern();
-    }else if(los){
-      los=false;soll=0;anfordern();
-    }
-  },{passive:true});
-  function zurueck(){
-    if(!el)return;
-    var e2=el;
-    if(raf){cancelAnimationFrame(raf);raf=0;}
-    if(zieh||soll){
-      e2.style.transition='transform .32s cubic-bezier(.22,1,.32,1)';
-      e2.style.transform='';
-      setTimeout(function(){e2.style.transition='';e2.style.willChange='';},340);
-    }else{
-      e2.style.transform='';e2.style.willChange='';
-    }
-    el=null;zieh=0;soll=0;los=false;
-  }
-  document.addEventListener('touchend',zurueck,{passive:true});
-  document.addEventListener('touchcancel',zurueck,{passive:true});
-  document.addEventListener('vkview',function(){
-    var v=document.querySelector('.view.on');
-    if(v){v.style.transition='';v.style.transform='';v.style.willChange='';}
-  });
-})();
 
 /* ---------- Kein Zoom ----------------------------------------------------
    Eine App zoomt nicht. Ein versehentliches Aufziehen mit zwei Fingern
@@ -11231,6 +11615,11 @@ function paintSetProfile(){
     profile.bf=parseInt(bs.value,10);set('profile',profile);
     $('setBfVal').innerHTML=profile.bf+'&nbsp;<small style="color:var(--ink3)">%</small>';
   });
+  /* Das Profil baut seine Zeilen bei jedem Sprachwechsel neu auf. Damit sind
+     alle vorher umgebauten Auswahlfelder wieder normale Auswahlfelder --
+     also gleich hier nachziehen, sonst steht mitten in den Einstellungen ein
+     einzelnes Aufklappfeld zwischen lauter Segmentleisten. */
+  if(typeof ctlUpgrade==='function')ctlUpgrade(host);
 }
 var reOnbBtn=$('reOnb');
 if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
@@ -11280,18 +11669,406 @@ sizeCv();
       Eintrag an. */
 show('today');
 
-/* Startbild wegblenden, sobald alles steht. Mindestens 700 ms, damit die
-   Zeichenanimation nicht mitten im Strich abbricht -- auf einem schnellen
-   Geraet waere sie sonst ein Zucken. */
+/* ---------- Einstellungen: Menue, Segmentleisten, Schalter ---------------
+   Drei Dinge, ein Ziel: die Einstellungsseite soll nicht mehr aussehen wie
+   ein Formular aus einem Bueroprogramm.
+
+   Wichtig am Vorgehen: die vorhandenen <select>-Elemente BLEIBEN im
+   Dokument, sie werden nur unsichtbar. Die neue Bedienung setzt ihren Wert
+   und loest change aus. Dadurch musste keine einzige der bestehenden
+   Zuhoerer-Funktionen angefasst werden -- und wer spaeter ein Auswahlfeld
+   ergaenzt, bekommt die neue Darstellung geschenkt. */
+
+/* Ein Auswahlfeld mit genau zwei An/Aus-Werten wird ein Schalter, alles
+   andere bis vier Werten eine Segmentleiste. Die Erkennung laeuft ueber die
+   Werte, nicht ueber die Kennung -- so gilt sie auch fuer alles Kuenftige. */
+function istSchalter(sel){
+  if(sel.options.length!==2)return false;
+  var a=String(sel.options[0].value).toLowerCase(),b=String(sel.options[1].value).toLowerCase();
+  return (a==='1'&&b==='0')||(a==='0'&&b==='1')||(a==='on'&&b==='off')||(a==='off'&&b==='on');
+}
+function segcSync(box){
+  var sel=box._sel,btns=box._btns,i=0,k;
+  for(k=0;k<sel.options.length;k++)if(sel.options[k].value===sel.value)i=k;
+  for(k=0;k<btns.length;k++)btns[k].setAttribute('aria-checked',k===i?'true':'false');
+  var laeufer=box.querySelector('i');
+  if(!laeufer)return;
+  var n=btns.length;
+  /* Zwei verschiedene Bezugsgroessen, und genau daran ist es zuerst
+     schiefgegangen:
+       width  in Prozent  -> bezieht sich auf den ELTERNBLOCK
+       translateX in Proz -> bezieht sich auf die EIGENE Breite
+     Beim ersten Versuch stand in beiden dieselbe Rechnung. Die Breite stimmte
+     damit, die Verschiebung war ein Viertel statt einer Haelfte -- der Balken
+     stand zwischen den Segmenten.
+     Da der Balken genau ein Segment breit ist, verschiebt ihn 100 % je Segment
+     exakt um eine Position. Kein Rechnen, kein Rundungsfehler. */
+  laeufer.style.setProperty('--segw','calc((100% - 6px)/'+n+')');
+  laeufer.style.setProperty('--segx',(i*100)+'%');
+}
+function segcBuild(sel){
+  if(sel.dataset.up)return;
+  var n=sel.options.length;
+  if(n<2||n>4)return;                    /* mehr als vier gehoert in ein Blatt */
+  sel.dataset.up='1';
+  var ctl=sel.parentNode,box=document.createElement('div');
+  box.className='segc';box.setAttribute('role','radiogroup');
+  var laeufer=document.createElement('i');laeufer.setAttribute('aria-hidden','true');
+  box.appendChild(laeufer);
+  var btns=[];
+  [].forEach.call(sel.options,function(o,i){
+    var b=document.createElement('button');
+    b.type='button';b.setAttribute('role','radio');b.textContent=o.textContent;
+    b.addEventListener('click',function(){
+      if(sel.value===o.value)return;
+      sel.value=o.value;
+      sel.dispatchEvent(new Event('change',{bubbles:true}));
+      segcSync(box);
+    });
+    box.appendChild(b);btns.push(b);
+  });
+  box._sel=sel;box._btns=btns;
+  if(ctl.classList)ctl.classList.add('hasSeg');
+  var feld=sel.closest?sel.closest('.field'):null;
+  if(feld)feld.classList.add('segf');
+  ctl.appendChild(box);
+  /* Beim ersten Zeichnen nicht animieren -- sonst faehrt der Balken beim
+     Oeffnen der Seite sichtbar von links an seinen Platz. */
+  box.classList.add('busy');
+  segcSync(box);
+  setTimeout(function(){box.classList.remove('busy');},60);
+  sel.addEventListener('change',function(){segcSync(box);});
+  sel._segc=box;
+}
+function swBuild(sel){
+  if(sel.dataset.up)return;
+  sel.dataset.up='1';
+  var feld=sel.closest('.field'),ctl=sel.parentNode;
+  var an=String(sel.options[0].value).toLowerCase();
+  var anWert=(an==='1'||an==='on')?sel.options[0].value:sel.options[1].value;
+  var ausWert=(anWert===sel.options[0].value)?sel.options[1].value:sel.options[0].value;
+  var b=document.createElement('button');
+  b.type='button';b.className='sw';b.setAttribute('role','switch');
+  var mal=function(){b.setAttribute('aria-checked',sel.value===anWert?'true':'false');};
+  b.addEventListener('click',function(){
+    sel.value=(sel.value===anWert)?ausWert:anWert;
+    sel.dispatchEvent(new Event('change',{bubbles:true}));
+    mal();
+  });
+  sel.addEventListener('change',mal);
+  ctl.appendChild(b);mal();
+  if(feld){
+    feld.classList.add('swf');
+    var lab=feld.querySelector('label');
+    if(lab)b.setAttribute('aria-label',lab.textContent);
+  }
+  sel._sw=b;
+}
+function ctlUpgrade(root){
+  if(!root)return;
+  [].forEach.call(root.querySelectorAll('select'),function(sel){
+    if(sel.dataset.noup)return;
+    if(istSchalter(sel))swBuild(sel);else segcBuild(sel);
+  });
+}
+/* Beim Sprachwechsel aendert die Uebersetzung den Text der <option>-Elemente.
+   Die Segmentknoepfe haben ihren Text beim Bauen kopiert und wuerden sonst
+   in der alten Sprache stehen bleiben -- ein Fehler, der erst auffaellt,
+   wenn jemand die Sprache umstellt, und dann sehr billig aussieht. */
+function segcRelabel(){
+  [].forEach.call(document.querySelectorAll('select[data-up]'),function(sel){
+    var box=sel._segc;if(!box)return;
+    box._btns.forEach(function(b,i){if(sel.options[i])b.textContent=sel.options[i].textContent;});
+    box.classList.add('busy');segcSync(box);
+    setTimeout(function(){box.classList.remove('busy');},60);
+  });
+}
+
+/* ---- Menue mit Unterseiten ----
+   Gebaut aus den vorhandenen Gruppen, nicht von Hand gepflegt. */
+var setOffen=-1;
+function setGruppen(){
+  var v=$('v-settings');if(!v)return [];
+  return [].filter.call(v.children,function(el){return el.classList&&el.classList.contains('form');});
+}
+function setStand(i){
+  /* Der aktuelle Stand direkt in der Uebersichtszeile. Das ist der Punkt, an
+     dem wir es besser machen als die Vorbilder: dort muss man in jede
+     Unterseite hineingehen, um zu sehen, was eingestellt ist. */
+  var DE=cfg.lang==='de',v;
+  switch(i){
+    case 0: return ($('setProfSub')||{}).textContent||'';
+    case 1: v=null;PACKS.forEach(function(x){if(x.id===pack)v=x;});
+            return v?v.n[DE?1:0]:'';
+    case 2: return [ (cfg.lang==='de'?'Deutsch':'English'),
+                     (($('setUnits')||{}).value==='metric'?(DE?'metrisch':'metric'):(DE?'imperial':'imperial')) ].join(' · ');
+    case 3: var c=(typeof ntGet==='function')?ntGet():null;
+            if(typeof Notification==='undefined'||Notification.permission!=='granted')return DE?'Aus':'Off';
+            var an=[];if(c.train)an.push(c.time);if(c.streak)an.push(DE?'Serie':'Streak');if(c.week)an.push(DE?'Woche':'Week');
+            return an.length?an.join(' · '):(DE?'Aus':'Off');
+    case 4: return (($('setHealth')||{}).value==='off')?(DE?'Nicht verbunden':'Not connected'):'Apple Health';
+    case 5: return DE?'Sichern, laden, zurücksetzen':'Export, import, reset';
+  }
+  return '';
+}
+function setMenuPaint(){
+  var idx=$('setIndex');if(!idx)return;
+  var g=setGruppen(),DE=cfg.lang==='de',h='<div class="srows">';
+  g.forEach(function(el,i){
+    var chip=el.querySelector('.gtitle .ichip'),t=el.querySelector('.gtitle .gt b');
+    h+='<button type="button" class="srow" data-pane="'+i+'">'+
+       (chip?chip.outerHTML:'')+
+       '<span class="st"><b>'+(t?t.textContent:'')+'</b><em>'+setStand(i)+'</em></span>'+
+       '<svg class="chev" width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg>'+
+       '</button>';
+  });
+  h+='</div><p class="hint">'+(DE
+    ?'Alles hier bleibt auf diesem Gerät. Kein Konto, kein Server, keine Übertragung.'
+    :'Everything here stays on this device. No account, no server, nothing transmitted.')+'</p>';
+  idx.innerHTML=h;
+}
+function setPane(i){
+  var g=setGruppen();if(!g[i])return;
+  setOffen=i;
+  $('setIndex').hidden=true;
+  g.forEach(function(el,k){el.hidden=(k!==i);});
+  var t=g[i].querySelector('.gtitle .gt b');
+  var kopf=$('v-settings').querySelector('.pushhead b');
+  if(kopf)kopf.textContent=t?t.textContent:'';
+  /* Die Gruppenueberschrift in der Unterseite selbst waere jetzt doppelt --
+     sie steht bereits im Kopf. */
+  var gt=g[i].querySelector('.gtitle');if(gt)gt.hidden=true;
+  var vw=$('v-settings');if(vw)vw.scrollTop=0;
+}
+function setIndexShow(){
+  setOffen=-1;
+  setGruppen().forEach(function(el){
+    el.hidden=true;
+    var gt=el.querySelector('.gtitle');if(gt)gt.hidden=false;
+  });
+  var idx=$('setIndex');if(idx)idx.hidden=false;
+  setMenuPaint();
+  var kopf=$('v-settings').querySelector('.pushhead b');
+  if(kopf)kopf.textContent=T('nav.settings');
+  var vw=$('v-settings');if(vw)vw.scrollTop=0;
+}
+function setMenuBuild(){
+  var v=$('v-settings');if(!v)return;
+  ctlUpgrade(v);
+  var idx=$('setIndex');
+  if(idx)idx.addEventListener('click',function(e){
+    var b=e.target.closest('[data-pane]');
+    if(b)setPane(+b.dataset.pane);
+  });
+  setIndexShow();
+}
+
+/* ---------- Erinnerungen -------------------------------------------------
+   Ehrlich, was hier geht und was nicht:
+
+   Eine Web-App kann OHNE eigenen Server keine Benachrichtigung zu einer
+   festen Uhrzeit ausloesen, waehrend sie geschlossen ist. Dafuer braeuchte
+   es Web Push -- einen Dienst, der von aussen anklopft. Das heisst Server,
+   laufende Kosten und die Push-Adresse jedes Nutzers bei einem Dritten.
+   Beides wollen wir nicht: die App haelt alles auf dem Geraet, und das ist
+   eines ihrer Versprechen.
+
+   Was ohne Server funktioniert, ist gebaut:
+     1. Ist die App offen, kommt der Hinweis auf die Minute genau -- ein
+        Wecker, der jede Minute nachsieht.
+     2. War sie zu, kommt er beim naechsten Oeffnen nach, sobald die Uhrzeit
+        ueberschritten ist. "Du hast heute noch nicht trainiert" stimmt dann
+        immer noch.
+
+   Was bewusst NICHT gebaut ist: periodische Hintergrundsynchronisierung.
+   Sie gibt es nur in Chrome, nur bei installierter App, der Browser
+   bestimmt den Takt selbst (in der Praxis Stunden), und der Service Worker
+   kaeme an diese Einstellungen nur ueber eine zweite Datenhaltung. Viel
+   Technik fuer eine Erinnerung, die trotzdem irgendwann kommt -- und eine
+   Erinnerung, die eine Stunde zu spaet eintrifft, ist schlimmer als keine.
+
+   Jeder Hinweis feuert hoechstens einmal pro Tag. */
+/* Vorgabewerte als FUNKTION, nicht als var.
+   Das war zweimal derselbe Absturz beim Start: hier stand
+   "var NTDEF={...}", und ntGet() las NTDEF.time. Funktionsdeklarationen
+   gelten im ganzen Gueltigkeitsbereich -- die Zuweisung eines var erst ab
+   ihrer eigenen Zeile. Jeder Aufruf von ntGet() aus einer weiter oben
+   stehenden Zeile bekam also undefined.time und riss den Start ab; sichtbar
+   war davon nur, dass das Startbild stehen blieb.
+   Als Funktion kann genau das nicht mehr passieren, egal wer wann aufruft. */
+function ntStd(){return {train:1,streak:1,week:1,time:'18:00'};}
+function ntGet(){
+  var c=get('nt',null);if(!c||typeof c!=='object')c={};
+  var d=ntStd();
+  return {train:c.train===0?0:1,streak:c.streak===0?0:1,week:c.week===0?0:1,
+          time:(typeof c.time==='string'&&/^\d\d:\d\d$/.test(c.time))?c.time:d.time};
+}
+function ntSave(c){set('nt',c);}
+function ntOK(){return (typeof Notification!=='undefined')&&Notification.permission==='granted';}
+/* Ueber den Service Worker anzeigen, wenn es ihn gibt: nur so bleibt der
+   Hinweis stehen, wenn das Fenster inzwischen zu ist. Sonst direkt. */
+function ntShow(titel,text,tag){
+  if(!ntOK())return;
+  var opt={body:text,tag:tag,icon:'valkr-icon-192.png',badge:'valkr-icon-192.png',
+           lang:cfg.lang==='de'?'de':'en'};
+  try{
+    if(navigator.serviceWorker&&navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(function(reg){
+        if(reg&&reg.showNotification)reg.showNotification(titel,opt);
+        else new Notification(titel,opt);
+      })['catch'](function(){try{new Notification(titel,opt);}catch(e){}});
+    }else new Notification(titel,opt);
+  }catch(e){}
+}
+/* Welcher Hinweis ist heute schon raus? Ein Datum je Art, damit nichts
+   doppelt kommt -- auch nicht, wenn die App mehrfach geoeffnet wird. */
+function ntLast(){var l=get('ntLast',null);return (l&&typeof l==='object')?l:{};}
+function ntMark(art,schluessel){var l=ntLast();l[art]=schluessel;set('ntLast',l);}
+function ntMin(hhmm){var p=String(hhmm).split(':');return (+p[0])*60+(+p[1]);}
+function ntCheck(){
+  if(!ntOK())return;
+  var c=ntGet(),jetzt=new Date(),heute=iso(jetzt),DE=cfg.lang==='de';
+  var min=jetzt.getHours()*60+jetzt.getMinutes(),l=ntLast();
+  /* 1. Trainingserinnerung: nur an Tagen, an denen wirklich etwas ansteht,
+        und nur solange der Tag nicht abgehakt ist. An einem Ruhetag zu
+        erinnern waere genau die Art Hinweis, die man abschaltet. */
+  if(c.train&&l.train!==heute&&min>=ntMin(c.time)&&!dayDone(heute)){
+    var pl=plan(jetzt);
+    if(pl&&pl.kind==='train'){
+      ntShow(DE?('Heute: '+pl.title):('Today: '+pl.title),
+             DE?'Die Einheit steht noch offen.':'The session is still open.','vk-train');
+      ntMark('train',heute);
+    }
+  }
+  /* 2. Serie in Gefahr: erst abends, und nur wenn es eine Serie gibt, die
+        reissen kann. Ohne Serie ist es keine Warnung, sondern Nachtreten. */
+  if(c.streak&&l.streak!==heute&&min>=20*60&&!dayDone(heute)){
+    var n=streak();
+    if(n>0){
+      ntShow(DE?(n+(n===1?' Tag Serie':' Tage Serie')):(n+' day streak'),
+             DE?'Heute noch nichts eingetragen. Um Mitternacht ist sie weg.'
+               :'Nothing logged today. It ends at midnight.','vk-streak');
+      ntMark('streak',heute);
+    }
+  }
+  /* 3. Wochenrueckblick: sonntagabends, einmal je Woche. */
+  if(c.week&&min>=19*60&&jetzt.getDay()===0){
+    var wk=heute.slice(0,7)+'-'+Math.floor(jetzt.getDate()/7);
+    if(l.week!==wk){
+      var w=wkStats(),s=streak();
+      ntShow(DE?'Deine Woche':'Your week',
+             DE?(w.active+(w.active===1?' aktive Woche':' aktive Wochen')+' \u00b7 Serie '+s+(s===1?' Tag':' Tage'))
+               :(w.active+(w.active===1?' active week':' active weeks')+' \u00b7 streak '+s+' d'),'vk-week');
+      ntMark('week',wk);
+    }
+  }
+}
+function ntPaint(){
+  var ask=$('ntAskRow'),opts=$('ntOpts'),note=$('ntNote');
+  if(!ask||!opts||!note)return;
+  var DE=cfg.lang==='de';
+  var moeglich=(typeof Notification!=='undefined');
+  var stand=moeglich?Notification.permission:'nix';
+  ask.hidden=(stand==='granted'||!moeglich);
+  opts.hidden=(stand!=='granted');
+  if(stand==='granted'){
+    var c=ntGet();
+    $('ntTrain').value=String(c.train);
+    $('ntStreak').value=String(c.streak);
+    $('ntWeek').value=String(c.week);
+    $('ntTime').value=c.time;
+    note.textContent=DE
+      ? 'Punktgenau, solange die App offen ist. War sie zu, kommt der Hinweis beim n\u00e4chsten \u00d6ffnen nach. Eine Web-App kann ohne eigenen Server keine Uhrzeit garantieren \u2014 und einen Server wollen wir nicht, weil deine Push-Adresse dann bei einem Fremden l\u00e4ge.'
+      : 'Exact while the app is open. If it was closed, the reminder arrives on your next visit. Without a server of our own a web app cannot guarantee a time \u2014 and a server would put your push address in someone else\u0027s hands.';
+  }else if(stand==='denied'){
+    note.textContent=DE
+      ? 'Der Browser hat Hinweise f\u00fcr diese Seite blockiert. Das l\u00e4sst sich nur in den Einstellungen des Browsers oder der App zur\u00fccknehmen, nicht von hier aus.'
+      : 'The browser has blocked notifications for this page. That can only be undone in the browser or app settings, not from here.';
+  }else if(!moeglich){
+    note.textContent=DE?'Dieser Browser kennt keine Hinweise.':'This browser has no notifications.';
+  }else{
+    note.textContent=DE
+      ? 'Eine kurze Erinnerung an Trainingstagen, ein Hinweis wenn die Serie zu reissen droht, sonntags ein R\u00fcckblick. Nichts davon verl\u00e4sst das Ger\u00e4t.'
+      : 'A short nudge on training days, a warning when the streak is about to break, a recap on Sunday. None of it leaves the device.';
+  }
+}
+(function(){
+  var a=$('ntAllow');if(!a)return;
+  a.addEventListener('click',function(){
+    if(typeof Notification==='undefined')return;
+    try{
+      var p=Notification.requestPermission(function(){ntPaint();});
+      if(p&&p.then)p.then(function(){ntPaint();if(ntOK())ntCheck();});
+    }catch(e){}
+  });
+  ['ntTrain','ntStreak','ntWeek','ntTime'].forEach(function(id){
+    var el=$(id);if(!el)return;
+    el.addEventListener('change',function(){
+      var c=ntGet();
+      if(id==='ntTime')c.time=el.value||ntStd().time;
+      else if(id==='ntTrain')c.train=(+el.value)?1:0;
+      else if(id==='ntStreak')c.streak=(+el.value)?1:0;
+      else c.week=(+el.value)?1:0;
+      ntSave(c);ntPaint();
+    });
+  });
+  var t=$('ntTest');
+  if(t)t.addEventListener('click',function(){
+    var DE=cfg.lang==='de';
+    ntShow('VALKR',DE?'So sieht eine Erinnerung aus.':'This is what a reminder looks like.','vk-test');
+  });
+  var o=$('ntOff');
+  if(o)o.addEventListener('click',function(){
+    var c=ntGet();ntSave({train:0,streak:0,week:0,time:c.time});ntPaint();
+  });
+  ntPaint();
+  /* Der Wecker: einmal beim Start -- der holt nach, was waehrend der
+     geschlossenen App faellig war -- und danach jede Minute. Die Pruefung
+     liest vier Werte und rechnet zwei Vergleiche; das kostet nichts. */
+  ntCheck();
+  setInterval(ntCheck,60000);
+  /* Beim Zurueckholen aus dem Hintergrund sofort nachsehen: wer das Telefon
+     um 18:30 entsperrt, soll nicht bis 18:31 warten. */
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)ntCheck();});
+})();
+
+/* Einstellungsmenue aufbauen: wandelt die Auswahlfelder in Segmentleisten
+   und Schalter und erzeugt die Uebersicht aus den vorhandenen Gruppen.
+
+   Der Aufruf steht bewusst HIER und nicht oben bei show('today').
+   Dort stand er zuerst, und die App startete nicht mehr:
+   Funktionsdeklarationen gelten im ganzen Gueltigkeitsbereich, die
+   Zuweisung eines var hingegen laeuft erst an ihrer Zeile. setMenuBuild
+   war also aufrufbar, las aber ueber ntGet() den Vorgabewert NTDEF, der zu
+   dem Zeitpunkt noch undefined war -- Absturz mitten im Start, und weil der
+   Start abbrach, blieb das Startbild stehen und die App sah aus, als haenge
+   sie. Alles, was diese Funktion braucht, ist an dieser Stelle fertig. */
+setMenuBuild();
+
+/* Startbild wegblenden, sobald alles steht -- OHNE Mindestdauer.
+   Die alte Fassung hielt es 700 ms fest, damit die Zeichenanimation
+   durchlaufen konnte. Gemessen ist die Seite nach 60 ms fertig: es waren
+   also mehr als sechshundert Millisekunden reine Wartezeit, damit eine
+   Animation zu sehen ist, die den Start nur verzoegert hat.
+   Jetzt geht das Startbild, sobald der Inhalt steht. Die Marke darauf
+   erscheint per CSS erst nach 260 ms und wird im Normalfall nie gezeichnet. */
 (function(){
   var sp=$('splash');if(!sp)return;
-  var t0=performance.now();
-  var go=function(){
-    var rest=Math.max(0,700-(performance.now()-t0));
-    setTimeout(function(){sp.classList.add('gone');
-      setTimeout(function(){if(sp.parentNode)sp.parentNode.removeChild(sp);},600);},rest);
+  document.body.classList.add('booting');
+  var weg=function(){
+    /* Zwei Bilder abwarten: das erste stellt den Aufbau fertig, das zweite
+       zeichnet ihn. Ohne das blitzt beim Ausblenden fuer einen Frame der
+       leere Grund durch -- genau das war im Video zu sehen, als das V kurz
+       ueber dem Inhalt stand. */
+    requestAnimationFrame(function(){requestAnimationFrame(function(){
+      sp.classList.add('gone');
+      setTimeout(function(){
+        if(sp.parentNode)sp.parentNode.removeChild(sp);
+        document.body.classList.remove('booting');
+      },300);
+    });});
   };
-  if(document.readyState==='complete')go();else window.addEventListener('load',go);
+  if(document.readyState==='complete')weg();else window.addEventListener('load',weg);
 })();
 
 recording=true;syncUndo();
