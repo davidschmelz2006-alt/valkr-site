@@ -227,7 +227,11 @@
      Safari und Chrome weiterhin bedienen. Gescrollt wird selbstverstaendlich
      weiter -- nur die Anzeige ist weg. */
   html,body,*{scrollbar-width:none;-ms-overflow-style:none}
-  ::-webkit-scrollbar{width:0;height:0;display:none}
+  html,body{scrollbar-color:transparent transparent}
+  ::-webkit-scrollbar,html::-webkit-scrollbar,body::-webkit-scrollbar{
+    width:0!important;height:0!important;display:none!important;
+    background:transparent!important}
+  ::-webkit-scrollbar-thumb,::-webkit-scrollbar-track{background:transparent!important}
 
   /* ---- Schaerfe --------------------------------------------------------
      Was eine Oberflaeche "hochwertig" aussehen laesst, sind selten grosse
@@ -2685,8 +2689,7 @@
   </section>
 
   <section class="view" id="v-plan">
-    <div><p class="sub">One row per week. Open a week to see its days and jump to any of them.</p></div>
-    <div class="kpis" id="planKpis"></div>
+        <div class="kpis" id="planKpis"></div>
     <div class="weeks" id="weeks"></div>
     <div class="noteblk">
       <p class="eyebrow" data-i18n="plan.miles">Milestones</p>
@@ -2743,7 +2746,7 @@
       <p class="hint" id="logRecall"></p>
       <span class="saved" id="savedFlag">Saved</span>
     </div>
-    <div><h2 class="sec" data-i18n="train.h">The six patterns</h2><p class="sub" data-i18n="train.s">Everything you train is one of these. Open one for the ladder, the cues, and what usually goes wrong.</p></div>
+    <div><h2 class="sec" data-i18n="train.h">The six patterns</h2></div>
     <div class="grid" id="tiles"></div>
     <div class="chartbox">
       <h4 data-i18n="train.vol">Weekly volume balance</h4>
@@ -2868,8 +2871,7 @@
   </section>
 
   <section class="view" id="v-skills">
-    <div><p class="sub" data-i18n="skills.s">These are why most people start calisthenics. Each one has an entry requirement &mdash; the hub checks yours against it.</p></div>
-    <div class="grid" id="skillTiles"></div>
+        <div class="grid" id="skillTiles"></div>
     <div id="skillDetail"></div>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="skills.rules">Three rules for skill work</span></summary>
@@ -2880,8 +2882,7 @@
   </section>
 
   <section class="view" id="v-mobility">
-    <div><p class="sub" data-i18n="mob.s">Under thirty minutes a week, aimed at the five restrictions that actually limit bodyweight training. Test yourself, then fix what fails.</p></div>
-    <div class="card">
+        <div class="card">
       <h4 data-i18n="mob.guided">Guided routine</h4>
       <div class="savebar">
         <button class="tbtn go" id="mobStart" data-i18n="btn.startRoutine">Start routine</button>
@@ -3039,8 +3040,7 @@
   </section>
 
   <section class="view" id="v-you">
-    <div><p class="sub" data-i18n="you.s">Baseline is week 1. Everything here is measured against your own start, not against anyone else.</p></div>
-    <div class="kpis" id="youKpis"></div>
+        <div class="kpis" id="youKpis"></div>
     <div class="chartbox" id="blockHist" style="display:none">
       <h4 data-i18n="you.blocks">Your blocks so far</h4>
       <div id="blockHistBody"></div>
@@ -3123,8 +3123,7 @@
 
   <section class="view pushv" id="v-coach">
     <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Coach</b></div>
-    <div><p class="sub" data-i18n="coach.s">Reads everything you have entered and updates the moment you change a number. Ordered by what costs you the most.</p></div>
-    <div class="coach" id="coachList"></div>
+        <div class="coach" id="coachList"></div>
     <!-- Von HEUTE hierher verschoben. renderHome() fuellt den Behaelter
          weiterhin ueber seine Kennung -- er darf stehen, wo er will. -->
     <p class="eyebrow" data-i18n="home.improve">Improve</p>
@@ -3139,7 +3138,7 @@
 
   <section class="view pushv" id="v-learn">
     <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Wissen</b></div>
-    <div><h2 class="sec" data-i18n="learn.h">The book, in short</h2><p class="sub" data-i18n="learn.s">Twelve chapters, short enough to look up mid-session.</p></div>
+    <div><h2 class="sec" data-i18n="learn.h">The book, in short</h2></div>
     <div class="acc" id="chapters"></div>
     <!-- Belege. Wettbewerber schreiben "wissenschaftliches Know-how" auf die
          Startseite und nennen keine einzige Quelle. Wir nennen sie. Das ist
@@ -3159,7 +3158,7 @@
 
   <section class="view pushv" id="v-access">
     <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b>Zugang</b></div>
-    <div><h2 class="sec" data-i18n="acc.h">Book or hub?</h2><p class="sub" data-i18n="acc.s">Same knowledge in both. The difference is whether you read it once, or use it every session.</p></div>
+    <div><h2 class="sec" data-i18n="acc.h">Book or hub?</h2></div>
       <div class="tblwrap"><table class="cmp">
         <thead><tr><th data-i18n="acc.get">What you get</th><th class="c">Book</th><th class="c">Hub</th></tr></thead>
         <tbody id="cmpBody"></tbody>
@@ -3319,7 +3318,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.6';
+var VERSION='23.7';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6399,7 +6398,7 @@ function paintLog(){
   for(var i=0;i<14;i++){var kk=iso(d);if(logs[kk]&&(logs[kk].note||logs[kk].rpe)){prev=logs[kk];prev._d=new Date(d);break;}d=add(d,-1);}
   el.innerHTML=prev
     ? '<b>'+(DE?'Letztes Log':'Last log')+' ('+prev._d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'):</b> '
-    : (DE?'Noch kein Log. Start- und End-Check im Training füllen ihn — der Coach liest mit.':'No log yet. The start and finish check-ins fill it — the coach reads along.');
+    : (DE?'Noch kein Log — der Start-Check in der Einheit füllt ihn.':'No log yet — the start check-in fills it.');
   if(prev)el.appendChild(document.createTextNode(logLine(prev,DE)));
 }
 
@@ -11850,7 +11849,6 @@ function renderBoard(avgLp){
    Loslassen sieht fast genauso aus und kostet ein Zehntel. */
 (function(){
   if(!('ontouchstart' in window))return;
-  var REITER=['today','train','fuel','prog'];
   var x0=0,y0=0,aktiv=false,t0=0;
 
   /* Steht der Finger in etwas, das selbst zur Seite scrollen kann? */
@@ -11888,16 +11886,32 @@ function renderBoard(avgLp){
     /* Mindestens 70 Pixel, deutlich waagerechter als senkrecht, und in unter
        anderthalb Sekunden -- sonst war es kein Wischen, sondern Nachdenken. */
     if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||dt>1500)return;
-    var jetzt=document.body.dataset.view||'today';
-    var i=REITER.indexOf(jetzt);
+    /* Gewischt wird INNERHALB des Bereichs, zwischen seinen Abschnitten --
+       im Training also Einheit, Skills, Mobility, Test, Wochen.
+       Nicht mehr von Bereich zu Bereich: dafuer ist die Tableiste da, und
+       zwei Wege zum selben Ziel sind einer zu viel. Vor allem aber war das
+       alte Verhalten falsch herum -- ein Wisch im Training landete in der
+       Ernaehrung, obwohl direkt darueber die Abschnittsleiste steht, die
+       genau das anbietet, was man erwartet.
+       Am Rand des Bereichs passiert nichts. Kein Umschlagen in den
+       Nachbarbereich: sonst waere man mit einem Wisch zu viel doch wieder
+       woanders. */
+    var key=document.body.dataset.view||'today';
+    var g=GROUP[key];
+    if(!g||!g.v||g.v.length<2)return;         /* Bereich ohne Abschnitte */
+    var akt=document.querySelector('.view.on');
+    if(!akt)return;
+    var name=null;
+    for(var k in VS){if(VS[k]===akt.id){name=k;break;}}
+    var i=g.v.indexOf(name);
     if(i<0)return;
     var ziel=i+(dx<0?1:-1);
-    if(ziel<0||ziel>=REITER.length)return;
-    swipeTo(REITER[ziel],dx<0?1:-1);
+    if(ziel<0||ziel>=g.v.length)return;
+    swipeTo(g.v[ziel],dx<0?1:-1);
   },{passive:true});
 
-  function swipeTo(bereich,richtung){
-    showTop(bereich);
+  function swipeTo(ansicht,richtung){
+    show(ansicht);
     var v=document.querySelector('.view.on');
     if(!v||(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches))return;
     /* Nur die neue Ansicht schiebt sich herein, und nur 22 Pixel weit. Die
