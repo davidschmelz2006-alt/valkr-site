@@ -3079,7 +3079,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.0';
+var VERSION='23.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -11472,6 +11472,94 @@ function renderBoard(avgLp){
     ? '<b>Nur deine Zeile ist echt.</b> Die mit * markierten sind erfundene Beispiele, damit du das Layout siehst. Eine wirklich geteilte Bestenliste braucht einen Server — die Seite hier speichert alles nur lokal im Browser. Wertung bewusst nach <b>Planerfüllung, Serie und Level</b>, nicht nach Wiederholungen: selbst eingetragene Kraftwerte kann jeder erfinden, Dranbleiben nicht. Ein „Alles zurücksetzen" leert auch XP, Level und deine Zeile hier.'
     : '<b>Only your row is real.</b> The ones marked * are invented examples so you can see the layout. A genuinely shared board needs a server — this page stores everything locally in your browser. Ranked on <b>plan adherence, streak and level</b> rather than reps on purpose: self-reported strength is trivial to fake, showing up is not. "Reset everything" also clears XP, level and your row here.';
 }
+
+/* ---------- Wischen zwischen den Bereichen -------------------------------
+   Vier Reiter, und bisher kam man nur ueber die Leiste unten von einem zum
+   naechsten. In jeder App, die sich wie eine App anfuehlt, geht das auch mit
+   dem Daumen.
+
+   Drei Dinge, an denen so etwas ueblicherweise scheitert, und wie sie hier
+   geloest sind:
+
+   1. Es reisst waagerechte Listen an sich. Die Abschnittsleiste, der
+      Wochenstreifen und der Uebungskatalog scrollen selbst zur Seite. Wer
+      dort wischt, will scrollen und nicht den Bereich wechseln. Deshalb
+      wird beim Aufsetzen geprueft, ob der Finger in etwas steht, das
+      waagerecht scrollen kann -- und wenn ja, passiert gar nichts.
+   2. Es reisst das senkrechte Scrollen an sich. Deshalb entscheidet nicht
+      die Strecke allein, sondern der Winkel: die waagerechte Bewegung muss
+      deutlich groesser sein als die senkrechte.
+   3. Es feuert waehrend einer Einheit. Trainingsmodus, Einfuehrung, Blatt,
+      Dialog und jede Schiebeansicht schalten es ab -- dort bedeutet
+      seitwaerts etwas anderes oder gar nichts.
+
+   Bewusst OHNE mitlaufende Vorschau am Finger: dafuer muesste die kommende
+   Ansicht schon waehrend der Bewegung gezeichnet und verschoben werden --
+   also genau die Compositor-Textur ueber den ganzen Baum, an der das
+   Gummiband auf Android gescheitert ist. Ein kurzes Hereinschieben nach dem
+   Loslassen sieht fast genauso aus und kostet ein Zehntel. */
+(function(){
+  if(!('ontouchstart' in window))return;
+  var REITER=['today','train','fuel','prog'];
+  var x0=0,y0=0,aktiv=false,t0=0;
+
+  /* Steht der Finger in etwas, das selbst zur Seite scrollen kann? */
+  function inWaagerechtem(el){
+    for(var n=0;n<8&&el&&el!==document.body;n++){
+      if(el.scrollWidth>el.clientWidth+4){
+        var ov=getComputedStyle(el).overflowX;
+        if(ov==='auto'||ov==='scroll')return true;
+      }
+      /* Regler und Eingaben nie stoeren. */
+      var t=el.tagName;
+      if(t==='INPUT'||t==='TEXTAREA'||t==='SELECT')return true;
+      el=el.parentElement;
+    }
+    return false;
+  }
+  function gesperrt(){
+    if(document.body.dataset.pushed)return true;
+    if(typeof sheetOpen!=='undefined'&&sheetOpen)return true;
+    var ids=['runner','intro','modal'],i,e;
+    for(i=0;i<ids.length;i++){e=$(ids[i]);if(e&&e.classList.contains('on'))return true;}
+    return false;
+  }
+  document.addEventListener('touchstart',function(e){
+    aktiv=false;
+    if(e.touches.length!==1||gesperrt())return;
+    if(inWaagerechtem(e.target))return;
+    x0=e.touches[0].clientX;y0=e.touches[0].clientY;t0=Date.now();aktiv=true;
+  },{passive:true});
+  document.addEventListener('touchend',function(e){
+    if(!aktiv)return;aktiv=false;
+    if(gesperrt())return;
+    var t=e.changedTouches[0];
+    var dx=t.clientX-x0,dy=t.clientY-y0,dt=Date.now()-t0;
+    /* Mindestens 70 Pixel, deutlich waagerechter als senkrecht, und in unter
+       anderthalb Sekunden -- sonst war es kein Wischen, sondern Nachdenken. */
+    if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||dt>1500)return;
+    var jetzt=document.body.dataset.view||'today';
+    var i=REITER.indexOf(jetzt);
+    if(i<0)return;
+    var ziel=i+(dx<0?1:-1);
+    if(ziel<0||ziel>=REITER.length)return;
+    swipeTo(REITER[ziel],dx<0?1:-1);
+  },{passive:true});
+
+  function swipeTo(bereich,richtung){
+    showTop(bereich);
+    var v=document.querySelector('.view.on');
+    if(!v||(window.matchMedia&&window.matchMedia('(prefers-reduced-motion:reduce)').matches))return;
+    /* Nur die neue Ansicht schiebt sich herein, und nur 22 Pixel weit. Die
+       Andeutung reicht -- eine volle Bildschirmbreite wuerde die Textur
+       kosten, die wir gerade losgeworden sind. */
+    try{
+      v.animate([{transform:'translateX('+(richtung*22)+'px)',opacity:.55},
+                 {transform:'none',opacity:1}],
+                {duration:210,easing:'cubic-bezier(.2,.8,.3,1)'});
+    }catch(err){}
+  }
+})();
 
 /* ---------- Kein Zoom ----------------------------------------------------
    Eine App zoomt nicht. Ein versehentliches Aufziehen mit zwei Fingern
