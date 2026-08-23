@@ -3327,7 +3327,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.8';
+var VERSION='23.9';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -10145,18 +10145,46 @@ $('mdOk').addEventListener('click',function(){
   if(inp&&inp.value.trim().toUpperCase()!=='RESET'){inp.style.borderColor='var(--ember)';return;}
   mdAction();closeModal();
 });
+/* Alles loeschen, was uns gehoert -- nach PRAEFIX, nicht nach Liste.
+   Vorher stand hier eine fest eingetragene Aufzaehlung von 26 Schluesseln.
+   Solche Listen veralten still: jeder Schluessel, der spaeter dazukommt,
+   fehlt darin, und niemand merkt es, weil ein Reset ja "funktioniert" --
+   er loescht nur nicht alles.
+   Gefunden wurden elf Ueberlebende, darunter:
+     meals, foods, recipes -- das komplette Ernaehrungstagebuch blieb stehen
+     exhist                -- die Uebungshistorie
+     vrf                   -- die BELEGE, auf denen der Rang aufbaut. Das ist
+                              der ernsteste: nach einem "vollstaendigen"
+                              Zuruecksetzen liessen sich daraus Teile des
+                              alten Rangs wieder herleiten.
+     nt, ntLast, dev, spar, a2hsOff -- Einstellungen und Zustaende
+   Mit dem Praefix als Kriterium kann die Liste nicht mehr veralten. Auch die
+   Sicherungskopien (vk_backup_*) gehen mit: der Dialog verspricht, dass sich
+   nichts rueckgaengig machen laesst -- eine ueberlebende Sicherung waere
+   genau das Gegenteil.
+   Erst sammeln, dann loeschen: wer waehrend des Durchlaufs entfernt,
+   verschiebt die Indizes und ueberspringt jeden zweiten Eintrag. */
+function wipeAll(){
+  try{
+    var weg=[],i,k;
+    for(i=0;i<localStorage.length;i++){
+      k=localStorage.key(i);
+      if(k&&k.indexOf('vk_')===0)weg.push(k);
+    }
+    for(i=0;i<weg.length;i++)localStorage.removeItem(weg[i]);
+  }catch(e){}
+  /* Der Notspeicher im Arbeitsspeicher muss mit -- sonst schreibt der naechste
+     Zugriff die alten Werte einfach zurueck. */
+  try{for(var m in mem)if(Object.prototype.hasOwnProperty.call(mem,m))delete mem[m];}catch(e){}
+  try{undoStack.length=0;}catch(e){}
+}
 function askReset(){
   var DE=cfg.lang==='de';
   openModal(DE?'Wirklich alles zurücksetzen?':'Reset everything?',
-    DE?'Das löscht Logs, Rekorde, Umfänge, Gewichtsverlauf, Leiterstufen und Einstellungen — und genauso Rang, XP, Level, Abzeichen und deine Zeile in der Bestenliste. Das lässt sich nicht rückgängig machen. Tippe RESET zum Bestätigen.'
-      :'This wipes your logs, records, measurements, weight history, ladder positions and settings — and with them your rank, XP, level, badges and your leaderboard row. It cannot be undone. Type RESET to confirm.',
+    DE?'Das löscht ALLES, was diese App auf dem Gerät hat: Logs, Rekorde, Umfänge, Gewichtsverlauf, Leiterstufen, das Ernährungstagebuch samt eigener Lebensmittel und Rezepte, Rang, XP, Level, Abzeichen, Einstellungen, Erinnerungen — und auch die Sicherungskopien. Das lässt sich nicht rückgängig machen. Tippe RESET zum Bestätigen.'
+      :'This wipes EVERYTHING this app keeps on the device: logs, records, measurements, weight history, ladder positions, the food diary with your own foods and recipes, rank, XP, level, badges, settings, reminders — and the backups too. It cannot be undone. Type RESET to confirm.',
     DE?'Alles löschen':'Wipe everything',
-    function(){
-      ['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile','exlog']
-        .forEach(del);
-      SKILLS.forEach(function(s){del('skill_'+s.id);});
-      location.reload();
-    },
+    function(){ wipeAll(); location.reload(); },
     '<div class="ctl"><input id="mdConfirmIn" type="text" placeholder="RESET" autocomplete="off"></div>');
 }
 $('resetBtn').addEventListener('click',askReset);
