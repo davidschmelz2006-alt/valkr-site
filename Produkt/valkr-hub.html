@@ -1569,7 +1569,19 @@
      Hintergrund-Canvas liegt unter der Einfuehrung, deshalb bringt sie ihre
      eigenen mit -- vier weiche Flecken, die nur atmen. Kein Canvas, keine
      Bildrate, nichts, was waehrend des Tippens rechnet. */
-  #intro{position:relative;isolation:isolate}
+  /* KEIN position:relative hier. Genau das stand hier zuerst und hat die
+     Einfuehrung zerstoert: die Regel weiter oben macht #intro zu einer
+     festen Vollbild-Ebene (position:fixed, inset:0, z-index:95), und
+     "relative" hat das ueberschrieben. Damit war die Einfuehrung ein
+     normaler Kasten im Seitenfluss -- die App samt Tableiste stand daneben
+     und schien durch den durchscheinenden Kasten hindurch.
+     Fuer die Lichtflecken darunter braucht es ohnehin nichts: eine feste
+     Positionierung mit z-index erzeugt bereits einen Stapelkontext, in dem
+     ::before mit z-index:-1 hinter dem Inhalt liegt.
+     Der Grund von #intro bleibt deckend -- nur so ist die App wirklich weg.
+     Das Glas liegt auf .ibox, also EINE Ebene hoeher, und scheint damit auf
+     die Lichtflecken durch statt auf die App. */
+  #intro{isolation:isolate}
   #intro::before,#intro::after{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none}
   #intro::before{
     background:
@@ -3277,7 +3289,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.4';
+var VERSION='23.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
