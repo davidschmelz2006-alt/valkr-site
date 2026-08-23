@@ -303,6 +303,42 @@
   .strk b{font-weight:700;font-variant-numeric:tabular-nums}
   .strk.zero{color:var(--ink3)}
   .strk:hover{background:var(--surf3)}
+  /* ---- Die Flamme -------------------------------------------------------
+     MCI laesst die Flamme still stehen. Eine Flamme, die stillsteht, ist
+     keine Flamme -- das ist der ganze Trick hier.
+
+     Zwei Kniffe machen den Unterschied zu einem simplen Pulsieren:
+     1. ZWEI Animationen mit teilerfremden Dauern (1,9 s und 2,7 s). Ihr
+        gemeinsames Vielfaches liegt bei ueber fuenfzig Sekunden -- das Auge
+        findet darin keine Wiederholung und liest es als echtes Flackern
+        statt als Schleife. Eine einzelne Animation verraet sich nach zwei
+        Durchlaeufen.
+     2. Der Ursprung sitzt UNTEN (transform-origin: 50% 85%). Eine Flamme
+        wird an ihrer Spitze bewegt, nicht in der Mitte; skaliert man mittig,
+        sieht es aus wie ein pochender Punkt.
+
+     Kosten: ausschliesslich transform und opacity. Beides laeuft auf der
+     Grafikeinheit ohne Neuzeichnen -- der Hauptprozessor sieht davon nichts,
+     auch nicht auf einem Mittelklasse-Telefon. Keine Schatten, keine Filter,
+     kein will-change (das Element ist 15 Pixel gross; eine eigene Ebene
+     dafuer kostet mehr, als sie spart).
+     Bei Serie null steht sie still -- es gibt nichts zu feiern. */
+  .strk svg{transform-origin:50% 85%;will-change:auto}
+  .strk:not(.zero) svg{animation:flame1 1.9s ease-in-out infinite}
+  .strk:not(.zero) svg path{animation:flame2 2.7s ease-in-out infinite}
+  @keyframes flame1{
+    0%,100%{transform:scale(1) rotate(0deg)}
+    28%{transform:scale(1.1,.94) rotate(-2.5deg)}
+    54%{transform:scale(.95,1.09) rotate(1.8deg)}
+    76%{transform:scale(1.05,.98) rotate(-1deg)}}
+  @keyframes flame2{0%,100%{opacity:.82}40%{opacity:1}70%{opacity:.9}}
+  /* Ein Tag mehr: die Flamme schlaegt einmal kraeftig aus. Die Klasse setzt
+     strkPaint() nur, wenn die Zahl wirklich gestiegen ist. */
+  .strk.up svg{animation:flameUp .62s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes flameUp{0%{transform:scale(1)}35%{transform:scale(1.5,1.35) rotate(-6deg)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion:reduce){
+    .strk svg,.strk svg path,.strk.up svg{animation:none!important}
+  }
   /* Symbolknoepfe ohne Kasten. Bei MCI stehen Flamme, Kamera und Mikrofon
      nackt in der Kopfzeile -- kein Rahmen, kein Hintergrund. Ein Rahmen um
      ein Symbol verdoppelt die Form und macht aus drei Zeichen drei Kaesten.
@@ -1811,7 +1847,12 @@
 
   .achGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(158px,1fr));gap:.5rem}
   .ach{background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.75rem;display:flex;flex-direction:column;align-items:center;gap:.4rem;text-align:center;transition:.2s;position:relative;overflow:hidden}
-  .ach.locked{opacity:.42;filter:grayscale(1)}
+  /* Ohne grayscale-Filter. Er lag auf 33 Abzeichen gleichzeitig, und jeder
+     Filter zwingt sein Element in einen eigenen Zeichendurchgang -- das ist
+     viel Aufwand fuer "sieht gesperrt aus". Bei 42 Prozent Deckkraft auf
+     schwarzem Grund ist von der Farbe ohnehin fast nichts mehr uebrig; der
+     Unterschied ist mit blossem Auge nicht zu sehen. */
+  .ach.locked{opacity:.38}
   .ach.got{border-color:var(--aurora)}
   .ach.got::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 60% at 50% 0%,rgba(var(--p1),.14),transparent 70%);pointer-events:none}
   .ach:hover{transform:translateY(-3px);box-shadow:var(--sh)}
@@ -2001,6 +2042,56 @@
     #splash svg,#splash span{animation:none;opacity:1}
     body.booting .shell{animation:none}
   }
+  /* ================= Leistung auf dem Telefon =========================
+     Gemessen an einem Galaxy A54: 120-Hz-Bildschirm, also 8,3 ms je Bild,
+     auf einer Mittelklasse-Grafikeinheit (Mali-G68). Was hier steht, ist
+     kein Feinschliff, sondern der Unterschied zwischen "laeuft" und
+     "ruckelt".
+
+     1. UNSCHAERFE HINTER FESTEN LEISTEN -- der mit Abstand teuerste Posten,
+        und zwar aus einem Grund, der beim Bauen nicht offensichtlich ist:
+        backdrop-filter muss den Bereich HINTER der Leiste lesen, unscharf
+        rechnen und zurueckschreiben. Solange sich dahinter nichts bewegt,
+        kann der Browser das Ergebnis behalten. Bei uns liegt dahinter aber
+        die Partikelflaeche, und die zeichnet sich dreissig Mal je Sekunde
+        neu -- die Unschaerfe wird also dreissig Mal je Sekunde neu
+        gerechnet, auch wenn niemand scrollt. Zwei Leisten, volle Breite,
+        1080 Pixel: das allein kann die Haelfte des Bildbudgets fressen.
+        Auf dem Telefon deshalb ersatzlos raus. Der Verlust ist gering: was
+        dahinter liegt, sind weiche Lichtpunkte -- die werden durch
+        Unschaerfe nicht weicher. Dafuer werden die Leisten dichter, damit
+        Text, der darunter durchlaeuft, nicht durchscheint. Am Rechner
+        bleibt die Unschaerfe, dort kostet sie nichts.
+
+     2. EIGENE EBENEN FUER FESTE LEISTEN. transform:translateZ(0) hebt sie
+        auf eine eigene Compositor-Ebene. Dann muss beim Scrollen nur der
+        Inhalt darunter verschoben werden, die Leisten bleiben stehen, ohne
+        neu gezeichnet zu werden. Genau HIER ist eine eigene Ebene richtig --
+        drei feste Elemente, nicht vierzig scrollende.
+
+     3. EINGRENZUNG. contain:paint sagt dem Browser, dass nichts aus einer
+        Karte herausragt. Er darf sie dann beim Neuzeichnen als Einheit
+        behandeln und muss nicht pruefen, ob sie in Nachbarn hineinmalt.
+        Bei rund vierzig Karten spart das jede Menge Buchhaltung. */
+  @media (max-width:900px){
+    .topwrap,#tabbar,#rundock,#intro .ibox{
+      backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    .topwrap{background:color-mix(in srgb,var(--bg) 94%,transparent)}
+    #tabbar{background:color-mix(in srgb,var(--bg) 92%,transparent)}
+    #rundock{background:color-mix(in srgb,var(--surf) 97%,transparent)}
+    #intro .ibox{background:linear-gradient(165deg,
+      color-mix(in srgb,var(--surf3) 30%,var(--bg)) 0%,
+      color-mix(in srgb,var(--surf) 22%,var(--bg)) 42%,
+      var(--bg) 100%)}
+    .topwrap,#tabbar,#rundock{transform:translateZ(0)}
+    .card,.mcard,.habcard,.exrow,.tile,.rankRow,.ach{contain:paint}
+  }
+  /* Sparmodus: hier ist jede Unschaerfe und jeder Filter aus, egal wo. */
+  :root[data-spar="1"] .topwrap,:root[data-spar="1"] #tabbar,
+  :root[data-spar="1"] #rundock,:root[data-spar="1"] #intro .ibox{
+    backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+  :root[data-spar="1"] #intro::before{animation:none}
+
   .flake{position:fixed;pointer-events:none;z-index:9999;color:var(--aurora);will-change:transform,opacity}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}.flake{display:none}#bgfx{display:none}}
   /* ---- Glasflaechen ----------------------------------------------------
@@ -3186,7 +3277,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.3';
+var VERSION='23.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -9783,9 +9874,17 @@ function renderHome(){
 });
 /* Serien-Chip in der Kopfzeile. Eine einzige Quelle -- streak(). Vorher stand
    die Zahl an drei Stellen und zwei davon lasen sie aus der Anzeige zurueck. */
+var strkVor=null;
 function strkPaint(){
   var c=$('strkChip'),el=$('strkNum');if(!c||!el)return;
   var n=streak(),DE=cfg.lang==='de';
+  /* Nur bei echtem Zuwachs einmal kraeftig ausschlagen -- nicht bei jedem
+     Neuzeichnen, sonst zuckt die Flamme bei jedem Ansichtswechsel. */
+  if(strkVor!==null&&n>strkVor){
+    c.classList.remove('up');void c.offsetWidth;c.classList.add('up');
+    setTimeout(function(){c.classList.remove('up');},700);
+  }
+  strkVor=n;
   el.textContent=n;
   c.classList.toggle('zero',n===0);
   c.setAttribute('aria-label',(DE?'Serie: ':'Streak: ')+n+(DE?' Tage':' days'));
@@ -9865,8 +9964,6 @@ function sceneFor(id){
      '" fill="none" stroke="'+p.a+'" stroke-width="1.1" opacity="'+(.22*q)+'"/>';
   return '<svg viewBox="0 0 '+W+' '+SCH+'" preserveAspectRatio="xMidYMax slice">'+s+'</svg>';
 }
-var sceneTmr=null;
-window.addEventListener('resize',function(){clearTimeout(sceneTmr);sceneTmr=setTimeout(drawScene,180);});
 function drawScene(){
   var el=$('scenery'); if(!el) return;
   if(cfg.motion!=='full'||SYSRED){el.innerHTML='';return;}
@@ -10981,7 +11078,12 @@ function sizeCv(){
      Bild, bei 1,5 nur noch 1,5 Millionen -- gut vierzig Prozent weniger.
      Zu sehen ist davon nichts: gezeichnet werden weiche Punkte von ein bis
      drei Pixeln Radius, keine Kanten, die scharf bleiben muessten. */
-  var dpr=Math.min(1.5,window.devicePixelRatio||1);
+  /* Auf dem Telefon haerter deckeln als am Rechner. Ein A54 meldet 2,625 --
+     bei Faktor 1,5 sind das rund 825.000 Pixel je Bild, bei 1,2 nur noch
+     530.000. Gezeichnet werden weiche Radialverlaeufe von ein bis drei
+     Pixeln Radius; die haben keine Kante, die scharf bleiben muesste, und
+     sehen bei 1,2 exakt gleich aus. */
+  var dpr=Math.min(istHandy()?1.2:1.5,window.devicePixelRatio||1);
   W=window.innerWidth;H=window.innerHeight;
   cv.width=W*dpr;cv.height=H*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
   var n=fxCalm()?Math.round(Math.min(30,Math.max(14,W/48))):Math.round(Math.min(64,Math.max(24,W/28)));
@@ -11003,9 +11105,28 @@ function mk(any){
    dass 120 Hz optisch nichts hinzufuegen -- kosten wuerde es aber das
    Vierfache, weil jedes Bild die volle Bildschirmflaeche neu zeichnet.
    Der Rest der Oberflaeche laeuft weiter mit voller Bildrate. */
+/* Partikel pausieren, solange gescrollt wird.
+   Der Grund ist Arithmetik: auf einem 120-Hz-Bildschirm stehen 8,3 ms je
+   Bild zur Verfuegung. Das Scrollen selbst braucht davon schon einen guten
+   Teil. Kommt die Partikelflaeche dazu -- bildschirmfuellend leeren und
+   dreissig weiche Punkte neu zeichnen --, reicht es auf einer
+   Mittelklasse-Grafikeinheit nicht mehr, und genau das ist das Stocken, das
+   man beim Wischen spuert.
+   Zu sehen ist die Pause nicht: die Punkte driften mit weniger als einem
+   Pixel je Bild. Wer scrollt, schaut ohnehin auf den Inhalt.
+   Bewusst KEIN cancelAnimationFrame -- der Ruecksprung kostet mehr, als der
+   leere Durchlauf spart, und ein abgemeldeter Rahmen muesste beim Anhalten
+   erst wieder anlaufen. */
+var fxScroll=false,fxScrollTi=null;
+addEventListener('scroll',function(){
+  fxScroll=true;
+  if(fxScrollTi)clearTimeout(fxScrollTi);
+  fxScrollTi=setTimeout(function(){fxScroll=false;},160);
+},{passive:true});
 var lastFx=0,FXSTEP=1000/30;
 function tick(ts){
   raf=requestAnimationFrame(tick);
+  if(fxScroll)return;
   if(ts!==undefined){
     if(ts-lastFx<FXSTEP)return;
     lastFx=ts;
