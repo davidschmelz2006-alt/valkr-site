@@ -217,6 +217,15 @@
      den Doppeltipp gleich mit. */
   body{touch-action:pan-x pan-y}
   *{box-sizing:border-box}
+  /* hidden muss hidden heissen.
+     Das Attribut wirkt ueber display:none aus dem Browser-Standard -- und
+     JEDE eigene display-Regel schlaegt den Standard. In dieser Datei ist das
+     schon viermal aufgelaufen: .form, .gtitle, .noteblk und .view tragen
+     display:flex und blieben deshalb sichtbar, obwohl der Code sie als
+     versteckt markiert hatte. Der Fehler bricht nichts, er sieht nur falsch
+     aus -- deshalb faellt er in einer Pruefung auf Fehler nicht auf.
+     Diese eine Zeile beendet die Fehlerklasse. */
+  [hidden]{display:none!important}
   /* ---- Keine Bildlaufleisten -------------------------------------------
      Eine App hat keine. Der graue Balken rechts ist ein Fenster-Element aus
      der Zeit, als Seiten in Fenstern lagen -- auf einem Telefon zeigt er
@@ -3318,7 +3327,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='23.7';
+var VERSION='23.8';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6390,16 +6399,28 @@ function paintLog(){
   var el=$('logRecall');if(!el)return;
   var DE=cfg.lang==='de',k=iso(sel),L=logs[k];
   if(L&&(L.note||L.rpe||L.pain||L.energy!==undefined)){
+    el.hidden=false;if(el.parentElement)el.parentElement.hidden=false;
     el.innerHTML='<b>'+(DE?'Log für diesen Tag: ':'Log for this day: ')+'</b>';
     el.appendChild(document.createTextNode(logLine(L,DE)));
     return;
   }
   var prev=null,d=add(sel,-1);
   for(var i=0;i<14;i++){var kk=iso(d);if(logs[kk]&&(logs[kk].note||logs[kk].rpe)){prev=logs[kk];prev._d=new Date(d);break;}d=add(d,-1);}
-  el.innerHTML=prev
-    ? '<b>'+(DE?'Letztes Log':'Last log')+' ('+prev._d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'):</b> '
-    : (DE?'Noch kein Log — der Start-Check in der Einheit füllt ihn.':'No log yet — the start check-in fills it.');
-  if(prev)el.appendChild(document.createTextNode(logLine(prev,DE)));
+  /* Gibt es nichts, steht auch nichts da -- die Karte verschwindet ganz.
+     Vorher stand hier ein Kasten mit dem Satz "Noch kein Log, der Start-Check
+     fuellt ihn". Das ist eine leere Flaeche mit Bedienungsanleitung: sie
+     kostet den Platz einer echten Karte, sagt nichts ueber den Tag aus, und
+     wer sie einmal gelesen hat, liest sie nie wieder -- sieht sie aber jeden
+     Tag, bis er zum ersten Mal etwas eintraegt. */
+  /* Die KARTE ausblenden, nicht nur ihren Text. Beim ersten Anlauf stand
+     danach ein leerer Kasten da -- der Rahmen mit Innenabstand bleibt ja,
+     auch wenn nichts mehr drinsteht. Ein leerer Kasten ist keine
+     Verbesserung gegenueber einem Kasten mit einem Satz darin. */
+  var karte=el.parentElement;
+  if(!prev){el.innerHTML='';el.hidden=true;if(karte)karte.hidden=true;return;}
+  el.hidden=false;if(karte)karte.hidden=false;
+  el.innerHTML='<b>'+(DE?'Letztes Log':'Last log')+' ('+prev._d.toLocaleDateString(undefined,{day:'numeric',month:'short'})+'):</b> ';
+  el.appendChild(document.createTextNode(logLine(prev,DE)));
 }
 
 /* ---------- today ---------- */
@@ -6651,7 +6672,10 @@ function buildWeeks(){
 function kpi(l,v,s){return '<div class="mcard"><em>'+l+'</em><b>'+v+'</b><span class="sub">'+s+'</span></div>';}
 function renderWins(){
   var el=$('winList');el.innerHTML='';
-  if(!wins.length){el.innerHTML='<p class="hint">'+(cfg.lang==='de'?'Noch nichts. Der erste ist meist der erste saubere Klimmzug.':'Nothing yet. The first one is usually your first clean pull-up.')+'</p>';return;}
+  /* Kein Hinweis bei leerer Liste: das Eingabefeld direkt darueber sagt
+     bereits, was zu tun ist. Ein Satz, der dasselbe noch einmal sagt, ist
+     kein Hinweis, sondern Fuellung. */
+  if(!wins.length){el.innerHTML='';return;}
   wins.slice().reverse().forEach(function(w){
     var r=document.createElement('div');r.className='win';
     r.innerHTML='<span class="wd">'+w.d+'</span><span class="wt"></span>';
@@ -9193,7 +9217,12 @@ $('prAdd').addEventListener('click',function(){
 var wlog=get('wlog',[]);
 function drawW(){
   var el=$('wChart');
-  if(wlog.length<2){el.innerHTML='<p class="hint" style="padding:.6rem 0">'+(cfg.lang==='de'?'Mindestens zwei Wiegungen für den Verlauf.':'Log at least two weigh-ins to see the trend.')+'</p>';$('wNote').textContent=cfg.lang==='de'?'Mehrmals pro Woche wiegen, gleiche Bedingungen. Wochenmittel vergleichen, nie Einzeltage.':'Weigh in a few times a week, same conditions. Compare weekly averages, never single days.';return;}
+  /* Unter zwei Wiegungen gibt es keine Kurve. Dann verschwindet der
+     Kurvenbereich, statt einen Satz darueber anzuzeigen -- die aktuelle Zahl
+     steht ohnehin darueber, und wie man wiegt, steht in der Erklaerung
+     darunter. */
+  if(wlog.length<2){el.innerHTML='';el.hidden=true;var wn=document.getElementById('wNote');if(wn)wn.innerHTML='';return;}
+  el.hidden=false;
   var vals=wlog.map(function(x){return x.v;}),mn=Math.min.apply(null,vals),mx=Math.max.apply(null,vals);
   var rng=Math.max(.6,mx-mn),W=100,H=34;
   var pts=wlog.map(function(x,i){return (i/(wlog.length-1)*W).toFixed(1)+','+(H-((x.v-mn)/rng*H)).toFixed(1);}).join(' ');
@@ -9646,7 +9675,11 @@ function statKarte(titel,unter,punkte,einheit,invers){
       (punkte.length>1?'<polyline points="'+pts.join(' ')+'" fill="none" stroke="var(--ember)" stroke-width="2" stroke-linejoin="round"/>':'')+
       kreise+labels+xlab+'</svg>';
   }else{
-    svg='<p class="hint" style="padding:1rem 0">'+(DE?'Noch keine Aufzeichnung — die erste geführte Einheit füllt diese Karte.':'No recording yet — your first guided session fills this card.')+'</p>';
+    /* Keine Daten, keine Karte. Eine Kachel, die nur sagt "hier steht noch
+       nichts", ist eine leere Flaeche mit Bedienungsanleitung: sie kostet den
+       Platz einer echten Karte, wird nach dem ersten Lesen nie wieder gelesen
+       -- aber jeden Tag gesehen, bis endlich Daten da sind. */
+    return '';
   }
   return '<div class="statcard"><div class="stathead"><div><b>'+titel+'</b><span>'+unter+'</span></div>'+chip+'</div>'+svg+'</div>';
 }
