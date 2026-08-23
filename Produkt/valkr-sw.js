@@ -12,7 +12,7 @@
    Das alte Problem „haengt fuer immer auf einer alten Version" bleibt
    trotzdem geloest: der Cache-Name traegt die Version, beim Aktivieren
    fliegt alles Aeltere raus. */
-var CACHE = 'valkr-v24.2';
+var CACHE = 'valkr-v24.12';
 var ASSETS = [
   './valkr-hub.html',
   './valkr-identity.html',
@@ -49,6 +49,30 @@ self.addEventListener('activate', function (e) {
         return k === CACHE ? null : caches.delete(k);
       }));
     }).then(function () { return self.clients.claim(); })
+  );
+});
+
+/* Klick auf einen Hinweis. data.view (von ntShow() gesetzt) sagt, welcher
+   Bereich gemeint ist. Ist die App schon in einem Fenster offen, bekommt sie
+   nur eine Nachricht und wird nach vorne geholt -- ein zweites Fenster waere
+   verwirrend. War sie zu, oeffnet sich eines neu, die Adresse traegt das
+   Ziel; app-seitig wertet das der Code beim Start aus. */
+self.addEventListener('notificationclick', function (e) {
+  var ziel = e.notification.data && e.notification.data.view;
+  e.notification.close();
+  e.waitUntil(
+    self.clients.matchAll({type: 'window', includeUncontrolled: true}).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        var c = list[i];
+        if ('focus' in c) {
+          c.postMessage({view: ziel});
+          return c.focus();
+        }
+      }
+      if (self.clients.openWindow) {
+        return self.clients.openWindow(ziel ? './valkr-hub.html?view=' + ziel : './valkr-hub.html');
+      }
+    })
   );
 });
 

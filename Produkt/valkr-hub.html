@@ -526,6 +526,8 @@
     left:0;right:0;bottom:5px;height:2px;border-radius:999px;background:var(--aurora)}
   body[data-view="train"] #subnav button[aria-selected="true"]::after{background:var(--ember)}
   body[data-view="prog"] #subnav button[aria-selected="true"]::after{background:var(--brass)}
+  #subnav .subdot{display:inline-block;width:6px;height:6px;border-radius:50%;
+    background:var(--ember);margin-left:.35rem;vertical-align:middle}
   @media (max-width:640px){
     #subnav{gap:1rem}
     #subnav button{font-size:.82rem}
@@ -855,6 +857,55 @@
   .mlsugrow b{font-size:var(--t2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .mlsugrow span{font-size:var(--t1);color:var(--ink3);font-family:var(--fm)}
   .mlsugrow:hover{border-color:var(--aurora)}
+  /* Suche zuerst: Eingabe und Scanner in einer Zeile, statt der Scanner als
+     eigener Vollbreite-Knopf ueber dem Feld -- das war der Umweg, den jede
+     Mahlzeit brauchte, bevor man ueberhaupt zu tippen anfing. */
+  #sheet .mlsearchctl{display:flex;align-items:center;gap:.4rem}
+  #sheet .mlsearchctl input{flex:1;min-width:0}
+  #sheet .mlscanbtn{flex:none;width:38px;height:38px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;
+    border:1px solid var(--line);background:var(--surf2);color:var(--ink2);transition:.16s}
+  #sheet .mlscanbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  /* Zuletzt gegessen: Schnellzugriff, solange das Suchfeld leer ist. */
+  .mlrchips{display:flex;flex-wrap:wrap;gap:.4rem}
+  .mlrchip{border:1px solid var(--line);background:var(--surf2);color:var(--ink2);
+    border-radius:999px;padding:.4rem .8rem;font-family:var(--fb);font-size:var(--t3);
+    transition:border-color .16s,color .16s}
+  .mlrchip:hover{border-color:var(--aurora);color:var(--ink)}
+  /* Manuelle Makros: eingeklappt bis eine Quelle feststeht (Suche, Zuletzt,
+     Scan) oder jemand ausdruecklich selbst eintragen will. Dieselbe
+     Kastenlogik wie .dsh, damit der Abstand zwischen den Feldern beim
+     Aufklappen nicht zusammenfaellt. */
+  .mlmanual{display:flex;flex-direction:column;gap:.7rem}
+  /* Mahlzeit-Kacheln: dieselbe Glas-plus-Farbe-Sprache wie die Antwortkarten
+     der Einfuehrung (--oc je Kachel, gefuellt bei Auswahl) statt der
+     schmalen, einfarbigen Segmentleiste von vorher -- eine 2x2-Flaeche mit
+     Icon und Wort statt vier duenner Pillen, in denen laengere Woerter
+     abgeschnitten wurden. Der eigene Haken (.chk) ist die klare
+     Auswahlmarkierung; die Segmentleiste hatte dafuer nur einen kaum
+     sichtbaren Farbwechsel im Hintergrund. */
+  .mslotpick{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
+  .mslotopt{--oc:var(--aurora);position:relative;display:flex;align-items:center;gap:.55rem;
+    text-align:left;padding:.6rem .7rem;border-radius:var(--r2);border:1px solid var(--line);
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 55%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 72%,transparent) 100%);
+    transition:.16s;min-height:52px}
+  .mslotopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent)}
+  .mslotopt .ic{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
+    background:color-mix(in srgb,var(--oc) 16%,transparent);color:var(--oc)}
+  .mslotopt .ic svg{width:18px;height:18px}
+  .mslotopt b{font-family:var(--fd);font-weight:600;font-size:.88rem;flex:1;min-width:0}
+  .mslotopt .chk{position:absolute;top:.45rem;right:.45rem;width:16px;height:16px;flex:none;
+    border-radius:50%;border:1.4px solid var(--line2);display:flex;align-items:center;justify-content:center;
+    color:transparent;font-size:10px;transition:.16s}
+  .mslotopt[aria-pressed="true"]{
+    border-color:color-mix(in srgb,var(--oc) 60%,transparent);
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--oc) 22%,transparent) 0%,
+      color-mix(in srgb,var(--surf3) 78%,transparent) 100%);
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 12%,transparent)}
+  .mslotopt[aria-pressed="true"] .chk{border-color:var(--oc);background:var(--oc);color:var(--hero)}
 
   /* ── Leistung auf schwachen Geraeten: lange Listen und das eingebettete
      Buch werden erst gerechnet, wenn sie ins Bild scrollen. Der Browser
@@ -925,6 +976,15 @@
   #v-kam .kamres .hint,#v-kam .kamfall .hint{color:var(--ink2)}
   @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
   h2.sec{font-family:var(--fd);font-weight:600;font-size:1.2rem;margin:0}
+  .sec-row{display:flex;align-items:center;gap:.4rem}
+  /* Kleines "i" statt eines weiteren Absatz-Hinweises: die Wortkur hat schon
+     genug Fliesstext entfernt, ein Tipp auf Antippen erklaert, ohne staendig
+     dazustehen. */
+  .hint-i{display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;padding:0;border:1px solid var(--line);border-radius:999px;
+    background:none;color:var(--ink3);font-family:var(--fm);font-size:11px;
+    font-style:italic;font-weight:700;line-height:1;cursor:pointer}
+  .hint-i:hover,.hint-i:focus-visible{border-color:var(--ink2);color:var(--ink)}
   p.sub{margin:0;color:var(--ink2);font-size:var(--t4);max-width:64ch}
   /* Die Zwischenueberschrift war in Ember gesetzt -- ein Signalton fuer eine
      blosse Beschriftung. Bei einem Dutzend davon auf einem Bildschirm schreit
@@ -978,7 +1038,12 @@
      alles andere auf der Seite sitzt auf einer Flaeche.
      Derselbe Verlauf und dieselbe Lichtkante wie die Karten, damit er dazu
      gehoert und nicht wie ein Fremdkoerper aussieht. */
-  .cal{margin-bottom:.9rem;touch-action:none;
+  /* contain:layout haelt die Auf/Zuklapp-Animation dort, wo sie hingehoert:
+     ohne das loest jede Bildaenderung der Hoehe ein Reflow der ganzen Seite
+     darunter aus (Session-Karten, Musterkacheln, Katalog) -- 25 Bilder in
+     420ms, jedes davon ein Layout-Durchlauf durch den ganzen Bereich. Mit
+     contain bleibt der Durchlauf auf diesen Kasten beschraenkt. */
+  .cal{margin-bottom:.9rem;touch-action:none;contain:layout;
     padding:.7rem .7rem .2rem;border-radius:var(--r3);
     border:1px solid var(--line);
     background:linear-gradient(160deg,
@@ -994,11 +1059,16 @@
      sich anfuehlen, als faehrt der Monat heraus, nicht als wird eine Hoehe
      gesetzt. Beide Werte -- Hoehe und Verschiebung -- laufen synchron, sonst
      rutscht das Raster sichtbar hinter der Kante her. */
-  .calview{overflow:hidden;transition:height .42s cubic-bezier(.22,1,.28,1)}
+  .calview{overflow:hidden;transition:height .42s cubic-bezier(.22,1,.28,1);will-change:height}
   /* Die zusaetzlichen Zeilen blenden beim Aufklappen mit auf. Ohne das
-     erscheinen sie hart an der Kante, sobald die Hoehe sie freigibt. */
-  .cal:not(.offen) .dstrip button{opacity:.001}
-  .cal:not(.offen) .dstrip button.inweek{opacity:1}
+     erscheinen sie hart an der Kante, sobald die Hoehe sie freigibt.
+     Bewusst auf .calview eingegrenzt, nicht auf .cal allgemein: der
+     Ernaehrungsstreifen sitzt jetzt auch in einem .cal-Kasten, hat aber
+     kein .calview und keine .inweek-Zeilenlogik -- mit der weiteren Regel
+     blieben seine Tage dauerhaft auf Opazitaet .001 stehen, weil .inweek
+     dort nie vergeben wird. */
+  .cal:not(.offen) .calview .dstrip button{opacity:.001}
+  .cal:not(.offen) .calview .dstrip button.inweek{opacity:1}
   .dstrip button{transition:background .18s,color .18s,opacity .3s ease .06s}
   /* Der Griff: eine kurze Linie, die sagt "hier laesst sich ziehen". Beim
      Aufklappen dreht sie sich in ein flaches Dach -- dieselbe Sprache wie
@@ -1012,9 +1082,11 @@
     transition:transform .42s cubic-bezier(.22,1,.28,1)}
   /* Tage ausserhalb des Monats bleiben lesbar, treten aber zurueck. */
   .dstrip button.out{opacity:.32}
-  /* Der Tagebuch-Streifen in der Ernaehrung hat keinen Kalenderrahmen und
-     braucht seinen Abstand deshalb selbst. */
-  #fstrip{margin-bottom:.8rem}
+  /* Der Tagebuch-Streifen steckt jetzt im selben Glaskasten (.cal) wie der
+     Trainingskalender -- der Kasten bringt seinen Abstand nach aussen schon
+     mit (.cal{margin-bottom}), ein eigener Rand hier waere ein zweiter,
+     zu grosser Leerraum am unteren Kastenrand. */
+  #fstrip{margin-bottom:0}
   /* Zugeklappt soll der Kalender ein Kalender sein, keine Knopfreihe.
      Vorher hatte JEDER Tag einen eigenen Kasten mit Hintergrund und Rand --
      sieben graue Kacheln nebeneinander, von denen sechs nichts zu sagen
@@ -1033,8 +1105,12 @@
      mehr braucht ein Kalender nicht, und weniger versteht man nicht. */
   .dstrip button.today{box-shadow:inset 0 0 0 1.5px var(--aurora)}
   .dstrip button.today b{color:var(--aurora)}
-  .dstrip button[aria-selected="true"]{background:var(--aurora);box-shadow:none}
-  .dstrip button[aria-selected="true"] b{color:var(--bg)}
+  /* Die Flaeche sitzt auf einem ::before, das kleiner ist als der Knopf --
+     der Knopf bleibt die volle Zelle (Tippflaeche), der sichtbare Kreis
+     zieht sich zurueck. Vorher fuellte die Farbe die ganze Zelle, das wirkte
+     wie ein Block statt wie ein Tagesindikator. */
+  .dstrip button[aria-selected="true"]{background:none;box-shadow:none}
+  .dstrip button[aria-selected="true"] b{color:var(--bg);position:relative;z-index:1}
   /* Der Punkt sagt "erledigt". Er sitzt unter der Zahl, damit er die Zahl
      nicht verdeckt -- ein Haken im Feld waere bei sieben Feldern nebeneinander
      zu viel Zeichen auf zu wenig Platz. */
@@ -1061,16 +1137,17 @@
      weicher Schein darunter. Dieselbe Sprache wie die Karten -- eine Flaeche
      in einer einzigen Farbe sieht aus wie Farbe, eine mit Richtung wie
      Material. */
-  .dstrip button[aria-selected="true"]{
+  .dstrip button[aria-selected="true"]::before{
+    content:'';position:absolute;inset:16%;border-radius:999px;z-index:0;
     background:linear-gradient(160deg,
       color-mix(in srgb,var(--aurora) 100%,#fff 22%) 0%,
       var(--aurora) 48%,
       color-mix(in srgb,var(--aurora) 82%,#000) 100%);
     box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 45%,transparent),
                0 2px 10px -2px color-mix(in srgb,var(--aurora) 55%,transparent)}
-  .dstrip button[aria-selected="true"] i{color:var(--bg)!important;background:var(--bg)}
+  .dstrip button[aria-selected="true"] i{color:var(--bg)!important;background:var(--bg);position:relative;z-index:1}
   @supports not (background:color-mix(in srgb,red 50%,transparent)){
-    .dstrip button[aria-selected="true"]{background:var(--aurora)}
+    .dstrip button[aria-selected="true"]::before{background:var(--aurora)}
   }
   @media (max-width:400px){
     .dstrip{gap:.22rem}
@@ -1729,11 +1806,23 @@
   #intro h2{font-family:var(--fd);font-weight:600;font-size:1.5rem;margin:0;line-height:1.18;text-wrap:balance}
   #intro .isub{margin:0;color:var(--ink2);font-size:.9rem;line-height:1.5;text-wrap:pretty}
   #intro .center h2,#intro .center .isub{text-align:center}
+  /* Jede Karte traegt ihre eigene Akzentfarbe als --oc (aus OBL, dieselbe
+     Farbe wie ihr Icon-Chip) -- ausgewaehlt fuellt sich die Karte mit einem
+     Hauch dieser Farbe statt mit dem immergleichen Aurora-Rand. Ohne Farbe
+     (Vermeidungsliste, Erfahrung) faellt --oc auf Aurora zurueck. */
   #intro .iopts{display:flex;flex-direction:column;gap:.55rem}
-  #intro .iopt{position:relative;display:flex;align-items:center;gap:.8rem;text-align:left;background:var(--surf);
+  #intro .iopt{--oc:var(--aurora);position:relative;display:flex;align-items:center;gap:.8rem;text-align:left;
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 55%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 72%,transparent) 100%);
     border:1px solid var(--line);border-radius:var(--r2);padding:.85rem .95rem;transition:.16s;box-shadow:var(--sh)}
-  #intro .iopt:hover{border-color:var(--aurora);transform:translateY(-1px)}
-  #intro .iopt[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
+  #intro .iopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent);transform:translateY(-1px)}
+  #intro .iopt[aria-pressed="true"]{
+    border-color:color-mix(in srgb,var(--oc) 60%,transparent);
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--oc) 24%,transparent) 0%,
+      color-mix(in srgb,var(--surf3) 78%,transparent) 100%);
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 12%,transparent),var(--sh)}
   #intro .iopt .ic{width:38px;height:38px;flex:none;border-radius:10px;display:flex;align-items:center;justify-content:center}
   #intro .iopt .ic svg{width:21px;height:21px}
   #intro .iopt .tx{flex:1;min-width:0}
@@ -1741,7 +1830,7 @@
   #intro .iopt .tx small{display:block;font-size:.78rem;color:var(--ink3);margin-top:.1rem;line-height:1.35}
   #intro .iopt .ring{width:22px;height:22px;flex:none;border-radius:50%;border:1.6px solid var(--line2);
     display:flex;align-items:center;justify-content:center;color:transparent;transition:.16s;font-size:var(--t1)}
-  #intro .iopt[aria-pressed="true"] .ring{border-color:var(--aurora);background:var(--aurora);color:var(--hero)}
+  #intro .iopt[aria-pressed="true"] .ring{border-color:var(--oc);background:var(--oc);color:var(--hero)}
   #intro .iopt .reco{position:absolute;top:-7px;right:.8rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;
     text-transform:uppercase;color:var(--brass);background:var(--bg);border:1px dashed color-mix(in srgb,var(--brass) 60%,transparent);
     border-radius:var(--r1);padding:.12rem .4rem}
@@ -1751,12 +1840,22 @@
      Tage tragen den farbigen Punkt ihrer Einheit, Legende darunter. */
   #intro .daypills{display:flex;gap:.45rem;justify-content:center;margin-top:.5rem}
   #intro .daypill{flex:1;min-width:0;max-width:54px;height:92px;border-radius:999px;border:1px solid var(--line);
-    background:var(--surf);display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 55%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 72%,transparent) 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:space-between;
     padding:.7rem .2rem .55rem;transition:.16s}
   #intro .daypill:hover{border-color:var(--aurora)}
   #intro .daypill b{font-family:var(--fm);text-transform:uppercase;font-size:var(--t3);color:var(--ink2)}
   #intro .daypill .dot{width:22px;height:22px;border-radius:999px;background:var(--surf2);border:1px dashed var(--line2);transition:.16s}
-  #intro .daypill[aria-pressed="true"]{border-color:var(--aurora);background:var(--surf3)}
+  /* --oc kommt aus paintTdays() -- die Reihenfolge der Auswahl bestimmt die
+     Farbe (1. Tag Aurora, 2. Ice, 3. Ember, 4. Brass), nicht der Wochentag
+     selbst. Ohne --oc (unausgewaehlt) bleibt die Grundflaeche neutral. */
+  #intro .daypill[aria-pressed="true"]{
+    border-color:color-mix(in srgb,var(--oc,var(--aurora)) 60%,transparent);
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--oc,var(--aurora)) 26%,transparent) 0%,
+      color-mix(in srgb,var(--surf3) 80%,transparent) 100%)}
   #intro .daypill[aria-pressed="true"] b{color:var(--ink)}
   #intro .daypill[aria-pressed="true"] .dot{border:none}
   #intro .tdleg{display:flex;gap:.85rem .9rem;justify-content:center;flex-wrap:wrap;margin-top:.55rem}
@@ -1772,10 +1871,37 @@
   #intro .valrow b{font-family:var(--fd);font-weight:600;font-size:2.9rem;line-height:1;font-variant-numeric:tabular-nums}
   #intro .valrow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
   #intro .stepbtns{display:flex;align-items:center;gap:.7rem;justify-content:center}
-  #intro .stepbtns button{width:40px;height:40px;border-radius:999px;border:1px solid var(--line);background:var(--surf);
-    color:var(--ink);font-size:1.15rem;line-height:1;transition:.16s;flex:none}
-  #intro .stepbtns button:hover{border-color:var(--aurora);color:var(--aurora)}
-  #intro input[type="range"].islide{width:100%;accent-color:var(--aurora);height:26px}
+  #intro .stepbtns button{width:40px;height:40px;border-radius:999px;flex:none;
+    border:1px solid color-mix(in srgb,#fff 8%,transparent);
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--surf3) 88%,transparent),
+      color-mix(in srgb,var(--surf2) 82%,transparent));
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 10%,transparent);
+    color:var(--ink);font-size:1.15rem;line-height:1;transition:filter .16s,transform .12s}
+  #intro .stepbtns button:hover{filter:brightness(1.3)}
+  #intro .stepbtns button:active{transform:scale(.92)}
+  /* Bewusst beim Schieber statt einem eigens gebauten Scroll-Rad-Waehler
+     geblieben: input[type=range] ist compositor-billig und laeuft nativ
+     fluessig, ein selbstgebautes Scroll-Snap-Rad waere genau die Art von
+     Zusatzlast, die auf dem A54 in diesem Umbau schon einmal ruckelte. Die
+     Optik holt trotzdem auf: Farbverlauf in der Leiste, glaeserner Griff. */
+  #intro input[type="range"].islide{width:100%;height:26px;-webkit-appearance:none;appearance:none;background:none}
+  #intro input[type="range"].islide::-webkit-slider-runnable-track{
+    height:6px;border-radius:999px;
+    background:linear-gradient(90deg,var(--aurora),color-mix(in srgb,var(--aurora) 35%,transparent))}
+  #intro input[type="range"].islide::-webkit-slider-thumb{
+    -webkit-appearance:none;width:26px;height:26px;margin-top:-10px;border-radius:50%;cursor:pointer;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--aurora) 100%,#fff 22%),color-mix(in srgb,var(--aurora) 82%,#000));
+    border:2px solid color-mix(in srgb,#fff 45%,transparent);
+    box-shadow:0 2px 8px -2px color-mix(in srgb,var(--aurora) 60%,transparent)}
+  #intro input[type="range"].islide::-moz-range-track{
+    height:6px;border-radius:999px;
+    background:linear-gradient(90deg,var(--aurora),color-mix(in srgb,var(--aurora) 35%,transparent))}
+  #intro input[type="range"].islide::-moz-range-thumb{
+    width:22px;height:22px;border-radius:50%;cursor:pointer;
+    background:linear-gradient(160deg,color-mix(in srgb,var(--aurora) 100%,#fff 22%),color-mix(in srgb,var(--aurora) 82%,#000));
+    border:2px solid color-mix(in srgb,#fff 45%,transparent);
+    box-shadow:0 2px 8px -2px color-mix(in srgb,var(--aurora) 60%,transparent)}
   #intro .slidewrap{position:relative;padding-top:.3rem;width:100%}
   #intro .slidewrap .est{position:absolute;top:-4px;transform:translateX(-50%);font-family:var(--fm);font-size:var(--t1);
     letter-spacing:.14em;text-transform:uppercase;color:var(--brass);white-space:nowrap}
@@ -1792,10 +1918,13 @@
   #intro .bridge .lead{font-size:1.05rem;color:var(--ink);margin:0;line-height:1.5}
   #intro .bridge .nextk{font-family:var(--fm);font-size:var(--t1);letter-spacing:.2em;text-transform:uppercase;color:var(--ink3);margin:1rem 0 0}
   #intro .bridge .nextv{font-family:var(--fd);font-weight:600;font-size:1.3rem;letter-spacing:.06em;text-transform:uppercase;margin:.15rem 0 0}
+  /* .tbtn.go traegt app-weit schon die Glasoptik (Verlauf, Lichtkante) --
+     hier stand vorher eine eigene, flache Ueberschreibung (deckendes
+     var(--ink)), die die Einfuehrung als einzigen Ort ohne dieses Glas
+     zeigte. Jetzt erbt der Knopf dieselbe Optik wie ueberall sonst. */
   #intro .inav{display:flex;flex-direction:column;gap:.5rem;align-items:stretch;margin-top:auto;padding-top:.6rem}
   #intro .inav .tbtn{width:100%;text-align:center;padding:.85rem;border-radius:999px;font-size:.95rem}
-  #intro .inav .tbtn.go{background:var(--ink);color:var(--bg);border-color:var(--ink);font-family:var(--fd);font-weight:600}
-  #intro .inav .tbtn.go:hover{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
+  #intro .inav .tbtn.go{font-family:var(--fd);font-weight:700}
   #intro .ilang{display:flex;gap:.4rem;justify-content:center}
   #intro .ilang button{font-family:var(--fm);font-size:var(--t1);letter-spacing:.12em;text-transform:uppercase;
     border:1px solid var(--line);border-radius:var(--r1);padding:.3rem .6rem;color:var(--ink2)}
@@ -2794,6 +2923,23 @@
     </div>
   </section>
 
+  <!-- Vorher am Ende von Training eingescrollt, hinter Musterkacheln und
+       Volumenchart -- wer nur nachschlagen wollte, welche Uebung was macht,
+       musste durch die ganze Session-Uebersicht scrollen. Jetzt ein eigener
+       Abschnitt neben Wochen, sofort erreichbar. -->
+  <section class="view" id="v-catalog">
+    <div class="form">
+      <div class="savebar" style="justify-content:space-between">
+        <p class="eyebrow" style="margin:0" data-i18n="cat.h">Exercise library</p>
+        <span class="pill" id="catCount"></span>
+      </div>
+      <div class="ctl"><input id="catSearch" type="text" placeholder="Search"></div>
+      <div class="chips" id="catChips"></div>
+      <div id="catList" class="catlist"></div>
+      <p class="hint" data-i18n="cat.s">Every exercise the plan can draw from. Difficulty runs Beginner to Elite; the tags show what you need and which joints work hardest. Swap any plan exercise from the Today view.</p>
+    </div>
+  </section>
+
   <section class="view" id="v-train">
     <!-- Kalender nach MCI-Vorbild: zugeklappt die laufende Woche, mit dem
          Finger nach unten gezogen der ganze Monat, nach oben wieder zu.
@@ -2852,22 +2998,14 @@
       <p class="hint" id="logRecall"></p>
       <span class="saved" id="savedFlag">Saved</span>
     </div>
-    <div><h2 class="sec" data-i18n="train.h">The six patterns</h2></div>
+    <div class="sec-row"><h2 class="sec" data-i18n="train.h">Fundamental movement patterns</h2>
+      <button type="button" class="hint-i" id="patInfo" data-i18n-title="pat.tip" aria-label="Info">i</button>
+    </div>
     <div class="grid" id="tiles"></div>
     <div class="chartbox">
       <h4 data-i18n="train.vol">Weekly volume balance</h4>
       <div class="volbar" id="volbar"></div>
       <p class="hint" id="volNote"></p>
-    </div>
-    <div class="form">
-      <div class="savebar" style="justify-content:space-between">
-        <p class="eyebrow" style="margin:0" data-i18n="cat.h">Exercise library</p>
-        <span class="pill" id="catCount"></span>
-      </div>
-      <div class="ctl"><input id="catSearch" type="text" placeholder="Search"></div>
-      <div class="chips" id="catChips"></div>
-      <div id="catList" class="catlist"></div>
-      <p class="hint" data-i18n="cat.s">Every exercise the plan can draw from. Difficulty runs Beginner to Elite; the tags show what you need and which joints work hardest. Swap any plan exercise from the Today view.</p>
     </div>
   </section>
 
@@ -2879,7 +3017,7 @@
       <div class="demo" id="d-demo"></div>
       <span id="d-media"></span>
     </div>
-    <div><p class="hint" style="margin:0 0 .5rem" data-i18n="train.ladder">Your ladder &mdash; tap a step to set where you are</p><div class="ladder" id="d-ladder"></div></div>
+    <div><p class="hint" style="margin:0 0 .5rem" data-i18n="train.ladder">Your level &mdash; tap a step to set where you are</p><div class="ladder" id="d-ladder"></div></div>
     <div class="cols">
       <div class="card"><h4 data-i18n="train.how">How to do it</h4><ul id="d-cues"></ul></div>
       <div class="card warn"><h4 data-i18n="train.wrong">What goes wrong</h4><ul id="d-bad"></ul></div>
@@ -3013,24 +3151,30 @@
 
   <section class="view" id="v-test">
     <div><h2 class="sec" data-i18n="test.h">Find your starting point</h2><p class="sub" data-i18n="test.s">Four tests, twenty minutes. Warm up first, rest three minutes between each, and stop the moment your form breaks. Your lowest score is your level.</p></div>
+    <!-- v17 (Baustelle 3): Stufen als benannte Baender statt nackter
+         L1-L6-Tabelle. "L1" sagt niemandem etwas -- die Namen (Einstieg bis
+         Elite) stehen jetzt direkt am Wert, das eigene Segment leuchtet.
+         v25: eine Karte statt zwei, Ergebnis und Detail in derselben
+         Reihenfolge, in der man sie braucht -- eintragen, sehen wo man
+         steht, dann erst die Knoepfe zum Uebernehmen. Vorher standen die
+         Knoepfe VOR dem Detail, man haette also speichern muessen, bevor
+         man das volle Bild sah. Die vier Ergebnis-Kacheln, die hier vorher
+         standen, sind raus -- dieselben vier Werte standen im Baender-Block
+         darunter ohnehin ein zweites Mal, ausfuehrlicher. -->
     <div class="form">
       <p class="hint" data-i18n="test.note0">Day one measures you in automatically &mdash; first contact with an exercise runs three max sets inside the session. This page is for the week 6 and week 12 retests.</p>
       <div class="fgrid" id="testGrid"></div>
       <div class="out" id="testOut"></div>
+      <p class="eyebrow" id="lvlLegT">Die sechs Level</p>
+      <div id="lvlBands"></div>
+      <p class="hint" id="lvlLeg"></p>
+      <p class="hint" data-i18n="test.rowpress">Row and Press have no test of their own &mdash; they follow your pull-up and push-up numbers, the same way your very first session sets them.</p>
       <p class="hint" id="testNote"></p>
       <div class="savebar">
-        <button class="tbtn go" id="testApply" data-i18n="btn.applyTest">Apply to my ladders</button>
+        <button class="tbtn go" id="testApply" data-i18n="btn.applyTest">Apply my levels</button>
         <button class="tbtn" id="testBaseline" data-i18n="btn.setBaseline">Save as week-1 baseline</button>
         <span class="saved" id="testFlag">Saved</span>
       </div>
-    </div>
-    <!-- v17 (Baustelle 3): Stufen als benannte Baender statt nackter
-         L1-L6-Tabelle. "L1" sagt niemandem etwas -- die Namen (Einstieg bis
-         Elite) stehen jetzt direkt am Wert, das eigene Segment leuchtet. -->
-    <div class="form">
-      <p class="eyebrow" id="lvlLegT">Die sechs Stufen</p>
-      <div id="lvlBands"></div>
-      <p class="hint" id="lvlLeg"></p>
     </div>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg><span class="ft" data-i18n="test.retest">Retest at week 6 and week 12</span></summary>
@@ -3043,7 +3187,16 @@
          und Slots, dann Gewicht, Naehrstoffe, Rezepte. Rechner, Zielwerte,
          Wasser und Supplemente bleiben vollstaendig -- als Ausklapper unten,
          denn sie werden selten angefasst und oft nur gelesen. -->
-    <div class="dstrip" id="fstrip" role="tablist" aria-label="Tagebuch-Woche"></div>
+    <!-- Derselbe Aufbau wie der Kalender im Training, nicht nur derselbe
+         Kasten: Wochentag-Kopfzeile einmal oben (.calhead), darunter nur
+         noch Zahlen. Vorher stand der Wochentag in jedem einzelnen Knopf
+         zusammengequetscht mit der Zahl -- der Kasten sah zwar gleich aus,
+         der Inhalt war strukturell eine andere Sache. Kein Ausklapper
+         noetig, das Tagebuch zeigt nur die laufende Woche. -->
+    <div class="cal">
+      <div class="calhead" id="fstripHead" aria-hidden="true"></div>
+      <div class="dstrip" id="fstrip" role="tablist" aria-label="Tagebuch-Woche"></div>
+    </div>
     <div class="form">
       <div class="savebar" style="justify-content:space-between;align-items:center">
         <div class="gtitle" style="margin:0"><span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M2.5 20h19M12 8V5.5M9.5 4h5"/></svg></span>
@@ -3150,7 +3303,7 @@
     <div class="chartbox" id="blockHist" style="display:none">
       <h4 data-i18n="you.blocks">Your blocks so far</h4>
       <div id="blockHistBody"></div>
-      <p class="hint" data-i18n="you.blocksNote">Each block is twelve weeks. Your ladder steps carry over, so block two starts where block one finished &mdash; that is where the long-term progress actually shows.</p>
+      <p class="hint" data-i18n="you.blocksNote">Each block is twelve weeks. Your levels carry over, so block two starts where block one finished &mdash; that is where the long-term progress actually shows.</p>
     </div>
     <div class="chartbox">
       <h4 data-i18n="you.ready">Readiness right now</h4>
@@ -3290,14 +3443,6 @@
         <span class="ft" data-i18n="acc.faq">Häufige Fragen</span><span class="fs" id="faqSum"></span></summary>
       <div class="foldBody"><div class="faq" id="faqList"></div></div>
     </details>
-    <details class="fold">
-      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="acc.notes">Hinweise zum Stand</span></summary>
-      <div class="foldBody">
-    <p class="legal"><b>Build note &mdash; access control:</b> this prototype has no sign-in on purpose. A password checked inside the page source is decoration, not protection. Real gating happens on the server before the page is delivered: purchase fires a webhook, the buyer&rsquo;s email lands on an allow-list, the host checks it with an emailed one-time code.</p>
-    <p class="legal"><b>Launch note &mdash; subscriptions:</b> before the monthly plan goes live it needs a cancel button under &sect;312k BGB, clear renewal terms, and correct handling of the withdrawal right for digital content.</p>
-      </div>
-    </details>
   </section>
 
   <section class="view pushv" id="v-settings">
@@ -3344,7 +3489,7 @@
         <div class="field"><label data-i18n="set.spar">Performance mode</label><div class="ctl"><select id="setSpar"><option value="auto" selected data-i18n="opt.auto">Auto</option><option value="on" data-i18n="opt.on">An</option><option value="off" data-i18n="opt.off">Aus</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div><span class="hint" id="sparNote"></span></div>
         <div class="field"><label data-i18n="set.sound">Timer sound</label><div class="ctl"><select id="setSound"><option value="on">On</option><option value="off" selected>Off</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
-      <p class="hint" data-i18n="set.langNote">The interface translates fully. Chapter text and technique cues stay English in this prototype &mdash; the German edition follows with the book.</p>
+      <p class="hint" data-i18n="set.langNote">Interface fully translated. Chapter text stays English for now &mdash; the German edition follows with the book.</p>
     </div>
     <!-- ---- Erinnerungen ---------------------------------------------------
          Was hier moeglich ist und was nicht, steht auch in der App selbst --
@@ -3424,7 +3569,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='24.2';
+var VERSION='24.12';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3617,7 +3762,7 @@ var DICT={
  'fuel.calcFold':['Calculator — your data','Rechner — deine Daten'],
  'fuel.targetFold':['Targets — edit any of them','Zielwerte — alle änderbar'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
- 'rk.s':['From where you stand on the ladders, not from sweat.','Aus deinem Stand auf den Leitern, nicht aus Schweiß.'],
+ 'rk.s':['From your level, not from sweat.','Aus deinem Level, nicht aus Schweiß.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
  'lb.h':['Leaderboard','Bestenliste'],
  'rk.dist':['All ranks — who stands where','Alle Ränge — wer steht wo'],
@@ -3625,7 +3770,7 @@ var DICT={
  'rk.addonsNote':['Pure cosmetics — they never change how the rank is earned.','Reine Optik — sie ändern nie, wie der Rang entsteht.'],
  'rk.ach':['Achievements','Erfolge'],
  'rk.perPat':['Rank per pattern','Rang je Muster'],'rk.how':['How the rank is earned','Wie der Rang entsteht'],
- 'rk.h1':['Ladder position counts most, more than extra reps.','Die Leiterstufe zählt am meisten, mehr als Zusatzwiederholungen.'],
+ 'rk.h1':['Your level counts most, more than extra reps.','Dein Level zählt am meisten, mehr als Zusatzwiederholungen.'],
  'rk.h2':['Personal records above your week-1 baseline add on top.','Rekorde über deiner Woche-1-Basis kommen obendrauf.'],
  'rk.h3':['Following the plan adds the rest. A rest day counts like a session.','Plan einhalten macht den Rest. Ein Ruhetag zählt wie eine Einheit.'],
  'rk.h4':['Strength sets the ceiling, showing up raises it. The top rank is months of work, on purpose.','Stärke setzt die Obergrenze, Dranbleiben hebt sie. Der höchste Rang ist bewusst Monate an Arbeit.'],
@@ -3640,7 +3785,7 @@ var DICT={
  'btn.save':['Save log','Log speichern'],
  'btn.logIt':['Log it','Eintragen'],'btn.allPatterns':['All patterns','Alle Muster'],
  'btn.startRoutine':['Start routine','Routine starten'],'btn.stop':['Stop','Stopp'],
- 'btn.applyTest':['Apply to my ladders','Auf Leitern übertragen'],'btn.setBaseline':['Save as week-1 baseline','Als Woche-1-Basis speichern'],
+ 'btn.applyTest':['Apply my levels','Level übernehmen'],'btn.setBaseline':['Save as week-1 baseline','Als Woche-1-Basis speichern'],
  'btn.auto':['Reset to auto','Auf automatisch'],'btn.logToday':['Log today','Heute eintragen'],
  'btn.clear':['Clear','Leeren'],'btn.rebase':['Set today as baseline','Heute als Basis setzen'],
  'btn.addEx':['Add exercise','Übung hinzufügen'],'btn.add':['Add','Hinzufügen'],
@@ -3652,10 +3797,11 @@ var DICT={
  'log.dur':['Duration','Dauer'],'log.pain':['Anything hurt? Tap the area','Etwas getan weh? Bereich antippen'],'log.notes':['Notes','Notizen'],
  'plan.h':['The twelve weeks','Die zwölf Wochen'],'plan.s':['One row per week. Open one to see its days.','Eine Zeile pro Woche. Aufklappen zeigt die Tage.'],
  'plan.miles':['Milestones','Meilensteine'],
- 'train.h':['The six patterns','Die sechs Muster'],'train.s':['Everything you train. Open one for ladder and cues.','Alles, was du trainierst. Öffnen für Leiter und Technik.'],
+ 'train.h':['Fundamental movement patterns','Grundlegende Bewegungsmuster'],'train.s':['Everything you train. Open one for level and cues.','Alles, was du trainierst. Öffnen für Level und Technik.'],
+ 'pat.tip':['Six categories that cover the whole body: Push, Pull, Row, Press, Legs, Core. Each has its own level — your rank is built from all six.','Sechs Kategorien, die zusammen den ganzen Körper abdecken: Push, Pull, Row, Press, Legs, Core. Jedes hat sein eigenes Level — dein Rang setzt sich aus allen sechs zusammen.'],
  'train.vol':['Weekly volume','Wochenvolumen'],
  'train.volHint':['Pull should never sit below push — that imbalance is the most common cause of shoulder trouble.','Zug darf nie unter Druck liegen — das ist die häufigste Ursache für Schulterprobleme.'],
- 'train.ladder':['Your ladder — tap a step to set where you are','Deine Leiter — Stufe antippen um deinen Stand zu setzen'],
+ 'train.ladder':['Your level — tap a step to set where you are','Dein Level — Stufe antippen, um deinen Stand zu setzen'],
  'train.how':['How to do it','Ausführung'],'train.wrong':['What goes wrong','Typische Fehler'],'train.numbers':['Numbers','Zahlen'],
  'skills.h':['Skills','Skills'],'skills.s':['Each one has an entry requirement. The hub checks it.','Jeder Skill hat eine Voraussetzung. Der Hub prüft sie.'],
  'skills.rules':['Three rules for skill work','Drei Regeln für Skill-Training'],
@@ -3669,6 +3815,7 @@ var DICT={
  'mob.note':['Save long holds for after training — before, they cost force.','Langes Dehnen erst nach dem Training — davor kostet es Kraft.'],
  'test.h':['Find your starting point','Finde deinen Startpunkt'],
  'test.note0':['Day one measures you in automatically. This page is for the week 6 and 12 retests: warm up, three minutes rest, stop when form breaks.','Tag eins misst automatisch ein. Diese Seite ist für die Retests in Woche 6 und 12: aufwärmen, drei Minuten Pause, abbrechen wenn die Form bricht.'],
+ 'test.rowpress':['Row and Press have no test of their own — they follow your pull-up and push-up numbers, the same way your very first session sets them.','Row und Press haben keinen eigenen Test — sie folgen deinen Klimmzug- und Liegestütz-Werten, genau wie schon deine allererste Einheit sie einstellt.'],
  'test.s':['Four tests, 20 minutes. Your lowest score counts.','Vier Tests, 20 Minuten. Der schwächste Wert zählt.'],
  'test.tbl':['Test','Test'],'test.retest':['Retest at week 6 and week 12','Wiederholung in Woche 6 und 12'],
  'test.retestP':['Same warm-up, same standards. Loosening your form only flatters you.','Gleiches Aufwärmen, gleiche Maßstäbe. Lockere Form betrügt nur dich.'],
@@ -3702,12 +3849,12 @@ var DICT={
  'ev.noteB':['Not medical advice.','Keine medizinische Beratung.'],
  'ev.note':['The references support the principles, not your result. Pain, illness or a known condition goes to a doctor.','Die Quellen stützen die Prinzipien, nicht dein Ergebnis. Schmerz, Krankheit oder Vorerkrankung gehören zum Arzt.'],
  'learn.s':['Twelve chapters, short enough to look up.','Zwölf Kapitel, kurz zum Nachschlagen.'],
- 'acc.faq':['Common questions','Häufige Fragen'],'acc.notes':['Notes on the current state','Hinweise zum Stand'],
+ 'acc.faq':['Common questions','Häufige Fragen'],
  'acc.h':['Book or hub?','Buch oder Hub?'],'acc.s':['Same knowledge: read it once, or use it every session.','Gleiches Wissen: einmal lesen oder jede Einheit nutzen.'],
  'acc.get':['What you get','Was du bekommst'],'acc.once':['one payment','einmalig'],'acc.forever':['one payment, keep forever','einmalig, für immer'],'acc.later':['not open yet','noch nicht offen'],
  'set.h':['Settings','Einstellungen'],'set.s':['Everything here is stored in your browser only.','Alles hier wird nur in deinem Browser gespeichert.'],
  'you.blocks':['Your blocks so far','Deine Blöcke bisher'],
- 'you.blocksNote':['A block is twelve weeks. Ladder steps carry over, so block two starts where block one finished.','Ein Block sind zwölf Wochen. Die Leiterstufen wandern mit — Block zwei beginnt, wo Block eins aufhörte.'],
+ 'you.blocksNote':['A block is twelve weeks. Your levels carry over, so block two starts where block one finished.','Ein Block sind zwölf Wochen. Dein Level wandert mit — Block zwei beginnt, wo Block eins aufhörte.'],
  'set.theme':['Theme','Design'],
  'set.hue':['Accent colour','Akzentfarbe'],
  'set.dev':['Developer','Entwickler'],
@@ -3719,7 +3866,7 @@ var DICT={
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.spar':['Performance mode','Sparmodus'],
  'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],
- 'set.langNote':['Interface fully translated. Chapter text stays English in this prototype.','Oberfläche vollständig übersetzt. Kapiteltexte bleiben im Prototyp englisch.'],
+ 'set.langNote':['Interface fully translated. Chapter text stays English for now — the German edition follows with the book.','Oberfläche vollständig übersetzt. Kapiteltexte bleiben vorerst englisch — die deutsche Fassung folgt mit dem Buch.'],
  'ob.h':['Your plan — five quick questions','Dein Plan — fünf schnelle Fragen'],
  'ob.s':['Answer once. Everything stays changeable.','Einmal beantworten. Später alles änderbar.'],
  'ob.goal':['Goal','Ziel'],'ob.days':['Training days per week','Trainingstage pro Woche'],
@@ -3728,7 +3875,7 @@ var DICT={
  'ob.exp':['Training experience','Trainingserfahrung'],
  'ob.note':['No gear? Wall, table and chair cover every pattern.','Ohne Equipment reichen Wand, Tisch und Stuhl.'],
  'ob.testH':['One more thing: the strength test','Noch eine Sache: der Krafttest'],
- 'ob.testS':['Ten minutes, four moves, stop when your form breaks. Your reps set every ladder to the right step.','Zehn Minuten, vier Übungen, Schluss wenn die Form bricht. Deine Wiederholungen stellen jede Leiter richtig ein.'],
+ 'ob.testS':['Ten minutes, four moves, stop when your form breaks. Your reps set your starting level.','Zehn Minuten, vier Übungen, Schluss wenn die Form bricht. Deine Wiederholungen setzen dein Start-Level.'],
  'btn.obSave':['Create my plan','Meinen Plan erstellen'],
  'btn.obTest':['Take the test now','Jetzt zum Krafttest'],
  'btn.obLater':['Later','Später'],
@@ -6143,7 +6290,7 @@ function pauseHiddenSvg(){
     svgDecide(s);
   }
 }
-var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',fuel:'v-fuel',kam:'v-kam',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
+var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',catalog:'v-catalog',fuel:'v-fuel',kam:'v-kam',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
 
 /* ---------- oberste Ebene: sieben Ziele statt vierzehn -------------------
    Vierzehn Reiter bekommt kein Design aufgeraeumt -- das ist keine Frage von
@@ -6170,7 +6317,7 @@ var GROUP={
      der sich fuer Calisthenics interessiert -- es steht so in jedem Programm,
      jedem Video und jeder anderen App. Dieselbe Ueberlegung wie bei Push,
      Pull und Legs. */
-  train:   {v:['train','skills','mobility','test','plan'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Mobility'],['Test','Test'],['Weeks','Wochen']]},
+  train:   {v:['train','skills','mobility','test','plan','catalog'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Mobility'],['Test','Test'],['Weeks','Wochen'],['Catalog','Katalog']]},
   coach:   {v:['coach']},
   fuel:    {v:['fuel']},
   prog:    {v:['stat','ranks','you'],               l:[['Stats','Statistik'],['Ranks','Ränge'],['You','Du']]},
@@ -6192,7 +6339,12 @@ function drawSub(g,cur){
   var L=cfg.lang==='de'?1:0;
   el.hidden=false;
   el.innerHTML=G.v.map(function(x,i){
-    return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+'</button>';
+    /* Der Test-Reiter ist kein Einstiegs-Hindernis -- Tag eins misst schon
+       automatisch ein (siehe Hinweistext im Test-Bereich). Er ist der
+       Retest zu Woche 6 und 12, und genau da soll er auffallen statt einer
+       von zehn gleich schweren Reitern zu sein, die man sich merken muss. */
+    var badge=(x==='test'&&typeof testDue==='function'&&testDue())?'<i class="subdot" aria-hidden="true"></i>':'';
+    return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+badge+'</button>';
   }).join('');
   if(typeof stickyMess==='function')stickyMess();
 }
@@ -6243,10 +6395,15 @@ function show(n,fromBack){
      besuchten Unterseite. Wer sie aufruft, sucht in der Regel etwas anderes
      als beim letzten Mal. */
   if(n==='settings'&&typeof setIndexShow==='function')setIndexShow();
-  if(n==='fuel'){fuelOff=0;fuelPaint(true);}
+  /* Frueher wurde hier fuelOff immer auf 0 zurueckgesetzt -- wer einen
+     anderen Tag im Tagebuch waehlte, kurz den Bereich wechselte und
+     zurueckkam, stand wieder auf "heute", als waere die Wahl nie passiert.
+     Der Streifen behaelt die Auswahl jetzt, so lange die App laeuft. */
+  if(n==='fuel')fuelPaint(true);
   if(n==='kam')kamStart();
   else if(typeof kamAktiv!=='undefined'&&kamAktiv)kamStop();
   if(n==='plan')buildWeeks();
+  if(n==='catalog')buildCatalog();
   if(n==='train'){volBar();
     /* Der Kalender muss neu vermessen werden, sobald die Ansicht wirklich
        sichtbar ist. Beim ersten Zeichnen liegt sie noch auf display:none,
@@ -6715,7 +6872,7 @@ function renderDay(){
     for(pk in steps){if(prev&&typeof prev[pk]==='number')climbed+=Math.max(0,steps[pk]-prev[pk]);}
     bb.innerHTML='<div class="card"><h4>'+(L?'Block ':'Block ')+blockNo+' — '+cb.n[L]+(L?' abgeschlossen':' complete')+'</h4>'+
       '<p class="hint">'+(L?'Zwölf Wochen, ':'Twelve weeks, ')+totalSets()+(L?' Blöcke abgehakt':' blocks ticked')+
-      (prev?(L?', '+climbed+' Leiterstufen seit dem letzten Block':', '+climbed+' ladder steps since the last block'):'')+'.</p>'+
+      (prev?(L?', '+climbed+' Stufen seit dem letzten Block':', '+climbed+' steps since the last block'):'')+'.</p>'+
       '<p class="hint"><b>'+(L?'Block ':'Block ')+(blockNo+1)+' — '+nb.n[L]+'</b><br>'+nb.d[L]+'</p>'+
       '<div class="savebar"><button class="tbtn go" id="nextBlockBtn">'+
       (L?'Block '+(blockNo+1)+' starten':'Start block '+(blockNo+1))+'</button></div></div>';
@@ -6760,8 +6917,8 @@ function renderDay(){
 function startNextBlock(){
   var DE=cfg.lang==='de',nb=blockOf(blockNo+1);
   openModal(DE?('Block '+(blockNo+1)+' starten?'):('Start block '+(blockNo+1)+'?'),
-    DE?('Schwerpunkt: '+nb.n[1]+'. Deine Leiterstufen, Rekorde, XP und Erfolge bleiben alle erhalten — nur der Plan beginnt wieder bei Woche 1, von den Stufen aus, auf denen du jetzt stehst.')
-      :('Emphasis: '+nb.n[0]+'. Your ladder steps, records, XP and achievements all stay — only the plan restarts at week 1, from the steps you are on now.'),
+    DE?('Schwerpunkt: '+nb.n[1]+'. Dein Level, Rekorde, XP und Erfolge bleiben alle erhalten — nur der Plan beginnt wieder bei Woche 1, von da an, wo du jetzt stehst.')
+      :('Emphasis: '+nb.n[0]+'. Your levels, records, XP and achievements all stay — only the plan restarts at week 1, from where you are now.'),
     DE?'Block starten':'Start block',
     function(){
       var hist=get('blocks',[]);
@@ -7085,6 +7242,11 @@ $('mobStart').addEventListener('click',function(){
 $('mobStop').addEventListener('click',mobStopF);
 
 /* ---------- test ---------- */
+/* Faellig: die Wochen um den Retest herum (Woche 6/7 und 12/13, ein Tag
+   Kalenderwoche ist kein exakter Termin). Bewusst nur nach Datum, nicht nach
+   "schon erledigt" -- das braeuchte einen eigenen Speicherstand je Meilenstein
+   fuer einen Punkt, der auch so nach zwei Wochen von selbst wieder verschwindet. */
+function testDue(){var w=wkOf(TODAY);return w===6||w===7||w===12||w===13;}
 var testVals=get('test',{});
 function buildTest(){
   $('testGrid').innerHTML=TESTS.map(function(t){
@@ -7101,13 +7263,14 @@ function lvlOf(t){var v=testVals[t.id]||0;for(var i=0;i<t.t.length;i++){if(v>=t.
 function testCalc(){
   var L=cfg.lang==='de'?1:0;
   var lv=TESTS.map(lvlOf),low=Math.min.apply(null,lv);
-  /* Stufenname statt nacktem "L3" -- die Nummer bleibt klein daneben,
-     weil die Leiterlogik intern weiter mit ihr rechnet. */
-  $('testOut').innerHTML=TESTS.map(function(t,i){return '<div class="obox'+(lv[i]===low?' hi':'')+'"><em>'+testN(t)+'</em><b>'+TLBL[lv[i]-1][L]+' <i>L'+lv[i]+' · '+(testVals[t.id]||0)+' '+t.u+'</i></b></div>';}).join('')+
-    '<div class="obox hi"><em>'+(L?'Dein Level':'Your level')+'</em><b>'+TLBL[low-1][L]+' <i>L'+low+'</i></b></div>';
+  /* Ein Ergebnis, nicht fuenf: vorher stand hier eine Kachel je Test UND
+     direkt danach dieselben vier Werte nochmal, ausfuehrlicher, im
+     Baender-Block weiter unten. Die Kacheln sind raus -- das Gesamtergebnis
+     bleibt hier, das Detail je Test steht jetzt einmal, im Baender-Block. */
+  $('testOut').innerHTML='<div class="obox hi"><em>'+(L?'Dein Level':'Your level')+'</em><b>'+TLBL[low-1][L]+' <i>L'+low+'</i></b></div>';
   var bands=$('lvlBands');
   if(bands){
-    var lt=$('lvlLegT');if(lt)lt.textContent=L?'Die sechs Stufen':'The six levels';
+    var lt=$('lvlLegT');if(lt)lt.textContent=L?'Die sechs Level':'The six levels';
     bands.innerHTML=TESTS.map(function(t,i){
       var v=testVals[t.id]||0;
       return '<div class="lvlrow"><div class="ltop"><b>'+testN(t)+'</b><span>'+v+' '+t.u+'</span></div>'+
@@ -7134,6 +7297,22 @@ $('testApply').addEventListener('click',function(){
     var frac=(lv-1)/(TESTS[0].t.length-1);
     var target=Math.round(frac*(p.ladder.length-1)*0.85);
     steps[p.id]=Math.max(0,Math.min(p.ladder.length-1,target));});
+  /* Row und Press haben keinen eigenen Test -- vorher blieb "Level
+     uebernehmen" deshalb bei vier von sechs Mustern stehen. Dieselbe
+     Ableitung, die calPlace() schon fuer die automatische Einmessung in der
+     ersten Einheit nutzt (Row aus dem Klimmzugwert, Press aus dem
+     Liegestuetzwert), rechnet hier genauso -- eine Formel, zwei Stellen,
+     nicht zwei verschiedene, die auseinanderlaufen koennten. */
+  [['row','pullup',0.5],['press','pushup',2]].forEach(function(x){
+    var p=pid[x[0]],srcTest=null;
+    TESTS.forEach(function(t){if(t.id===x[1])srcTest=t;});
+    if(!p||!srcTest)return;
+    var v=(testVals[x[1]]||0)*x[2],lv=1;
+    for(var i=0;i<srcTest.t.length;i++){if(v>=srcTest.t[i][0]&&v<=srcTest.t[i][1]){lv=i+1;break;}}
+    var frac=(lv-1)/(srcTest.t.length-1);
+    var target=Math.round(frac*(p.ladder.length-1)*0.85);
+    steps[p.id]=Math.max(0,Math.min(p.ladder.length-1,target));
+  });
   set('steps',steps);buildTiles();flash('testFlag');refresh();});
 $('testBaseline').addEventListener('click',function(){
   var map={pushup:'Push-ups',pullup:'Pull-ups',squat:'Squats',hollow:'Hollow hold'};
@@ -7232,10 +7411,10 @@ function buildAccess(){
     var b=r[1]===1?'<td class="c y">&#10003;</td>':(r[1]===2?'<td class="c n">table only</td>':'<td class="c n">&mdash;</td>');
     return '<tr><td>'+r[0]+'</td>'+b+'<td class="c y">&#10003;</td></tr>';}).join('');
   var faq=[['Do I need a gym?','No. A pull-up bar is the only thing worth buying, about twenty euros. Everything else uses the floor, a chair and a table.'],
-   ['Never trained before, too advanced?','No. The test puts you on the right rung of every ladder. Level 1 starts with wall push-ups.'],
+   ['Never trained before, too advanced?','No. The test sets the right starting level for you. Level 1 starts with wall push-ups.'],
    ['How do I get in?','You sign in with the email you bought with. A one-time code arrives in your inbox, so the link cannot be passed around.'],
    ['Is my data sent anywhere?','No. Everything you type stays in your own browser.'],
-   ['What if I miss a week?','Repeat it. The hub keeps your ladder positions and the coach tells you where to restart.']];
+   ['What if I miss a week?','Repeat it. The hub keeps your levels and the coach tells you where to restart.']];
   var fq=$('faqSum');if(fq)fq.textContent=faq.length;
   $('faqList').innerHTML=faq.map(function(f){return '<div class="qa"><b>'+f[0]+'</b><p>'+f[1]+'</p></div>';}).join('');
 }
@@ -7335,7 +7514,7 @@ function sessWrap(it){
     set('prs',PRS);set('steps',steps);
     buildTiles();buildPR();
     coachSay(cfg.lang==='de'?'Eingemessen':'Calibrated',
-      cfg.lang==='de'?'Deine ersten Sätze haben Basiswerte und Leiterstufen gesetzt.':'Your first sets just set your baselines and ladder steps.');
+      cfg.lang==='de'?'Deine ersten Sätze haben Basiswerte und dein Level gesetzt.':'Your first sets just set your baselines and levels.');
   }
 }
 function calPlace(id,best){
@@ -7720,8 +7899,42 @@ function openMacro(k){
    vermischt, ist keins. */
 var meals=get('meals',{});
 function mealKcal(m){return Math.round(m.p*4+m.f*9+m.c*4);}
+/* Vier Mahlzeit-Slots mit eigener Farbe und Icon -- geteilt zwischen der
+   Tagesliste und dem Hinzufuegen-Blatt, damit beide dieselbe Sprache
+   sprechen statt zwei verschiedene Darstellungen fuer dieselbe Sache. */
+function mealSlots(DE){return [
+  ['b',DE?'Frühstück':'Breakfast','var(--brass)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="14" r="4.6"/><path d="M12 6.5V4M6.7 8.7 5 7M17.3 8.7 19 7M3 14h2M19 14h2M4 19h16"/></svg>'],
+  ['l',DE?'Mittag':'Lunch','var(--aurora)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.4"/></svg>'],
+  ['d',DE?'Abend':'Dinner','var(--ice)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13.5A8 8 0 1 1 10.5 4.5a6.5 6.5 0 0 0 9 9Z"/></svg>'],
+  ['s','Snacks','var(--ember)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-6.5-3.8-6.5-8.4A3.6 3.6 0 0 1 12 9.3a3.6 3.6 0 0 1 6.5 2.8c0 4.6-6.5 8.4-6.5 8.4Z"/><path d="M12 9.3V6.2M10 4.5h4"/></svg>']
+];}
 function mealsOf(k){return meals[k]||[];}
 function saveMeals(){set('meals',meals);}
+/* Zuletzt gegessen, ueber alle Tage hinweg, ohne Wiederholungen -- fuer den
+   Schnellzugriff im Hinzufuegen-Blatt. Kein Server, keine "haeufig"-Statistik,
+   nur die letzten eindeutigen Namen ruecklaufend durch die Tage: billig zu
+   berechnen und trifft in der Praxis genauso gut wie ein Ranking. */
+function recentFoods(limit){
+  var seen={},out=[],tage=Object.keys(meals).sort().reverse();
+  for(var d=0;d<tage.length&&out.length<limit;d++){
+    var arr=meals[tage[d]]||[];
+    for(var i=arr.length-1;i>=0&&out.length<limit;i--){
+      var mm=arr[i],key=(mm.n||'').toLowerCase();
+      if(!key||seen[key])continue;
+      seen[key]=1;out.push(mm);
+    }
+  }
+  return out;
+}
+/* Sobald eine Quelle feststeht (Suche, Zuletzt, Scan), zeigt sich die manuelle
+   Eingabe von selbst -- niemand muss sie noch aufklappen, um zu sehen, was
+   uebernommen wurde. */
+function mlRevealManual(){
+  var box=$('mlManualBox'),tog=$('mlManualToggle'),rec=$('mlRecent');
+  if(box)box.hidden=false;
+  if(tog)tog.hidden=true;
+  if(rec)rec.hidden=true;
+}
 /* v19: das Tagebuch hat einen waehlbaren Tag (Wochenstreifen), nicht nur
    heute. Alle Lese- und Schreibwege laufen ueber fuelTag(). */
 var fuelOff=0;
@@ -7786,13 +7999,11 @@ function drawMeals(){
   var MICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.4"/></svg>';
   /* v18: Mahlzeiten-Slots wie im App-Standard -- Fruehstueck, Mittag, Abend,
      Snacks. Jeder Slot mit eigenem Symbol-Chip, Summen und Plus-Knopf; alte
-     Eintraege ohne Slot laufen unter Snacks. */
-  var SLOTS=[
-    ['b',DE?'Frühstück':'Breakfast','var(--brass)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="14" r="4.6"/><path d="M12 6.5V4M6.7 8.7 5 7M17.3 8.7 19 7M3 14h2M19 14h2M4 19h16"/></svg>'],
-    ['l',DE?'Mittagessen':'Lunch','var(--aurora)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.4"/></svg>'],
-    ['d',DE?'Abendessen':'Dinner','var(--ice)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13.5A8 8 0 1 1 10.5 4.5a6.5 6.5 0 0 0 9 9Z"/></svg>'],
-    ['s','Snacks','var(--ember)','<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5s-6.5-3.8-6.5-8.4A3.6 3.6 0 0 1 12 9.3a3.6 3.6 0 0 1 6.5 2.8c0 4.6-6.5 8.4-6.5 8.4Z"/><path d="M12 9.3V6.2M10 4.5h4"/></svg>']
-  ];
+     Eintraege ohne Slot laufen unter Snacks. mealSlots() steht jetzt weiter
+     oben, geteilt mit dem Hinzufuegen-Blatt -- dieselben vier Farben und
+     Icons an beiden Stellen statt einer zweiten Kopie, die auseinanderlaufen
+     koennte. */
+  var SLOTS=mealSlots(DE);
   var h='';
   SLOTS.forEach(function(sl){
     var eintraege=[];
@@ -7828,34 +8039,48 @@ function openMeal(idx,slot){
   var m=(idx===null||idx===undefined)?{n:'',p:0,f:0,c:0,s:slot||'s'}:ms[idx];
   if(!m)return;
   var neu=(idx===null||idx===undefined);
+  /* Suche zuerst, Makros danach: vorher stand ein Formular mit sieben immer
+     sichtbaren Feldern, die Suche nur eines davon. Jetzt fuehrt die Suche,
+     und Protein/Fett/Kohlenhydrate zeigen sich erst, sobald eine Quelle
+     feststeht oder jemand ausdruecklich "manuell" waehlt. */
   var html=
     '<h4>'+(neu?(DE?'Neue Mahlzeit':'New meal'):(DE?'Mahlzeit':'Meal'))+'</h4>'+
     '<div class="dsh">'+
-      '<div class="dshHead"><b>'+(DE?'Kalorien':'Calories')+'</b><span id="mlKcal">'+mealKcal(m)+' kcal</span></div>'+
-      '<div class="savebar" style="margin:0 0 .55rem"><button type="button" class="tbtn" id="mlScan">'+
-        '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" style="vertical-align:-2px;margin-right:.35rem"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>'+
-        (DE?'Barcode scannen':'Scan barcode')+'</button></div>'+
-      '<div class="field"><label for="mlSlot">'+(DE?'Mahlzeit':'Meal slot')+'</label>'+
-        '<div class="ctl"><select id="mlSlot">'+
-          '<option value="b"'+(m.s==='b'?' selected':'')+'>'+(DE?'Frühstück':'Breakfast')+'</option>'+
-          '<option value="l"'+(m.s==='l'?' selected':'')+'>'+(DE?'Mittagessen':'Lunch')+'</option>'+
-          '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abendessen':'Dinner')+'</option>'+
-          '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
-        '</select></div></div>'+
-      '<div class="field"><label for="mlName">'+(DE?'Name oder Suche':'Name or search')+'</label>'+
-        '<div class="ctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'"></div></div>'+
+      '<div class="field mlsearch"><label for="mlName">'+(DE?'Suchen oder eingeben':'Search or type')+'</label>'+
+        '<div class="ctl mlsearchctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'">'+
+        '<button type="button" class="mlscanbtn" id="mlScan" aria-label="'+(DE?'Barcode scannen':'Scan barcode')+'">'+
+          '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>'+
+        '</button></div></div>'+
+      '<div class="mlrecent" id="mlRecent" hidden></div>'+
       '<div class="mlsug" id="mlSug" hidden></div>'+
-      '<div class="field" id="mlGRow" hidden><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
-        '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
-      '<div class="field hasSlide"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
-        '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
-      '<div class="field hasSlide"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
-        '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
-      '<div class="field hasSlide"><label for="mlC">'+(DE?'Kohlenhydrate':'Carbs')+'</label>'+
-        '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
-      '<p class="hint">'+(DE
-        ?'Kalorien rechnet der Hub: Protein und Kohlenhydrate mal vier, Fett mal neun. Nährwerte stehen auf jeder Packung.'
-        :'The hub works out the calories: protein and carbs times four, fat times nine. The macros are on every label.')+'</p>'+
+      '<div class="field"><label id="mlSlotLbl">'+(DE?'Mahlzeit':'Meal slot')+'</label>'+
+        '<select id="mlSlot" data-noup="1" hidden aria-hidden="true" tabindex="-1">'+
+          '<option value="b"'+(m.s==='b'?' selected':'')+'>'+(DE?'Frühstück':'Breakfast')+'</option>'+
+          '<option value="l"'+(m.s==='l'?' selected':'')+'>'+(DE?'Mittag':'Lunch')+'</option>'+
+          '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abend':'Dinner')+'</option>'+
+          '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
+        '</select>'+
+        '<div class="mslotpick" id="mslotPick" role="radiogroup" aria-labelledby="mlSlotLbl">'+
+          mealSlots(DE).map(function(sl){
+            return '<button type="button" class="mslotopt" data-slot="'+sl[0]+'" aria-pressed="'+((m.s||'s')===sl[0])+'" style="--oc:'+sl[2]+'">'+
+              '<span class="ic">'+sl[3]+'</span><b>'+sl[1]+'</b><i class="chk" aria-hidden="true">&#10003;</i></button>';
+          }).join('')+
+        '</div></div>'+
+      (neu?'<button type="button" class="txtbtn" id="mlManualToggle">'+(DE?'Makros manuell eintragen':'Enter macros manually')+'</button>':'')+
+      '<div class="mlmanual" id="mlManualBox"'+(neu?' hidden':'')+'>'+
+        '<div class="field" id="mlGRow" hidden><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
+        '<div class="field hasSlide"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
+        '<div class="field hasSlide"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
+        '<div class="field hasSlide"><label for="mlC">'+(DE?'Kohlenhydrate':'Carbs')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
+        '<p class="hint">'+(DE
+          ?'Kalorien rechnet der Hub: Protein und Kohlenhydrate mal vier, Fett mal neun. Nährwerte stehen auf jeder Packung.'
+          :'The hub works out the calories: protein and carbs times four, fat times nine. The macros are on every label.')+'</p>'+
+        '<div class="dshHead"><b>'+(DE?'Kalorien':'Calories')+'</b><span id="mlKcal">'+mealKcal(m)+' kcal</span></div>'+
+      '</div>'+
       '<div class="savebar">'+
         '<button class="tbtn go" data-mlact="save">'+(neu?(DE?'Hinzufügen':'Add'):(DE?'Speichern':'Save'))+'</button>'+
         '<button class="tbtn" data-mlact="rezept">'+(DE?'Als Rezept merken':'Save as recipe')+'</button>'+
@@ -7867,6 +8092,15 @@ function openMeal(idx,slot){
   delete $('sheetBody').dataset.mikro;
   if(!neu&&m.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:m.z,bl:m.bl,sa:m.sa,gf:m.gf});
   $('mlName').value=m.n;
+  if(neu)$('mlName').focus();
+  if(typeof ctlUpgrade==='function')ctlUpgrade($('sheetBody'));
+  [].forEach.call(document.querySelectorAll('#mslotPick .mslotopt'),function(b){
+    b.addEventListener('click',function(){
+      $('mlSlot').value=b.dataset.slot;
+      [].forEach.call(document.querySelectorAll('#mslotPick .mslotopt'),function(x){
+        x.setAttribute('aria-pressed',String(x===b));});
+    });
+  });
   pairSlider('mlP',{min:0,max:120,step:1,empty:0});
   pairSlider('mlF',{min:0,max:80,step:1,empty:0});
   pairSlider('mlC',{min:0,max:200,step:5,empty:0});
@@ -7876,6 +8110,31 @@ function openMeal(idx,slot){
   }
   ['mlP','mlF','mlC'].forEach(function(id){$(id).addEventListener('input',nach);});
   nach();
+  var manToggle=$('mlManualToggle');
+  if(manToggle)manToggle.addEventListener('click',mlRevealManual);
+  /* Zuletzt gegessen: nur bei einer neuen Mahlzeit, nur solange das Suchfeld
+     leer ist -- sobald getippt wird, geht es erkennbar um etwas anderes. */
+  var recents=neu?recentFoods(6):[];
+  if(recents.length){
+    var rc=$('mlRecent');
+    rc.innerHTML='<p class="eyebrow" style="margin:0 0 .3rem">'+(DE?'Zuletzt':'Recent')+'</p><div class="mlrchips">'+
+      recents.map(function(r,i){return '<button type="button" class="mlrchip" data-r="'+i+'">'+(r.n||'?').slice(0,28)+'</button>';}).join('')+'</div>';
+    rc.hidden=false;
+    [].forEach.call(rc.querySelectorAll('.mlrchip'),function(ch,i){
+      ch.addEventListener('click',function(){
+        var r=recents[i];
+        sugBase=null;$('mlGRow').hidden=true;
+        $('mlName').value=(r.n||'').slice(0,40);
+        $('mlP').value=r.p;$('mlF').value=r.f;$('mlC').value=r.c;
+        if(r.z!==undefined||r.bl!==undefined||r.sa!==undefined||r.gf!==undefined)
+          $('sheetBody').dataset.mikro=JSON.stringify({z:r.z,bl:r.bl,sa:r.sa,gf:r.gf});
+        else delete $('sheetBody').dataset.mikro;
+        mlRevealManual();
+        $('mlSug').hidden=true;$('mlSug').innerHTML='';
+        nach();
+      });
+    });
+  }
   /* Suche: lokale Grundnahrungsmittel sofort, Open Food Facts kurz danach.
      Ein Treffer setzt die Basis je 100 g; das Mengenfeld skaliert. */
   var sugBase=null,sugTimer=null;
@@ -7911,6 +8170,7 @@ function openMeal(idx,slot){
         $('mlName').value=sugBase.n.slice(0,40);
         el.hidden=true;el.innerHTML='';
         $('mlGRow').hidden=false;$('mlG').value=100;
+        mlRevealManual();
         skala();
       });
     });
@@ -7919,6 +8179,7 @@ function openMeal(idx,slot){
   $('mlName').addEventListener('input',function(){
     var q=this.value.trim().toLowerCase();
     sugBase=null;$('mlGRow').hidden=true;
+    if($('mlRecent')&&recents.length)$('mlRecent').hidden=q.length>0;
     if(q.length<2){sugZeigen([]);return;}
     var lok=[];
     if(typeof STAPLES!=='undefined'){
@@ -7974,16 +8235,23 @@ function drawFstrip(){
   var el=$('fstrip');if(!el)return;
   var DE=cfg.lang==='de';
   var wd=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  /* Kopfzeile wie beim Trainingskalender: Wochentag einmal oben, nicht in
+     jedem Knopf einzeln. */
+  var kopf=$('fstripHead');
+  if(kopf)kopf.innerHTML=wd.map(function(x){return '<span>'+x+'</span>';}).join('');
   var mo=monday(fuelTag()),html='';
   for(var i=0;i<7;i++){
     var d=add(mo,i),k=iso(d);
     var cls=[];
     if(k===iso(TODAY))cls.push('today');
-    if((meals[k]||[]).length)cls.push('done');
+    /* .done hatte bisher keine einzige CSS-Regel -- ein Zustand, der nie
+       zu sehen war. Jetzt derselbe Haken wie beim Trainingskalender. */
+    var mark='';
+    if((meals[k]||[]).length){cls.push('ok');mark='✓';}
     html+='<button type="button" role="tab" data-fd="'+k+'" aria-selected="'+(k===iso(fuelTag()))+'"'+
       (cls.length?' class="'+cls.join(' ')+'"':'')+
       ' aria-label="'+wd[i]+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
-      '<em>'+wd[i]+'</em><b>'+d.getDate()+'</b><i aria-hidden="true"></i></button>';
+      '<b>'+d.getDate()+'</b><i aria-hidden="true">'+mark+'</i></button>';
   }
   el.innerHTML=html;
   var kopf=document.querySelector('#v-fuel .gtitle .gt b');
@@ -8987,6 +9255,7 @@ function kamUebernehmen(food,g){
       gf:food.gf!==undefined?Math.round(food.gf*g*10)/10:undefined});
   }
   ['mlP','mlF','mlC'].forEach(function(id){$(id).dispatchEvent(new Event('input'));});
+  if(typeof mlRevealManual==='function')mlRevealManual();
 }
 /* Texterkennung: Tesseract kommt erst bei Bedarf aus dem Netz. */
 var ocrLaedt=null;
@@ -9139,12 +9408,16 @@ var SUP=[
 ];
 var VD={g:['Worth it','Lohnt sich'],a:['Situational','Situativ'],r:['Skip it','Spar es dir']};
 var tipT=null,tipEl=null;
+/* Nicht jeder Tipp hat einen Verdict-Badge und eine Dosis -- die Muster-
+   Erklaerung ist reiner Text. Leere Spannen werden ausgeblendet statt einen
+   leeren Absatz stehen zu lassen. */
 function showTip(el){
   var box=$('tipbox');
   box.innerHTML='<span class="th"></span><span class="bd"></span><span class="dose"></span>';
-  box.querySelector('.th').textContent=el.dataset.verdict;
+  var th=box.querySelector('.th'),dose=box.querySelector('.dose');
+  th.textContent=el.dataset.verdict||'';th.style.display=el.dataset.verdict?'':'none';
   box.querySelector('.bd').textContent=el.dataset.body;
-  box.querySelector('.dose').textContent=el.dataset.dose;
+  dose.textContent=el.dataset.dose||'';dose.style.display=el.dataset.dose?'':'none';
   box.classList.add('on');box.setAttribute('aria-hidden','false');
   var r=el.getBoundingClientRect(),bw=Math.min(300,window.innerWidth-24);
   box.style.width=bw+'px';var bh=box.offsetHeight;
@@ -9184,6 +9457,21 @@ function buildSup(){
 }
 window.addEventListener('scroll',hideTip,{passive:true});
 window.addEventListener('resize',hideTip);
+
+/* Der Info-Knopf neben "Grundlegende Bewegungsmuster": derselbe Tipp-Kasten
+   wie bei den Nahrungsergaenzungen, aber ohne Verdict und Dosis -- nur der
+   Text. data-i18n-title haelt .title schon sprachaktuell, der Klick liest
+   ihn direkt aus statt eine zweite Kopie mitzufuehren, die veralten koennte. */
+(function(){
+  var b=$('patInfo');if(!b)return;
+  var t2=null;
+  function open(){b.dataset.body=b.title;hideTip();showTip(b);}
+  b.addEventListener('mouseenter',function(){t2=setTimeout(open,350);});
+  b.addEventListener('mouseleave',function(){clearTimeout(t2);hideTip();});
+  b.addEventListener('focus',open);
+  b.addEventListener('blur',hideTip);
+  b.addEventListener('click',function(){if(tipEl===b)hideTip();else open();});
+})();
 
 /* ---------- you ---------- */
 var MEAS=[['chest','Chest',98],['waist','Waist',82],['hip','Hip',96],['arm','Upper arm',34],['thigh','Thigh',56],['shoulder','Shoulders',115],['neck','Neck',38]];
@@ -9489,7 +9777,7 @@ function drawBlockHist(){
     var tot=0;for(k in h.steps)tot+=h.steps[k];
     return '<div class="row"><div class="h">'+(L?'Block ':'Block ')+h.n+'</div><div class="t">'+
       '<b>'+b.n[L]+'</b><span>'+(h.from||'?')+' – '+(h.to||'?')+' · '+(h.sets||0)+(L?' Blöcke':' blocks')+
-      ' · '+(L?'Leitersumme ':'ladder total ')+tot+(i>0?(L?', +'+climb+' Stufen':', +'+climb+' steps'):'')+'</span></div></div>';
+      ' · '+(L?'Stufensumme ':'step total ')+tot+(i>0?(L?', +'+climb+' Stufen':', +'+climb+' steps'):'')+'</span></div></div>';
   });
   var cb=curBlock();
   rows.push('<div class="row"><div class="h">'+(L?'Block ':'Block ')+blockNo+'</div><div class="t"><b>'+cb.n[L]+
@@ -9531,8 +9819,8 @@ var PAINFIX={
     en:'Do the wrist prep before every session — rocking on all fours, hands turned in, then on fists. Until it settles, press on fists or handles so the joint stays straight.',
     de:'Handgelenks-Prep vor jede Einheit — im Vierfüßler wippen, Hände eingedreht, dann auf Fäusten. Bis es ruhig ist auf Fäusten oder Griffen drücken, damit das Gelenk gerade bleibt.'},
   'Elbow':{pat:['pull','row'],
-    en:'Usually load, not damage. Drop one ladder step, slow the lowering to three seconds, and drop any false grip for two weeks.',
-    de:'Meist Belastung, kein Schaden. Eine Leiterstufe zurück, das Ablassen auf drei Sekunden verlangsamen, und zwei Wochen ohne falschen Griff.'},
+    en:'Usually load, not damage. Drop one step, slow the lowering to three seconds, and drop any false grip for two weeks.',
+    de:'Meist Belastung, kein Schaden. Eine Stufe zurück, das Ablassen auf drei Sekunden verlangsamen, und zwei Wochen ohne falschen Griff.'},
   'Shoulder':{pat:['press','push'],
     en:'Rows first in every session, pressing last, and nothing overhead for two weeks. Elbows at about 45 degrees, not flared wide.',
     de:'Rudern an den Anfang jeder Einheit, Drücken ans Ende, zwei Wochen nichts über Kopf. Ellbogen auf etwa 45 Grad, nicht weit abgespreizt.'},
@@ -9622,8 +9910,8 @@ function runCoach(){
     var guide=[
       {ok:anyTest,
        t:['Step 1 — do the level test','Schritt 1 — Level-Test machen'],
-       d:['Four tests, about twenty minutes, under "Test". They decide where you start on each ladder. Without them the programme is guessing, and it lands either too hard or too easy.',
-          'Vier Tests, etwa zwanzig Minuten, unter „Test". Sie legen fest, wo du auf jeder Leiter anfängst. Ohne sie rät das Programm — und liegt entweder zu hoch oder zu niedrig.']},
+       d:['Four tests, about twenty minutes, under "Test". They decide your starting level for each pattern. Without them the programme is guessing, and it lands either too hard or too easy.',
+          'Vier Tests, etwa zwanzig Minuten, unter „Test". Sie legen fest, bei welchem Level du in jedem Muster startest. Ohne sie rät das Programm — und liegt entweder zu hoch oder zu niedrig.']},
       {ok:hasBody(),
        t:['Step 2 — enter your body data','Schritt 2 — Körperdaten eintragen'],
        d:['Age, height and weight under "Fuel". Nothing is prefilled on purpose — targets calculated from somebody else’s body look convincing and are worthless.',
@@ -10641,7 +10929,7 @@ var OBL={
  exp:[
   ['0',['Just starting','Fange gerade an'],['First structured plan','Erster strukturierter Plan']],
   ['1',['Under 6 months','Unter 6 Monate'],['The basics are settling in','Die Grundlagen setzen sich']],
-  ['2',['6-12 months','6-12 Monate'],['Clean reps, first ladders','Saubere Wiederholungen, erste Leitern']],
+  ['2',['6-12 months','6-12 Monate'],['Clean reps, early levels','Saubere Wiederholungen, frühe Level']],
   ['3',['1-3 years','1-3 Jahre'],['Training is a habit','Training ist Gewohnheit']],
   ['4',['Over 3 years','Über 3 Jahre'],['You know your body well','Du kennst deinen Körper genau']]]
 };
@@ -10813,6 +11101,10 @@ function inHead(k,L){
   if(!prog.hidden){
     var h='';
     var CN=ICHN.length-1;
+    /* Dieselben vier Farben wie die Kapitel-Chips (chchip.c1..c4) -- der
+       Fortschritt erzaehlt so auf einen Blick, in welchem Kapitel man steckt,
+       statt vier gleich weisse Balken zu zeigen. */
+    var CCOL=['','var(--aurora)','var(--ember)','var(--ice)','var(--brass)'];
     for(var c=1;c<=CN;c++){
       var fill=0;
       if(chDone(c,k))fill=100;
@@ -10820,7 +11112,7 @@ function inHead(k,L){
         var steps=ICHSTEPS[c],i=steps.indexOf(k);
         fill=i<0?100:Math.round((i+1)/steps.length*100);
       }
-      h+='<span class="seg"><i style="width:'+fill+'%"></i></span>';
+      h+='<span class="seg"><i style="width:'+fill+'%;background:'+CCOL[c]+'"></i></span>';
       if(c<CN)h+='<span class="tick'+(chDone(c,k)?' done':'')+'">✓</span>';
     }
     prog.innerHTML=h;
@@ -10835,7 +11127,7 @@ function inOpts(k,L){
     var ic=o[3]?'<span class="ic" style="background:color-mix(in srgb,'+o[4]+' 14%,transparent);color:'+o[4]+'">'+o[3]+'</span>':'';
     var sub=o[2]?'<small>'+o[2][L]+'</small>':'';
     var badge=(reco===o[0])?'<span class="reco">'+(L?'Empfohlen':'Suggested')+'</span>':'';
-    return '<button type="button" class="iopt" data-i="'+i+'" aria-pressed="'+on+'">'+badge+ic+
+    return '<button type="button" class="iopt" data-i="'+i+'" aria-pressed="'+on+'"'+(o[4]?' style="--oc:'+o[4]+'"':'')+'">'+badge+ic+
       '<span class="tx"><b>'+o[1][L]+'</b>'+sub+'</span><span class="ring">✓</span></button>';
   }).join('')+'</div>'+(reco?'<p class="recoleg">'+(L?'Empfohlen für deine Erfahrung':'Suggested for your experience')+'</p>':'');
 }
@@ -10863,6 +11155,7 @@ function paintTdays(L,warn){
   [].forEach.call(host.querySelectorAll('.daypill'),function(b){
     var w7=parseInt(b.dataset.d,10),ix=sel.indexOf(w7);
     b.setAttribute('aria-pressed',String(ix>=0));
+    if(ix>=0)b.style.setProperty('--oc',TDCOLS[ix]);else b.style.removeProperty('--oc');
     b.querySelector('.dot').style.background=ix>=0?TDCOLS[ix]:'';
   });
   var hint=$('tdHint'),first=$('tdFirst');
@@ -11146,7 +11439,7 @@ function openSwap(pl,idx,it,after){
   function rows(){
     var out='';
     out+='<button type="button" class="swaprow'+(!it.l?' cur':'')+'" data-ex=""><span class="swthumb none">∅</span>'+
-      '<span class="swnm"><b>'+(DE?'Standard (Plan wählt)':'Default (plan decides)')+'</b><span>'+(DE?'zurück zur Leiter':'back to the ladder')+'</span></span>'+
+      '<span class="swnm"><b>'+(DE?'Standard (Plan wählt)':'Default (plan decides)')+'</b><span>'+(DE?'zurück zum Level':'back to your level')+'</span></span>'+
       '<span class="swtick">✓</span></button>';
     list.forEach(function(e){
       if(q&&exName(e).toLowerCase().indexOf(q)<0&&e[0].toLowerCase().indexOf(q)<0)return;
@@ -11906,8 +12199,8 @@ function bodyCapPaint(DE,bestId,worstId,bestLp,worstLp){
   PAT.forEach(function(p){if(p.id===bestId)bn=p.name;if(p.id===worstId)wn=p.name;});
   var spread=bestLp-worstLp;
   if(bestLp<=0){
-    $('bodyCap').innerHTML=DE?'Noch keine Daten — setz deine Leiterstufen, dann färbt sich der Körper.'
-                             :'No data yet — set your ladder steps and the body fills in.';
+    $('bodyCap').innerHTML=DE?'Noch keine Daten — setz dein Level, dann färbt sich der Körper.'
+                             :'No data yet — set your level and the body fills in.';
   } else if(spread<25){
     $('bodyCap').innerHTML=DE?'Gleichmäßig entwickelt.<br>Kein Bereich hängt hinterher.'
                              :'Evenly developed.<br>No area is lagging.';
@@ -11949,8 +12242,8 @@ function renderRanks(){
       ib.className='cnote ok';
       ib.innerHTML='<span class="sev">'+(L?'Belegt':'Verified')+'</span><div><b>'+
         (L?'Rang vollständig belegt':'Rank fully backed')+'</b><p>'+
-        (L?'Jede Leiterstufe wurde an mehreren Tagen tatsächlich trainiert.'
-          :'Every ladder step has been trained on several separate days.')+'</p></div>';
+        (L?'Jede Stufe wurde an mehreren Tagen tatsächlich trainiert.'
+          :'Every step has been trained on several separate days.')+'</p></div>';
     }else{
       ib.className='cnote md';
       var txt=ig.offen.map(function(o){return o.n+' ('+o.fehlt+')';}).join(', ');
@@ -12374,8 +12667,18 @@ sizeCv();
    2. v-today trug sein "on" nur aus dem Markup. Damit war die Ansichts-
       Historie beim Start leer, und die Zurueck-Taste hatte nichts, wohin sie
       haette zuruecklaufen koennen. Ein show() beim Start legt den ersten
-      Eintrag an. */
-show('today');
+      Eintrag an.
+
+   Ausnahme: kommt der Start ueber einen Klick auf einen Hinweis (Deep-Link,
+   ?view=... vom Service Worker gesetzt), zaehlt das Ziel aus der Notification
+   mehr als die Grundregel "immer Heute". Die Adresse wird danach sofort
+   wieder entfernt, damit ein Neuladen nicht erneut dorthin springt. */
+(function(){
+  var ziel=null;
+  try{ziel=new URLSearchParams(location.search).get('view');}catch(e){}
+  show((ziel&&VS[ziel])?ziel:'today');
+  if(ziel)history.replaceState(null,'',location.pathname);
+})();
 
 /* ---------- Einstellungen: Menue, Segmentleisten, Schalter ---------------
    Drei Dinge, ein Ziel: die Einstellungsseite soll nicht mehr aussehen wie
@@ -12614,18 +12917,34 @@ function ntGet(){
 function ntSave(c){set('nt',c);}
 function ntOK(){return (typeof Notification!=='undefined')&&Notification.permission==='granted';}
 /* Ueber den Service Worker anzeigen, wenn es ihn gibt: nur so bleibt der
-   Hinweis stehen, wenn das Fenster inzwischen zu ist. Sonst direkt. */
-function ntShow(titel,text,tag){
+   Hinweis stehen, wenn das Fenster inzwischen zu ist. Sonst direkt.
+   ziel ist der Bereich, den ein Klick auf den Hinweis oeffnen soll (siehe
+   VS-Tabelle) -- ohne Server keine Zustellung im Hintergrund, aber ein Klick
+   auf einen bereits angezeigten Hinweis soll trotzdem an die richtige
+   Stelle fuehren, nicht nur die App vorne hinstellen. */
+function ntShow(titel,text,tag,ziel){
   if(!ntOK())return;
   var opt={body:text,tag:tag,icon:'valkr-icon-192.png',badge:'valkr-icon-192.png',
-           lang:cfg.lang==='de'?'de':'en'};
+           lang:cfg.lang==='de'?'de':'en',data:{view:ziel||'today'}};
   try{
     if(navigator.serviceWorker&&navigator.serviceWorker.ready){
       navigator.serviceWorker.ready.then(function(reg){
         if(reg&&reg.showNotification)reg.showNotification(titel,opt);
-        else new Notification(titel,opt);
-      })['catch'](function(){try{new Notification(titel,opt);}catch(e){}});
-    }else new Notification(titel,opt);
+        else fallbackNotify(titel,opt);
+      })['catch'](function(){fallbackNotify(titel,opt);});
+    }else fallbackNotify(titel,opt);
+  }catch(e){}
+}
+/* Ohne Service Worker (oder wenn er fehlschlaegt) hat die Notification kein
+   eigenes notificationclick -- den Klick muss das Objekt selbst tragen. */
+function fallbackNotify(titel,opt){
+  try{
+    var n=new Notification(titel,opt);
+    n.onclick=function(){
+      try{window.focus();}catch(e){}
+      if(opt.data&&opt.data.view&&VS[opt.data.view])show(opt.data.view);
+      n.close();
+    };
   }catch(e){}
 }
 /* Welcher Hinweis ist heute schon raus? Ein Datum je Art, damit nichts
@@ -12644,7 +12963,7 @@ function ntCheck(){
     var pl=plan(jetzt);
     if(pl&&pl.kind==='train'){
       ntShow(DE?('Heute: '+pl.title):('Today: '+pl.title),
-             DE?'Die Einheit steht noch offen.':'The session is still open.','vk-train');
+             DE?'Die Einheit steht noch offen.':'The session is still open.','vk-train','train');
       ntMark('train',heute);
     }
   }
@@ -12655,7 +12974,7 @@ function ntCheck(){
     if(n>0){
       ntShow(DE?(n+(n===1?' Tag Serie':' Tage Serie')):(n+' day streak'),
              DE?'Heute noch nichts eingetragen. Um Mitternacht ist sie weg.'
-               :'Nothing logged today. It ends at midnight.','vk-streak');
+               :'Nothing logged today. It ends at midnight.','vk-streak','today');
       ntMark('streak',heute);
     }
   }
@@ -12666,7 +12985,7 @@ function ntCheck(){
       var w=wkStats(),s=streak();
       ntShow(DE?'Deine Woche':'Your week',
              DE?(w.active+(w.active===1?' aktive Woche':' aktive Wochen')+' \u00b7 Serie '+s+(s===1?' Tag':' Tage'))
-               :(w.active+(w.active===1?' active week':' active weeks')+' \u00b7 streak '+s+' d'),'vk-week');
+               :(w.active+(w.active===1?' active week':' active weeks')+' \u00b7 streak '+s+' d'),'vk-week','stat');
       ntMark('week',wk);
     }
   }
@@ -12815,6 +13134,15 @@ recording=true;syncUndo();
   });
 })();
 
+/* War die App beim Klick auf den Hinweis schon offen, oeffnet der Service
+   Worker kein zweites Fenster, sondern schickt dem vorhandenen eine
+   Nachricht -- die Adresse mit ?view= greift nur beim Neustart. */
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.addEventListener('message',function(e){
+    var ziel=e.data&&e.data.view;
+    if(ziel&&VS[ziel])show(ziel);
+  });
+}
 if('serviceWorker' in navigator && location.protocol.indexOf('http')===0){
   window.addEventListener('load',function(){
     navigator.serviceWorker.register('valkr-sw.js').then(function(reg){
