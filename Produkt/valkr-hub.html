@@ -977,7 +977,16 @@
   .calhead{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.3rem}
   .calhead span{text-align:center;font-family:var(--fm);font-size:var(--t1);
     letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
-  .calview{overflow:hidden;transition:height .34s cubic-bezier(.2,.8,.3,1)}
+  /* Etwas laenger und mit einem Hauch Ueberschwingen: das Aufklappen soll
+     sich anfuehlen, als faehrt der Monat heraus, nicht als wird eine Hoehe
+     gesetzt. Beide Werte -- Hoehe und Verschiebung -- laufen synchron, sonst
+     rutscht das Raster sichtbar hinter der Kante her. */
+  .calview{overflow:hidden;transition:height .42s cubic-bezier(.22,1,.28,1)}
+  /* Die zusaetzlichen Zeilen blenden beim Aufklappen mit auf. Ohne das
+     erscheinen sie hart an der Kante, sobald die Hoehe sie freigibt. */
+  .cal:not(.offen) .dstrip button{opacity:.001}
+  .cal:not(.offen) .dstrip button.inweek{opacity:1}
+  .dstrip button{transition:background .18s,color .18s,opacity .3s ease .06s}
   /* Der Griff: eine kurze Linie, die sagt "hier laesst sich ziehen". Beim
      Aufklappen dreht sie sich in ein flaches Dach -- dieselbe Sprache wie
      ein Blatt, das sich schliessen laesst. */
@@ -987,24 +996,32 @@
   .calgrab:hover i{background:var(--ink3);width:44px}
   .cal.offen .calgrab i{background:var(--ink3)}
   .dstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;
-    transition:transform .34s cubic-bezier(.2,.8,.3,1)}
+    transition:transform .42s cubic-bezier(.22,1,.28,1)}
   /* Tage ausserhalb des Monats bleiben lesbar, treten aber zurueck. */
   .dstrip button.out{opacity:.32}
   /* Der Tagebuch-Streifen in der Ernaehrung hat keinen Kalenderrahmen und
      braucht seinen Abstand deshalb selbst. */
   #fstrip{margin-bottom:.8rem}
-  .dstrip button{position:relative;display:flex;flex-direction:column;align-items:center;
-    gap:.1rem;padding:.5rem .1rem .62rem;border:1px solid transparent;border-radius:var(--r2);
-    background:var(--surf2);color:var(--ink3);cursor:pointer;font-family:var(--fb);
-    transition:background .16s,border-color .16s,color .16s}
-  .dstrip button em{font-style:normal;font-family:var(--fm);font-size:var(--t1);
-    letter-spacing:.06em;text-transform:uppercase}
-  .dstrip button b{font-family:var(--fd);font-weight:600;font-size:.92rem;
+  /* Zugeklappt soll der Kalender ein Kalender sein, keine Knopfreihe.
+     Vorher hatte JEDER Tag einen eigenen Kasten mit Hintergrund und Rand --
+     sieben graue Kacheln nebeneinander, von denen sechs nichts zu sagen
+     haben. Ein echter Kalender zeigt Zahlen; hervorgehoben wird nur, was
+     heraussticht: heute und der gewaehlte Tag.
+     Das ist auch der Grund, warum es aufgeklappt vorher unruhig aussah --
+     42 Kacheln statt 42 Zahlen. */
+  .dstrip button{position:relative;display:flex;align-items:center;justify-content:center;
+    aspect-ratio:1;padding:0;border:0;border-radius:999px;
+    background:none;color:var(--ink3);cursor:pointer;font-family:var(--fb);
+    transition:background .18s,color .18s}
+  .dstrip button:hover{background:var(--surf2)}
+  .dstrip button b{font-family:var(--fd);font-weight:600;font-size:.95rem;
     font-variant-numeric:tabular-nums;color:var(--ink2)}
-  .dstrip button.rest{background:transparent;border-color:var(--line)}
-  .dstrip button.today{border-color:var(--aurora)}
-  .dstrip button[aria-selected="true"]{background:var(--surf3);border-color:var(--aurora);color:var(--ink)}
-  .dstrip button[aria-selected="true"] b{color:var(--ink)}
+  /* Heute: nur ein Ring. Gewaehlt: gefuellt. Zwei Zustaende, zwei Formen --
+     mehr braucht ein Kalender nicht, und weniger versteht man nicht. */
+  .dstrip button.today{box-shadow:inset 0 0 0 1.5px var(--aurora)}
+  .dstrip button.today b{color:var(--aurora)}
+  .dstrip button[aria-selected="true"]{background:var(--aurora);box-shadow:none}
+  .dstrip button[aria-selected="true"] b{color:var(--bg)}
   /* Der Punkt sagt "erledigt". Er sitzt unter der Zahl, damit er die Zahl
      nicht verdeckt -- ein Haken im Feld waere bei sieben Feldern nebeneinander
      zu viel Zeichen auf zu wenig Platz. */
@@ -3363,7 +3380,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='24.0';
+var VERSION='24.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6513,7 +6530,8 @@ function drawStrip(){
     if(pl.kind==='rest')cls.push('rest');
     if(dayDone(k))cls.push('done');
     if(d.getMonth()!==mon)cls.push('out');
-    if(iso(monday(d))===iso(monday(sel)))calZeile=Math.floor(i/7);
+    var inWoche=(iso(monday(d))===iso(monday(sel)));
+    if(inWoche){calZeile=Math.floor(i/7);cls.push('inweek');}
     html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+(k===iso(sel))+'"'+
       (cls.length?' class="'+cls.join(' ')+'"':'')+
       ' aria-label="'+dname(d)+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
