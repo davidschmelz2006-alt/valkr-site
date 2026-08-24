@@ -1057,9 +1057,15 @@
     letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
   /* Etwas laenger und mit einem Hauch Ueberschwingen: das Aufklappen soll
      sich anfuehlen, als faehrt der Monat heraus, nicht als wird eine Hoehe
-     gesetzt. Beide Werte -- Hoehe und Verschiebung -- laufen synchron, sonst
-     rutscht das Raster sichtbar hinter der Kante her. */
-  .calview{overflow:hidden;transition:height .42s cubic-bezier(.22,1,.28,1);will-change:height}
+     gesetzt. Beide Werte -- Fenster und Verschiebung -- laufen synchron, sonst
+     rutscht das Raster sichtbar hinter der Kante her.
+     Animiert wird ausschliesslich per clip-path (Compositor, kein Reflow) --
+     transition und will-change setzt calLayout() gezielt nur waehrend der
+     Animation selbst per Inline-Style, siehe dort. Vorher lief hier eine
+     transition auf height: eine reine Layout-Eigenschaft, die bei jedem der
+     ~25 Bilder in 420ms einen Reflow des Kastens ausgeloest hat -- das war
+     das Ruckeln. */
+  .calview{overflow:hidden}
   /* Die zusaetzlichen Zeilen blenden beim Aufklappen mit auf. Ohne das
      erscheinen sie hart an der Kante, sobald die Hoehe sie freigibt.
      Bewusst auf .calview eingegrenzt, nicht auf .cal allgemein: der
@@ -1145,13 +1151,20 @@
       color-mix(in srgb,var(--aurora) 82%,#000) 100%);
     box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 45%,transparent),
                0 2px 10px -2px color-mix(in srgb,var(--aurora) 55%,transparent)}
-  .dstrip button[aria-selected="true"] i{color:var(--bg)!important;background:var(--bg);position:relative;z-index:1}
+  /* position:absolute bleibt bestehen (vorher stand hier :relative) -- sonst
+     wird das <i> zum zweiten Flex-Kind neben der Zahl und schiebt sie beim
+     ausgewaehlten Tag seitlich aus der Mitte. z-index reicht allein, um es
+     ueber das ::before der ausgewaehlten Flaeche zu heben. */
+  .dstrip button[aria-selected="true"] i{color:var(--bg)!important;background:var(--bg);position:absolute;z-index:1}
   @supports not (background:color-mix(in srgb,red 50%,transparent)){
     .dstrip button[aria-selected="true"]::before{background:var(--aurora)}
   }
   @media (max-width:400px){
     .dstrip{gap:.22rem}
-    .dstrip button{padding:.45rem .05rem .58rem}
+    /* Padding oben/unten muss gleich sein -- ungleiche Werte (vorher .45rem/
+       .58rem) schieben die Zahl aus der Mitte der Ring-Markierung heraus,
+       obwohl beide auf derselben Flexbox sitzen. */
+    .dstrip button{padding:.5rem .05rem}
     .dstrip button b{font-size:.85rem}
   }
   .dbar{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
@@ -1197,7 +1210,7 @@
   .exrow .nm{flex:1;min-width:0;cursor:pointer}
   .exrow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
   .exrow .nm span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
-  .exrow .sets{font-family:var(--fm);font-size:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .exrow .sets{font-family:var(--fm);font-size:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
 
   .timer{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);padding:.8rem 1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
   .clock{font-family:var(--fd);font-weight:600;font-size:1.95rem;font-variant-numeric:tabular-nums;min-width:5rem}
@@ -1403,7 +1416,10 @@
   .wrow.cur{border-color:var(--ember)}
   .whead{display:flex;align-items:center;gap:.75rem;padding:.68rem .82rem;width:100%;text-align:left;transition:.16s}
   .whead:hover{background:var(--surf3)}
-  .wno{font-family:var(--fd);font-weight:600;font-size:var(--t5);width:3.5rem;flex:none}
+  /* Seit v25.2 traegt wno Phasennamen ("Phase 1 · Basis", "Wiederholungstest")
+     statt "Woche 12" -- die feste 3.5rem-Breite von vorher brach das mitten im
+     Namen um. Jetzt am Inhalt orientiert, .wph bleibt der Ausgleich. */
+  .wno{font-family:var(--fd);font-weight:600;font-size:var(--t5);flex:1 1 auto;min-width:0}
   .wph{font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;color:var(--ink3);flex:1;min-width:0}
   .wdots{display:flex;gap:3px;flex:none}
   .wdots i{width:8px;height:8px;border-radius:50%;background:var(--line2);display:block}
@@ -1816,7 +1832,14 @@
       color-mix(in srgb,var(--surf3) 55%,transparent) 0%,
       color-mix(in srgb,var(--surf) 72%,transparent) 100%);
     border:1px solid var(--line);border-radius:var(--r2);padding:.85rem .95rem;transition:.16s;box-shadow:var(--sh)}
+  /* Nur bei echtem Zeigegeraet hovern lassen: ein Touch-Tap setzt :hover
+     ohne passenden mouseleave, der Rand blieb also getoent stehen, obwohl
+     aria-pressed schon wieder false war -- eine abgewaehlte Karte sah dann
+     weiter wie ausgewaehlt aus. Betraf .iopt (alle Antwortkarten) genauso
+     wie .daypill unten. */
+  @media(hover:hover){
   #intro .iopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent);transform:translateY(-1px)}
+  }
   #intro .iopt[aria-pressed="true"]{
     border-color:color-mix(in srgb,var(--oc) 60%,transparent);
     background:linear-gradient(160deg,
@@ -1845,7 +1868,9 @@
       color-mix(in srgb,var(--surf) 72%,transparent) 100%);
     display:flex;flex-direction:column;align-items:center;justify-content:space-between;
     padding:.7rem .2rem .55rem;transition:.16s}
+  @media(hover:hover){
   #intro .daypill:hover{border-color:var(--aurora)}
+  }
   #intro .daypill b{font-family:var(--fm);text-transform:uppercase;font-size:var(--t3);color:var(--ink2)}
   #intro .daypill .dot{width:22px;height:22px;border-radius:999px;background:var(--surf2);border:1px dashed var(--line2);transition:.16s}
   /* --oc kommt aus paintTdays() -- die Reihenfolge der Auswahl bestimmt die
@@ -1870,21 +1895,30 @@
   #intro .valrow{display:flex;align-items:baseline;justify-content:center;gap:.5rem;margin-top:.4rem}
   #intro .valrow b{font-family:var(--fd);font-weight:600;font-size:2.9rem;line-height:1;font-variant-numeric:tabular-nums}
   #intro .valrow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
-  #intro .stepbtns{display:flex;align-items:center;gap:.7rem;justify-content:center}
-  #intro .stepbtns button{width:40px;height:40px;border-radius:999px;flex:none;
-    border:1px solid color-mix(in srgb,#fff 8%,transparent);
-    background:linear-gradient(180deg,
-      color-mix(in srgb,var(--surf3) 88%,transparent),
-      color-mix(in srgb,var(--surf2) 82%,transparent));
-    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 10%,transparent);
-    color:var(--ink);font-size:1.15rem;line-height:1;transition:filter .16s,transform .12s}
-  #intro .stepbtns button:hover{filter:brightness(1.3)}
-  #intro .stepbtns button:active{transform:scale(.92)}
-  /* Bewusst beim Schieber statt einem eigens gebauten Scroll-Rad-Waehler
-     geblieben: input[type=range] ist compositor-billig und laeuft nativ
-     fluessig, ein selbstgebautes Scroll-Snap-Rad waere genau die Art von
-     Zusatzlast, die auf dem A54 in diesem Umbau schon einmal ruckelte. Die
-     Optik holt trotzdem auf: Farbverlauf in der Leiste, glaeserner Griff. */
+  /* Scroll-Rad fuer Alter/Groesse/Gewicht (iOS-Stil): reines CSS
+     scroll-snap, keine JS-Animationsschleife pro Frame -- nur ein
+     entprellter scroll-Handler, der nach dem Ausrollen einmal den
+     zentrierten Wert liest. Das fruehere Ruckeln auf dem A54 kam von einer
+     JS-Ticker-Animation, nicht von nativem Scroll-Snap; die eigentliche
+     Bewegung bleibt beim Browser-Compositor. */
+  #intro .wheelrow{display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-top:.3rem}
+  #intro .wheelbox{position:relative;height:220px;width:8rem}
+  #intro .wheel{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+    scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 44px,#000 176px,transparent 100%);
+    mask-image:linear-gradient(to bottom,transparent 0,#000 44px,#000 176px,transparent 100%)}
+  #intro .wheel::-webkit-scrollbar{display:none}
+  #intro .wheel .wpad{height:88px}
+  #intro .wopt{scroll-snap-align:center;scroll-snap-stop:always;height:44px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
+    font-family:var(--fd);font-variant-numeric:tabular-nums;font-weight:500;
+    font-size:1.2rem;color:var(--ink3);transition:color .15s,font-size .15s,font-weight .15s}
+  #intro .wopt.wsel{color:var(--ink);font-weight:700;font-size:1.7rem}
+  #intro .wheelbar{position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%);
+    border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);pointer-events:none;
+    background:color-mix(in srgb,var(--aurora) 7%,transparent)}
+  #intro .wheelunit{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
   #intro input[type="range"].islide{width:100%;height:26px;-webkit-appearance:none;appearance:none;background:none}
   #intro input[type="range"].islide::-webkit-slider-runnable-track{
     height:6px;border-radius:999px;
@@ -2561,7 +2595,8 @@
   .lvlband{display:grid;grid-template-columns:repeat(6,1fr);gap:3px}
   .lvlband i{display:flex;align-items:center;justify-content:center;height:26px;border-radius:var(--r1);
     font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.02em;
-    background:var(--surf2);border:1px solid var(--line2);color:var(--ink3);min-width:0;overflow:hidden}
+    background:var(--surf2);border:1px solid var(--line2);color:var(--ink3);min-width:0;overflow:hidden;
+    white-space:nowrap;text-overflow:ellipsis}
   .lvlband i.on{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
   .lvlrow .lname{margin:.3rem 0 0;font-size:var(--t3);color:var(--ink2)}
   .lvlrow .lname b{font-family:var(--fd);font-weight:600;color:var(--ink)}
@@ -2911,6 +2946,12 @@
   </section>
 
   <section class="view" id="v-plan">
+    <!-- h2.sec/p.sub: buildWeeks() fuellt sie mit Blockname und -beschreibung
+         (v25.2 -- vorher fehlten diese zwei Elemente im Markup, der
+         querySelector traf ins Leere, der if(hd)-Schutz schluckte es lautlos.
+         Ohne sie stand die Makrozyklus-Uebersicht ohne Einordnung da: welcher
+         der drei Bloecke, welcher Schwerpunkt. -->
+    <div><h2 class="sec"></h2><p class="sub"></p></div>
         <div class="kpis" id="planKpis"></div>
     <div class="weeks" id="weeks"></div>
     <div class="noteblk">
@@ -2958,10 +2999,10 @@
     <div class="dbar">
       <div class="now"><b id="dayName"></b><span id="dayMeta"></span></div>
       <button class="nb hot" id="jumpToday" style="display:none" data-i18n="btn.backToday">Back to today</button>
-      <!-- Leiser Eintrag, kein zweiter Startknopf. Er fuehrt in die Uebersicht
-           der Einheit: Uebungen tauschen und der kurze Check zu Form und
-           Schmerz. Ohne ihn waere beides nach dem Direktstart von HEUTE gar
-           nicht mehr erreichbar. -->
+      <!-- Zweiter Weg zur selben Tuer: fuehrt in dieselbe Uebersicht wie der
+           Startknopf auf HEUTE (openSessOv) -- Uebungen tauschen und der
+           kurze Check zu Form und Schmerz, bevor es losgeht. Kein eigener
+           Start hier, nur ein leiser Einstieg von hier aus. -->
       <button class="txtbtn" id="sessOvBtn" data-i18n="btn.sessOv">Session detail</button>
     </div>
     <div class="hero">
@@ -3183,10 +3224,19 @@
     </details>
   </section>
   <section class="view" id="v-fuel">
-    <!-- v19 (MCI-Ordnung): erst das Tagebuch des gewaehlten Tages mit Ring
-         und Slots, dann Gewicht, Naehrstoffe, Rezepte. Rechner, Zielwerte,
-         Wasser und Supplemente bleiben vollstaendig -- als Ausklapper unten,
-         denn sie werden selten angefasst und oft nur gelesen. -->
+    <!-- v25.3: die Zielwerte-Kacheln standen vorher in einem geschlossenen
+         Ausklapper ganz unten -- Kcal, Protein, Fett, Kohlenhydrate, die
+         wichtigsten Zahlen des ganzen Tabs, hinter einem Klick. Jetzt stehen
+         sie fest oben, unveraendert aus drawMacros()/macroNow gespeist, nur
+         der Ort ist neu. Rechner und Detailwerte bleiben Ausklapper --
+         die werden selten angefasst und oft nur gelesen. -->
+    <div class="form" id="fuelTargetHead">
+      <div class="savebar" style="justify-content:space-between">
+        <p class="eyebrow" style="margin:0" data-i18n="fuel.targets">Your targets &mdash; edit any of them</p>
+        <button class="tbtn" id="resetMacros" data-i18n="btn.auto">Reset to auto</button>
+      </div>
+      <div class="cards" id="macroCards"></div>
+    </div>
     <!-- Derselbe Aufbau wie der Kalender im Training, nicht nur derselbe
          Kasten: Wochentag-Kopfzeile einmal oben (.calhead), darunter nur
          noch Zahlen. Vorher stand der Wochentag in jedem einzelnen Knopf
@@ -3230,39 +3280,34 @@
     </details>
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="fuel.targetFold">Targets &mdash; edit any of them</span></summary>
+        <span class="ft" data-i18n="fuel.targetDetail">Breakdown &mdash; per kilogram</span></summary>
       <div class="foldBody"><div class="form">
-      <div class="savebar" style="justify-content:space-between">
-        <p class="eyebrow" style="margin:0" data-i18n="fuel.targets">Your targets &mdash; edit any of them</p>
-        <button class="tbtn" id="resetMacros" data-i18n="btn.auto">Reset to auto</button>
-      </div>
-      <!-- Die Zielwerte als Kacheln. Vorher standen hier vier Zahlenfelder mit
-           Reglern -- der Wert, den man taeglich sehen will, sah damit aus wie
-           etwas, das man taeglich eintippen muss. Geaendert wird selten,
-           angeschaut oft; die Form folgt jetzt dem haeufigeren Fall.
-           Kohlenhydrate sind nicht antippbar: sie ergeben sich aus den drei
-           anderen und lassen sich gar nicht getrennt setzen. -->
-      <div class="cards" id="macroCards"></div>
       <div><div class="macrobar" id="mbar"></div>
         <div class="mkey"><span><u style="background:var(--aurora)"></u>Protein</span><span><u style="background:var(--brass)"></u>Fat</span><span><u style="background:var(--ice)"></u>Carbs</span></div></div>
       <div class="out" id="perkg"></div>
       <p class="hint" id="f-note"></p>
     </div></div>
     </details>
+    <!-- Supplements & Flüssigkeit als eine Sektion: die persoenliche Liste
+         ("Was du nimmst", vorher unten im DU-Tab) gehoert inhaltlich zur
+         Ernaehrung, nicht zu den Koerperdaten. Wasser/Koffein und die
+         Evidenz-Tabelle standen ohnehin schon nebeneinander im Fuel-Tab --
+         jetzt alle drei unter einem Dach. -->
     <details class="fold">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="fuel.hydr">Water and caffeine</span></summary>
+        <span class="ft" data-i18n="fuel.suppHydr">Supplements &amp; hydration</span></summary>
       <div class="foldBody"><div class="form">
+      <p class="eyebrow" data-i18n="you.taking">What you are taking</p>
+      <div class="chips" id="suppchips"></div>
+      <div class="savebar">
+        <div class="ctl" style="flex:1;min-width:150px"><input id="supName" type="text" placeholder="Add something else"></div>
+        <button class="tbtn go" id="supAdd" data-i18n="btn.add">Add</button>
+      </div>
+      <p class="hint" id="suppnote"></p>
       <div class="gtitle"><span class="ichip" style="--chip:#5B8DEF"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 4.2 6 7.4 6 10.7a6 6 0 0 1-12 0c0-3.3 2.8-6.5 6-10.7Z"/></svg></span>
         <div class="gt"><b data-i18n="fuel.hydr">Water and caffeine</b></div></div>
       <div class="out" id="hydrOut"></div>
       <p class="hint" data-i18n="fuel.hydrNote">Thirst is a decent guide for most people. The number below is a rough floor, not a quota to force down. Caffeine cut-off is eight hours before bed.</p>
-    </div></div>
-    </details>
-    <details class="fold">
-      <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="fuel.supps">Supplements</span></summary>
-      <div class="foldBody"><div>
       <div class="gtitle"><span class="ichip" style="--chip:var(--brass)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="9" width="17" height="7" rx="3.5" transform="rotate(-35 12 12.5)"/><path d="M9.5 8.2l5 7.4"/></svg></span>
         <div class="gt"><b data-i18n="fuel.supps">Supplements &mdash; hover for the detail</b></div></div>
       <div class="supgrid" id="supgrid"></div>
@@ -3369,15 +3414,10 @@
         </div>
       </div>
     </details>
-    <div class="form">
-      <p class="eyebrow" data-i18n="you.taking">What you are taking</p>
-      <div class="chips" id="suppchips"></div>
-      <div class="savebar">
-        <div class="ctl" style="flex:1;min-width:150px"><input id="supName" type="text" placeholder="Add something else"></div>
-        <button class="tbtn go" id="supAdd" data-i18n="btn.add">Add</button>
-      </div>
-      <p class="hint" id="suppnote"></p>
-    </div>
+    <!-- v25.3: "Was du nimmst" ist in den Ernaehrungs-Tab gezogen (Sektion
+         "Supplements & Hydration") -- Supplemente sind Ernaehrung, nicht
+         Koerperdaten. Rendering unveraendert in buildChips(), nur der
+         Ort im Markup ist neu. -->
   </section>
 
   <section class="view pushv" id="v-coach">
@@ -3569,7 +3609,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='24.12';
+var VERSION='25.3';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3760,7 +3800,8 @@ var DICT={
  'home.habits':['Overview','Übersicht'],'home.improve':['Improve','Verbessern'],
  'fuel.micro':['Nutrients','Nährstoffe'],'fuel.recipes':['Recipes','Rezepte'],
  'fuel.calcFold':['Calculator — your data','Rechner — deine Daten'],
- 'fuel.targetFold':['Targets — edit any of them','Zielwerte — alle änderbar'],
+ 'fuel.targetDetail':['Breakdown — per kilogram','Aufschlüsselung — pro Kilogramm'],
+ 'fuel.suppHydr':['Supplements & hydration','Supplements & Flüssigkeit'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
  'rk.s':['From your level, not from sweat.','Aus deinem Level, nicht aus Schweiß.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
@@ -6332,19 +6373,28 @@ function istHandy(){return window.matchMedia&&window.matchMedia('(max-width:640p
 var PARENT={detail:'train',kam:'fuel'};
 Object.keys(GROUP).forEach(function(g){GROUP[g].v.forEach(function(x){PARENT[x]=g;});});
 
+/* Der Test-Reiter zeigt sich erst, wenn er gebraucht wird: der Hinweistext
+   im Test-Bereich sagt selbst, wofuer er da ist -- "Tag eins misst schon
+   automatisch ein... diese Seite ist fuer die Retests in Woche 6 und 12".
+   testDue() (weiter unten, seit je fuer den Hinweis-Punkt gedacht) ist genau
+   diese Bedingung -- kein zweiter Trigger noetig. Ausserhalb dieser Wochen
+   war der Reiter ohnehin nur ein Punkt auf einer Liste, den man nicht braucht. */
+function visGroup(g){
+  var G=GROUP[g];
+  if(!G||g!=='train'||typeof testDue==='function'&&testDue())return G;
+  var i=G.v.indexOf('test');if(i<0)return G;
+  var v=G.v.slice();v.splice(i,1);
+  var l=G.l?G.l.slice():G.l;if(l)l.splice(i,1);
+  return{v:v,l:l};
+}
 function drawSub(g,cur){
   var el=$('subnav');if(!el)return;
-  var G=GROUP[g];
+  var G=visGroup(g);
   if(!G||!G.l){el.hidden=true;el.innerHTML='';if(typeof stickyMess==='function')stickyMess();return;}
   var L=cfg.lang==='de'?1:0;
   el.hidden=false;
   el.innerHTML=G.v.map(function(x,i){
-    /* Der Test-Reiter ist kein Einstiegs-Hindernis -- Tag eins misst schon
-       automatisch ein (siehe Hinweistext im Test-Bereich). Er ist der
-       Retest zu Woche 6 und 12, und genau da soll er auffallen statt einer
-       von zehn gleich schweren Reitern zu sein, die man sich merken muss. */
-    var badge=(x==='test'&&typeof testDue==='function'&&testDue())?'<i class="subdot" aria-hidden="true"></i>':'';
-    return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+badge+'</button>';
+    return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+'</button>';
   }).join('');
   if(typeof stickyMess==='function')stickyMess();
 }
@@ -6704,7 +6754,7 @@ function sessOf(pl){
    weit nach oben, dass die Woche mit dem gewaehlten Tag im Fenster steht.
    Deshalb ist das Auf- und Zuklappen eine einzige Verschiebung und kein
    Neuaufbau -- es laeuft auf der Grafikeinheit und kostet nichts. */
-var calOffen=false,calZeile=0;
+var calOffen=false,calZeile=0,calAnimT=null,calSperre=false;
 function monatsRaster(d){
   /* Vom Montag der Woche, in der der Monatserste liegt, bis zum Sonntag der
      Woche, in der der Monatsletzte liegt. Dadurch sind es immer volle
@@ -6755,8 +6805,14 @@ function drawStrip(){
   el.innerHTML=html;
   calLayout(false);
 }
-/* Hoehe und Verschiebung setzen. Beim ersten Zeichnen ohne Uebergang, sonst
-   faehrt der Kalender bei jedem Ansichtswechsel sichtbar an seinen Platz. */
+/* Fenster und Verschiebung setzen. Beim ersten Zeichnen ohne Uebergang, sonst
+   faehrt der Kalender bei jedem Ansichtswechsel sichtbar an seinen Platz.
+   Animiert wird nur noch per clip-path (welches Stueck des Kastens sichtbar
+   ist) und transform -- beides Compositor-Eigenschaften, kein Reflow pro
+   Bild. Der Kasten bleibt waehrend der Animation auf voller Monatshoehe
+   stehen (das Fenster wird nur optisch zu-/aufgedeckt); die platzsparende
+   echte Hoehe wird erst am Ende in einem einzigen Reflow gesetzt, nicht bei
+   jedem der ~25 Bilder in 420ms. */
 function calLayout(anim){
   var view=$('calview'),grid=$('dstrip'),cal=$('cal'),grab=$('calgrab');
   if(!view||!grid||!grid.children.length)return;
@@ -6764,14 +6820,10 @@ function calLayout(anim){
   var hoehe=grid.children[0].offsetHeight;
   var luecke=parseFloat(getComputedStyle(grid).rowGap)||5;
   var schritt=hoehe+luecke;
-  if(!anim){view.style.transition='none';grid.style.transition='none';}
-  if(calOffen){
-    view.style.height=(zeilen*schritt-luecke)+'px';
-    grid.style.transform='translateY(0)';
-  }else{
-    view.style.height=hoehe+'px';
-    grid.style.transform='translateY('+(-calZeile*schritt)+'px)';
-  }
+  var voll=zeilen*schritt-luecke;
+  var einzugZu=calOffen?0:(voll-hoehe);
+  var verschiebungZu=calOffen?0:(-calZeile*schritt);
+  clearTimeout(calAnimT);calAnimT=null;
   if(cal)cal.classList.toggle('offen',calOffen);
   if(grab){
     grab.setAttribute('aria-expanded',calOffen?'true':'false');
@@ -6779,9 +6831,39 @@ function calLayout(anim){
       ?(cfg.lang==='de'?'Monat zuklappen':'Collapse month')
       :(cfg.lang==='de'?'Monat anzeigen':'Show month'));
   }
-  if(!anim){void view.offsetHeight;view.style.transition='';grid.style.transition='';}
+  if(!anim){
+    calSperre=false;
+    view.style.transition='none';grid.style.transition='none';
+    view.style.willChange='';view.style.clipPath='none';
+    view.style.height=(calOffen?voll:hoehe)+'px';
+    grid.style.transform='translateY('+verschiebungZu+'px)';
+    void view.offsetHeight;view.style.transition='';grid.style.transition='';
+    return;
+  }
+  /* ponytail: calSperre haelt neue Klicks waehrend der laufenden Animation
+     ab, statt den Zwischenstand des laufenden clip-path live auszulesen --
+     ein 440ms-Sperrfenster ist die einfachere Loesung fuer das seltene
+     Doppel-Tipp-Timing und reicht hier aus. */
+  calSperre=true;
+  var einzugVorher=(voll-hoehe)-einzugZu;
+  view.style.willChange='clip-path';
+  view.style.transition='none';
+  view.style.height=voll+'px';
+  view.style.clipPath='inset(0 0 '+einzugVorher+'px 0)';
+  grid.style.transform='translateY('+verschiebungZu+'px)';
+  void view.offsetHeight;
+  view.style.transition='clip-path .42s cubic-bezier(.22,1,.28,1)';
+  view.style.clipPath='inset(0 0 '+einzugZu+'px 0)';
+  calAnimT=setTimeout(function(){
+    view.style.transition='none';
+    view.style.height=(calOffen?voll:hoehe)+'px';
+    view.style.clipPath='none';
+    view.style.willChange='';
+    calSperre=false;calAnimT=null;
+  },440);
 }
 function calToggle(auf){
+  if(calSperre)return;
   calOffen=(auf===undefined)?!calOffen:!!auf;
   calLayout(true);
 }
@@ -6966,55 +7048,36 @@ function streak(){
 }
 
 /* ---------- plan ---------- */
+/* Makrozyklus statt Wochenliste. Vorher standen hier zwoelf aufklappbare
+   Wochenzeilen, jede mit einem Tagesraster aus Datum, Titel und Haken --
+   dieselben Tage, dieselben Zeichen, die der Kalender in TRAINING seit der
+   Kalender-Performance-Phase schon zeigt (Punkt, Haken, Kreuz). Zwei Orte fuer
+   dieselbe Frage "was war an Tag X".
+   Was hier bleibt, steht nirgends sonst: die drei Phasen des laufenden Blocks
+   (aus BLOCKS/phase(), nicht erfunden) plus Deload und Retest, mit Umfang
+   (Saetze x Wdh, Pause) und Fortschritt je Phase. */
 function buildWeeks(){
   var wrap=$('weeks');wrap.innerHTML='';
-  /* Zweiter Behaelter fuer die uebrigen Wochen. Er wandert am Ende in einen
-     Ausklapper -- gebaut werden sie trotzdem alle, weil die Gesamtzahlen
-     darunter (Einheiten, Logs) sie brauchen. */
-  var restWrap=document.createElement('div');restWrap.className='wlist';
   /* Ueberschrift traegt den Block, sonst sehen zwoelf Wochen im Block 3
      genauso aus wie zwoelf Wochen im Block 1. */
   var LB=cfg.lang==='de'?1:0,cbk=curBlock(),hd=document.querySelector('#v-plan h2.sec'),sb=document.querySelector('#v-plan p.sub');
   if(hd)hd.textContent=(LB?'Block ':'Block ')+blockNo+' · '+cbk.n[LB];
   if(sb)sb.textContent=cbk.d[LB];
   var curW=wkOf(TODAY),totDone=0,totTrain=0;
-  for(var w=1;w<=12;w++){(function(w){
-    var ph=phase(w),done=0,tot=0,dots='';
-    for(var i=0;i<7;i++){
+  var STAGES=[[1,4],[5,8],[9,10],[11,11],[12,12]];
+  STAGES.forEach(function(rng){
+    var w0=rng[0],w1=rng[1],ph=phase(w0),done=0,tot=0;
+    for(var w=w0;w<=w1;w++)for(var i=0;i<7;i++){
       var dt=add(STD,(w-1)*7+i),pl=plan(dt),k=iso(dt);
-      dots+='<i class="'+pl.kind+(dayDone(k)?'':' off')+'"></i>';
-      if(pl.kind==='train'){tot++;if(dayDone(k))done++;}}
+      if(pl.kind==='train'){tot++;if(dayDone(k))done++;}
+    }
     totDone+=done;totTrain+=tot;
-    var row=document.createElement('div');row.className='wrow'+(w===curW?' cur':'');
-    var head=document.createElement('button');head.className='whead';
-    head.innerHTML='<span class="wno">'+(cfg.lang==='de'?'Woche ':'Week ')+w+'</span><span class="wph">'+ph.name+' · '+ph.sets+' x '+ph.reps+'</span><span class="wdots">'+dots+'</span><span class="wpct">'+(tot?Math.round(done/tot*100):0)+'%</span>';
-    var body=document.createElement('div');body.className='wbody';
-    var g=document.createElement('div');g.className='dgrid';
-    for(var i=0;i<7;i++){(function(i){
-      var dt=add(STD,(w-1)*7+i),pl=plan(dt),k=iso(dt);
-      var c=document.createElement('button');c.className='dcard'+(k===iso(TODAY)?' today':'');
-      c.innerHTML='<em>'+SH[i]+' '+dt.getDate()+'.'+(dt.getMonth()+1)+'.</em><b>'+pl.title+'</b>'+(dayDone(k)?'<span class="st">&#10003;</span>':'')+((logs[k]&&(logs[k].note||logs[k].rpe))?'<span class="nd"></span>':'');
-      c.addEventListener('click',function(){sel=dt;renderDay();show('today');});
-      g.appendChild(c);})(i);}
-    body.appendChild(g);
-    head.addEventListener('click',function(){row.classList.toggle('open');});
-    row.appendChild(head);row.appendChild(body);
-    if(w===curW)row.classList.add('open');
-    /* Nur die laufende Woche steht offen da. Zwoelf Wochenzeilen sind rund
-       tausend Pixel, von denen elf niemanden interessieren, solange man in
-       Woche eins steht. Der Rest liegt hinter einem Griff. */
-    (w===curW?wrap:restWrap).appendChild(row);})(w);}
-  /* Die uebrigen elf Wochen hinter einen Griff legen. Die Kurzfassung rechts
-     sagt schon, worum es geht -- oeffnen muss nur, wer wirklich vorausschauen
-     will. */
-  if(restWrap.children.length){
-    var d=document.createElement('details');d.className='fold';
-    d.innerHTML='<summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>'+
-      '<span class="ft">'+(cfg.lang==='de'?'Die übrigen Wochen':'The other weeks')+'</span>'+
-      '<span class="fs">'+restWrap.children.length+'</span></summary>';
-    var bd=document.createElement('div');bd.className='foldBody';
-    bd.appendChild(restWrap);d.appendChild(bd);wrap.appendChild(d);
-  }
+    var row=document.createElement('div');row.className='wrow'+(curW>=w0&&curW<=w1?' cur':'');
+    row.innerHTML='<div class="whead"><span class="wno">'+ph.name+'</span>'+
+      '<span class="wph">'+ph.sets+' x '+ph.reps+' · '+ph.rest+'</span>'+
+      '<span class="wpct">'+(tot?Math.round(done/tot*100):0)+'%</span></div>';
+    wrap.appendChild(row);
+  });
   var logged=Object.keys(logs).length;
   $('planKpis').innerHTML=kpi(cfg.lang==='de'?'Einheiten':'Sessions done',totDone,(cfg.lang==='de'?'von ':'of ')+totTrain)+
     kpi(cfg.lang==='de'?'Aktuelle Woche':'Current week',(curW<1?'-':(curW>12?'12+':curW)),'of 12')+
@@ -7245,7 +7308,10 @@ $('mobStop').addEventListener('click',mobStopF);
 /* Faellig: die Wochen um den Retest herum (Woche 6/7 und 12/13, ein Tag
    Kalenderwoche ist kein exakter Termin). Bewusst nur nach Datum, nicht nach
    "schon erledigt" -- das braeuchte einen eigenen Speicherstand je Meilenstein
-   fuer einen Punkt, der auch so nach zwei Wochen von selbst wieder verschwindet. */
+   fuer einen Punkt, der auch so nach zwei Wochen von selbst wieder verschwindet.
+   Steuert seit v25.2 auch, ob der Test-Reiter ueberhaupt in der Abschnittsleiste
+   auftaucht (siehe visGroup weiter oben) -- ausserhalb dieser Wochen gibt es
+   nichts zu tun, siehe test.note0. */
 function testDue(){var w=wkOf(TODAY);return w===6||w===7||w===12||w===13;}
 var testVals=get('test',{});
 function buildTest(){
@@ -10303,10 +10369,14 @@ function renderHome(){
        vier Symbole, dann ist die Kachelhoehe alle; eine Reihe unter dem Text
        traegt den ganzen Tag. */
     var thumbs=its.map(function(x){return x.id?exThumb(x.l,x.id):looseThumb(x.l);}).join('');
-    /* v22.1: die Karte startet IMMER direkt -- auch am freien Tag. Wer auf
-       sein Training tippt, will trainieren, nicht etwas ansehen; runItems()
-       zieht dafuer die naechste geplante Einheit vor. Ansehen gibt es
-       weiterhin, aber im Trainings-Bereich, wo es hingehoert. */
+    /* v25.2: fuehrt jetzt ueber openSessOv() statt direkt zu starten -- das war
+       derselbe Knopf mit anderem Namen wie "Training starten" im Bereich
+       TRAINING (Session detail). Zwei Wege, die beide eine Einheit anfangen,
+       sind derselbe Fehler wie der entfernte zweite Startknopf aus v22.1, nur
+       eine Ebene tiefer versteckt. Laeuft schon eine Einheit, oeffnet
+       openSessOv() ohnehin direkt den Trainingsmodus -- kein Umweg fuer
+       "Weiter". runItems() zieht die naechste geplante Einheit vor, auch am
+       freien Tag. */
     heroEl.innerHTML='<button type="button" class="hcard" data-run="1">'+
       '<span class="hcMain"><p class="tag">'+tag+'</p><h3>'+pl.title+'</h3>'+
       '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+' · '+Object.keys(muster).join(' · ')+'</p>'+
@@ -10423,9 +10493,11 @@ function renderHome(){
 ['homeHero','homeHabits','homeCards'].forEach(function(id){
   var el=$(id);if(!el)return;
   el.addEventListener('click',function(e){
-    /* data-run startet die heutige Einheit direkt; data-go navigiert nur. */
+    /* data-run fuehrt zur Einheit -- ueber openSessOv(), damit HEUTE und
+       "Session detail" in TRAINING dieselbe Tuer benutzen statt je einen
+       eigenen Startknopf zu haben. data-go navigiert nur. */
     var r=e.target.closest('[data-run]');
-    if(r){ if(runValid()){openRun();} else { startRun(0); openRun(); } return; }
+    if(r){ openSessOv(); return; }
     var b=e.target.closest('[data-go]');if(b)show(b.dataset.go);
   });
 });
@@ -10895,17 +10967,35 @@ $('soClose').addEventListener('click',function(){soShow(false);});
    Kapiteln eine ruhige Uebergabeseite. */
 var OBL={
  sex:[
-  ['f',['Female','Weiblich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="9" r="4.6"/><path d="M12 13.6V21M9 18h6"/></svg>','var(--ice)'],
-  ['m',['Male','Männlich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="14" r="4.6"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg>','var(--aurora)'],
+  ['f',['Female','Weiblich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.4"/><path d="M5.5 20c.4-4.8 2.9-7.3 6.5-7.3s6.1 2.5 6.5 7.3"/></svg>','var(--ice)'],
+  ['m',['Male','Männlich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.4"/><path d="M4.5 20c.2-3.4 1-5.6 2.6-6.8 1.4-1 3-1.5 4.9-1.5s3.5.5 4.9 1.5c1.6 1.2 2.4 3.4 2.6 6.8"/></svg>','var(--aurora)'],
   ['x',['Prefer not to say','Keine Angabe'],['Estimates use a middle value','Schätzwerte nehmen die Mitte'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><path d="M8.5 12h7"/></svg>','var(--brass)']],
  goal:[
   ['muscle',['Build muscle','Muskeln aufbauen'],['Visible strength, clear progression','Sichtbare Kraft, klare Progression'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 12h16M7 8v8M17 8v8M2.5 10v4M21.5 10v4"/></svg>','var(--aurora)'],
   ['lean',['Get lean','Abnehmen und straffen'],['Drop fat, keep the strength you build','Fett runter, aufgebaute Kraft behalten'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 3.6-4.6 5-4 9a4.3 4.3 0 0 0 8.6-.4c0-3.6-3.4-5-4.6-8.6Z"/></svg>','var(--ember)'],
   ['skills',['Learn skills','Skills lernen'],['Muscle-up, handstand, L-sit and friends','Muscle-up, Handstand, L-Sit und Co.'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 9.3l5.4-.8Z"/></svg>','var(--ice)'],
   ['fit',['General fitness','Allgemein fit'],['Strong for everyday life','Stark für den Alltag'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.7 12 20 12 20Z"/></svg>','var(--brass)']],
+ /* ponytail: nur 3 und 4 Tage, nicht 1-7. SESS3/SESS4 sind die einzigen
+    Wochenplaene, die es gibt -- cfg.track/profile.days sind ueberall im
+    Trainingsmotor (buildCatalog, Wochenaufbau, Settings-Auswahl) strikt
+    binaer '4'?SESS4:SESS3 verdrahtet, tdNeed() ebenso. Weitere Tageszahlen
+    anzubieten hiesse, fuer 1/2/5/6/7 Tage neue Splits zu erfinden -- genau
+    die Trainingsplan-Berechnungslogik, die dieser Umbau nicht neu bauen
+    soll. Upgrade-Pfad: eigene Session-Vorlagen je Tageszahl, das ist eine
+    Aenderung am Trainingsmotor, keine an der Einfuehrung. */
  days:[
   ['3',['3 days a week','3 Tage pro Woche'],['Full body — the classic start','Ganzkörper — der Klassiker zum Einstieg'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2"/></svg>','var(--aurora)'],
   ['4',['4 days a week','4 Tage pro Woche'],['Upper/lower split — more volume','Ober-/Unterkörper geteilt — mehr Volumen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"/></svg>','var(--ember)']],
+ /* ponytail: keine Kraftraum-Geraete (Kettlebell/Kabelzug/Multipresse)
+    ergaenzt. EQN (die einzige Ausruestungs-Registrierung, die exAvail()
+    kennt) hat genau 7 Codes -- wl/tb/ch/br/dp/rg/an -- und jede Uebung in
+    der Datenbank ist auf genau diese 7 getaggt, alle koerpergewichts-
+    basiert. Ein Geraet als Option anzubieten, das keine einzige Uebung
+    filtert, waere ein Knopf ohne Wirkung -- schlimmer als keiner, weil er
+    Wirkung vortaeuscht. Es fehlt hier nichts: Wand/Tisch/Stuhl/Sofa-Halt
+    gelten als immer vorhanden, Stange/Barren/Ringe sind bereits abgefragt.
+    Upgrade-Pfad: neue Uebungen samt Geraete-Code in der Datenbank waeren
+    eine Aenderung am Uebungspool, keine an der Einfuehrung. */
  eq:[
   ['bar',['Pull-up bar','Klimmzugstange'],['A doorway bar is all it takes','Ein Türreck reicht völlig'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 5h18M6 5v6M18 5v6"/><path d="M12 5v4m0 0c-2 1.6-2 4-2 6m2-6c2 1.6 2 4 2 6"/></svg>','var(--aurora)'],
   ['dip',['Dip bars','Barren / Dip-Gelegenheit'],['Parallettes or two sturdy chairs','Parallettes oder zwei stabile Stühle'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h6M14 9h6M5.5 9v8M18.5 9v8M8.5 9v8M15.5 9v8"/></svg>','var(--ice)'],
@@ -10915,10 +11005,17 @@ var OBL={
   ['1.375',['On your feet some','Etwas auf den Beinen'],['Errands, standing spells','Wege, Phasen im Stehen'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="14 99"/></svg>','var(--brass)'],
   ['1.55',['On your feet a lot','Viel auf den Beinen'],['Standing job, long walks','Stehberuf, lange Wege'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="21 99"/></svg>','var(--ice)'],
   ['1.725',['Physical job','Körperliche Arbeit'],['Lifting and moving all day','Heben und Bewegen den ganzen Tag'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="28.3 99"/></svg>','var(--aurora)']],
+ /* Fuenf Ziele, aber nur drei Kalorien-Eimer (Ueberschuss/Erhalt/Defizit)
+    haengen an der echten Rechnung -- siehe NGMAP unten. obState.ngoal
+    traegt weiter genau einen der drei alten Werte (Ernaehrungsrechner und
+    Wiedereinstieg lesen ihn direkt als Select-Wert), obState.goalphys
+    traegt die tatsaechlich gewaehlte Kachel fuer die Anzeige. */
  ngoal:[
-  ['300',['Build muscle','Muskeln aufbauen'],['Slight surplus, steady gain','Leichter Überschuss, stetiger Aufbau'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 12h16M7 8v8M17 8v8M2.5 10v4M21.5 10v4"/></svg>','var(--aurora)'],
-  ['0',['Hold weight','Gewicht halten'],['Maintain while getting stronger','Halten und dabei stärker werden'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9.5h16M4 14.5h16"/></svg>','var(--ice)'],
-  ['-450',['Lean out','Definieren'],['Deficit, keep the muscle','Defizit, Muskel bleibt'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 3.6-4.6 5-4 9a4.3 4.3 0 0 0 8.6-.4c0-3.6-3.4-5-4.6-8.6Z"/></svg>','var(--ember)']],
+  ['fat',['Lose fat','Fettabbau'],['Calorie deficit, strength stays','Kalorien-Defizit, Kraft bleibt erhalten'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 3.6-4.6 5-4 9a4.3 4.3 0 0 0 8.6-.4c0-3.6-3.4-5-4.6-8.6Z"/></svg>','var(--ember)'],
+  ['recomp',['Recomposition','Körperrekomposition'],['Same weight, better composition','Gleiches Gewicht, bessere Zusammensetzung'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h11l-3-3M18 16H7l3 3"/></svg>','var(--ice)'],
+  ['muscle',['Build muscle','Muskelaufbau'],['Slight surplus, steady gain','Leichter Überschuss, stetiger Aufbau'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 12h16M7 8v8M17 8v8M2.5 10v4M21.5 10v4"/></svg>','var(--aurora)'],
+  ['strength',['Max strength','Maximalkraft'],['Maintenance calories, max effort','Erhaltungskalorien, maximaler Einsatz'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8.5a3 3 0 0 1 6 0v1.5"/><rect x="6" y="10" width="12" height="10" rx="4"/></svg>','var(--brass)'],
+  ['athletic',['Athletic performance','Athletik'],['Maintenance, built for performance','Erhaltungskalorien, für Leistungsfähigkeit gebaut'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="4.6" r="1.8"/><path d="M9 20l3-5.2-2-2.6 1.3-4 3.7 2 2.6 3.8M10.3 14.8l-4 1.8M13.3 10.6l3.7 1 1.8 3.6"/></svg>','var(--ice)']],
  avoid:[
   ['wrist',['Wrists','Handgelenke'],null],
   ['elbow',['Elbows','Ellbogen'],null],
@@ -10933,8 +11030,13 @@ var OBL={
   ['3',['1-3 years','1-3 Jahre'],['Training is a habit','Training ist Gewohnheit']],
   ['4',['Over 3 years','Über 3 Jahre'],['You know your body well','Du kennst deinen Körper genau']]]
 };
+/* ponytail: Maximalkraft und Athletik haben keinen eigenen Kalorien-Eimer --
+   der Rechner kennt nur Ueberschuss/Erhalt/Defizit (siehe f-goal-Select).
+   Beide laufen auf Erhalt, der naechstliegende bestehende Wert; ein vierter
+   Eimer waere neue Rechenlogik, die hier niemand verlangt hat. */
+var NGMAP={fat:'-450',recomp:'0',muscle:'300',strength:'0',athletic:'0'};
 var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,tdays:[0,2,4],act:'1.375',ngoal:'300',
-  goal:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
+  goal:'muscle',goalphys:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
 var IT={
  hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
   s:['VALKR builds you a 12-week calisthenics plan around what you have and what you can do. A few quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Calisthenics-Plan um das, was du hast und was du kannst. Ein paar schnelle Fragen — alles bleibt später änderbar.'],
@@ -10957,8 +11059,8 @@ var IT={
   nx:['Your fuel','Deine Ernährung'],n:['Continue','Weiter']},
  act:{t:['How active is your day?','Wie aktiv ist dein Alltag?'],
   s:['Outside of training. This scales your calorie target.','Außerhalb des Trainings. Das skaliert dein Kalorienziel.']},
- ngoal:{t:['What should the scale do?','Was soll die Waage machen?'],
-  s:['Sets surplus or deficit around your maintenance.','Legt Überschuss oder Defizit um deinen Erhalt.']},
+ ngoal:{t:['What is your primary physical goal?','Was ist dein primäres körperliches Ziel?'],
+  s:['Sets surplus, maintenance or deficit around your numbers.','Legt Überschuss, Erhalt oder Defizit um deine Zahlen fest.']},
  b3:{t:['Fuel is set.','Ernährung steht.'],
   s:['Your targets, computed from your numbers — editable any time under Fuel.','Deine Ziele, gerechnet aus deinen Zahlen — jederzeit unter Ernährung änderbar.'],
   nx:['Your setup','Dein Rahmen'],n:['Continue','Weiter']},
@@ -11023,16 +11125,29 @@ function bfFigure(bf,sex){
      'Q'+C+' 72 '+(C-sh)+' 80 Z ';
   d+='M'+(C-8)+' 62 Q'+(C-6)+' 54 '+(C-11)+' 47 A13.5 13.5 0 1 1 '+(C+11)+' 47 Q'+(C+6)+' 54 '+(C+8)+' 62 '+
      'Q'+C+' 67 '+(C-8)+' 62 Z ';
+  /* Hals: vorher stiess das Kinn direkt an die Schulterlinie -- ein Spalt aus
+     zwei ungefuellten Konturen liess den Kopf schweben. Ein schmales Trapez
+     schliesst die Luecke. */
+  d+='M'+(C-7)+' 63 Q'+(C-6.5)+' 71 '+(C-7)+' 79 L'+(C+7)+' 79 Q'+(C+6.5)+' 71 '+(C+7)+' 63 Z ';
   function arm(s){
     var x0=C+s*(sh+1),x1=C+s*(sh+mix(8,12)),x2=C+s*(sh+mix(11,15));
-    return 'M'+x0+' 82 Q'+(x1+s*aw*0.4)+' 130 '+x2+' 176 '+
-      'L'+(x2-s*aw*0.72)+' 178 Q'+(x1-s*aw)+' 130 '+(x0-s*aw*1.15)+' 88 Z ';
+    /* Handansatz: die Armspitze bekommt eine kleine seitliche Ausbuchtung
+       statt eines geraden Schnitts, damit der Arm sichtbar in einer Hand
+       endet statt im Nichts. */
+    return 'M'+x0+' 82 Q'+(x1+s*aw*0.4)+' 130 '+x2+' 174 '+
+      'Q'+(x2+s*aw*0.55)+' 179 '+(x2+s*aw*0.05)+' 184 '+
+      'Q'+(x2-s*aw*0.85)+' 184 '+(x2-s*aw*0.72)+' 176 '+
+      'Q'+(x1-s*aw)+' 130 '+(x0-s*aw*1.15)+' 88 Z ';
   }
   d+=arm(1)+arm(-1);
   function leg(s){
     var xi=C+s*3,xo=C+s*hp,xa=C+s*mix(11,15);
+    /* Fussansatz: dieselbe kleine Ausbuchtung am unteren Ende statt eines
+       geraden Schienbein-Schnitts. */
     return 'M'+xi+' 182 L'+xo+' 182 Q'+(C+s*(hp-1))+' 226 '+(xa+s*lw*0.35)+' 262 '+
-      'L'+(xa+s*lw*0.35)+' 296 L'+(xa-s*lw*0.55)+' 296 Q'+(C+s*(3+lw*0.2))+' 240 '+xi+' 196 Z ';
+      'L'+(xa+s*lw*0.35)+' 294 Q'+(xa+s*lw*0.85)+' 300 '+(xa+s*lw*0.05)+' 302 '+
+      'Q'+(xa-s*lw*0.75)+' 300 '+(xa-s*lw*0.55)+' 294 '+
+      'Q'+(C+s*(3+lw*0.2))+' 240 '+xi+' 196 Z ';
   }
   d+=leg(1)+leg(-1);
   var absOp=bf<=15?1:(bf>=24?0:(24-bf)/9);
@@ -11121,9 +11236,13 @@ function inHead(k,L){
 /* Antwortkarten: Icon-Chip links, Text, Auswahlkreis rechts. */
 function inOpts(k,L){
   var opts=OBL[k],multi=(k==='eq'||k==='avoid');
+  /* ngoal zeigt fuenf Kacheln, obState.ngoal traegt aber nur einen von drei
+     Kalorien-Werten (Mehrfachbelegung, siehe NGMAP) -- die Auswahlkachel
+     selbst steht separat in obState.goalphys. */
+  var selKey=(k==='ngoal')?'goalphys':k;
   var reco=(k==='days')?((parseInt(obState.exp,10)>=3)?'4':'3'):null;
   return '<div class="iopts">'+opts.map(function(o,i){
-    var on=multi?!!obState[k][o[0]]:obState[k]===o[0];
+    var on=multi?!!obState[k][o[0]]:obState[selKey]===o[0];
     var ic=o[3]?'<span class="ic" style="background:color-mix(in srgb,'+o[4]+' 14%,transparent);color:'+o[4]+'">'+o[3]+'</span>':'';
     var sub=o[2]?'<small>'+o[2][L]+'</small>':'';
     var badge=(reco===o[0])?'<span class="reco">'+(L?'Empfohlen':'Suggested')+'</span>':'';
@@ -11225,10 +11344,12 @@ function renderIntro(){
   if(k==='sex'){
     h+='<div class="figstage" id="figStage">'+bfFigure(obState.bf,obState.sex)+'</div>'+inOpts(k,L);
   }else if(NUMS[k]){
-    h+='<div class="valrow"><b id="nvVal">'+obState[k]+'</b><span>'+NUMS[k].unit[L]+'</span></div>'+
-       '<div class="stepbtns"><button type="button" id="nvMinus" aria-label="-">&minus;</button>'+
-       '<input type="range" class="islide" id="nvSlide" style="flex:1" min="'+NUMS[k].min+'" max="'+NUMS[k].max+'" step="1" value="'+obState[k]+'">'+
-       '<button type="button" id="nvPlus" aria-label="+">+</button></div>';
+    h+='<div class="wheelrow"><div class="wheelbox"><div class="wheel" id="nvWheel" tabindex="0" role="listbox" aria-label="'+NUMS[k].unit[L]+'"><div class="wpad"></div>';
+    for(var nv=NUMS[k].min;nv<=NUMS[k].max;nv++){
+      h+='<div class="wopt'+(nv===obState[k]?' wsel':'')+'" data-v="'+nv+'" role="option" aria-selected="'+(nv===obState[k])+'">'+nv+'</div>';
+    }
+    h+='<div class="wpad"></div></div><div class="wheelbar" aria-hidden="true"></div></div>'+
+       '<span class="wheelunit">'+NUMS[k].unit[L]+'</span></div>';
   }else if(k==='bf'){
     var est=bfEstimate(),estPct=Math.round((est-8)/37*100);
     h+='<div class="figstage" id="figStage">'+bfFigure(obState.bf,obState.sex)+'</div>'+
@@ -11322,6 +11443,9 @@ function renderIntro(){
         if(multi){
           obState[k][o[0]]=!obState[k][o[0]];
           b.setAttribute('aria-pressed',String(!!obState[k][o[0]]));
+        }else if(k==='ngoal'){
+          obState.goalphys=o[0];obState.ngoal=NGMAP[o[0]];
+          [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
         }else{
           obState[k]=o[0];
           [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
@@ -11333,15 +11457,25 @@ function renderIntro(){
     });
   }
   if(NUMS[k]){
-    var sl=$('nvSlide'),vv=$('nvVal');
-    function nvSet(v){
-      v=Math.max(NUMS[k].min,Math.min(NUMS[k].max,v));
-      obState[k]=v;sl.value=v;vv.textContent=v;
-      if(k!=='age')obState.bfTouched=false;
+    /* Scroll-Rad: WROW muss die feste Zeilenhoehe aus der CSS-Regel .wopt
+       treffen (44px), sonst landet der berechnete Index daneben. */
+    var WROW=44,wEl=$('nvWheel'),wOpts=[].slice.call(wEl.querySelectorAll('.wopt'));
+    function wSelect(idx){
+      idx=Math.max(0,Math.min(wOpts.length-1,idx));
+      var v=NUMS[k].min+idx;
+      obState[k]=v;if(k!=='age')obState.bfTouched=false;
+      wOpts.forEach(function(o,i){o.classList.toggle('wsel',i===idx);o.setAttribute('aria-selected',String(i===idx));});
     }
-    sl.addEventListener('input',function(){nvSet(parseInt(sl.value,10));});
-    $('nvMinus').addEventListener('click',function(){nvSet(obState[k]-1);});
-    $('nvPlus').addEventListener('click',function(){nvSet(obState[k]+1);});
+    wEl.scrollTop=(obState[k]-NUMS[k].min)*WROW;
+    var wTimer=null;
+    function wSettle(){wSelect(Math.round(wEl.scrollTop/WROW));}
+    wEl.addEventListener('scroll',function(){clearTimeout(wTimer);wTimer=setTimeout(wSettle,120);});
+    wEl.addEventListener('scrollend',wSettle);
+    wOpts.forEach(function(o){
+      o.addEventListener('click',function(){
+        wEl.scrollTo({top:(parseInt(o.dataset.v,10)-NUMS[k].min)*WROW,behavior:'smooth'});
+      });
+    });
   }
   if(k==='bf'){
     var bs=$('bfSlide');
@@ -11824,13 +11958,33 @@ function tname(t){return t<0?UNRANKED.n[cfg.lang==='de'?1:0]:TIERS[t].n[cfg.lang
    wie das erste. Ein Fehler, der stillliegt, bis jemand eine harmlose
    Aenderung macht. */
 var badgeNr=0;
+/* Gestaffelt statt generisch: vorher unterschied sich zwischen Holz und
+   Olympier nur die Farbe, Form und Detailgrad waren identisch. Jetzt waechst
+   das Abzeichen mit dem Rang -- vom blossen gestrichelten Umriss (ohne Rang)
+   ueber die flache Flaeche (Holz/Bronze) und den Innenrahmen (Silber/Gold)
+   bis zu Ring plus Eckpunkten (Platin/Diamant), dem rotierenden Ring
+   (Champion/Titan) und Krone plus Funkeln fuer Olympier. Animation nur ab
+   60px (der grossen Rangkarte) -- in Listen mit vielen Abzeichen waere sie
+   nur Unruhe, keine Information. */
 function badgeSvg(t,size){
   size=size||60;var c=(t<0?'#6E767E':TIERS[t].c);var lbl=(t<0?'0':String(t+1));
-  var gid='bg'+t+'_'+(++badgeNr);
+  var gid='bg'+t+'_'+(++badgeNr),big=size>=60;
+  if(t<0){
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 60 60" aria-hidden="true">'+
+      '<path d="M30 3 L53 16 L53 42 L30 55 L7 42 L7 16 Z" fill="none" stroke="'+c+'" stroke-width="1.4" stroke-dasharray="3 4" opacity=".7"/>'+
+      '<text x="30" y="35" text-anchor="middle" fill="'+c+'" style="font-family:ui-monospace,monospace;font-size:13px;font-weight:700;opacity:.8">'+lbl+'</text></svg>';
+  }
+  var rim=t>=2?'<path d="M30 11 L45.5 20 L45.5 38 L30 47 L14.5 38 L14.5 20 Z" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1"/>':'';
+  var halo=t>=4?'<path d="M30 1 L56 15.5 L56 42.5 L30 57 L4 42.5 L4 15.5 Z" fill="none" stroke="'+c+'" stroke-width=".8" opacity=".4"/>':'';
+  var dots=(t===4||t===5)?'<circle cx="51" cy="11" r="1.3" fill="'+c+'" opacity=".85"/><circle cx="9" cy="45" r="1" fill="'+c+'" opacity=".55"/>':'';
+  var ring=((t===6||t===7)&&big)?'<circle cx="30" cy="28" r="25" fill="none" stroke="'+c+'" stroke-width=".7" stroke-dasharray="2.5 5" opacity=".55"><animateTransform attributeName="transform" type="rotate" from="0 30 28" to="360 30 28" dur="7s" repeatCount="indefinite"/></circle>':'';
+  var crown=t>=8?crownAt(30,10):'';
+  var sparkle=(t>=8&&big)?'<g opacity=".85"><animateTransform attributeName="transform" type="rotate" from="0 30 28" to="360 30 28" dur="5s" repeatCount="indefinite"/><circle cx="30" cy="3" r="1.5" fill="#FFE9A8"/><circle cx="55" cy="28" r="1.1" fill="'+c+'"/><circle cx="30" cy="53" r="1.5" fill="#FFE9A8"/><circle cx="5" cy="28" r="1.1" fill="'+c+'"/></g>':'';
   return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 60 60" aria-hidden="true">'+
     '<defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+c+'"/><stop offset="1" stop-color="'+c+'" stop-opacity=".45"/></linearGradient></defs>'+
+    ring+halo+
     '<path d="M30 3 L53 16 L53 42 L30 55 L7 42 L7 16 Z" fill="url(#'+gid+')" stroke="'+c+'" stroke-width="1.6"/>'+
-    '<path d="M30 11 L45.5 20 L45.5 38 L30 47 L14.5 38 L14.5 20 Z" fill="none" stroke="rgba(255,255,255,.42)" stroke-width="1"/>'+
+    rim+dots+crown+sparkle+
     '<text x="30" y="35" text-anchor="middle" fill="#fff" style="font-family:ui-monospace,monospace;font-size:13px;font-weight:700;opacity:.92">'+lbl+'</text></svg>';
 }
 function prFor(name){var r=0;PRS.forEach(function(p){if(p.n===name)r=Math.max(0,p.v-p.b);});return r;}
@@ -12225,10 +12379,23 @@ function renderRanks(){
   $('rkSub').textContent=(cfg.lang==='de'
     ?(wks.active+(wks.active===1?' aktive Woche':' aktive Wochen')+' · max. '+wks.cap+' LP')
     :(wks.active+(wks.active===1?' active week':' active weeks')+' · max '+wks.cap+' LP'));
-  $('rkBar').style.width=Math.round(t.within/100*100)+'%';
-  $('rkLp').textContent = t.t<0
-    ? (cfg.lang==='de'?('Noch ohne Rang — '+Math.max(0,25-avg)+' LP bis Holz III'):('Unranked — '+Math.max(0,25-avg)+' LP to Wood III'))
-    : (t.within+' LP '+(cfg.lang==='de'?'bis':'to')+' '+(t.t<8?tierOf((t.t*100)+(t.div+1)*34).label:(cfg.lang==='de'?'Maximum':'max')));
+  /* Balken und Text mussten dieselbe Frage beantworten: wie weit bis zur
+     naechsten Stufe. Vorher fuellte der Balken sich ueber die ganze
+     Rangbreite (100 LP), der Text daneben nannte aber die naechste DIVISION
+     (34 LP-Schritte) -- zwei verschiedene Massstaebe nebeneinander. Jetzt
+     zeigen beide dieselbe naechste Schwelle, plus die Zahl, die wirklich
+     fehlt, statt der Zahl, die schon da ist. */
+  var pct,fehlt,naechste;
+  if(t.t<0){pct=t.within;fehlt=Math.max(0,25-avg);naechste=tierOf(25).label;}
+  else if(t.t<8){
+    var divStart=t.div*34,nextAbs=t.t*100+(t.div+1)*34;
+    pct=Math.max(0,Math.min(100,Math.round((t.within-divStart)/34*100)));
+    fehlt=Math.max(0,nextAbs-avg);naechste=tierOf(nextAbs).label;
+  } else {pct=100;fehlt=0;naechste=null;}
+  $('rkBar').style.width=pct+'%';
+  $('rkLp').textContent = naechste
+    ? (pct+'% · '+fehlt+' LP '+(cfg.lang==='de'?'bis':'to')+' '+naechste)
+    : (cfg.lang==='de'?'Maximum erreicht':'Maximum reached');
   /* Integritaet offen ausweisen. Kein Vorwurf -- eine Auskunft darueber,
      wie viel vom Rang durch tatsaechliches Training belegt ist. */
   var ig=integrity(),ib=$('rkIntegrity');
@@ -12446,7 +12613,7 @@ function renderBoard(avgLp){
        Nachbarbereich: sonst waere man mit einem Wisch zu viel doch wieder
        woanders. */
     var key=document.body.dataset.view||'today';
-    var g=GROUP[key];
+    var g=visGroup(key);
     if(!g||!g.v||g.v.length<2)return;         /* Bereich ohne Abschnitte */
     var akt=document.querySelector('.view.on');
     if(!akt)return;
@@ -12630,6 +12797,10 @@ if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
     obState.goal=profile.goal||'muscle';obState.days=profile.days||'3';obState.exp=profile.exp||'1';
     obState.tdays=(profile.tdays&&profile.tdays.length)?profile.tdays.slice():(obState.days==='4'?[0,1,3,4]:[0,2,4]);
     obState.act=profile.act||'1.375';obState.ngoal=profile.ngoal||'300';
+    /* Umkehrung nur ungefaehr moeglich: '0' teilen sich drei Kacheln
+       (Rekomposition/Maximalkraft/Athletik). Rekomposition ist der
+       naechstliegende Stellvertreter fuer "Erhalt". */
+    obState.goalphys={'-450':'fat','0':'recomp','300':'muscle'}[obState.ngoal]||'muscle';
     obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings)};
     obState.avoid={};if(profile.avoid)Object.keys(profile.avoid).forEach(function(a){if(profile.avoid[a])obState.avoid[a]=true;});
   }
