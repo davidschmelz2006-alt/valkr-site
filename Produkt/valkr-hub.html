@@ -1085,7 +1085,7 @@
   .calgrab:hover i{background:var(--ink3);width:44px}
   .cal.offen .calgrab i{background:var(--ink3)}
   .dstrip{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;
-    transition:transform .42s cubic-bezier(.22,1,.28,1)}
+    transition:transform .28s ease-out}
   /* Tage ausserhalb des Monats bleiben lesbar, treten aber zurueck. */
   .dstrip button.out{opacity:.32}
   /* Der Tagebuch-Streifen steckt jetzt im selben Glaskasten (.cal) wie der
@@ -3609,7 +3609,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='25.3';
+var VERSION='25.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6842,7 +6842,7 @@ function calLayout(anim){
   }
   /* ponytail: calSperre haelt neue Klicks waehrend der laufenden Animation
      ab, statt den Zwischenstand des laufenden clip-path live auszulesen --
-     ein 440ms-Sperrfenster ist die einfachere Loesung fuer das seltene
+     ein 300ms-Sperrfenster ist die einfachere Loesung fuer das seltene
      Doppel-Tipp-Timing und reicht hier aus. */
   calSperre=true;
   var einzugVorher=(voll-hoehe)-einzugZu;
@@ -6852,7 +6852,13 @@ function calLayout(anim){
   view.style.clipPath='inset(0 0 '+einzugVorher+'px 0)';
   grid.style.transform='translateY('+verschiebungZu+'px)';
   void view.offsetHeight;
-  view.style.transition='clip-path .42s cubic-bezier(.22,1,.28,1)';
+  /* v25.4: war .42s cubic-bezier(.22,1,.28,1) -- eine Kurve mit extrem langem
+     Auslauf. Gemessen: nach 130ms optisch schon 85% zu, aber der Kasten blieb
+     bis zum setTimeout unten auf voller Hoehe stehen, der Rest der Seite
+     ruckte erst nach vollen 440ms nach. Das war das gemeldete Hakeln beim
+     Zuklappen. ease-out mit kuerzerer Laufzeit schliesst den Kasten und
+     verschiebt den Inhalt darunter fast gleichzeitig. */
+  view.style.transition='clip-path .28s ease-out';
   view.style.clipPath='inset(0 0 '+einzugZu+'px 0)';
   calAnimT=setTimeout(function(){
     view.style.transition='none';
@@ -6860,7 +6866,7 @@ function calLayout(anim){
     view.style.clipPath='none';
     view.style.willChange='';
     calSperre=false;calAnimT=null;
-  },440);
+  },300);
 }
 function calToggle(auf){
   if(calSperre)return;
