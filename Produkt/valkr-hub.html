@@ -1075,7 +1075,6 @@
      dort nie vergeben wird. */
   .cal:not(.offen) .calview .dstrip button{opacity:.001}
   .cal:not(.offen) .calview .dstrip button.inweek{opacity:1}
-  .dstrip button{transition:background .18s,color .18s,opacity .3s ease .06s}
   /* Der Griff: eine kurze Linie, die sagt "hier laesst sich ziehen". Beim
      Aufklappen dreht sie sich in ein flaches Dach -- dieselbe Sprache wie
      ein Blatt, das sich schliessen laesst. */
@@ -1100,10 +1099,19 @@
      heraussticht: heute und der gewaehlte Tag.
      Das ist auch der Grund, warum es aufgeklappt vorher unruhig aussah --
      42 Kacheln statt 42 Zahlen. */
+  /* v25.4: es gab hier zwei ".dstrip button{transition:...}"-Regeln. Diese
+     zweite stand spaeter im Stylesheet und hat bei gleicher Spezifitaet die
+     erste komplett ersetzt, nicht ergaenzt -- das dort deklarierte
+     opacity .2s ease .04s griff nie. Zahlen ausserhalb der Woche
+     verschwanden beim Zuklappen deshalb hart, statt auszublenden, waehrend
+     die Box selbst noch 280ms auf voller Groesse stand: ein leerer, grosser
+     Kasten fuer einen Wimpernschlag -- das gemeldete "bleibt offen, nur
+     ausgegraut". Die Transition steht jetzt nur noch hier, an der Regel,
+     die tatsaechlich gewinnt. */
   .dstrip button{position:relative;display:flex;align-items:center;justify-content:center;
     aspect-ratio:1;padding:0;border:0;border-radius:999px;
     background:none;color:var(--ink3);cursor:pointer;font-family:var(--fb);
-    transition:background .18s,color .18s}
+    transition:background .18s,color .18s,opacity .2s ease .04s}
   .dstrip button:hover{background:var(--surf2)}
   .dstrip button b{font-family:var(--fd);font-weight:600;font-size:.95rem;
     font-variant-numeric:tabular-nums;color:var(--ink2)}
@@ -3609,7 +3617,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='25.4';
+var VERSION='25.5';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
