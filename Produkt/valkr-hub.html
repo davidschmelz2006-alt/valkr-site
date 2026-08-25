@@ -659,7 +659,10 @@
   nav button .badge{display:inline-block;margin-left:.3rem;background:var(--ember);color:#fff;border-radius:8px;padding:0 .3rem;font-size:var(--t1)}
 
   .view{display:none;flex-direction:column;gap:1.3rem;padding-top:1.1rem}
-  .view.on{display:flex;animation:fade .26s ease}
+  /* Weicher Wechsel statt hartem Umschalten -- nur transform+opacity (Compositor,
+     kein Layout). Push-Overlays (.pushv) haben ihre eigene Schiebe-Transition
+     und setzen animation:none, ueberschneidet sich also nicht. */
+  .view.on{display:flex;animation:viewIn .18s ease}
 
   /* ── v19 Push-Navigation (MCI-Vorbild). Nur auf dem Handy: die Ansicht
      schiebt sich von rechts ueber ihren Bereich, der darunter mit leichtem
@@ -737,9 +740,23 @@
   .hcard .hcGo{background:linear-gradient(180deg,
     color-mix(in srgb,var(--ember) 100%,#fff 0%),
     color-mix(in srgb,var(--ember) 82%,#000));
-    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 30%,transparent)}
+    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 30%,transparent);
+    animation:ctaGlow 3.2s ease-in-out infinite}
   .hcard .hcGo:active{transform:scale(.98)}
   .hcard .hcGo:hover{filter:brightness(1.08)}
+  /* ponytail: einziges dauerhaft laufendes Glimmen der App, bewusst. box-shadow
+     statt filter:drop-shadow -- der Compositor blendet nur die Schattenfarbe,
+     ohne das Element jeden Frame neu zu rastern. Langsamer Puls (3.2s), ein
+     einzelnes Element (der wichtigste Knopf der App). Sparmodus und
+     reduzierte-Bewegung-Praeferenz schalten ihn ab (Zeile ~2422 fuer Reduce,
+     Regel direkt unten fuer Sparmodus). */
+  @keyframes ctaGlow{
+    0%,100%{box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 30%,transparent),
+      0 0 0 0 color-mix(in srgb,var(--ember) 55%,transparent)}
+    50%{box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 30%,transparent),
+      0 0 18px 2px color-mix(in srgb,var(--ember) 55%,transparent)}
+  }
+  :root[data-spar="1"] .hcard .hcGo{animation:none}
   /* Die Uebungssymbole stehen unten in EINER Reihe. Als Spalte rechts neben
      dem Text passten vier -- ein Tag hat aber fuenf oder sechs Uebungen, und
      welche fehlten, sah man der Kachel nicht an. Quer ueber die volle Breite
@@ -793,6 +810,7 @@
   .habgrid .hcWeight{grid-column:1/-1;order:2}
   .habgrid .hcTrain{order:3}
   .habgrid .hcStreak{order:4}
+  .habgrid .hcBoost{grid-column:1/-1;order:5;min-height:0;align-items:center;text-align:center}
   .habcard.hcCal em{align-self:flex-start}
   /* Kalorien: der Ring steht mittig, gegessen und uebrig stehen IM Ring.
      Vorher stand ein kleiner Ring links und dieselbe Aussage nochmal als
@@ -975,6 +993,7 @@
   .kamfall[hidden],.kamres[hidden]{display:none}
   #v-kam .kamres .hint,#v-kam .kamfall .hint{color:var(--ink2)}
   @keyframes fade{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+  @keyframes viewIn{from{opacity:0;transform:scale(.98)}to{opacity:1;transform:scale(1)}}
   h2.sec{font-family:var(--fd);font-weight:600;font-size:1.2rem;margin:0}
   .sec-row{display:flex;align-items:center;gap:.4rem}
   /* Kleines "i" statt eines weiteren Absatz-Hinweises: die Wortkur hat schon
@@ -1913,6 +1932,7 @@
   #intro .wheelbox{position:relative;height:220px;width:8rem}
   #intro .wheel{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
     scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;
+    perspective:400px;z-index:1;
     -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 44px,#000 176px,transparent 100%);
     mask-image:linear-gradient(to bottom,transparent 0,#000 44px,#000 176px,transparent 100%)}
   #intro .wheel::-webkit-scrollbar{display:none}
@@ -1921,11 +1941,25 @@
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
     font-family:var(--fd);font-variant-numeric:tabular-nums;font-weight:500;
-    font-size:1.2rem;color:var(--ink3);transition:color .15s,font-size .15s,font-weight .15s}
+    font-size:1.2rem;color:var(--ink3);transform:rotateX(0deg);
+    transition:color .15s,font-size .15s,font-weight .15s,transform .15s,opacity .15s}
   #intro .wopt.wsel{color:var(--ink);font-weight:700;font-size:1.7rem}
+  /* Gestaffelte 3D-Kippung nach Abstand zur Mitte, wie ein iOS-Picker-Rad --
+     reines CSS ueber :has()/+ relativ zu .wsel, kein JS-Ticker: die Klasse
+     .wsel wechselt ohnehin nur beim entprellten Scroll-Settle (siehe wSelect),
+     nicht pro Frame. */
+  #intro .wopt.wsel+.wopt{transform:rotateX(-32deg);opacity:.7}
+  #intro .wopt.wsel+.wopt+.wopt{transform:rotateX(-52deg);opacity:.35}
+  #intro .wopt:has(+.wopt.wsel){transform:rotateX(32deg);opacity:.7}
+  #intro .wopt:has(+.wopt+.wopt.wsel){transform:rotateX(52deg);opacity:.35}
+  /* z-index:1 auf .wheel (oben) haelt die Zahlen ueber diesem Streifen --
+     sonst verwischt der eigene backdrop-filter die gerade zentrierte Zahl,
+     die er hervorheben soll. */
   #intro .wheelbar{position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%);
     border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);pointer-events:none;
-    background:color-mix(in srgb,var(--aurora) 7%,transparent)}
+    background:color-mix(in srgb,var(--aurora) 9%,transparent);
+    -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
+    box-shadow:0 0 10px -2px color-mix(in srgb,var(--aurora) 50%,transparent) inset}
   #intro .wheelunit{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
   #intro input[type="range"].islide{width:100%;height:26px;-webkit-appearance:none;appearance:none;background:none}
   #intro input[type="range"].islide::-webkit-slider-runnable-track{
@@ -3198,6 +3232,22 @@
     </details>
   </section>
 
+  <!-- v26.1: Haltung & Problemzonen. Zwei Bloecke, zwei Datenquellen.
+       Oben "Instant Fix": drei neue Uebungen gegen Rib Flare und Rundruecken,
+       im .drill-Kartenstil der Mobility-Sektion, nur ohne Test-Frage --
+       hier steht Wirkung und Ausfuehrung statt einer Diagnose.
+       Unten "Problemzonen": Schnellzugriffe je Muskelgruppe. Fuenf der sechs
+       Zonen verlinken bestehende EXDB-Eintraege ueber exName()/exCue() --
+       kein Duplikat, dieselbe Quelle wie der Katalog. Nur Nacken ist neu,
+       weil Chin Tucks und Band Neck Extensions im Katalog fehlen. -->
+  <section class="view" id="v-posture">
+    <p class="sub" data-i18n="post.s">Quick, targeted picks for common problem areas — most link straight into the exercise catalog.</p>
+    <p class="eyebrow" data-i18n="post.instant">Instant fix — rib flare &amp; rounded back</p>
+    <div class="cols" id="postList"></div>
+    <p class="eyebrow" data-i18n="post.zones">Problem zones — quick picks</p>
+    <div class="cols" id="zoneList"></div>
+  </section>
+
   <section class="view" id="v-test">
     <div><h2 class="sec" data-i18n="test.h">Find your starting point</h2><p class="sub" data-i18n="test.s">Four tests, twenty minutes. Warm up first, rest three minutes between each, and stop the moment your form breaks. Your lowest score is your level.</p></div>
     <!-- v17 (Baustelle 3): Stufen als benannte Baender statt nackter
@@ -3529,7 +3579,7 @@
         <div class="field"><label data-i18n="set.lang">Language</label><div class="ctl"><select id="setLang"><option value="en">English</option><option value="de">Deutsch</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.units">Units</label><div class="ctl"><select id="setUnits"><option value="metric" data-i18n="opt.metric">kg · cm</option><option value="imperial" data-i18n="opt.imperial">lb · in</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.start">Programme start</label><div class="ctl"><input id="setStart" type="date"></div></div>
-        <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="3" data-i18n="opt.d3">3 Tage</option><option value="4" data-i18n="opt.d4">4 Tage</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="1" data-i18n="opt.d1">1 Tag</option><option value="2" data-i18n="opt.d2">2 Tage</option><option value="3" data-i18n="opt.d3">3 Tage</option><option value="4" data-i18n="opt.d4">4 Tage</option><option value="5" data-i18n="opt.d5">5 Tage</option><option value="6" data-i18n="opt.d6">6 Tage</option><option value="7" data-i18n="opt.d7">7 Tage</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected data-i18n="opt.calm">Ruhig</option><option value="full" data-i18n="opt.full">Voll</option><option value="off" data-i18n="opt.off">Aus</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <!-- Der Sparmodus laeuft automatisch nach Geraeteleistung. Hier laesst
              er sich erzwingen oder abschalten -- zum Testen, und fuer den Fall,
@@ -3617,7 +3667,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='25.5';
+var VERSION='26.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3862,6 +3912,9 @@ var DICT={
  'mob.guided':['Guided routine','Geführte Routine'],'mob.dose':['The weekly dose','Wochendosis'],
  'mob.d1':['Before every session','Vor jeder Einheit'],'mob.d2':['After two sessions','Nach zwei Einheiten'],'mob.d3':['Optional full sequence','Optional komplett'],
  'mob.note':['Save long holds for after training — before, they cost force.','Langes Dehnen erst nach dem Training — davor kostet es Kraft.'],
+ 'post.s':['Quick, targeted picks for common problem areas — most link straight into the exercise catalog.','Kurze, gezielte Auswahl für typische Problemzonen — die meisten führen direkt in den Übungskatalog.'],
+ 'post.instant':['Instant fix — rib flare & rounded back','Sofort-Fix — Rippen & Rundrücken'],
+ 'post.zones':['Problem zones — quick picks','Problemzonen — Schnellzugriff'],
  'test.h':['Find your starting point','Finde deinen Startpunkt'],
  'test.note0':['Day one measures you in automatically. This page is for the week 6 and 12 retests: warm up, three minutes rest, stop when form breaks.','Tag eins misst automatisch ein. Diese Seite ist für die Retests in Woche 6 und 12: aufwärmen, drei Minuten Pause, abbrechen wenn die Form bricht.'],
  'test.rowpress':['Row and Press have no test of their own — they follow your pull-up and push-up numbers, the same way your very first session sets them.','Row und Press haben keinen eigenen Test — sie folgen deinen Klimmzug- und Liegestütz-Werten, genau wie schon deine allererste Einheit sie einstellt.'],
@@ -3948,7 +4001,9 @@ var DICT={
     "kg · cm" versteht jeder in jeder Sprache. */
  'opt.on':['On','An'],'opt.off':['Off','Aus'],
  'opt.metric':['kg · cm','kg · cm'],'opt.imperial':['lb · in','lb · in'],
+ 'opt.d1':['1 day','1 Tag'],'opt.d2':['2 days','2 Tage'],
  'opt.d3':['3 days','3 Tage'],'opt.d4':['4 days','4 Tage'],
+ 'opt.d5':['5 days','5 Tage'],'opt.d6':['6 days','6 Tage'],'opt.d7':['7 days','7 Tage'],
  'opt.auto':['Auto','Auto'],'opt.calm':['Calm','Ruhig'],'opt.full':['Full','Voll'],
  'set.conn':['Connections','Verbindungen'],
  'set.health':['Apple Health','Apple Health'],
@@ -4155,12 +4210,43 @@ var SESS4={
  upB:{title:'Upper B',sub:'Row / Press / Pull / Push / Core',items:[{id:'row',l:'Inverted row, harder angle'},{id:'press',l:'Pike progression'},{id:'pull',l:'Pull-up, easier step'},{id:'push',l:'Push-up, different angle'},{id:'core',l:'Hanging knee raise'}]},
  lowB:{title:'Lower B',sub:'Hinge / Split / Glute / Squat / Core',items:[{id:'legs',l:'Nordic curl progression'},{id:'legs',l:'Bulgarian split squat'},{id:'legs',l:'Single-leg glute bridge'},{id:'legs',l:'Paused squat'},{id:'core',l:'Hollow rock'}]}
 };
+/* Zusammengefuehrte Nachschlage-Tabelle -- SESS3 (pull/push/legs) und SESS4
+   (upA/lowA/upB/lowB) teilen sich keinen einzigen Schluessel, ein Merge ist
+   also gefahrlos. Jede Tageszahl 1-7 ist eine reine Wochen-Rotation aus
+   diesen sieben bestehenden Tagen, keine einzige neue Uebung noetig.
+   order = die Rotation fuer den Kalendertage-Pfad (tdaysValid()), Laenge =
+   Anzahl der zu waehlenden Wochentage. `null` an letzter Stelle (nur Track
+   '7') heisst "kein Trainingstag hier, sondern der leichte Erholungstag".
+   rhythm = dieselbe Woche als 7 feste Ablauf-Plaetze (Montag..Sonntag) fuer
+   den Rhythmus-Pfad ohne gewaehlte Wochentage -- {k:Session-Schluessel} oder
+   {f:ftype} wie im bisherigen Code (easy/rest/opt/review). dflt = die
+   Wochentage, die eine neu gewaehlte Frequenz vorbelegt.
+   3 und 4 sind hier nur umgezogen, nicht veraendert: rhythm/order/dflt bilden
+   exakt das alte map3/map4-Verhalten nach. */
+var SESSALL={pull:SESS3.pull,push:SESS3.push,legs:SESS3.legs,upA:SESS4.upA,lowA:SESS4.lowA,upB:SESS4.upB,lowB:SESS4.lowB};
+var TRACKS={
+ '1':{order:['pull'],dflt:[0],
+   rhythm:[{k:'pull'},{f:'easy'},{f:'rest'},{f:'opt'},{f:'rest'},{f:'easy'},{f:'review'}]},
+ '2':{order:['upA','lowA'],dflt:[0,3],
+   rhythm:[{k:'upA'},{f:'rest'},{f:'easy'},{k:'lowA'},{f:'rest'},{f:'opt'},{f:'review'}]},
+ '3':{order:['pull','push','legs'],dflt:[0,2,4],
+   rhythm:[{k:'pull'},{f:'easy'},{k:'push'},{f:'rest'},{k:'legs'},{f:'opt'},{f:'review'}]},
+ '4':{order:['upA','lowA','upB','lowB'],dflt:[0,1,3,4],
+   rhythm:[{k:'upA'},{k:'lowA'},{f:'easy'},{k:'upB'},{k:'lowB'},{f:'opt'},{f:'review'}]},
+ '5':{order:['pull','push','legs','upA','lowA'],dflt:[0,1,3,4,5],
+   rhythm:[{k:'pull'},{k:'push'},{f:'easy'},{k:'legs'},{k:'upA'},{k:'lowA'},{f:'review'}]},
+ '6':{order:['pull','push','legs','pull','push','legs'],dflt:[0,1,2,4,5,6],
+   rhythm:[{k:'pull'},{k:'push'},{k:'legs'},{f:'easy'},{k:'pull'},{k:'push'},{k:'legs'}]},
+ '7':{order:['pull','push','legs','pull','push','legs',null],dflt:[0,1,2,3,4,5,6],
+   rhythm:[{k:'pull'},{k:'push'},{k:'legs'},{k:'pull'},{k:'push'},{k:'legs'},{f:'easy'}]}
+};
 /* ---------- Uebungskatalog ------------------------------------------------
    [Name, Stufe 0-5, Equipment, Schonungs-Flags, Cue]
    Equipment: ''=nichts noetig, wl=Wand, tb=Tisch, ch=Stuhl/Erhoehung,
-   br=Klimmzugstange, dp=Barren/Dip-Gelegenheit, rg=Ringe, an=Halt (Sofa etc.)
+   br=Klimmzugstange, dp=Barren/Dip-Gelegenheit, rg=Ringe, an=Halt (Sofa etc.),
+   kb=Kettlebell, cbl=Kabelzug, mp=Multipresse, bnd=Widerstandsband.
    Wand/Tisch/Stuhl/Halt gelten als immer vorhanden.
-   Flags: w=handgelenklastig, s=Schulter ueber Kopf, k=knielastig. */
+   Flags: w=handgelenklastig, s=Schulter ueber Kopf, k=knielastig, e=ellbogenlastig, l=unterer Ruecken, h=hueftlastig. */
 var EXDB={
  push:[
   ['Wall push-up',0,'wl','','Hands on the wall, body one line, chest to the wall.','Liegestütz an der Wand|Hände an die Wand, Körper eine Linie, Brust zur Wand.'],
@@ -4172,7 +4258,10 @@ var EXDB={
   ['Wide push-up',2,'','w','Hands wider, more chest, less triceps.','Weiter Liegestütz|Hände weiter außen: mehr Brust, weniger Trizeps.'],
   ['Staggered push-up',2,'','w','One hand forward, one back - uneven load, swap sides.','Versetzter Liegestütz|Eine Hand vor, eine zurück - ungleiche Last, Seiten wechseln.'],
   ['Sphinx push-up',2,'','e','Forearms to hands and back - triceps, wrist-friendly start.','Sphinx-Liegestütz|Von den Unterarmen auf die Hände und zurück - Trizeps, schonender Einstieg.'],
+  ['Machine Bench Press',2,'mp','','Guided bar path, seat and handles set to you. Press to lockout.','Bankdrücken an der Maschine|Geführte Stange, Sitz und Griffe passend einstellen. Bis zum Lockout drücken.'],
+  ['Cable Tricep Pushdown',2,'cbl','e','Elbows pinned to the ribs, push the bar down to full extension.','Trizepsdrücken am Kabel|Ellbogen an die Rippen gepresst, die Stange bis zur vollen Streckung drücken.'],
   ['Diamond push-up',3,'','we','Hands form a triangle under the chest. Triceps day.','Diamant-Liegestütz|Hände bilden ein Dreieck unter der Brust. Trizeps-Tag.'],
+  ['Banded push-up',3,'bnd','w','Band across the upper back, ends under the hands - push against the stretch.','Liegestütz mit Band|Band über den oberen Rücken, Enden unter den Händen - gegen den Zug drücken.'],
   ['Hindu push-up',3,'','ws','Dive from pike through low arc to cobra and back.','Hindu-Liegestütz|Aus dem Hundeblick tief durch und in die Kobra, dann zurück.'],
   ['Decline push-up',3,'ch','w','Feet elevated - more weight on the shoulders.','Liegestütz mit erhöhten Füßen|Füße hoch - mehr Gewicht auf den Schultern.'],
   ['Pseudo planche lean',3,'','we','Push-up hold, hands by the hips, lean far forward.','Planche-Lean|Liegestützhalt, Hände neben der Hüfte, weit nach vorn lehnen.'],
@@ -4190,6 +4279,7 @@ var EXDB={
   ['Scapular pull-up',1,'br','','Small pulls from the shoulder blades only. The first inch.','Scapula-Klimmzug|Kleine Züge nur aus den Schulterblättern. Die ersten Zentimeter.'],
   ['Jumping pull-up',1,'br','','Jump to the top, lower with control.','Sprung-Klimmzug|Nach oben springen, kontrolliert ablassen.'],
   ['Band-assisted pull-up',1,'br','','Band under the knee takes what you cannot lift yet.','Klimmzug mit Band|Das Band unter dem Knie nimmt ab, was noch fehlt.'],
+  ['Lat pulldown',1,'cbl','','Cable lat pulldown, wide grip, pull the bar to the collarbone.','Latzug am Kabel|Weiter Griff, die Stange bis zum Schlüsselbein ziehen.'],
   ['Negative pull-up',2,'br','','Start at the top, lower for 3-5 seconds.','Negativer Klimmzug|Oben starten, in 3 bis 5 Sekunden ablassen.'],
   ['Chin-up',2,'br','','Palms toward you - more biceps, usually the first to work.','Klimmzug im Kammgriff|Handflächen zu dir - mehr Bizeps, meist der erste, der klappt.'],
   ['Pull-up',3,'br','','Dead hang to chin clearly over the bar. No kipping.','Klimmzug|Aus dem Hang bis das Kinn klar über der Stange ist. Kein Schwung.'],
@@ -4207,8 +4297,13 @@ var EXDB={
  row:[
   ['Doorframe row',0,'','','Stand in the door, hold the frame, lean back, pull in.','Rudern am Türrahmen|In der Tür stehen, Rahmen greifen, zurücklehnen, heranziehen.'],
   ['Table row',0,'tb','','Under a sturdy table, body straight, chest to the edge.','Rudern unter dem Tisch|Unter einem stabilen Tisch, Körper gerade, Brust zur Kante.'],
+  ['Band pull-apart',0,'bnd','','Band at arm-length, pull it apart until it touches the chest.','Band auseinanderziehen|Band auf Armlänge, bis zur Brust auseinanderziehen.'],
+  ['Band row',0,'bnd','','Band anchored at chest height, row the handles to the ribs.','Rudern mit Band|Band auf Brusthöhe befestigt, die Griffe zu den Rippen ziehen.'],
   ['Bar row, chest height',1,'br','','Nearly upright - the easiest bar angle.','Rudern, Stange auf Brusthöhe|Fast aufrecht - der leichteste Winkel.'],
+  ['Kettlebell row',1,'kb','l','Hinge forward, one kettlebell hangs, row it to the hip.','Kettlebell-Rudern|Nach vorn beugen, eine Kettlebell hängt, zur Hüfte ziehen.'],
+  ['Cable row',1,'cbl','','Seated cable row, chest up, pull the handle to the sternum.','Rudern am Kabelzug|Sitzend, Brust raus, den Griff zum Brustbein ziehen.'],
   ['Bar row, waist height',2,'br','','The standard inverted row. Body one line.','Rudern, Stange auf Hüfthöhe|Das Standard-Rudern. Körper eine Linie.'],
+  ['Cable face pull',2,'cbl','','Rope to the face, elbows high, squeeze the shoulder blades.','Face Pull am Kabel|Seil zum Gesicht, Ellbogen hoch, Schulterblätter zusammenziehen.'],
   ['Bar row, hip height',3,'br','','Nearly horizontal - close to pull-up load.','Rudern, Stange tief|Fast waagerecht - nah an der Last eines Klimmzugs.'],
   ['Ring row',3,'rg','','Rings turn with you - smooth on the shoulders, hard on form.','Rudern an Ringen|Ringe drehen mit - schonend für die Schulter, hart für die Form.'],
   ['Feet-elevated row',3,'tb','','Feet on a chair under the table edge - full horizontal.','Rudern mit erhöhten Füßen|Füße auf einen Stuhl unter der Tischkante - voll waagerecht.'],
@@ -4223,6 +4318,7 @@ var EXDB={
   ['Pike push-up',1,'','ws','Upside-down V, head lowers between the hands.','Pike-Liegestütz|Umgedrehtes V, der Kopf senkt sich zwischen die Hände.'],
   ['Bench dips',2,'ch','se','Hands on a chair behind you. Shoulders down, short range.','Dips an der Bank|Hände auf dem Stuhl hinter dir. Schultern tief, kurzer Weg.'],
   ['Feet-elevated pike push-up',2,'ch','ws','Feet on a chair, hips over shoulders.','Pike-Liegestütz mit erhöhten Füßen|Füße auf den Stuhl, Hüfte über den Schultern.'],
+  ['Machine shoulder press',2,'mp','s','Seated machine press, handles at shoulder height, press straight up.','Schulterdrücken an der Maschine|Sitzend, Griffe auf Schulterhöhe, gerade nach oben drücken.'],
   ['Deficit pike push-up',3,'','ws','Hands on books - deeper range than the floor allows.','Pike-Liegestütz mit Defizit|Hände auf Büchern - tiefer, als der Boden erlaubt.'],
   ['Wall walk',3,'wl','ws','Walk the feet up the wall, hands toward it, walk back.','Wall Walk|Mit den Füßen die Wand hochlaufen, Hände heran, zurücklaufen.'],
   ['Straight-bar dip',3,'br','se','Both hands on one bar, lean over it, dip.','Dip an der geraden Stange|Beide Hände auf einer Stange, darüber lehnen, absenken.'],
@@ -4241,15 +4337,19 @@ var EXDB={
   ['Step-up',1,'ch','k','Full foot on the surface, drive through the heel.','Aufsteiger|Ganzer Fuß auf die Fläche, über die Ferse hochdrücken.'],
   ['Calf raise',1,'','','Full stretch at the bottom, pause at the top.','Wadenheben|Unten voll dehnen, oben kurz halten.'],
   ['Good morning',1,'','l','Hands behind the head, hinge at the hip, flat back.','Good Morning|Hände hinter den Kopf, aus der Hüfte beugen, Rücken gerade.'],
+  ['Goblet squat',1,'kb','','Kettlebell held at the chest, squat between the knees.','Goblet Squat|Kettlebell vor der Brust halten, zwischen die Knie squatten.'],
   ['Paused squat',2,'','','Two seconds at the bottom. No bounce, all muscle.','Kniebeuge mit Pause|Zwei Sekunden unten. Kein Federn, alles Muskel.'],
   ['Reverse lunge',2,'','k','Step back instead of forward - kinder to the knee.','Ausfallschritt nach hinten|Schritt zurück statt vor - schonender fürs Knie.'],
   ['Single-leg glute bridge',2,'','','One leg up, hips stay level.','Einbeiniges Beckenheben|Ein Bein hoch, die Hüfte bleibt waagerecht.'],
   ['Single-leg calf raise',2,'','','All bodyweight on one calf, full range.','Einbeiniges Wadenheben|Das ganze Körpergewicht auf einer Wade, voller Weg.'],
   ['Walking lunge',2,'','k','Long steps, torso tall, knee tracks the toes.','Ausfallschritt gehend|Lange Schritte, Oberkörper aufrecht, Knie über den Zehen.'],
+  ['Machine squat',2,'mp','k','Guided bar on the shoulders, safety catches set below.','Kniebeuge an der Multipresse|Geführte Stange auf den Schultern, Sicherheitsstopper darunter einstellen.'],
+  ['Kettlebell swing',2,'kb','l','Hinge, snap the hips, float the bell to chest height.','Kettlebell Swing|Aus der Hüfte schwingen, die Kettlebell bis Brusthöhe fliegen lassen.'],
   ['Split squat',3,'','k','Feet split, back knee toward the floor.','Split Squat|Füße versetzt, hinteres Knie Richtung Boden.'],
   ['Lateral lunge',3,'','kh','Step sideways, sit into one hip, other leg straight.','Seitlicher Ausfallschritt|Schritt zur Seite, in eine Hüfte setzen, anderes Bein gestreckt.'],
   ['Single-leg RDL',3,'','l','Hinge on one leg, back flat - hamstrings and balance.','Einbeiniges Kreuzheben|Auf einem Bein aus der Hüfte beugen, Rücken gerade - Beinbeuger und Gleichgewicht.'],
   ['Cossack squat',3,'','kh','Weight over one heel, wide stance, other leg straight.','Kosakenkniebeuge|Gewicht über einer Ferse, breiter Stand, anderes Bein gestreckt.'],
+  ['Band-assisted pistol squat',3,'bnd','kh','Band anchored high, holds you up through the bottom.','Pistol Squat mit Band|Band hoch befestigt, hält dich unten in der Kniebeuge.'],
   ['Jump squat',3,'','k','Explode up, land soft into the next rep.','Sprungkniebeuge|Explosiv hoch, weich in die nächste Wiederholung landen.'],
   ['Hip thrust',3,'ch','','Shoulders on a couch edge, hips to full lockout.','Hip Thrust|Schultern auf der Sofakante, Hüfte ganz durchstrecken.'],
   ['Sissy squat',4,'','k','Knees travel far forward, body leans back. Quad isolation.','Sissy Squat|Knie weit nach vorn, Körper lehnt zurück. Reine Oberschenkelarbeit.'],
@@ -4283,6 +4383,7 @@ var EXDB={
   ['Hanging leg raise',4,'br','lh','Straight legs to horizontal, no momentum.','Hängendes Beinheben|Gestreckte Beine bis waagerecht, ohne Schwung.'],
   ['Tuck L-sit',4,'','wh','On the floor or parallettes, knees tucked, hips lifted.','L-Sitz angehockt|Am Boden oder auf Parallettes, Knie angezogen, Hüfte abgehoben.'],
   ['Dragon flag negative',4,'an','l','Shoulders down, body straight, lower slowly.','Dragon Flag, negativ|Schultern unten, Körper gerade, langsam ablassen.'],
+  ['Turkish get-up',4,'kb','sk','Kettlebell overhead the whole way - lie to stand, then reverse.','Turkish Get-up|Kettlebell die ganze Zeit über Kopf - vom Liegen zum Stehen und zurück.'],
   ['Toes-to-bar',5,'br','lh','Feet touch the bar, controlled both ways.','Zehen zur Stange|Die Füße berühren die Stange, kontrolliert in beide Richtungen.'],
   ['L-sit',5,'','wh','Legs horizontal, hips floating. The core summit on the floor.','L-Sitz|Beine waagerecht, Hüfte schwebt. Die Rumpfspitze am Boden.'],
   ['Windshield wipers',5,'br','l','Legs up at the bar, swing side to side with control.','Scheibenwischer|Beine oben an der Stange, kontrolliert von Seite zu Seite.'],
@@ -4354,7 +4455,7 @@ function ladLabel(patId,stufe,fallback){
   if(!a||stufe<0||stufe>=a.length||!a[stufe])return fallback;
   return a[stufe];
 }
-var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Sofa-Halt']};
+var EQN={wl:['Wall','Wand'],tb:['Table','Tisch'],ch:['Chair','Stuhl'],br:['Bar','Stange'],dp:['Dip bars','Barren'],rg:['Rings','Ringe'],an:['Anchor','Sofa-Halt'],kb:['Kettlebell','Kettlebell'],cbl:['Cable machine','Kabelzug'],mp:['Smith machine','Multipresse'],bnd:['Resistance band','Widerstandsband']};
 var FLN={w:['wrists','Handgelenke'],s:['overhead shoulder','Schulter über Kopf'],k:['knee-dominant','knielastig'],e:['elbow-heavy','ellbogenlastig'],l:['lower back','unterer Rücken'],h:['hip-heavy','hüftlastig']};
 var profile=get('profile',null);
 function exAvail(e){var q=e[2];
@@ -4363,6 +4464,10 @@ function exAvail(e){var q=e[2];
   if(q==='br')return !!eq.bar;
   if(q==='dp')return !!eq.dip||!!eq.rings;
   if(q==='rg')return !!eq.rings;
+  if(q==='kb')return !!eq.kb;
+  if(q==='cbl')return !!eq.cbl;
+  if(q==='mp')return !!eq.mp;
+  if(q==='bnd')return !!eq.bnd;
   return true;}
 function exAllowed(e){if(!profile||!profile.avoid)return true;var f=e[3]||'';
   if(profile.avoid.wrist&&f.indexOf('w')>-1)return false;
@@ -4443,7 +4548,8 @@ function plan(d){
      Der Abstand zwischen den Einheiten bleibt derselbe, er haengt nur nicht
      mehr davon ab, an welchem Wochentag jemand zufaellig auf Start drueckt. */
   var wd=((dIdx(d)%7)+7)%7,ph=phase(w);
-  var S=cfg.track==='4'?SESS4:SESS3;
+  var TR=TRACKS[cfg.track]||TRACKS['3'];
+  var S=SESSALL;
   var key=null,ftype=null;
   var td=tdaysValid();
   if(td){
@@ -4454,8 +4560,8 @@ function plan(d){
        ersten gewaehlten Tag legt. */
     var w7=(d.getDay()+6)%7;
     var i=td.indexOf(w7);
-    var order=cfg.track==='4'?['upA','lowA','upB','lowB']:['pull','push','legs'];
-    if(i>=0){key=order[i]||order[order.length-1];}
+    var order=TR.order;
+    if(i>=0){var ok=order[i];if(ok)key=ok;else ftype='easy';}
     else{
       var free=[0,1,2,3,4,5,6].filter(function(x){return td.indexOf(x)<0;});
       var fi=free.indexOf(w7);
@@ -4465,15 +4571,11 @@ function plan(d){
       else ftype='opt';
     }
   }else{
-    /* Ohne Auswahl: Rhythmus ab Starttag (v16.8), Tag 0 ist immer Einheit. */
-    var map3={0:'pull',2:'push',4:'legs'},map4={0:'upA',1:'lowA',3:'upB',4:'lowB'};
-    key=cfg.track==='4'?map4[wd]:map3[wd];
-    if(!key){
-      if(wd===1||wd===2&&cfg.track==='4')ftype='easy';
-      else if(wd===5)ftype='opt';
-      else if(wd===3)ftype='rest';
-      else ftype='review';
-    }
+    /* Ohne Auswahl: Rhythmus ab Starttag (v16.8), Tag 0 ist immer Einheit.
+       TR.rhythm ist der feste 7-Platz-Wochenplan der Frequenz -- fuer 3/4
+       bit-identisch zum alten map3/map4 nachgebaut. */
+    var slot=TR.rhythm[wd];
+    if(slot.k)key=slot.k;else ftype=slot.f;
   }
   if(key)return{kind:'train',title:sessDe(S[key].title),sub:sessDe(S[key].sub),s:key,ph:ph,w:w};
   var easy=cfg.lang==='de'?'Lockerer Tag':'Easy day',opt=cfg.lang==='de'?'Optional':'Optional',rest=cfg.lang==='de'?'Ruhetag':'Rest';
@@ -4485,7 +4587,7 @@ function plan(d){
 /* Gewaehlte Trainingstage (Mo=0..So=6), nur gueltig wenn die Anzahl zur
    Spur passt -- sonst faellt alles auf den Start-Rhythmus zurueck. */
 function tdaysValid(){
-  var need=cfg.track==='4'?4:3;
+  var need=(TRACKS[cfg.track]||TRACKS['3']).order.length;
   if(!cfg.tdays||!cfg.tdays.length)return null;
   var td=cfg.tdays.slice().sort(function(a,b){return a-b;});
   if(td.length!==need)return null;
@@ -6339,7 +6441,7 @@ function pauseHiddenSvg(){
     svgDecide(s);
   }
 }
-var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',test:'v-test',catalog:'v-catalog',fuel:'v-fuel',kam:'v-kam',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
+var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',posture:'v-posture',test:'v-test',catalog:'v-catalog',fuel:'v-fuel',kam:'v-kam',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
 
 /* ---------- oberste Ebene: sieben Ziele statt vierzehn -------------------
    Vierzehn Reiter bekommt kein Design aufgeraeumt -- das ist keine Frage von
@@ -6366,7 +6468,7 @@ var GROUP={
      der sich fuer Calisthenics interessiert -- es steht so in jedem Programm,
      jedem Video und jeder anderen App. Dieselbe Ueberlegung wie bei Push,
      Pull und Legs. */
-  train:   {v:['train','skills','mobility','test','plan','catalog'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Mobility'],['Test','Test'],['Weeks','Wochen'],['Catalog','Katalog']]},
+  train:   {v:['train','skills','mobility','posture','test','plan','catalog'], l:[['Session','Einheit'],['Skills','Skills'],['Mobility','Mobility'],['Posture','Haltung'],['Test','Test'],['Weeks','Wochen'],['Catalog','Katalog']]},
   coach:   {v:['coach']},
   fuel:    {v:['fuel']},
   prog:    {v:['stat','ranks','you'],               l:[['Stats','Statistik'],['Ranks','Ränge'],['You','Du']]},
@@ -6743,7 +6845,7 @@ function paintLog(){
 
 /* ---------- today ---------- */
 function sessOf(pl){
-  var base=(cfg.track==='4'?SESS4:SESS3)[pl.s];
+  var base=SESSALL[pl.s];
   if(!base||curBlock().id!=='skill')return base;
   /* Skill-Block: die Skill-Uebung kommt nach vorn, weil sie frisch etwas
      taugt und nach vier harten Saetzen nichts mehr. */
@@ -7183,11 +7285,14 @@ function ladder(){
    Und die Balken zeigen erledigt gegen geplant, sind also waehrend der Woche
    in Bewegung statt fuer zwoelf Wochen dieselben. */
 function volBar(){
-  var w=Math.min(12,Math.max(1,wkOf(TODAY))),ph=phase(w),S=cfg.track==='4'?SESS4:SESS3;
+  var w=Math.min(12,Math.max(1,wkOf(TODAY))),ph=phase(w),TR=TRACKS[cfg.track]||TRACKS['3'];
   var DE=cfg.lang==='de';
   var soll={push:0,pull:0,row:0,press:0,legs:0,core:0};
   var ist ={push:0,pull:0,row:0,press:0,legs:0,core:0};
-  Object.keys(S).forEach(function(s){S[s].items.forEach(function(x){if(soll[x.id]!==undefined)soll[x.id]+=ph.sets;});});
+  /* Ueber die Rotation summieren, nicht ueber eindeutige Tagesnamen -- bei
+     6/7 Tagen kommt z.B. "pull" zweimal in der Woche vor, das Soll muss das
+     doppelt zaehlen. */
+  TR.order.forEach(function(s){if(!s)return;SESSALL[s].items.forEach(function(x){if(soll[x.id]!==undefined)soll[x.id]+=ph.sets;});});
   /* Erledigt: die sieben Tage dieser Woche durchgehen. Die Reihenfolge der
      Positionen ist dieselbe wie beim Abhaken, deshalb passt der Index. */
   for(var i=0;i<7;i++){
@@ -7317,6 +7422,130 @@ $('mobStart').addEventListener('click',function(){
   if(mobT)return;mobI=-1;mobStep();
   mobT=setInterval(function(){mobLeft--;mobPaint();if(mobLeft<=0)mobStep();},1000);});
 $('mobStop').addEventListener('click',mobStopF);
+
+/* ---------- posture ---------- */
+/* Drei neue Uebungen gegen Rib Flare und Rundruecken. Gleiche Form wie MOB
+   (n/fix/dose), plus sci -- der eine Satz Wirkung, den Abschnitt 3 des
+   Auftrags fuer jede neue Haltungsuebung verlangt. Keine Bewegungsdemo:
+   dafuer gibt es keine Pose-Daten, und MOB zeigt ohne Eintrag in MOBDEMO
+   ebenfalls keine -- derselbe Fallback, kein neuer. */
+var POST=[
+ {n:'Deadbug — rib focus',
+  fix:'Lie on your back, knees bent, lower back pressed to the floor. Lower one arm behind you and the opposite leg away, stopping the moment your ribs pop up or your back arches.',
+  dose:'2 x 8 per side',
+  sci:'Trains the abs that hold the ribcage and pelvis in line, instead of letting the ribs tip forward.'},
+ {n:'Scapular wall slides',
+  fix:'Back against a wall, arms in a goalpost shape, forearms and hands touching the wall. Slide the arms up and down while keeping contact, pulling the shoulder blades down as you go.',
+  dose:'2 x 10, slow',
+  sci:'Trains the muscles that pull the shoulder blades down and together, the opposite pull to a rounded upper back.'},
+ {n:'Thoracic extension',
+  fix:'Foam roller or rolled towel across the mid-back, hands behind the head, extend backward over it. Works against a wall too: hands behind the head, elbows back, arch over the point of contact.',
+  dose:'10 slow reps',
+  sci:'Restores extension in the upper back, the motion a rounded posture gradually loses.'}
+];
+var POSTDE=[
+ {n:'Deadbug — Fokus Rippen',
+  fix:'Rückenlage, Knie angewinkelt, unterer Rücken auf den Boden gedrückt. Einen Arm nach hinten und das gegengleiche Bein wegsenken — stoppen, sobald die Rippen hochklappen oder sich der Rücken hohlt.',
+  dose:'2 × 8 je Seite',
+  sci:'Deadbug trainiert die Bauchmuskulatur, die Becken und Rippen in einer Linie hält, statt die Rippen nach vorne kippen zu lassen.'},
+ {n:'Scapula Wall Slides',
+  fix:'Rücken an die Wand, Arme als Torpfosten, Unterarme und Hände an der Wand. Auf und ab gleiten, Kontakt halten und dabei die Schulterblätter nach unten ziehen.',
+  dose:'2 × 10, langsam',
+  sci:'Trainiert die Muskeln, die die Schulterblätter nach unten und zusammenziehen — die Gegenbewegung zum runden oberen Rücken.'},
+ {n:'Brustwirbel-Streckung',
+  fix:'Rolle oder gerolltes Handtuch quer unter den mittleren Rücken, Hände hinter den Kopf, darüber nach hinten strecken. Geht auch an der Wand: Hände hinter den Kopf, Ellbogen zurück, über den Kontaktpunkt wölben.',
+  dose:'10 langsame Wiederholungen',
+  sci:'Stellt die Streckfähigkeit im oberen Rücken wieder her, die ein runder Rücken nach und nach verliert.'}
+];
+/* Nacken fehlt komplett in EXDB -- die sechs Muster dort (push/pull/row/
+   press/legs/core) haben keine Kategorie dafuer, und eine siebte nur fuer
+   zwei Uebungen anzulegen haette Rang-Koerperkarte, LADEX und die Katalog-
+   Chips mitgezogen. Deshalb eine eigene, kleine Liste, nur fuer diese Sektion. */
+var NECK=[
+ {n:'Chin tucks',
+  cc:'Sit or stand tall. Draw the chin straight back into a double chin, without tilting the head down. 2 x 10, hold 3 s.',
+  sci:'Strengthens the deep neck flexors that hold the head back over the shoulders, instead of letting it drift forward.'},
+ {n:'Band neck extensions',
+  cc:'Loop a light band around the back of the head, anchor it in front at head height. Nod the head back against the band, controlled. 2 x 12.',
+  sci:'Builds strength in the neck extensors that support a forward-carried head.'}
+];
+var NECKDE=[
+ {n:'Chin Tucks',
+  cc:'Aufrecht sitzen oder stehen. Das Kinn gerade nach hinten ziehen, Doppelkinn machen, Kopf dabei nicht senken. 2 × 10, 3 s halten.',
+  sci:'Kräftigt die tiefe Nackenmuskulatur, die den Kopf über den Schultern hält, statt ihn nach vorn hängen zu lassen.'},
+ {n:'Band Neck Extensions',
+  cc:'Ein leichtes Band um den Hinterkopf legen, vorn auf Kopfhöhe befestigen. Kopf kontrolliert gegen das Band nach hinten nicken. 2 × 12.',
+  sci:'Baut Kraft in der Nackenmuskulatur auf, die einen nach vorn geschobenen Kopf stützt.'}
+];
+/* Fuenf Zonen zeigen nur, was EXDB schon hat -- [Muster,Index] wird ueber
+   exName()/exCue() aufgeloest, dieselben Funktionen, die auch der Katalog
+   nutzt. Kein Duplikat, keine zweite Wahrheit ueber dieselbe Uebung. */
+var ZONES=[
+ {id:'neck',      label:['Neck','Nacken']},
+ {id:'shoulders', label:['Shoulders','Schultern'], refs:[['press',0],['press',1]]},
+ {id:'abs',       label:['Abs','Bauch'],           refs:[['core',0],['core',2],['core',7]]},
+ {id:'calves',    label:['Calves','Waden'],        refs:[['legs',5],['legs',10]]},
+ {id:'forearms',  label:['Forearms','Unterarme'],  refs:[['pull',0],['pull',1]]},
+ {id:'back',      label:['Back','Rücken'],         refs:[['row',0],['row',1],['pull',7]]}
+];
+function buildPost(){
+  var DE=cfg.lang==='de';
+  var pl=$('postList');if(pl)pl.innerHTML=POST.map(function(p,i){
+    var d=DE&&POSTDE[i]?POSTDE[i]:p;
+    return '<div class="drill"><b>'+d.n+'</b>'+
+      '<p><b>'+(DE?'Wirkung: ':'Effect: ')+'</b>'+d.sci+'</p>'+
+      '<p><b>'+(DE?'Ausführung: ':'How: ')+'</b>'+d.fix+'</p>'+
+      '<span class="dose">'+d.dose+'</span></div>';
+  }).join('');
+  var zl=$('zoneList');if(zl)zl.innerHTML=ZONES.map(function(z){
+    var rows=(z.refs||[]).map(function(r){
+      var e=EXDB[r[0]][r[1]];
+      return '<div class="catrow"><b>'+exName(e)+'</b><span class="cc">'+exCue(e)+'</span></div>';
+    });
+    if(z.id==='neck')(DE?NECKDE:NECK).forEach(function(x){
+      rows.push('<div class="catrow"><b>'+x.n+'</b><span class="cc">'+x.cc+'</span><p class="hint">'+x.sci+'</p></div>');
+    });
+    return '<div class="card"><h4>'+z.label[DE?1:0]+'</h4>'+rows.join('')+'</div>';
+  }).join('');
+}
+
+/* ---------- Boost-Widget ---------- */
+/* "Mir ist langweilig": ein Klick, eine zufaellige 2-Minuten-Mikroroutine aus
+   der Haltungs-Sektion (POST/NECK) -- keine zweite Uebungsliste, nur eine
+   andere Ansicht auf dieselbe. Laeuft im vorhandenen Blatt (openSheet), der
+   Countdown ist derselbe simple setInterval wie bei der Mobility-Routine
+   (mobStep), nur ohne deren Mehrschritt-Ablauf: hier gibt es nur einen
+   Schritt und einen festen Rahmen. sheetOpen (siehe openSheet/closeSheet)
+   ist bereits der Schalter, der ein geschlossenes Blatt anzeigt -- der Tick
+   liest ihn statt einen eigenen Zustand mitzufuehren. */
+function boostPool(){
+  var DE=cfg.lang==='de';
+  return (DE?POSTDE:POST).map(function(x){return{n:x.n,d:x.fix};})
+    .concat((DE?NECKDE:NECK).map(function(x){return{n:x.n,d:x.cc};}));
+}
+var boostT=null,boostLeft=0;
+function boostTick(){
+  if(!sheetOpen){clearInterval(boostT);boostT=null;return;}
+  boostLeft--;
+  var el=$('boostClock');if(!el){clearInterval(boostT);boostT=null;return;}
+  el.textContent=fmt(Math.max(0,boostLeft));
+  if(boostLeft<=0){
+    clearInterval(boostT);boostT=null;el.classList.remove('run');el.classList.add('zero');
+    beep();burst(window.innerWidth/2,window.innerHeight/2,14);
+    var s=$('boostDone');if(s)s.textContent=cfg.lang==='de'?'Fertig — gut gemacht.':'Done — nice work.';
+  }
+}
+function boostOpen(){
+  var DE=cfg.lang==='de',pool=boostPool();
+  var it=pool[Math.floor(Math.random()*pool.length)];
+  boostLeft=120;
+  openSheet('<h4>'+(DE?'Kurzer Boost':'Quick boost')+'</h4>'+
+    '<div class="dsh"><p class="hint"><b>'+it.n+'</b> — '+it.d+'</p>'+
+    '<div class="savebar"><span class="clock run" id="boostClock">'+fmt(boostLeft)+'</span>'+
+    '<span class="hint" id="boostDone"></span></div></div>');
+  clearInterval(boostT);
+  boostT=setInterval(boostTick,1000);
+}
 
 /* ---------- test ---------- */
 /* Faellig: die Wochen um den Retest herum (Woche 6/7 und 12/13, ein Tag
@@ -7527,7 +7756,7 @@ function runItems(){
   if(pl.kind!=='train')return null;
   var adj=(run&&run.on&&run.key===iso(TODAY)&&run.adj)||0;
   var xl=get('exlog',{});
-  return sessOf(pl).items.map(function(x){
+  var it=sessOf(pl).items.map(function(x){
     /* Einmessen im Training: hat das Muster noch keine Basis, sind es drei
        Saetze "max" -- die eingetragenen Wiederholungen setzen danach Leiter
        und Basiswert. Kein separater Test vor dem ersten Training mehr. */
@@ -7557,6 +7786,24 @@ function runItems(){
            sets:x.v?1:(cal?3:Math.min(5,Math.max(2,pl.ph.sets+adj+pa))),
            reps:cal?'max':pl.ph.reps,rest:pl.ph.rs};
   });
+  /* Micro-Workout: der laufende Zustand traegt eine Auswahl von Original-
+     Indizes (siehe microPick) -- dieselbe Liste, nur eingedampft. Alles, was
+     runItems() konsumiert (Runner, Dock, sessWrap), sieht dadurch einfach
+     eine kuerzere Einheit und braucht keinen eigenen Zweig. */
+  if(run&&run.on&&run.key===iso(TODAY)&&run.micro)it=run.micro.map(function(i){return it[i];});
+  return it;
+}
+/* Waehlt die zwei tragenden Uebungen fuer das Micro-Workout. SESS3/SESS4
+   (siehe oben) fuehren je Trainingstag bewusst die Verbund-/Grunduebungen
+   zuerst, Rumpf immer zuletzt -- deshalb reichen "die ersten zwei mit
+   Muster-ID, die nicht Rumpf sind" als Auswahl, ohne eine zweite Gewichtung
+   ueber Saetze/Wochenvolumen nachzubauen, die bei gleicher Satzzahl je
+   Uebung ohnehin nichts unterscheiden koennte. */
+function microPick(it){
+  var idx=[];
+  for(var i=0;i<it.length&&idx.length<2;i++)if(it[i].id&&it[i].id!=='core')idx.push(i);
+  for(var i=0;i<it.length&&idx.length<2;i++)if(idx.indexOf(i)<0)idx.push(i);
+  return idx;
 }
 /* Nach der Einheit: erfasste Wiederholungen je Uebung ablegen (fuer die
    Autoregulation der naechsten Einheit) und Erstkontakte einmessen --
@@ -7614,13 +7861,15 @@ function runValid(){
   return run&&run.on&&run.key===iso(TODAY)&&runItems();
 }
 function saveRun(){set('run',run);}
-function startRun(adj){
+function startRun(adj,micro){
   var it=runItems();if(!it)return;
-  /* Bei bereits abgehakten Bloecken vorn einsteigen, wo es weitergeht. */
-  var dn=doneMap[iso(TODAY)]||{},i=0;
-  while(i<it.length&&dn[i])i++;
-  if(i>=it.length)i=0;
+  /* Bei bereits abgehakten Bloecken vorn einsteigen, wo es weitergeht.
+     Im Micro-Workout gilt dieselbe Regel, nur innerhalb der Auswahl. */
+  var dn=doneMap[iso(TODAY)]||{},i=0,mic=micro?microPick(it):null;
+  if(mic){while(i<mic.length&&dn[mic[i]])i++;if(i>=mic.length)i=0;}
+  else{while(i<it.length&&dn[i])i++;if(i>=it.length)i=0;}
   run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{},t0:Date.now(),adj:adj||0};
+  if(mic)run.micro=mic;
   saveRun();openRun();
 }
 function openRun(){
@@ -10471,6 +10720,10 @@ function renderHome(){
   var st=String(streakVal||0);
   h+='<div class="habcard hcStreak"><em>'+(DE?'Serie':'Streak')+'</em>'+
     '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?(st==='1'?'Tag':'Tage'):(st==='1'?'day':'days'))+'</small></b></div>';
+  /* Boost: 1-Klick-Ausrede-Killer, kein Ziel, keine Navigation -- deshalb
+     eigenes data-boost statt data-go, siehe Klick-Weiche unten. */
+  h+='<button type="button" class="habcard hcBoost" data-boost="1"><em>'+(DE?'Mir ist langweilig':'I’m bored')+'</em>'+
+    '<b class="big" style="font-size:var(--t5)">'+(DE?'2 Min Boost':'2 min boost')+'</b></button>';
   habEl.innerHTML=h;
   /* Ring und Zahlen laufen erst nach dem Einhaengen los: ein frisch erzeugtes
      Element hat keinen Vorzustand, aus dem heraus etwas ueberblenden koennte.
@@ -10512,6 +10765,8 @@ function renderHome(){
        eigenen Startknopf zu haben. data-go navigiert nur. */
     var r=e.target.closest('[data-run]');
     if(r){ openSessOv(); return; }
+    var bo=e.target.closest('[data-boost]');
+    if(bo){ boostOpen(); return; }
     var b=e.target.closest('[data-go]');if(b)show(b.dataset.go);
   });
 });
@@ -10901,6 +11156,11 @@ function openSessOv(){
 function renderSessOv(){
   var DE=cfg.lang==='de',pl=plan(TODAY),it=runItems();
   if(!it){soShow(false);return;}
+  /* runItems() sucht bis zu 14 Tage voraus nach der naechsten Einheit --
+     plan(TODAY) allein kann hier trotzdem 'pre' oder 'post' liefern (vor
+     Start oder nach Woche 12), und die haben kein .ph. Dieselbe Vorschau
+     wie in runItems(), sonst crasht pl.ph.name direkt darunter. */
+  for(var vzo=1;vzo<=14&&pl.kind!=='train';vzo++)pl=plan(add(TODAY,vzo));
   $('soTitle').textContent=pl.title;
   $('soMeta').textContent=(DE?'Woche ':'Week ')+pl.w+' · '+pl.ph.name+' · '+(DE?'Pause ':'rest ')+pl.ph.rest;
   var host=$('soBody'),h='';
@@ -10913,6 +11173,10 @@ function renderSessOv(){
         (x.id?'<button type="button" class="swp" data-i="'+i+'" aria-label="Swap">&#8644;</button>':'')+'</div>';
     }).join('')+'</div>';
     h+='<button type="button" class="tbtn go sogo" id="soStart">'+(DE?'Training starten':'Start session')+'</button>';
+    /* Notfallmodus: keine Zeit, keine Lust -- die zwei tragenden Uebungen
+       reichen, um die Serie zu retten. Kein Check-in davor, das waere genau
+       die Reibung, die hier vermieden werden soll. */
+    h+='<button type="button" class="tbtn sogo" id="soMicro">'+(DE?'Micro-Workout (15 Min)':'Micro workout (15 min)')+'</button>';
   }else{
     h+='<p class="hint">'+(DE?'Kurzer Check, dann geht es los — der Tag passt sich deiner Form an.':'Quick check, then we go — the day adapts to how you feel.')+'</p>';
     var opts=[['3',DE?'Voll da':'Fresh'],['2',DE?'Normal':'Normal'],['1',DE?'Wenig drin':'Running low']];
@@ -10941,6 +11205,7 @@ function renderSessOv(){
       });
     });
     $('soStart').addEventListener('click',function(){soView='chk';renderSessOv();});
+    $('soMicro').addEventListener('click',function(){soShow(false);startRun(0,true);});
   }else{
     function adjTxt(){$('soAdj').textContent=soEnergy==='1'
       ?(DE?'Heute eine Runde weniger je Übung — durchkommen zählt.':'One set less per exercise today — showing up counts.')
@@ -10989,31 +11254,31 @@ var OBL={
   ['lean',['Get lean','Abnehmen und straffen'],['Drop fat, keep the strength you build','Fett runter, aufgebaute Kraft behalten'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c.8 3.6-4.6 5-4 9a4.3 4.3 0 0 0 8.6-.4c0-3.6-3.4-5-4.6-8.6Z"/></svg>','var(--ember)'],
   ['skills',['Learn skills','Skills lernen'],['Muscle-up, handstand, L-sit and friends','Muscle-up, Handstand, L-Sit und Co.'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.6l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.5-4.8 2.5.9-5.4L4.2 9.3l5.4-.8Z"/></svg>','var(--ice)'],
   ['fit',['General fitness','Allgemein fit'],['Strong for everyday life','Stark für den Alltag'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20s-7-4.3-7-9.2A4 4 0 0 1 12 8a4 4 0 0 1 7 2.8C19 15.7 12 20 12 20Z"/></svg>','var(--brass)']],
- /* ponytail: nur 3 und 4 Tage, nicht 1-7. SESS3/SESS4 sind die einzigen
-    Wochenplaene, die es gibt -- cfg.track/profile.days sind ueberall im
-    Trainingsmotor (buildCatalog, Wochenaufbau, Settings-Auswahl) strikt
-    binaer '4'?SESS4:SESS3 verdrahtet, tdNeed() ebenso. Weitere Tageszahlen
-    anzubieten hiesse, fuer 1/2/5/6/7 Tage neue Splits zu erfinden -- genau
-    die Trainingsplan-Berechnungslogik, die dieser Umbau nicht neu bauen
-    soll. Upgrade-Pfad: eigene Session-Vorlagen je Tageszahl, das ist eine
-    Aenderung am Trainingsmotor, keine an der Einfuehrung. */
+ /* Sieben Rotationen aus den sieben bestehenden Tagen (SESS3.pull/push/legs,
+    SESS4.upA/lowA/upB/lowB) -- siehe TRACKS oben bei SESS4. Kein Eintrag hier
+    fuegt eine neue Uebung hinzu, nur eine neue Reihenfolge auf denselben
+    sieben Tagen. Details je Frequenz stehen bei TRACKS[n].rhythm/.order. */
  days:[
+  ['1',['1 day a week','1 Tag pro Woche'],['Full body, once a week — the minimum that still works','Ganzkörper, einmal die Woche — das Minimum, das noch wirkt'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M11 15h2"/></svg>','var(--ice)'],
+  ['2',['2 days a week','2 Tage pro Woche'],['Upper and lower body, spread across the week','Ober- und Unterkörper, auf die Woche verteilt'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 15h2M14.5 15h2"/></svg>','var(--brass)'],
   ['3',['3 days a week','3 Tage pro Woche'],['Full body — the classic start','Ganzkörper — der Klassiker zum Einstieg'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2"/></svg>','var(--aurora)'],
-  ['4',['4 days a week','4 Tage pro Woche'],['Upper/lower split — more volume','Ober-/Unterkörper geteilt — mehr Volumen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"/></svg>','var(--ember)']],
- /* ponytail: keine Kraftraum-Geraete (Kettlebell/Kabelzug/Multipresse)
-    ergaenzt. EQN (die einzige Ausruestungs-Registrierung, die exAvail()
-    kennt) hat genau 7 Codes -- wl/tb/ch/br/dp/rg/an -- und jede Uebung in
-    der Datenbank ist auf genau diese 7 getaggt, alle koerpergewichts-
-    basiert. Ein Geraet als Option anzubieten, das keine einzige Uebung
-    filtert, waere ein Knopf ohne Wirkung -- schlimmer als keiner, weil er
-    Wirkung vortaeuscht. Es fehlt hier nichts: Wand/Tisch/Stuhl/Sofa-Halt
-    gelten als immer vorhanden, Stange/Barren/Ringe sind bereits abgefragt.
-    Upgrade-Pfad: neue Uebungen samt Geraete-Code in der Datenbank waeren
-    eine Aenderung am Uebungspool, keine an der Einfuehrung. */
+  ['4',['4 days a week','4 Tage pro Woche'],['Upper/lower split — more volume','Ober-/Unterkörper geteilt — mehr Volumen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"/></svg>','var(--ember)'],
+  ['5',['5 days a week','5 Tage pro Woche'],['Pull/push/legs plus upper/lower — five different days','Pull/Push/Legs plus Ober-/Unterkörper — fünf verschiedene Tage'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2M11 17h2"/></svg>','var(--aurora)'],
+  ['6',['6 days a week','6 Tage pro Woche'],['Pull/push/legs, twice through the week','Push/Pull/Legs im Doppel-Zyklus'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2M11 17h2M14.5 17h2"/></svg>','var(--ember)'],
+  ['7',['7 days a week','7 Tage pro Woche'],['Six training days plus one easy recovery day — no seventh hard day','Sechs Trainingstage plus ein leichter Erholungstag'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2M11 17h2M14.5 17h2"/><circle cx="17.6" cy="7.6" r="1.15" fill="currentColor" stroke="none"/></svg>','var(--ice)']],
+ /* Kraftraum-Geraete (Kettlebell/Kabelzug/Multipresse/Widerstandsband)
+    ergaenzt -- EQN und exAvail() kennen die vier neuen Codes kb/cbl/mp/bnd,
+    und je 3-4 echte Uebungen in EXDB sind darauf getaggt (siehe dort). Wer
+    hier nichts antippt, sieht diese Uebungen im Pool nicht -- der Schalter
+    wirkt. */
  eq:[
   ['bar',['Pull-up bar','Klimmzugstange'],['A doorway bar is all it takes','Ein Türreck reicht völlig'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M3 5h18M6 5v6M18 5v6"/><path d="M12 5v4m0 0c-2 1.6-2 4-2 6m2-6c2 1.6 2 4 2 6"/></svg>','var(--aurora)'],
   ['dip',['Dip bars','Barren / Dip-Gelegenheit'],['Parallettes or two sturdy chairs','Parallettes oder zwei stabile Stühle'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h6M14 9h6M5.5 9v8M18.5 9v8M8.5 9v8M15.5 9v8"/></svg>','var(--ice)'],
-  ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 3v4M16 3v4"/><circle cx="8" cy="13" r="3.6"/><circle cx="16" cy="13" r="3.6"/></svg>','var(--brass)']],
+  ['rings',['Rings','Ringe'],['Gymnastic rings or straps','Turnringe oder Schlingen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M8 3v4M16 3v4"/><circle cx="8" cy="13" r="3.6"/><circle cx="16" cy="13" r="3.6"/></svg>','var(--brass)'],
+  ['kb',['Kettlebell','Kettlebell'],['One or two, any weight works','Eine oder zwei, jedes Gewicht passt'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 8a3 3 0 0 1 6 0v1.5"/><circle cx="12" cy="15" r="6.5"/></svg>','var(--ember)'],
+  ['cbl',['Cable machine','Kabelzug'],['Gym cable station with adjustable pulley','Kabelstation im Gym mit verstellbarer Umlenkrolle'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5.5" r="2.3"/><path d="M12 7.8v6.2M8.5 17.5h7"/><path d="M9 14.3l3 3 3-3"/></svg>','var(--aurora)'],
+  ['mp',['Smith machine / multi-press','Multipresse'],['Guided bar on a fixed rack','Geführte Stange im festen Rahmen'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M5 3v18M19 3v18M3.5 10h17"/><path d="M6 8v4M8 7v6M16 7v6M18 8v4"/></svg>','var(--ice)'],
+  ['bnd',['Resistance band','Widerstandsband'],['Loop or long band, any resistance','Loop- oder langes Band, jeder Widerstand'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4c-2.5 3-2.5 13 0 16M18 4c2.5 3 2.5 13 0 16"/></svg>','var(--brass)']],
  act:[
   ['1.2',['Mostly sitting','Meist sitzend'],['Desk, little walking','Schreibtisch, wenig Wege'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="7 99"/></svg>','var(--ember)'],
   ['1.375',['On your feet some','Etwas auf den Beinen'],['Errands, standing spells','Wege, Phasen im Stehen'],'<svg viewBox="0 0 24 16" fill="none"><path d="M3 14 A9 9 0 0 1 21 14" stroke="var(--line2)" stroke-width="3" stroke-linecap="round"/><path d="M3 14 A9 9 0 0 1 21 14" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-dasharray="14 99"/></svg>','var(--brass)'],
@@ -11050,7 +11315,7 @@ var OBL={
    Eimer waere neue Rechenlogik, die hier niemand verlangt hat. */
 var NGMAP={fat:'-450',recomp:'0',muscle:'300',strength:'0',athletic:'0'};
 var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,tdays:[0,2,4],act:'1.375',ngoal:'300',
-  goal:'muscle',goalphys:'muscle',days:'3',eq:{bar:true,dip:false,rings:false},avoid:{},exp:'1'};
+  goal:'muscle',goalphys:'muscle',days:'3',eq:{bar:true,dip:false,rings:false,kb:false,cbl:false,mp:false,bnd:false},avoid:{},exp:'1'};
 var IT={
  hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
   s:['VALKR builds you a 12-week calisthenics plan around what you have and what you can do. A few quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Calisthenics-Plan um das, was du hast und was du kannst. Ein paar schnelle Fragen — alles bleibt später änderbar.'],
@@ -11187,7 +11452,8 @@ function introFinishProfile(){
   var altSwaps=(profile&&profile.swaps)||{};
   var altTest=(profile&&profile.testAsked)||1;
   profile={goal:obState.goal,days:obState.days,
-    eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings},
+    eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings,
+      kb:!!obState.eq.kb,cbl:!!obState.eq.cbl,mp:!!obState.eq.mp,bnd:!!obState.eq.bnd},
     avoid:av,exp:obState.exp,swaps:altSwaps,testAsked:altTest,
     sex:obState.sex,age:obState.age,height:obState.height,weight:obState.weight,bf:obState.bf,
     act:obState.act,ngoal:obState.ngoal,
@@ -11268,16 +11534,20 @@ function inOpts(k,L){
    ein voller renderIntro je Klick wuerde die Einblend-Animation neu anstossen. */
 var TDLET=[['M','T','W','T','F','S','S'],['M','D','M','D','F','S','S']];
 var TDCOLS=['var(--aurora)','var(--ice)','var(--ember)','var(--brass)'];
-function tdNeed(){return obState.days==='4'?4:3;}
+function tdNeed(){return (TRACKS[obState.days]||TRACKS['3']).order.length;}
 function tdaysHtml(L){
-  var S=obState.days==='4'?SESS4:SESS3;
-  var order=obState.days==='4'?['upA','lowA','upB','lowB']:['pull','push','legs'];
+  var order=(TRACKS[obState.days]||TRACKS['3']).order;
   var h='<div class="daypills">';
   for(var w7=0;w7<7;w7++){
     h+='<button type="button" class="daypill" data-d="'+w7+'" aria-pressed="false"><b>'+TDLET[L][w7]+'</b><span class="dot"></span></button>';
   }
+  /* Nur 4 Akzentfarben gibt es im Theme -- ab dem fuenften Rotationstag
+     (Tracks 5-7) faengt die Farbe wieder von vorn an, statt eine fuenfte
+     Farbe zu erfinden. `null` (Track 7, letzter Platz) ist kein Trainingstag
+     sondern der leichte Tag -- eigene Beschriftung ohne SESSALL-Nachschlage. */
   h+='</div><div class="tdleg">'+order.map(function(key,i){
-    return '<span><i style="background:'+TDCOLS[i]+'"></i>'+sessDe(S[key].title)+'</span>';
+    var label=key?sessDe(SESSALL[key].title):(L?'Leicht':'Easy');
+    return '<span><i style="background:'+TDCOLS[i%TDCOLS.length]+'"></i>'+label+'</span>';
   }).join('')+'</div>';
   h+='<p class="tdmeta" id="tdHint"></p><p class="tdfirst" id="tdFirst"></p>';
   return h;
@@ -11288,8 +11558,8 @@ function paintTdays(L,warn){
   [].forEach.call(host.querySelectorAll('.daypill'),function(b){
     var w7=parseInt(b.dataset.d,10),ix=sel.indexOf(w7);
     b.setAttribute('aria-pressed',String(ix>=0));
-    if(ix>=0)b.style.setProperty('--oc',TDCOLS[ix]);else b.style.removeProperty('--oc');
-    b.querySelector('.dot').style.background=ix>=0?TDCOLS[ix]:'';
+    if(ix>=0)b.style.setProperty('--oc',TDCOLS[ix%TDCOLS.length]);else b.style.removeProperty('--oc');
+    b.querySelector('.dot').style.background=ix>=0?TDCOLS[ix%TDCOLS.length]:'';
   });
   var hint=$('tdHint'),first=$('tdFirst');
   if(hint){
@@ -11465,7 +11735,7 @@ function renderIntro(){
           [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
           if(k==='sex'){var fs=$('figStage');if(fs)fs.innerHTML=bfFigure(obState.bf,obState.sex);}
           /* Neue Frequenz -> sinnvolle Standard-Wochentage vorbelegen. */
-          if(k==='days'){obState.tdays=o[0]==='4'?[0,1,3,4]:[0,2,4];}
+          if(k==='days'){obState.tdays=(TRACKS[o[0]]||TRACKS['3']).dflt.slice();}
         }
       });
     });
@@ -11477,6 +11747,7 @@ function renderIntro(){
     function wSelect(idx){
       idx=Math.max(0,Math.min(wOpts.length-1,idx));
       var v=NUMS[k].min+idx;
+      if(v!==obState[k]&&navigator.vibrate)navigator.vibrate(10);
       obState[k]=v;if(k!=='age')obState.bfTouched=false;
       wOpts.forEach(function(o,i){o.classList.toggle('wsel',i===idx);o.setAttribute('aria-selected',String(i===idx));});
     }
@@ -11619,9 +11890,16 @@ function openSwap(pl,idx,it,after){
     [].forEach.call(document.querySelectorAll('#swapList .swaprow'),function(b){
       b.addEventListener('click',function(){
         var v=b.dataset.ex||'';
-        if(!profile){profile={goal:'fit',days:cfg.track,eq:{bar:true,dip:true,rings:true},avoid:{},swaps:{}};}
+        if(!profile){profile={goal:'fit',days:cfg.track,eq:{bar:true,dip:true,rings:true,kb:false,cbl:false,mp:false,bnd:false},avoid:{},swaps:{}};}
         profile.swaps=profile.swaps||{};
-        var key=cfg.track+':'+pl.s+':'+idx;
+        /* Der Schluessel muss die SESS3/SESS4-Herkunft von pl.s tragen, nicht
+           die aktuelle Spur -- applyProfile() liest ihn ueber ['3',SESS3] und
+           ['4',SESS4], unabhaengig davon, welche Frequenz gerade laeuft. Bei
+           reinen 3/4-Spuren war beides zufaellig identisch; seit 1/2/5/6/7
+           Tage SESS3- und SESS4-Tage mischen, waere ein Tausch auf einer
+           gemischten Woche sonst unter dem falschen Schluessel abgelegt und
+           nie wiedergefunden worden. */
+        var key=(SESS3[pl.s]?'3':'4')+':'+pl.s+':'+idx;
         if(v)profile.swaps[key]=v;else delete profile.swaps[key];
         set('profile',profile);applyProfile();renderDay();
         closeSheet();
@@ -11729,7 +12007,7 @@ function syncSettings(){
   $('setStart').value=ST;
   $('u-h').textContent=ul();$('u-w').textContent=uw();$('u-w2').textContent=uw();
 }
-$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();drawW();refresh();testCalc();});
+$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildPost();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();drawW();refresh();testCalc();});
 $('setUnits').addEventListener('change',function(){
   var oldW=fromDisp(nv('f-w'),'w'),oldH=fromDisp(nv('f-h'),'l');
   cfg.units=this.value;saveCfg();
@@ -11738,11 +12016,19 @@ $('setUnits').addEventListener('change',function(){
 $('setTrack').addEventListener('change',function(){cfg.track=this.value;
   /* Spurwechsel: gewaehlte Tage muessen zur neuen Anzahl passen, sonst
      Standard-Tage setzen -- stiller Rueckfall auf den Rhythmus waere
-     verwirrender als eine sichtbare Neuvorgabe. */
-  if(cfg.tdays&&cfg.tdays.length&&cfg.tdays.length!==(this.value==='4'?4:3)){
-    cfg.tdays=this.value==='4'?[0,1,3,4]:[0,2,4];
-    if(profile){profile.tdays=cfg.tdays.slice();set('profile',profile);}
+     verwirrender als eine sichtbare Neuvorgabe.
+     profile.days MUSS dabei mitziehen (nicht nur cfg.track): applyProfile()
+     -- bei jedem Neuladen und bei jedem Uebungstausch aufgerufen -- liest
+     profile.days als Wahrheit und schreibt cfg.track darauf zurueck, wenn
+     beide auseinanderlaufen. Ohne diese Zeile sprang die Spur beim naechsten
+     Uebungstausch klammheimlich auf die alte Tageszahl zurueck -- ein
+     bestehender Fehler, der bisher nur bei 3⇄4 nie auffiel, weil kaum jemand
+     nach der Einfuehrung nochmal umschaltet. */
+  var _tr=TRACKS[this.value]||TRACKS['3'];
+  if(cfg.tdays&&cfg.tdays.length&&cfg.tdays.length!==_tr.order.length){
+    cfg.tdays=_tr.dflt.slice();
   }
+  if(profile){profile.days=cfg.track;profile.tdays=(cfg.tdays||[]).slice();set('profile',profile);}
   saveCfg();renderDay();buildWeeks();volBar();refresh();
   if(typeof paintSetProfile==='function')paintSetProfile();});
 $('setMotion').addEventListener('change',function(){cfg.motion=this.value;saveCfg();sizeCv();drawScene();});
@@ -12691,7 +12977,7 @@ function initSliders(){
 }
 initSliders();
 applyI18n();syncSettings();buildThemeGrid();
-buildTiles();buildSkills();buildMob();buildTest();buildSup();buildMeas();buildPR();buildChips();
+buildTiles();buildSkills();buildMob();buildPost();buildTest();buildSup();buildMeas();buildPR();buildChips();
 buildLearn();buildAccess();renderWins();
 /* buildWeeks() lief beim Start, obwohl der Plan-Bereich nicht sichtbar ist --
    und show('plan') baut ihn ohnehin beim Oeffnen. Zwoelf Wochen mit allen
@@ -12769,7 +13055,7 @@ function paintSetProfile(){
      das muss die Zeile darunter SAGEN, sonst wirkt der Plan kaputt. */
   function tdHintPaint(){
     var el=$('setTdHint');if(!el)return;
-    var need=(profile.days==='4')?4:3,n=(profile.tdays||[]).length;
+    var need=(TRACKS[profile.days]||TRACKS['3']).order.length,n=(profile.tdays||[]).length;
     el.textContent=(n===need)?'':(n+' / '+need+(DE
       ?' gewählt — bis alle gewählt sind, läuft der Plan im Start-Rhythmus.'
       :' picked — until all are picked, the plan runs on the start rhythm.'));
@@ -12777,7 +13063,7 @@ function paintSetProfile(){
   tdHintPaint();
   if(tdHost)[].forEach.call(tdHost.querySelectorAll('button'),function(b){
     b.addEventListener('click',function(){
-      var need=(profile.days==='4')?4:3;
+      var need=(TRACKS[profile.days]||TRACKS['3']).order.length;
       var sel=(profile.tdays||[]).slice();
       var w7=parseInt(b.dataset.d,10),ix=sel.indexOf(w7);
       if(ix>=0)sel.splice(ix,1);
@@ -12809,13 +13095,14 @@ if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
     obState.sex=profile.sex||'m';obState.age=profile.age||22;obState.height=profile.height||180;
     obState.weight=profile.weight||78;obState.bf=profile.bf||20;obState.bfTouched=!!profile.bf;
     obState.goal=profile.goal||'muscle';obState.days=profile.days||'3';obState.exp=profile.exp||'1';
-    obState.tdays=(profile.tdays&&profile.tdays.length)?profile.tdays.slice():(obState.days==='4'?[0,1,3,4]:[0,2,4]);
+    obState.tdays=(profile.tdays&&profile.tdays.length)?profile.tdays.slice():(TRACKS[obState.days]||TRACKS['3']).dflt.slice();
     obState.act=profile.act||'1.375';obState.ngoal=profile.ngoal||'300';
     /* Umkehrung nur ungefaehr moeglich: '0' teilen sich drei Kacheln
        (Rekomposition/Maximalkraft/Athletik). Rekomposition ist der
        naechstliegende Stellvertreter fuer "Erhalt". */
     obState.goalphys={'-450':'fat','0':'recomp','300':'muscle'}[obState.ngoal]||'muscle';
-    obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings)};
+    obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings),
+      kb:!!(profile.eq&&profile.eq.kb),cbl:!!(profile.eq&&profile.eq.cbl),mp:!!(profile.eq&&profile.eq.mp),bnd:!!(profile.eq&&profile.eq.bnd)};
     obState.avoid={};if(profile.avoid)Object.keys(profile.avoid).forEach(function(a){if(profile.avoid[a])obState.avoid[a]=true;});
   }
   inIdx=0;
