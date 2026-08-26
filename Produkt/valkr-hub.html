@@ -1327,6 +1327,15 @@
   .slide .ctl{flex:none;width:6.4rem}
   .slide .ctl input{text-align:center;padding-left:.35rem;padding-right:2rem}
   .slide .ctl.hasunit .unit{right:.42rem}
+  /* Handy: die Schiene teilt sich die Zeile mit dem 6,4rem breiten Zahlenfeld
+     und bleibt bei feinen Bereichen (Groesse: 80 Stufen zu 1cm) auf ~175px
+     zusammengequetscht -- ein Antippen, das das Ziel nur knapp verfehlt,
+     reisst den Wert dann spuerbar weit weg. Auf eigener Zeile bekommt der
+     Regler die volle Breite und damit mehr Pixel pro Schritt. */
+  @media (max-width:480px){
+    .slide{flex-direction:column;align-items:stretch;gap:.3rem}
+    .slide .ctl{align-self:flex-end}
+  }
   input[type=range].rng{flex:1;min-width:0;-webkit-appearance:none;appearance:none;
     height:28px;padding:0;border:0;background:transparent;cursor:pointer;touch-action:pan-y}
   input[type=range].rng::-webkit-slider-runnable-track{height:6px;border-radius:999px;
@@ -1922,45 +1931,52 @@
   #intro .valrow{display:flex;align-items:baseline;justify-content:center;gap:.5rem;margin-top:.4rem}
   #intro .valrow b{font-family:var(--fd);font-weight:600;font-size:2.9rem;line-height:1;font-variant-numeric:tabular-nums}
   #intro .valrow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
-  /* Scroll-Rad fuer Alter/Groesse/Gewicht (iOS-Stil): reines CSS
-     scroll-snap, keine JS-Animationsschleife pro Frame -- nur ein
-     entprellter scroll-Handler, der nach dem Ausrollen einmal den
-     zentrierten Wert liest. Das fruehere Ruckeln auf dem A54 kam von einer
-     JS-Ticker-Animation, nicht von nativem Scroll-Snap; die eigentliche
-     Bewegung bleibt beim Browser-Compositor. */
-  #intro .wheelrow{display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-top:.3rem}
-  #intro .wheelbox{position:relative;height:220px;width:8rem}
-  #intro .wheel{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
+  /* Scroll-Rad (iOS-Stil): reines CSS scroll-snap, keine
+     JS-Animationsschleife pro Frame -- nur ein entprellter scroll-Handler,
+     der nach dem Ausrollen einmal den zentrierten Wert liest. Das fruehere
+     Ruckeln auf dem A54 kam von einer JS-Ticker-Animation, nicht von
+     nativem Scroll-Snap; die eigentliche Bewegung bleibt beim
+     Browser-Compositor. Nicht mehr an #intro gebunden -- Alter/Groesse/
+     Gewicht (Einfuehrung) UND die Erinnerungs-Uhrzeit (Einstellungen)
+     nutzen dieselben Klassen, siehe wheelBoxHtml/wheelWire. */
+  .wheelrow{display:flex;flex-direction:column;align-items:center;gap:.4rem;margin-top:.3rem}
+  .wheelbox{position:relative;height:220px;width:8rem}
+  .wheel{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;
     scroll-snap-type:y mandatory;scrollbar-width:none;-ms-overflow-style:none;
     perspective:400px;z-index:1;
     -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 44px,#000 176px,transparent 100%);
     mask-image:linear-gradient(to bottom,transparent 0,#000 44px,#000 176px,transparent 100%)}
-  #intro .wheel::-webkit-scrollbar{display:none}
-  #intro .wheel .wpad{height:88px}
-  #intro .wopt{scroll-snap-align:center;scroll-snap-stop:always;height:44px;
+  .wheel::-webkit-scrollbar{display:none}
+  .wheel .wpad{height:88px}
+  .wopt{scroll-snap-align:center;scroll-snap-stop:always;height:44px;
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;
     font-family:var(--fd);font-variant-numeric:tabular-nums;font-weight:500;
     font-size:1.2rem;color:var(--ink3);transform:rotateX(0deg);
     transition:color .15s,font-size .15s,font-weight .15s,transform .15s,opacity .15s}
-  #intro .wopt.wsel{color:var(--ink);font-weight:700;font-size:1.7rem}
+  .wopt.wsel{color:var(--ink);font-weight:700;font-size:1.7rem}
   /* Gestaffelte 3D-Kippung nach Abstand zur Mitte, wie ein iOS-Picker-Rad --
      reines CSS ueber :has()/+ relativ zu .wsel, kein JS-Ticker: die Klasse
      .wsel wechselt ohnehin nur beim entprellten Scroll-Settle (siehe wSelect),
      nicht pro Frame. */
-  #intro .wopt.wsel+.wopt{transform:rotateX(-32deg);opacity:.7}
-  #intro .wopt.wsel+.wopt+.wopt{transform:rotateX(-52deg);opacity:.35}
-  #intro .wopt:has(+.wopt.wsel){transform:rotateX(32deg);opacity:.7}
-  #intro .wopt:has(+.wopt+.wopt.wsel){transform:rotateX(52deg);opacity:.35}
+  .wopt.wsel+.wopt{transform:rotateX(-32deg);opacity:.7}
+  .wopt.wsel+.wopt+.wopt{transform:rotateX(-52deg);opacity:.35}
+  .wopt:has(+.wopt.wsel){transform:rotateX(32deg);opacity:.7}
+  .wopt:has(+.wopt+.wopt.wsel){transform:rotateX(52deg);opacity:.35}
   /* z-index:1 auf .wheel (oben) haelt die Zahlen ueber diesem Streifen --
      sonst verwischt der eigene backdrop-filter die gerade zentrierte Zahl,
      die er hervorheben soll. */
-  #intro .wheelbar{position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%);
+  .wheelbar{position:absolute;left:0;right:0;top:50%;height:44px;transform:translateY(-50%);
     border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);pointer-events:none;
     background:color-mix(in srgb,var(--aurora) 9%,transparent);
     -webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);
     box-shadow:0 0 10px -2px color-mix(in srgb,var(--aurora) 50%,transparent) inset}
-  #intro .wheelunit{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+  .wheelunit{font-family:var(--fm);font-size:var(--t1);letter-spacing:.16em;text-transform:uppercase;color:var(--ink3)}
+  /* Zwei Raeder nebeneinander (Erinnerungs-Uhrzeit Stunde:Minute) --
+     schmalere Radspalten, damit beide plus Trenner auf 375px passen. */
+  .tpick{flex-direction:row;align-items:center;gap:.15rem;margin-top:.2rem}
+  .tpick .wheelbox{width:4.4rem}
+  .tpick .wheelsep{font-family:var(--fd);font-weight:600;font-size:1.7rem;color:var(--ink);padding-bottom:.05rem}
   #intro input[type="range"].islide{width:100%;height:26px;-webkit-appearance:none;appearance:none;background:none}
   #intro input[type="range"].islide::-webkit-slider-runnable-track{
     height:6px;border-radius:999px;
@@ -2223,8 +2239,13 @@
   /* Meldungen sitzen oben links, klein, und lassen sich wegwischen. Vorher
      sassen sie gross unten in der Mitte -- genau dort, wo waehrend einer
      Einheit der Hauptknopf liegt. Eine Meldung soll informieren, nicht im
-     Weg stehen. */
-  #toast{position:fixed;left:10px;top:calc(10px + env(safe-area-inset-top,0px));
+     Weg stehen.
+     top-Wert unter der Kopfzeile: bei 10px lag die Meldung genau auf dem
+     Zurueck-Pfeil eines Push-Bildschirms und auf dem Bereichstitel -- beide
+     dann drei bis fuenf Sekunden lang nicht antippbar. topwrap/pushhead
+     sind an dieser Stelle rund 60px hoch (skaliert selbst schon mit
+     safe-area-inset-top), 66px lassen ueberall Luft. */
+  #toast{position:fixed;left:10px;top:calc(66px + env(safe-area-inset-top,0px));
     transform:translateX(-118%);z-index:400;
     background:color-mix(in srgb,var(--hero) 90%,transparent);
     backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass);
@@ -2624,10 +2645,11 @@
   .profrow select{background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);color:var(--ink);
     padding:.3rem .5rem;font:inherit;font-size:var(--t3)}
   .profrow .setdays{display:flex;gap:.28rem;flex:none}
-  .profrow .setdays button{width:27px;height:27px;border-radius:999px;border:1px solid var(--line);background:var(--surf2);
-    color:var(--ink3);font-family:var(--fm);text-transform:uppercase;font-size:var(--t1);line-height:1;padding:0;transition:.16s}
-  /* Einzelbuchstaben ohne Sperrung: letter-spacing haengt HINTER jeder Glyphe
-     und wuerde das eine Zeichen im Kreis nach links ruecken. */
+  /* v26.11: Zwei-Buchstaben-Kuerzel (Mo/Di/Mi...) statt einem -- ein Kreis
+     mit fixer Breite quetscht das zweite Zeichen. Kapsel statt Kreis: Breite
+     folgt dem Inhalt, border-radius bleibt gross genug fuer runde Enden. */
+  .profrow .setdays button{min-width:30px;height:27px;padding:0 .4rem;border-radius:999px;border:1px solid var(--line);background:var(--surf2);
+    color:var(--ink3);font-family:var(--fm);text-transform:uppercase;font-size:var(--t1);line-height:1;transition:.16s}
   .profrow .setdays button[aria-pressed="true"]{background:var(--aurora);border-color:var(--aurora);color:var(--hero)}
   /* Auf dem Telefon bekommen die sieben Wochentage eine eigene Zeile.
      Vorher standen sie neben der Beschriftung und mussten sich mit ihr rund
@@ -2640,7 +2662,7 @@
     .profrow:has(.setdays){flex-wrap:wrap}
     .profrow .setdays{flex:1 0 100%;justify-content:space-between;gap:.3rem;margin-top:.55rem}
     .profrow .setdays button{flex:1;width:auto;height:auto;min-height:40px;
-      aspect-ratio:1;max-width:46px;font-size:var(--t3)}
+      padding:0 .3rem;font-size:var(--t3)}
   }
   #setBfSlide{flex:1;min-width:120px;accent-color:var(--aurora)}
   /* ── v17 (Baustelle 3): Stufenbaender im Test. Sechs benannte Segmente,
@@ -3344,7 +3366,7 @@
       <div class="fgrid">
         <div class="field"><label for="f-sex" data-i18n="f.sex">Sex</label><div class="ctl"><select id="f-sex"><option value="m" data-i18n="f.m">Male</option><option value="f" data-i18n="f.f">Female</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" placeholder="20" min="14" max="90"><span class="unit">yrs</span></div></div>
-        <div class="field"><label for="f-h" data-i18n="f.height">Height</label><div class="ctl hasunit"><input id="f-h" type="number" placeholder="180" min="130" max="220"><span class="unit" id="u-h">cm</span></div></div>
+        <div class="field"><label for="f-h" data-i18n="f.height">Height</label><div class="ctl hasunit"><input id="f-h" type="number" placeholder="180" min="140" max="220"><span class="unit" id="u-h">cm</span></div></div>
         <div class="field"><label for="f-w" data-i18n="f.weight">Weight</label><div class="ctl hasunit"><input id="f-w" type="number" placeholder="78" min="35" max="200" step="0.5"><span class="unit" id="u-w">kg</span></div></div>
         <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2" data-i18n="f.a1">Mostly sitting</option><option value="1.375" selected data-i18n="f.a2">On feet some</option><option value="1.55" data-i18n="f.a3">On feet a lot</option><option value="1.725" data-i18n="f.a4">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected data-i18n="f.g1">Build muscle</option><option value="0" data-i18n="f.g2">Maintain</option><option value="-450" data-i18n="f.g3">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
@@ -3631,7 +3653,7 @@
       <div id="ntOpts" hidden>
         <div class="fgrid">
           <div class="field"><label data-i18n="set.ntTrain">Training reminder</label><div class="ctl"><select id="ntTrain"><option value="1" data-i18n="opt.on">On</option><option value="0" data-i18n="opt.off">Off</option></select></div></div>
-          <div class="field"><label data-i18n="set.ntTime">Time</label><div class="ctl"><input id="ntTime" type="time"></div></div>
+          <div class="field"><label data-i18n="set.ntTime">Time</label><div class="ctl"><div class="wheelrow tpick" id="ntTimeWrap"></div></div></div>
           <div class="field"><label data-i18n="set.ntStreak">Streak at risk</label><div class="ctl"><select id="ntStreak"><option value="1" data-i18n="opt.on">On</option><option value="0" data-i18n="opt.off">Off</option></select></div></div>
           <div class="field"><label data-i18n="set.ntWeek">Weekly recap</label><div class="ctl"><select id="ntWeek"><option value="1" data-i18n="opt.on">On</option><option value="0" data-i18n="opt.off">Off</option></select></div></div>
         </div>
@@ -3683,7 +3705,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='26.10';
+var VERSION='26.16';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -7091,6 +7113,16 @@ function renderDay(){
       '<div class="savebar"><button class="tbtn go" id="nextBlockBtn">'+
       (L?'Block '+(blockNo+1)+' starten':'Start block '+(blockNo+1))+'</button></div></div>';
     $('nextBlockBtn').addEventListener('click',startNextBlock);
+  }else if(pl.kind==='rest'){
+    /* Ruhetag verweist auf Mobility statt nur "Erholung" zu behaupten --
+       beweglich bleiben ist an einem trainingsfreien Tag genauso Teil des
+       Plans, nicht dessen Gegenteil. Eigener Klick-Handler, weil data-go
+       nur innerhalb der HEUTE-Kacheln delegiert wird, nicht hier. */
+    bb.innerHTML='<div class="card"><p class="hint">'+(cfg.lang==='de'
+      ?'Kein Trainingstag heisst nicht bewegungslos. Fuenf kurze Drills halten dich locker.'
+      :'A rest day is not a still day. Five short drills keep you loose.')+'</p>'+
+      '<button type="button" class="txtbtn" id="restMobBtn">'+(cfg.lang==='de'?'Mobility ansehen':'View mobility')+'</button></div>';
+    var rmb=$('restMobBtn');if(rmb)rmb.addEventListener('click',function(){show('mobility');});
   }else bb.innerHTML='';
   /* Der Startknopf steht nur an Trainingstagen und nur fuer heute --
      eine gefuehrte Einheit fuer vorgestern ergibt keinen Sinn. */
@@ -7269,7 +7301,8 @@ function ladder(){
     var cls=i<c?'done':(i===c?'cur':'');
     var w=14+(i*(58/Math.max(1,p.ladder.length-1)));
     var b=document.createElement('button');b.className='rung '+cls;
-    b.innerHTML='<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+(i<c?'Cleared':(i===c?'You are here':'Locked'))+'</span>';
+    var stTxt=i<c?(DE?'Geschafft':'Cleared'):(i===c?(DE?'Hier':'You are here'):(DE?'Gesperrt':'Locked'));
+    b.innerHTML='<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+stTxt+'</span>';
     b.querySelector('.lb').textContent=ladLabel(cur,i,s);
     /* Der Katalogname als zweite Zeile, wo es einen gibt. Die Sprosse erklaert
        ("Hände auf einen Tisch"), der Katalogname benennt ("Liegestütz an der
@@ -7383,7 +7416,7 @@ function openSkill(id){
     var b=document.createElement('button');b.className='rung '+cls;
     var pose=skPose(s.id,i);
     var demo=pose?demoHost('r:'+s.id+':'+i,pose,cvar(s.cv),'rdemo'):'';
-    var stTxt=i<prog?(DE?'Geschafft':'Cleared'):(i===prog?(DE?'Du bist hier':'You are here'):(DE?'Gesperrt':'Locked'));
+    var stTxt=i<prog?(DE?'Geschafft':'Cleared'):(i===prog?(DE?'Hier':'You are here'):(DE?'Gesperrt':'Locked'));
     b.innerHTML=demo+'<span class="n">'+(i+1)+'</span><span class="bar" style="width:'+w+'px"></span><span class="lb"></span><span class="st">'+stTxt+'</span>';
     b.querySelector('.lb').textContent=(SD&&SD.steps[i])?SD.steps[i]:st;
     b.addEventListener('click',function(){set('skill_'+s.id,i);openSkill(id);buildSkills();});
@@ -11502,6 +11535,65 @@ function introFinishProfile(){
 }
 function inNextStep(){inIdx=Math.min(ISTEPS.length-1,inIdx+1);renderIntro();}
 var NUMS={age:{min:14,max:80,unit:['years','Jahre']},height:{min:140,max:210,unit:['cm','cm']},weight:{min:40,max:150,unit:['kg','kg']}};
+/* Scroll-Rad (iOS-Stil): ein Bauplan fuer jedes Zahlenrad in der App --
+   Einfuehrung (Alter/Groesse/Gewicht) UND Erinnerungs-Uhrzeit (Stunde/Minute)
+   rufen dieselben drei Funktionen mit eigenen Wertelisten auf. Keine zweite
+   Radimplementierung, siehe CSS unter .wheelrow/.wopt/.wsel (nicht mehr
+   #intro-gebunden, damit auch Einstellungen darauf zugreifen kann). */
+function wheelRange(min,max,step){step=step||1;var a=[];for(var i=min;i<=max;i+=step)a.push(i);return a;}
+function wheelBoxHtml(id,vals,sel,aria,fmt){
+  fmt=fmt||function(v){return v;};
+  var h='<div class="wheelbox"><div class="wheel" id="'+id+'" tabindex="0" role="listbox" aria-label="'+aria+'"><div class="wpad"></div>';
+  vals.forEach(function(v){
+    h+='<div class="wopt'+(v===sel?' wsel':'')+'" data-v="'+v+'" role="option" aria-selected="'+(v===sel)+'">'+fmt(v)+'</div>';
+  });
+  h+='<div class="wpad"></div></div><div class="wheelbar" aria-hidden="true"></div></div>';
+  return h;
+}
+/* Verdrahtet ein per wheelBoxHtml erzeugtes Rad: entprellter Scroll-Settle,
+   Klick-zum-Anspringen, Haptik beim Wechsel. onSet(wert) feuert bei jeder
+   Aenderung, der Aufrufer entscheidet was damit passiert. */
+function wheelWire(id,vals,sel,onSet){
+  var WROW=44,wEl=$(id);if(!wEl)return;
+  var wOpts=[].slice.call(wEl.querySelectorAll('.wopt')),cur=sel,beruehrt=false;
+  /* beruehrt haelt fest, ob der naechste Settle von einer echten Beruehrung
+     kommt (Zeigergeraet/Rad/Taste/Klick) -- ein Resize oder eine
+     Bildschirmrotation kann scrollTop auf 0 zuruecksetzen, ohne dass
+     jemand etwas ausgewaehlt hat. Ohne diese Schranke wuerde ein solcher
+     Reset lautlos die Erinnerungszeit auf 00:00 ueberschreiben, siehe
+     Verifikation dieser Aenderung. */
+  function wSelect(idx){
+    idx=Math.max(0,Math.min(wOpts.length-1,idx));
+    var v=vals[idx];
+    if(v!==cur&&navigator.vibrate)navigator.vibrate(10);
+    cur=v;
+    wOpts.forEach(function(o,i){o.classList.toggle('wsel',i===idx);o.setAttribute('aria-selected',String(i===idx));});
+    if(beruehrt){beruehrt=false;onSet(v);}
+  }
+  wEl.scrollTop=Math.max(0,vals.indexOf(sel))*WROW;
+  var wTimer=null;
+  function wSettle(){wSelect(Math.round(wEl.scrollTop/WROW));}
+  ['pointerdown','touchstart','wheel','keydown'].forEach(function(evt){
+    wEl.addEventListener(evt,function(){beruehrt=true;},{passive:true});
+  });
+  wEl.addEventListener('scroll',function(){clearTimeout(wTimer);wTimer=setTimeout(wSettle,120);});
+  wEl.addEventListener('scrollend',wSettle);
+  wOpts.forEach(function(o,i){
+    o.addEventListener('click',function(){beruehrt=true;wEl.scrollTo({top:i*WROW,behavior:'smooth'});});
+  });
+  /* Tastatur: das native Feld, das dieses Rad ersetzt, war mit Pfeiltasten
+     bedienbar -- das darf beim Umbau nicht verloren gehen. */
+  wEl.addEventListener('keydown',function(ev){
+    var idx=Math.round(wEl.scrollTop/WROW);
+    if(ev.key==='ArrowDown')idx=Math.min(wOpts.length-1,idx+1);
+    else if(ev.key==='ArrowUp')idx=Math.max(0,idx-1);
+    else if(ev.key==='Home')idx=0;
+    else if(ev.key==='End')idx=wOpts.length-1;
+    else return;
+    ev.preventDefault();
+    wEl.scrollTo({top:idx*WROW,behavior:'smooth'});
+  });
+}
 function chDone(c,k){var ch=ICH[k]||0;return ch>c||(k==='b1'&&c===1)||(k==='b2'&&c<=2)||(k==='b3'&&c<=3)||(k==='ready');}
 function inHead(k,L){
   var ch=ICH[k]||0,chip=$('inChip'),back=$('inBack'),prog=$('inProg');
@@ -11548,7 +11640,7 @@ function inOpts(k,L){
 }
 /* Wochentags-Schritt: Pillen bauen und in Ort und Stelle nachfaerben --
    ein voller renderIntro je Klick wuerde die Einblend-Animation neu anstossen. */
-var TDLET=[['M','T','W','T','F','S','S'],['M','D','M','D','F','S','S']];
+var TDLET=[['Mo','Tu','We','Th','Fr','Sa','Su'],['Mo','Di','Mi','Do','Fr','Sa','So']];
 var TDCOLS=['var(--aurora)','var(--ice)','var(--ember)','var(--brass)'];
 function tdNeed(){return (TRACKS[obState.days]||TRACKS['3']).order.length;}
 function tdaysHtml(L){
@@ -11644,11 +11736,7 @@ function renderIntro(){
   if(k==='sex'){
     h+='<div class="figstage" id="figStage">'+bfFigure(obState.bf,obState.sex)+'</div>'+inOpts(k,L);
   }else if(NUMS[k]){
-    h+='<div class="wheelrow"><div class="wheelbox"><div class="wheel" id="nvWheel" tabindex="0" role="listbox" aria-label="'+NUMS[k].unit[L]+'"><div class="wpad"></div>';
-    for(var nv=NUMS[k].min;nv<=NUMS[k].max;nv++){
-      h+='<div class="wopt'+(nv===obState[k]?' wsel':'')+'" data-v="'+nv+'" role="option" aria-selected="'+(nv===obState[k])+'">'+nv+'</div>';
-    }
-    h+='<div class="wpad"></div></div><div class="wheelbar" aria-hidden="true"></div></div>'+
+    h+='<div class="wheelrow">'+wheelBoxHtml('nvWheel',wheelRange(NUMS[k].min,NUMS[k].max),obState[k],NUMS[k].unit[L])+
        '<span class="wheelunit">'+NUMS[k].unit[L]+'</span></div>';
   }else if(k==='bf'){
     var est=bfEstimate(),estPct=Math.round((est-8)/37*100);
@@ -11676,8 +11764,8 @@ function renderIntro(){
              ?'Dein Browser lässt hier keine Hinweise zu. Das lässt sich nur in seinen eigenen Einstellungen ändern.'
              :'Your browser does not allow notifications here. That can only be changed in its own settings.')+'</p>'
          : '<div class="opts">'+
-           '<button type="button" class="opt'+(erlaubt?' on':'')+'" data-nt="1"><b>'+(DE?'Ja, erinnere mich':'Yes, remind me')+'</b><span>'+(DE?'An Trainingstagen und wenn die Serie kippt':'On training days and when the streak is at risk')+'</span></button>'+
-           '<button type="button" class="opt" data-nt="0"><b>'+(DE?'Nein danke':'No thanks')+'</b><span>'+(DE?'Später in den Einstellungen nachholbar':'Can be turned on later in settings')+'</span></button>'+
+           '<button type="button" class="opt'+(erlaubt?' on':'')+'" data-nt="1"><b>'+(DE?'Ja, erinnere mich':'Yes, remind me')+'</b> <span>'+(DE?'an Trainingstagen und wenn die Serie kippt':'on training days and when the streak is at risk')+'</span></button>'+
+           '<button type="button" class="opt" data-nt="0"><b>'+(DE?'Nein danke,':'No thanks,')+'</b> <span>'+(DE?'später in den Einstellungen nachholbar':'can be turned on later in settings')+'</span></button>'+
            '</div>')+
        '</div>';
   }else if(OBL[k]&&k!=='sex'){
@@ -11757,25 +11845,8 @@ function renderIntro(){
     });
   }
   if(NUMS[k]){
-    /* Scroll-Rad: WROW muss die feste Zeilenhoehe aus der CSS-Regel .wopt
-       treffen (44px), sonst landet der berechnete Index daneben. */
-    var WROW=44,wEl=$('nvWheel'),wOpts=[].slice.call(wEl.querySelectorAll('.wopt'));
-    function wSelect(idx){
-      idx=Math.max(0,Math.min(wOpts.length-1,idx));
-      var v=NUMS[k].min+idx;
-      if(v!==obState[k]&&navigator.vibrate)navigator.vibrate(10);
+    wheelWire('nvWheel',wheelRange(NUMS[k].min,NUMS[k].max),obState[k],function(v){
       obState[k]=v;if(k!=='age')obState.bfTouched=false;
-      wOpts.forEach(function(o,i){o.classList.toggle('wsel',i===idx);o.setAttribute('aria-selected',String(i===idx));});
-    }
-    wEl.scrollTop=(obState[k]-NUMS[k].min)*WROW;
-    var wTimer=null;
-    function wSettle(){wSelect(Math.round(wEl.scrollTop/WROW));}
-    wEl.addEventListener('scroll',function(){clearTimeout(wTimer);wTimer=setTimeout(wSettle,120);});
-    wEl.addEventListener('scrollend',wSettle);
-    wOpts.forEach(function(o){
-      o.addEventListener('click',function(){
-        wEl.scrollTo({top:(parseInt(o.dataset.v,10)-NUMS[k].min)*WROW,behavior:'smooth'});
-      });
     });
   }
   if(k==='bf'){
@@ -12987,7 +13058,7 @@ document.addEventListener('touchstart',function(e){
    nicht eingegeben. */
 function initSliders(){
   pairSlider('f-age',{min:14,max:90,step:1,empty:20});
-  pairSlider('f-h',{min:130,max:220,step:1,unit:'l',empty:180});
+  pairSlider('f-h',{min:140,max:220,step:1,unit:'l',empty:180});
   pairSlider('f-w',{min:35,max:200,step:0.5,unit:'w',empty:78});
   pairSlider('y-sleep',{min:3,max:12,step:0.5,dec:1,empty:7});
 }
@@ -13046,7 +13117,7 @@ function paintSetProfile(){
   h+=row('height',DE?'Größe':'Height',profile.height||180,'cm');
   h+=row('weight',DE?'Gewicht':'Weight',profile.weight||78,'kg');
   var tdSel=(profile.tdays&&profile.tdays.length)?profile.tdays.slice().sort(function(a,b){return a-b;}):[];
-  var tdLet=DE?['M','D','M','D','F','S','S']:['M','T','W','T','F','S','S'];
+  var tdLet=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mo','Tu','We','Th','Fr','Sa','Su'];
   var tdBtns='';
   for(var w7=0;w7<7;w7++){tdBtns+='<button type="button" data-d="'+w7+'" aria-pressed="'+(tdSel.indexOf(w7)>=0)+'">'+tdLet[w7]+'</button>';}
   h+='<div class="profrow"><span class="pk">'+(DE?'Trainingstage':'Training days')+'</span><span class="setdays" id="setTdays">'+tdBtns+'</span></div>'+
@@ -13478,6 +13549,31 @@ function ntCheck(){
     }
   }
 }
+/* Erinnerungs-Uhrzeit als zwei Scroll-Raeder (Stunde 0-23, Minute im
+   5-Minuten-Schritt -- fuer einen Hinweis reicht das, siehe ntCheck()'s
+   min>=ntMin(c.time)-Schwelle). Baut nur neu, wenn sich der gespeicherte
+   Wert seit dem letzten Aufruf geaendert hat -- sonst wuerde jede Aenderung
+   an ntTrain/ntStreak/ntWeek (die ebenfalls ntPaint ausloesen) das gerade
+   bediente Rad unter der Hand neu aufbauen. Wiederverwendet wheelBoxHtml/
+   wheelWire vom Einfuehrungs-Rad (Alter/Groesse/Gewicht), keine zweite
+   Radimplementierung. */
+function ntTimeBuild(time){
+  var wrap=$('ntTimeWrap');if(!wrap)return;
+  if(wrap.dataset.v===time)return;
+  var DE=cfg.lang==='de';
+  var hh=parseInt(time.slice(0,2),10)||0,mm=parseInt(time.slice(3,5),10)||0;
+  mm=Math.min(55,Math.round(mm/5)*5);
+  var hrs=wheelRange(0,23),mins=wheelRange(0,55,5);
+  function pad(v){return v<10?'0'+v:''+v;}
+  wrap.innerHTML=wheelBoxHtml('ntTimeH',hrs,hh,DE?'Stunde':'Hour',pad)+
+    '<span class="wheelsep" aria-hidden="true">:</span>'+
+    wheelBoxHtml('ntTimeM',mins,mm,DE?'Minute':'Minute',pad);
+  wrap.dataset.v=pad(hh)+':'+pad(mm);
+  if(wrap.dataset.v!==time){var c0=ntGet();c0.time=wrap.dataset.v;ntSave(c0);}
+  function commit(){var c=ntGet();c.time=wrap.dataset.v;ntSave(c);}
+  wheelWire('ntTimeH',hrs,hh,function(v){hh=v;wrap.dataset.v=pad(hh)+':'+pad(mm);commit();});
+  wheelWire('ntTimeM',mins,mm,function(v){mm=v;wrap.dataset.v=pad(hh)+':'+pad(mm);commit();});
+}
 function ntPaint(){
   var ask=$('ntAskRow'),opts=$('ntOpts'),note=$('ntNote');
   if(!ask||!opts||!note)return;
@@ -13491,7 +13587,7 @@ function ntPaint(){
     $('ntTrain').value=String(c.train);
     $('ntStreak').value=String(c.streak);
     $('ntWeek').value=String(c.week);
-    $('ntTime').value=c.time;
+    ntTimeBuild(c.time);
     note.textContent=DE
       ? 'Punktgenau, solange die App offen ist. War sie zu, kommt der Hinweis beim n\u00e4chsten \u00d6ffnen nach. Eine Web-App kann ohne eigenen Server keine Uhrzeit garantieren \u2014 und einen Server wollen wir nicht, weil deine Push-Adresse dann bei einem Fremden l\u00e4ge.'
       : 'Exact while the app is open. If it was closed, the reminder arrives on your next visit. Without a server of our own a web app cannot guarantee a time \u2014 and a server would put your push address in someone else\u0027s hands.';
@@ -13516,12 +13612,11 @@ function ntPaint(){
       if(p&&p.then)p.then(function(){ntPaint();if(ntOK())ntCheck();});
     }catch(e){}
   });
-  ['ntTrain','ntStreak','ntWeek','ntTime'].forEach(function(id){
+  ['ntTrain','ntStreak','ntWeek'].forEach(function(id){
     var el=$(id);if(!el)return;
     el.addEventListener('change',function(){
       var c=ntGet();
-      if(id==='ntTime')c.time=el.value||ntStd().time;
-      else if(id==='ntTrain')c.train=(+el.value)?1:0;
+      if(id==='ntTrain')c.train=(+el.value)?1:0;
       else if(id==='ntStreak')c.streak=(+el.value)?1:0;
       else c.week=(+el.value)?1:0;
       ntSave(c);ntPaint();
