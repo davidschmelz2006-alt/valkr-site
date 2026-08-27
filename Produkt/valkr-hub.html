@@ -801,17 +801,28 @@
   .habheat i.tr{background:color-mix(in srgb,var(--ember) 75%,var(--surf))}
   .habheat i.ms{background:color-mix(in srgb,var(--ink3) 30%,var(--surf2))}
   .habheat i.td{outline:1.5px solid var(--ink);outline-offset:1px}
-  /* Reihenfolge und Breite der Dashboard-Kacheln. Kalorien und Gewicht tragen
-     beide ein Bild -- ein Ring mit Zahlen darin und eine Kurve. Auf halber
-     Breite waere der Ring zu klein zum Ablesen und die Kurve zu kurz, um eine
-     Richtung zu zeigen. Also volle Breite, und die zwei reinen Zahlen-Kacheln
-     teilen sich die Zeile darunter. */
-  .habgrid .hcCal{grid-column:1/-1;order:1;align-items:center}
-  .habgrid .hcWeight{grid-column:1/-1;order:2}
-  .habgrid .hcTrain{order:3}
+  /* Dashboard-2x2: Kalorien, Trainings, Schritte, Gewohnheiten gleich gross
+     -- vier Kennzahlen auf einen Blick statt einer, die die ganze Zeile
+     traegt. Gewicht war vorher die zweite Vollbreite-Karte neben Kalorien;
+     jetzt eine fuenfte Karte unter dem Raster, weiterhin mit der Kurve, die
+     auf Viertelbreite nicht lesbar waere. Boost bleibt die letzte Zeile. */
+  .habgrid .hcCal{order:1;align-items:center}
+  .habgrid .hcTrain{order:2}
+  .habgrid .hcSteps{order:3}
   .habgrid .hcStreak{order:4}
-  .habgrid .hcBoost{grid-column:1/-1;order:5;min-height:0;align-items:center;text-align:center}
+  .habgrid .hcWeight{grid-column:1/-1;order:5}
+  .habgrid .hcBoost{grid-column:1/-1;order:6;min-height:0;align-items:center;text-align:center}
   .habcard.hcCal em{align-self:flex-start}
+  .habcard.hcCal .calring{width:84px}
+  .habcard.hcCal .calmid b{font-size:var(--t6)}
+  .habcard.hcCal .calmid span{font-size:9px}
+  .habcard.hcTrain .track,.habcard.hcSteps .track{height:4px;border-radius:999px;
+    background:var(--surf2);overflow:hidden;margin-top:auto}
+  .habcard.hcTrain .track i,.habcard.hcSteps .track i{display:block;height:100%;
+    border-radius:999px;background:var(--aurora)}
+  .habcard.hcSteps .sub,.habcard.hcTrain .sub{display:block;font-size:var(--t1);
+    color:var(--ink3);margin:0}
+  .habcard.hcStreak .habheat{margin-top:.2rem}
   /* Kalorien: der Ring steht mittig, gegessen und uebrig stehen IM Ring.
      Vorher stand ein kleiner Ring links und dieselbe Aussage nochmal als
      Text darunter -- zwei Orte fuer eine Zahl. */
@@ -2992,7 +3003,7 @@
   <button type="button" id="rundock" hidden>
     <span class="rd">
       <b id="rdName">—</b>
-      <em><span id="rdProg"></span></em>
+      <em><span id="rdProg"></span><span id="rdTime"></span></em>
     </span>
     <span class="rdGo" id="rdGo">Weiter</span>
   </button>
@@ -3713,7 +3724,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='26.18';
+var VERSION='26.20';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8007,17 +8018,33 @@ function closeRun(){
 /* Leiste der laufenden Einheit unten. Sie liest denselben Zustand wie der
    Trainingsmodus -- keine zweite Quelle, keine Gefahr, dass beide etwas
    anderes behaupten. */
+var dockTi=null;
+/* Nur der Zeit-Textknoten wird sekuendlich/alle 20s angefasst -- ein
+   dockPaint() je Tick wuerde Name, Fortschritt und Knopf ohne Grund neu
+   schreiben und denselben Jank einfuehren, den runTick() (oben) schon einmal
+   vermieden hat. */
+function dockTime(){
+  var t=$('rdTime');if(!t)return;
+  if(!run||!run.t0){t.textContent='';return;}
+  t.textContent=' · '+runMinutes()+' min';
+}
 function dockPaint(){
   var d=$('rundock');if(!d)return;
   var it=runValid()?runItems():null;
   var offen=$('runner')&&$('runner').classList.contains('on');
-  if(!it||offen){d.hidden=true;document.body.classList.remove('hasrun');return;}
+  if(!it||offen){
+    d.hidden=true;document.body.classList.remove('hasrun');
+    if(dockTi){clearInterval(dockTi);dockTi=null;}
+    return;
+  }
   var DE=cfg.lang==='de',pl=plan(TODAY);
   for(var vz=1;vz<=14&&pl.kind!=='train';vz++)pl=plan(add(TODAY,vz));
   $('rdName').textContent=pl.title||(DE?'Einheit':'Session');
   $('rdProg').textContent=(DE?'Übung ':'Exercise ')+Math.min(run.ex+1,it.length)+'/'+it.length;
+  dockTime();
   $('rdGo').textContent=DE?'Weiter':'Resume';
   d.hidden=false;document.body.classList.add('hasrun');
+  if(!dockTi)dockTi=setInterval(dockTime,20000);
 }
 (function(){
   var d=$('rundock');if(!d)return;
@@ -10745,6 +10772,87 @@ function zaehlAuf(el,schluessel,bis){
     if(u<1)requestAnimationFrame(schritt);
   });
 }
+/* ---------- Schrittzaehler -------------------------------------------
+   Es gibt keine Pedometer-API im Browser (die "Generic Sensor API
+   Pedometer" ist in keinem Browser implementiert) -- das hier ist
+   Peak-Detection auf dem rohen Beschleunigungsbetrag von DeviceMotionEvent.
+   Laeuft nur im Vordergrund, bei offener Seite und wachem Bildschirm --
+   kein Hintergrund-Tracking wie eine native App. Eine echte Grenze von
+   Web-Technik, keine Abkuerzung.
+   ponytail: Schwelle/Mindestabstand sind ein vernuenftiger Startwert fuer
+   Gehen, kein kalibrierter Wert -- auf echtem Geraet beim Gehen pruefen und
+   PEDO_THRESH/PEDO_MIN_MS nachziehen. */
+var PEDO_GOAL=8000,PEDO_THRESH=1.15,PEDO_MIN_MS=300;
+var pedoState='idle'; /* idle | active | denied | unsupported */
+var pedoGrav=9.81,pedoRising=false,pedoLastT=0,pedoGotEvt=false;
+var pedoData=get('pedo',{d:'',n:0});
+if(pedoData.d!==iso(TODAY))pedoData={d:iso(TODAY),n:0};
+function pedoHandler(e){
+  var a=e.accelerationIncludingGravity;
+  /* Desktop-Chrome feuert oft genau EIN devicemotion mit lauter null-Werten
+     und dann nichts mehr -- das ist die Art des Browsers, "kein Sensor" zu
+     sagen, ohne das Ereignis ganz wegzulassen. pedoGotEvt darf deshalb erst
+     bei echten Werten wahr werden, sonst haengt die Karte für immer in
+     "active" fest, ohne je einen Schritt zu zaehlen. */
+  if(!a||a.x==null)return;
+  pedoGotEvt=true;
+  var mag=Math.sqrt(a.x*a.x+a.y*a.y+a.z*a.z);
+  /* Gleitender Mittelwert als Schwerkraft-Basislinie -- die Abweichung
+     davon ist der Ausschlag eines Schritts. */
+  pedoGrav=pedoGrav*0.9+mag*0.1;
+  var dev=mag-pedoGrav,now=Date.now();
+  if(dev>PEDO_THRESH&&!pedoRising&&(now-pedoLastT)>PEDO_MIN_MS){
+    pedoRising=true;pedoLastT=now;
+    if(pedoData.d!==iso(TODAY))pedoData={d:iso(TODAY),n:0};
+    pedoData.n++;set('pedo',pedoData);pedoPaint();
+  }else if(dev<PEDO_THRESH*0.5){pedoRising=false;}
+}
+function pedoPaint(){
+  var box=document.querySelector('#homeHabits .hcSteps');if(!box)return;
+  var b=box.querySelector('b.big');if(b)b.textContent=String(pedoData.n);
+  var i=box.querySelector('.track i');
+  if(i)i.style.width=Math.min(100,Math.round(pedoData.n/PEDO_GOAL*100))+'%';
+}
+function pedoStart(){
+  if(pedoState==='active')return;
+  if(typeof DeviceMotionEvent==='undefined'){pedoState='unsupported';renderHome();return;}
+  function begin(){
+    pedoState='active';pedoGotEvt=false;
+    window.addEventListener('devicemotion',pedoHandler);
+    renderHome();
+    /* Kein einziges Ereignis nach 4s: Desktop ohne Sensor oder iOS ohne
+       HTTPS -- dann meldet requestPermission oft trotzdem "granted", aber
+       es kommt nie ein Event. Das ist der einzige Weg, das zu erkennen. */
+    setTimeout(function(){
+      if(!pedoGotEvt){
+        window.removeEventListener('devicemotion',pedoHandler);
+        pedoState='unsupported';renderHome();
+      }
+    },4000);
+  }
+  /* iOS braucht eine Erlaubnis per Klick-Geste, Android/Desktop meist nicht. */
+  if(typeof DeviceMotionEvent.requestPermission==='function'){
+    DeviceMotionEvent.requestPermission().then(function(r){
+      if(r==='granted')begin();else{pedoState='denied';renderHome();}
+    }).catch(function(){pedoState='denied';renderHome();});
+  }else begin();
+}
+function pedoCardHtml(){
+  var DE=cfg.lang==='de';
+  var pct=Math.min(100,Math.round(pedoData.n/PEDO_GOAL*100));
+  var em='<em>'+(DE?'Schritte':'Steps')+'</em>',num='<b class="big">'+pedoData.n+'</b>';
+  var bar='<div class="track"><i style="width:'+pct+'%"></i></div>';
+  if(pedoState==='active')
+    return '<div class="habcard hcSteps">'+em+num+bar+
+      '<p class="sub">'+(DE?'heute · Ziel '+PEDO_GOAL:'today · goal '+PEDO_GOAL)+'</p></div>';
+  if(pedoState==='unsupported')
+    return '<div class="habcard hcSteps">'+em+num+bar+
+      '<p class="sub">'+(DE?'Kein Bewegungssensor gefunden':'No motion sensor found')+'</p></div>';
+  var txt=pedoState==='denied'?(DE?'Zugriff verweigert · erneut antippen':'Access denied · tap to retry')
+    :(DE?'Antippen zum Starten':'Tap to start');
+  return '<button type="button" class="habcard hcSteps" data-pedo="1">'+em+num+bar+
+    '<p class="sub">'+txt+'</p></button>';
+}
 function renderHome(){
   var heroEl=$('homeHero'),habEl=$('homeHabits'),upEl=$('homeCards');
   if(!heroEl)return;
@@ -10798,22 +10906,23 @@ function renderHome(){
     '<circle id="calArc" cx="64" cy="64" r="'+RR+'" fill="none" stroke="var(--aurora)" stroke-width="10" stroke-linecap="round" stroke-dasharray="'+RC.toFixed(1)+'" stroke-dashoffset="'+RC.toFixed(1)+'" transform="rotate(-90 64 64)"/></svg>'+
     '<div class="calmid"><b id="calNum">0</b><span>'+(ziel?(DE?'von ':'of ')+ziel:'kcal')+'</span></div></div>'+
     '<p class="sub">'+(ziel?('<b id="calLeft">0</b> '+(DE?'übrig':'left')):(DE?'Rechner einrichten':'set up the calculator'))+'</p></button>';
-  /* Trainings-Heatmap: 28 Tage, heute umrandet. */
-  var zellen='',n=0,woSoll=0,woIst=0;
-  for(var i=27;i>=0;i--){
-    var dd=add(TODAY,-i),p2=plan(dd),cls='';
-    if(p2.w>=1&&p2.w<=12&&p2.kind==='train'){cls=dayDone(iso(dd))?'tr':(i>0?'ms':'');}
-    if(i===0)cls+=(cls?' ':'')+'td';
-    zellen+='<i style="--i:'+n+'"'+(cls?' class="'+cls+'"':'')+'></i>';n++;
-  }
+  /* Trainings: Wochenfortschritt als Balken statt 28-Tage-Heatmap -- die
+     Heatmap war fuer eine Vollbreite-Karte gedacht, auf Viertelbreite im
+     2x2-Raster waeren 28 Zellen nicht mehr lesbar. Die Frage dieser Kachel
+     ist "diese Woche", nicht "die letzten vier Wochen". */
+  var woSoll=0,woIst=0;
   for(var j=0;j<7;j++){
     var dw=add(STD,(Math.min(12,Math.max(1,wkOf(TODAY)))-1)*7+j),pw=plan(dw);
     if(pw.kind==='train'){woSoll++;if(dayDone(iso(dw)))woIst++;}
   }
+  var trPct=woSoll?Math.round(woIst/woSoll*100):0;
   h+='<button type="button" class="habcard hcTrain" data-go="train"><em>'+(DE?'Trainings':'Sessions')+'</em>'+
     '<svg class="go" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>'+
-    '<div class="habheat">'+zellen+'</div>'+
-    '<p class="sub">'+woIst+'/'+woSoll+' '+(DE?'diese Woche':'this week')+'</p></button>';
+    '<b class="big">'+woIst+'<small> / '+woSoll+'</small></b>'+
+    '<div class="track"><i style="width:'+trPct+'%"></i></div>'+
+    '<p class="sub">'+(DE?'diese Woche':'this week')+'</p></button>';
+  /* Schritte: echte Peak-Detection auf DeviceMotion, siehe pedoStart(). */
+  h+=pedoCardHtml();
   /* Gewicht als Kurve. Eine Zahl sagt, wo du stehst; eine Kurve sagt,
      wohin du gehst -- und das ist beim Gewicht die einzige Frage.
      Bei nur einem Wert eine glatte Linie ohne Punkte: ein Diagramm aus einem
@@ -10846,10 +10955,18 @@ function renderHome(){
     '<b class="big">'+(kg?wz(kg)+'<small> '+uw()+'</small>':'–')+'</b>'+
     wSpark+
     '<p class="sub">'+wSub+'</p></button>';
-  /* Serie. */
-  var st=String(streakVal||0);
+  /* Gewohnheiten/Serie: Zahl plus 7-Tage-Mini-Heatmap -- derselbe Baustein,
+     der vorher bei Trainings stand (Tagkacheln), nur sieben statt 28 und
+     nach dayDone() statt nach Plan, weil genau das die Serie zaehlt. */
+  var st=String(streakVal||0),stZellen='';
+  for(var si=6;si>=0;si--){
+    var sdd=add(TODAY,-si),scls=dayDone(iso(sdd))?'tr':'';
+    if(si===0)scls+=(scls?' ':'')+'td';
+    stZellen+='<i'+(scls?' class="'+scls+'"':'')+'></i>';
+  }
   h+='<div class="habcard hcStreak"><em>'+(DE?'Serie':'Streak')+'</em>'+
-    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?(st==='1'?'Tag':'Tage'):(st==='1'?'day':'days'))+'</small></b></div>';
+    '<b class="big" style="color:var(--ember)">'+st+'<small> '+(DE?(st==='1'?'Tag':'Tage'):(st==='1'?'day':'days'))+'</small></b>'+
+    '<div class="habheat">'+stZellen+'</div></div>';
   /* Boost: 1-Klick-Ausrede-Killer, kein Ziel, keine Navigation -- deshalb
      eigenes data-boost statt data-go, siehe Klick-Weiche unten. */
   h+='<button type="button" class="habcard hcBoost" data-boost="1"><em>'+(DE?'Mir ist langweilig':'I’m bored')+'</em>'+
@@ -10897,6 +11014,8 @@ function renderHome(){
     if(r){ openSessOv(); return; }
     var bo=e.target.closest('[data-boost]');
     if(bo){ boostOpen(); return; }
+    var pd=e.target.closest('[data-pedo]');
+    if(pd){ pedoStart(); return; }
     var b=e.target.closest('[data-go]');if(b)show(b.dataset.go);
   });
 });
