@@ -3705,7 +3705,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='26.16';
+var VERSION='26.17';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -4507,13 +4507,20 @@ function exAvail(e){var q=e[2];
   if(q==='mp')return !!eq.mp;
   if(q==='bnd')return !!eq.bnd;
   return true;}
-function exAllowed(e){if(!profile||!profile.avoid)return true;var f=e[3]||'';
-  if(profile.avoid.wrist&&f.indexOf('w')>-1)return false;
-  if(profile.avoid.shoulder&&f.indexOf('s')>-1)return false;
-  if(profile.avoid.knee&&f.indexOf('k')>-1)return false;
-  if(profile.avoid.elbow&&f.indexOf('e')>-1)return false;
-  if(profile.avoid.lowback&&f.indexOf('l')>-1)return false;
-  if(profile.avoid.hip&&f.indexOf('h')>-1)return false;
+/* Schmerzstelle aus dem Check-in (PAIN-Werte, siehe unten) -> derselbe
+   Schluessel wie profile.avoid. Session-lokal ueber run.pain, siehe exAllowed. */
+var PAINKEY={Wrist:'wrist',Elbow:'elbow',Shoulder:'shoulder','Lower back':'lowback',Knee:'knee',Hip:'hip'};
+function exAllowed(e){var f=e[3]||'';
+  var av=(profile&&profile.avoid)||{};
+  /* run.pain gilt nur waehrend der laufenden Einheit (run.on) -- endet die
+     Einheit, greift wieder nur die dauerhafte profile.avoid-Einstellung. */
+  var rp=(run&&run.on&&run.pain)?PAINKEY[run.pain]:null;
+  if((av.wrist||rp==='wrist')&&f.indexOf('w')>-1)return false;
+  if((av.shoulder||rp==='shoulder')&&f.indexOf('s')>-1)return false;
+  if((av.knee||rp==='knee')&&f.indexOf('k')>-1)return false;
+  if((av.elbow||rp==='elbow')&&f.indexOf('e')>-1)return false;
+  if((av.lowback||rp==='lowback')&&f.indexOf('l')>-1)return false;
+  if((av.hip||rp==='hip')&&f.indexOf('h')>-1)return false;
   return true;}
 /* Anzeigename und Hinweis in der eingestellten Sprache.
 
@@ -7795,7 +7802,7 @@ function beep(){
    gesperrtes Handy oder ein versehentliches Schliessen die Einheit nicht
    verliert -- genau das passiert waehrend eines Trainings staendig.
    Die Pausendauer kommt aus dem Block, nicht aus einem festen Wert. */
-var run=get('run',null),runTi=null;
+var run=get('run',null),runTi=null,runPainSwap=false;
 function runItems(){
   var pl=plan(TODAY);
   /* v22.1: am freien Tag zaehlt die naechste geplante Einheit -- die Karte
@@ -7805,7 +7812,24 @@ function runItems(){
   if(pl.kind!=='train')return null;
   var adj=(run&&run.on&&run.key===iso(TODAY)&&run.adj)||0;
   var xl=get('exlog',{});
+  /* Schmerz heute (run.pain, Check-in): nur fuer DIESE Einheit greift
+     zusaetzlich zu profile.avoid ein weiterer Filter -- exAllowed() prueft
+     run.pain schon selbst, hier nur noch der Tausch, falls der Standard-
+     Slot dadurch rausfaellt. swapUsed haelt die Session-Namen auseinander,
+     genau wie applyProfile() es fuer profile.avoid schon tut. */
+  var painOn=!!(run&&run.on&&run.key===iso(TODAY)&&run.pain);
+  var swapUsed={};
+  runPainSwap=false;
   var it=sessOf(pl).items.map(function(x){
+    var l=x.l;
+    if(painOn&&x.id&&!x.v){
+      var cur=exFind(x.id,l);
+      if(cur&&!exAllowed(cur)){
+        var alt=exPick(x.id,cur[1],swapUsed);
+        if(alt){l=alt[0];runPainSwap=true;}
+      }
+    }
+    if(x.id)swapUsed[l]=1;
     /* Einmessen im Training: hat das Muster noch keine Basis, sind es drei
        Saetze "max" -- die eingetragenen Wiederholungen setzen danach Leiter
        und Basiswert. Kein separater Test vor dem ersten Training mehr. */
@@ -7822,7 +7846,7 @@ function runItems(){
          Mehrsatz-Metaanalysen (Schoenfeld 2017, Ralston 2017):
          Anfaenger fahren mit 2-3 Saetzen fast optimal, mehr als 5 lohnt
          im Wochenvolumen kaum. Deshalb harte Grenzen 2 bis 5. */
-      var h=xl[x.l];
+      var h=xl[l];
       if(!cal&&h&&h.reps&&h.reps.length){
         var top=parseInt(String(pl.ph.reps).split('-')[1]||pl.ph.reps,10)||12;
         var rp=(logs[h.d]&&logs[h.d].rpe)||0;
@@ -7831,7 +7855,7 @@ function runItems(){
         else if(rp>0&&rp<=6&&h.reps.every(function(n){return n>=top;}))pa=1;
       }
     }
-    return{id:x.id,l:x.l,k:x.k,fixed:!!x.v,label:x.v||null,cal:cal,
+    return{id:x.id,l:l,k:x.k,fixed:!!x.v,label:x.v||null,cal:cal,
            sets:x.v?1:(cal?3:Math.min(5,Math.max(2,pl.ph.sets+adj+pa))),
            reps:cal?'max':pl.ph.reps,rest:pl.ph.rs};
   });
@@ -7910,7 +7934,7 @@ function runValid(){
   return run&&run.on&&run.key===iso(TODAY)&&runItems();
 }
 function saveRun(){set('run',run);}
-function startRun(adj,micro){
+function startRun(adj,micro,pain){
   var it=runItems();if(!it)return;
   /* Bei bereits abgehakten Bloecken vorn einsteigen, wo es weitergeht.
      Im Micro-Workout gilt dieselbe Regel, nur innerhalb der Auswahl. */
@@ -7919,7 +7943,19 @@ function startRun(adj,micro){
   else{while(i<it.length&&dn[i])i++;if(i>=it.length)i=0;}
   run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',left:0,reps:{},t0:Date.now(),adj:adj||0};
   if(mic)run.micro=mic;
-  saveRun();openRun();
+  /* Schmerz aus dem Check-in: nur dieser eine run -- siehe exAllowed()/
+     runItems(). Endet automatisch mit dem Abhaken der Einheit (run.on). */
+  if(pain)run.pain=pain;
+  saveRun();
+  if(pain){
+    runItems();
+    if(runPainSwap){
+      var DE=cfg.lang==='de',loc=DE?(PAIN_DE[pain]||pain):pain;
+      coachSay(DE?'Angepasst':'Adjusted',
+        DE?loc+'schonende Alternativen gewählt':loc+'-friendly alternatives chosen');
+    }
+  }
+  openRun();
 }
 function openRun(){
   $('runner').classList.add('on');histArm();$('runner').setAttribute('aria-hidden','false');
@@ -11282,7 +11318,7 @@ function renderSessOv(){
       if(nv)logs[k].note=logs[k].note?(logs[k].note+'. '+nv):nv;
       set('logs',logs);
       soShow(false);
-      startRun(soEnergy==='1'?-1:0);
+      startRun(soEnergy==='1'?-1:0,false,soPainV!=='None'?soPainV:null);
       paintLog();refresh();
     });
   }
