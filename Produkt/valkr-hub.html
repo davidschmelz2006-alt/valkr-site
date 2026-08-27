@@ -3724,7 +3724,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='26.20';
+var VERSION='26.21';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6591,13 +6591,12 @@ function visGroup(g){
 function drawSub(g,cur){
   var el=$('subnav');if(!el)return;
   var G=visGroup(g);
-  if(!G||!G.l){el.hidden=true;el.innerHTML='';if(typeof stickyMess==='function')stickyMess();return;}
+  if(!G||!G.l){el.hidden=true;el.innerHTML='';return;}
   var L=cfg.lang==='de'?1:0;
   el.hidden=false;
   el.innerHTML=G.v.map(function(x,i){
     return '<button role="tab" data-view="'+x+'" aria-selected="'+(x===cur)+'">'+G.l[i][L]+'</button>';
   }).join('');
-  if(typeof stickyMess==='function')stickyMess();
 }
 
 function show(n,fromBack){
@@ -6659,8 +6658,22 @@ function show(n,fromBack){
     /* Der Kalender muss neu vermessen werden, sobald die Ansicht wirklich
        sichtbar ist. Beim ersten Zeichnen liegt sie noch auf display:none,
        und dann sind alle Hoehen null -- der Kalender waere zugeklappt
-       unsichtbar. */
-    if(typeof calLayout==='function')calLayout(false);
+       unsichtbar. v26.21: die Messung braucht offsetHeight, also einen
+       erzwungenen Sync-Reflow direkt nach dem classList.toggle('on') oben --
+       gemessen 5.7ms, der groesste Einzelposten im Tab-Wechsel. Auf den
+       naechsten Frame verschoben: die Uebergangsanimation (laeuft schon,
+       .on sitzt bereits im DOM) startet ohne diese Wartezeit, der Kalender
+       schnappt einen Frame spaeter unsichtbar schnell in Position -- in den
+       allermeisten Faellen sowieso auf denselben Wert wie vorher, weil sich
+       an Fenstergroesse und Auswahl seit dem letzten Besuch nichts geaendert
+       hat. Sichtbarkeits-Check gegen die Ansicht darunter, die inzwischen
+       schon wieder gewechselt haben kann (schnelles Hin-und-Her-Klicken) --
+       sonst wuerde hier auf einer unsichtbaren, display:none-Ansicht
+       gemessen und calLayout haette lauter Nullen zum Rechnen. */
+    if(typeof calLayout==='function'){
+      var trEl=$(VS['train']);
+      requestAnimationFrame(function(){if(trEl.classList.contains('on'))calLayout(false);});
+    }
   }
   if(n==='ranks'){evalAch(false);renderRanks();}
   if(n==='stat')drawStat();
@@ -9921,13 +9934,15 @@ function hideTip(){
 /* Klebe-Koepfe (MCI-Scrollverhalten): Kopf- und Abschnittsleisten-Hoehe als
    CSS-Variablen -- einmal gemessen beim Start, bei Groessenwechsel und beim
    Bereichswechsel, nie waehrend des Scrollens. */
-function stickyMess(){
-  var b=document.querySelector('.bar');
-  if(b)document.documentElement.style.setProperty('--barH',b.offsetHeight+'px');
-  var s=$('subnav');
-  document.documentElement.style.setProperty('--subH',(s&&!s.hidden?s.offsetHeight:0)+'px');
-}
-window.addEventListener('resize',function(){requestAnimationFrame(stickyMess);},{passive:true});
+/* stickyMess() (v26.20 und frueher) mass --barH/--subH per erzwungenem
+   Sync-Reflow (offsetHeight) bei jedem drawSub() -- also bei jedem einzigen
+   Tab-/Abschnittswechsel. Beide CSS-Variablen hatten keinen Verbraucher mehr:
+   die Abschnittsleiste sitzt seit dem Umbau auf "sticky im Kopfblock" (siehe
+   Kommentar bei #subnav weiter oben) im normalen Fluss, nicht mehr separat
+   geklebt. Reiner Messkosten ohne Wirkung -- gemessen 1-2.8ms pro Wechsel,
+   in jedem der geprueften Uebergaenge der zweitgroesste Posten nach
+   calLayout(). Ersatzlos gestrichen statt verschoben: Code, der nichts mehr
+   liest, muss nicht performant nichts lesen. */
 function buildSup(){
   var L=cfg.lang==='de'?1:0;
   $('supgrid').innerHTML=SUP.map(function(s){
@@ -13310,7 +13325,7 @@ if(profile){
   var bac=$('f-act');if(bac&&profile.act)bac.value=profile.act;
   var bgo=$('f-goal');if(bgo&&profile.ngoal!==undefined)bgo.value=String(profile.ngoal);
 }
-renderDay();streak();calc();drawW();volBar();stickyMess();
+renderDay();streak();calc();drawW();volBar();
 evalAch(true);
 refresh();mobStopF();
 clockCheck();devSync();applyHue();syncHueUI();syncThemeColor();
