@@ -2058,8 +2058,6 @@
   .bodyCap{margin:0;font-family:var(--fm);font-size:var(--t2);color:var(--ink3);text-align:center;line-height:1.5}
   .bz{transition:fill .45s ease}
   .bz:hover{filter:brightness(1.25)}
-  @keyframes bestGlow{0%,100%{opacity:.25;r:15}50%{opacity:.6;r:19}}
-  @keyframes bestSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
   /* Rang je Muster als Kartenraster -- Liftoffs "Dein Rang".
      Aufbau je Karte: Stufenname klein und in der Stufenfarbe ganz oben, dann
      der Name des Musters, dann das Abzeichen, unten Balken und LP. Genau die
@@ -2154,7 +2152,12 @@
   .segc i{position:absolute;top:3px;bottom:3px;left:3px;border-radius:999px;
     background:var(--surf3);width:var(--segw,50%);
     transform:translateX(var(--segx,0px));
-    transition:transform .28s cubic-bezier(.34,1.25,.5,1),width .28s cubic-bezier(.34,1.25,.5,1);
+    /* Nur transform animiert -- width haengt allein an der Options-Anzahl
+       (--segw), die sich innerhalb einer Segmentleiste nie aendert. Eine
+       Transition darauf war also nie aktiv, stand dem Kommentar oben aber
+       widersprechend im Weg: sie taeuschte eine Layout-Animation vor, die
+       im Betrieb nie feuert. */
+    transition:transform .28s cubic-bezier(.34,1.25,.5,1);
     z-index:-1}
   .segc button{flex:1;min-width:0;min-height:40px;padding:0 .5rem;border:0;background:none;
     border-radius:999px;font-family:var(--fd);font-weight:600;font-size:var(--t3);
@@ -2449,7 +2452,12 @@
         behandeln und muss nicht pruefen, ob sie in Nachbarn hineinmalt.
         Bei rund vierzig Karten spart das jede Menge Buchhaltung. */
   @media (max-width:900px){
-    .topwrap,#tabbar,#rundock,#intro .ibox{
+    /* .wheelbar (Scroll-Rad-Markierung) dazu: dahinter laufen beim Ziehen
+       die Zahlen der Reihe durch -- derselbe "es bewegt sich dahinter"-Fall
+       wie oben, nur ausgeloest von der Geste statt von den Partikeln. Radius
+       ist klein (5px) und die Flaeche schmal, aber die Neuberechnung faellt
+       genau waehrend des Ziehens an, wo Ruckeln am meisten auffaellt. */
+    .topwrap,#tabbar,#rundock,#intro .ibox,.wheelbar{
       backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
     .topwrap{background:color-mix(in srgb,var(--bg) 94%,transparent)}
     #tabbar{background:color-mix(in srgb,var(--bg) 92%,transparent)}
@@ -3705,7 +3713,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='26.17';
+var VERSION='26.18';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3772,12 +3780,28 @@ var SYSRED=false;try{SYSRED=matchMedia('(prefers-reduced-motion: reduce)').match
    eben nicht durchscheinend.
 
    deviceMemory kennt nur Chrome. Fehlt der Wert, wird von ausreichend
-   ausgegangen: lieber einmal zu schoen als grundlos abgespeckt. */
+   ausgegangen: lieber einmal zu schoen als grundlos abgespeckt.
+
+   UND statt ODER, bewusst: deviceMemory ist aus Datenschutzgruenden auf
+   maximal 8 gedeckelt und rundet auf grobe Stufen (0.25/0.5/1/2/4/8) --
+   manche Android-Browser melden dabei niedriger, als das Geraet hergibt.
+   hardwareConcurrency kann ebenfalls gedeckelt sein (manche Browser
+   schneiden das aus Fingerprint-Gruenden ab). Mit ODER haette ein einzelner
+   falsch gemeldeter Wert gereicht, um ein 120-Hz-Flaggschiff faelschlich
+   abzuspecken -- genau das Gegenteil von "lieber zu schoen" oben, nur beim
+   zweiten Signal nicht mitgedacht. Mit UND braucht es echte Uebereinstimmung
+   in beiden Signalen; das trifft echte Schwaechlinge (die typischerweise in
+   beidem knapp sind) weiterhin, schont aber Geraete, bei denen nur eine
+   Kennzahl daneben liegt. Fehlt deviceMemory (Safari, Firefox), greift der
+   Fallback oben (ram=8) -- dann kann UND nie mehr ausloesen, selbst bei
+   wenigen Kernen. Das ist ein bewusster Kompromiss: ohne zweites Signal gilt
+   dieselbe Vorsicht wie beim fehlenden Wert selbst, nicht ein drittes,
+   ungeprueftes Kriterium. */
 var SCHWACH=(function(){
   try{
     var kerne=navigator.hardwareConcurrency||8;
     var ram=navigator.deviceMemory||8;
-    return kerne<=4||ram<=3;
+    return kerne<=4&&ram<=3;
   }catch(e){return false;}
 })();
 /* Automatik laesst sich in den Einstellungen ueberstimmen -- zum Testen auf
@@ -3846,7 +3870,18 @@ function pairSlider(num,opt){
     var d=slDec(rec);
     num.value=d?(+r.value).toFixed(d):String(+r.value);
     slFill(r);
-    num.dispatchEvent(new Event('input',{bubbles:true}));
+    /* Ein Fingerzug am Regler loest das native input-Ereignis oft mehrfach
+       je Bild aus. Das synthetische Ereignis auf dem Zahlenfeld haengen
+       Dutzende Listener ab (calc(), refresh() -- neun Funktionen, mehrere
+       innerHTML-Neubauten), ungebuendelt also ein voller App-Durchlauf pro
+       Tick statt pro Bild. Zahlenfeld und Fuellstand bleiben synchron (oben
+       laufen sie unveraendert bei jedem Tick mit), nur die teure Kette
+       wartet auf das naechste Bild. */
+    if(rec._raf)return;
+    rec._raf=requestAnimationFrame(function(){
+      rec._raf=null;
+      num.dispatchEvent(new Event('input',{bubbles:true}));
+    });
   });
   num.addEventListener('input',function(){slSync(rec);});
   slSync(rec);
@@ -7995,8 +8030,18 @@ function runStartTi(){
     if(!run||run.ph!=='rest'){runStopTi();return;}
     run.left--;
     if(run.left<=0){runStopTi();beep();burst(window.innerWidth/2,window.innerHeight/2,14);runAdvance();}
-    else{saveRun();runPaint();}
+    /* runPaint() statt runTick() wuerde hier auch Segmentleiste (rnSegs) und
+       Punktereihe (rnDots) jede Sekunde per innerHTML neu bauen, obwohl sich
+       waehrend der Pause nur die Uhr aendert -- run.ex/run.set bleiben stehen,
+       bis die Pause endet. runTick() schreibt nur die Ziffer. */
+    else{saveRun();runTick();}
   },1000);
+}
+/* Nur die Pausenuhr: die einzige Anzeige, die sich waehrend run.ph==='rest'
+   sekuendlich wirklich aendert. Phasenwechsel (Satz fertig, naechste Uebung,
+   Pause beginnt) laufen weiter ueber das volle runPaint(). */
+function runTick(){
+  var big=$('rnBig');if(big)big.textContent=fmt(Math.max(0,run.left));
 }
 /* Ein Satz ist fertig: entweder kommt der naechste Satz oder die naechste
    Uebung. Dazwischen liegt immer die Pause -- ausser am Ende. */
@@ -12167,10 +12212,34 @@ $('setSpar').addEventListener('change',function(){
    Hub auf einem fuenf Jahre alten Telefon fluessig laeuft, laesst sich auf
    einem Entwicklerrechner nicht feststellen -- dort ist immer alles fluessig.
    Wer im Park steht, kann jetzt nachsehen statt zu raten, und die beiden
-   Einstellungen gegeneinander messen. */
+   Einstellungen gegeneinander messen.
+
+   Eine feste Schwelle (frueher: ab 55 "fluessig") ist auf 60 Hz geeicht. Auf
+   einem 120-Hz-Handy, das nur 60fps schafft -- die Haelfte dessen, was der
+   Bildschirm koennte -- haette sie trotzdem "fluessig" gemeldet und genau das
+   Problem versteckt, das David gemeldet hat. Der Browser hat keine API fuer
+   die Bildschirm-Wiederholrate, aber rAF liefert sie indirekt: der kuerzeste
+   Abstand zwischen zwei Bildern IST ein Bildschirm-Takt (bei 120 Hz ~8,3ms,
+   bei 60 Hz ~16,6ms). Einzelne Ausreisser (Timer-Jitter, ein GC-Tick) wuerden
+   das nackte Minimum verfaelschen, deshalb ein robuster niedriger Wert (das
+   schnellste Zehntel der gemessenen Abstaende) statt des Minimums selbst. */
 function fpsMessen(cb){
-  var f=0,t0=performance.now();
-  function step(t){f++;if(t-t0<1000)requestAnimationFrame(step);else cb(Math.round(f/((t-t0)/1000)));}
+  var f=0,t0=performance.now(),letzt=t0,dt=[];
+  function step(t){
+    f++;
+    if(t>letzt)dt.push(t-letzt);
+    letzt=t;
+    if(t-t0<1000){requestAnimationFrame(step);return;}
+    dt.sort(function(a,b){return a-b;});
+    var schnell=dt.length?dt[Math.floor(dt.length*0.1)]:16.7;
+    var hz=Math.round(1000/schnell);
+    /* Auf gaengige Taktraten einrasten, sonst rauscht die Anzeige (z.B. 118
+       statt 120 durch Messungenauigkeit). */
+    var BEKANNT=[60,90,120,144,165,240],naechste=BEKANNT[0];
+    BEKANNT.forEach(function(c){if(Math.abs(c-hz)<Math.abs(naechste-hz))naechste=c;});
+    if(Math.abs(naechste-hz)<=8)hz=naechste;
+    cb(Math.round(f/((t-t0)/1000)),hz);
+  }
   requestAnimationFrame(step);
 }
 function sparNote(){
@@ -12182,12 +12251,16 @@ function sparNote(){
     ? (DE?('Automatisch — gerade '+(SPAR?'an':'aus')+'.'):('Automatic — currently '+(SPAR?'on':'off')+'.'))
     : (SPAR?(DE?'Erzwungen an.':'Forced on.'):(DE?'Erzwungen aus.':'Forced off.')));
   el.textContent=stand+' '+geraet+(DE?'. Bildrate wird gemessen …':'. Measuring frame rate …');
-  fpsMessen(function(fps){
+  fpsMessen(function(fps,hz){
     /* Nur schreiben, wenn der Hinweis noch derselbe ist -- sonst ueberschreibt
        eine alte Messung eine neue Einstellung. */
     if(!$('sparNote'))return;
-    var urteil=fps>=55?(DE?'flüssig':'smooth'):fps>=40?(DE?'brauchbar':'usable'):(DE?'zu langsam — Sparmodus einschalten':'too slow — turn the mode on');
-    $('sparNote').textContent=stand+' '+geraet+'. '+fps+' '+(DE?'Bilder/s':'fps')+' — '+urteil+'.';
+    /* Urteil relativ zum GERAET, nicht zu einer festen 60-Hz-Annahme: bei
+       60 Hz ergibt das dieselben Schwellen wie vorher (54/39 statt 55/40,
+       Rundungsdifferenz ohne Bedeutung), bei 120 Hz verdoppeln sie sich mit. */
+    var urteil=fps>=hz*0.9?(DE?'flüssig':'smooth'):fps>=hz*0.65?(DE?'brauchbar':'usable'):(DE?'zu langsam — Sparmodus einschalten':'too slow — turn the mode on');
+    var takt=DE?(', Display ~'+hz+' Hz'):(', display ~'+hz+' Hz');
+    $('sparNote').textContent=stand+' '+geraet+'. '+fps+' '+(DE?'Bilder/s':'fps')+takt+' — '+urteil+'.';
   });
 }
 $('setHealth').addEventListener('change',function(){cfg.health=this.value;saveCfg();syncHealthUI();});
