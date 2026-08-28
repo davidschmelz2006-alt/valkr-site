@@ -927,21 +927,34 @@
   /* Vorschlagsliste der Lebensmittel-Suche im Mahlzeit-Blatt. */
   .mlsug{display:flex;flex-direction:column;gap:.3rem;margin:-.3rem 0 .5rem}
   .mlsug[hidden]{display:none}
-  .mlsugrow{display:flex;flex-direction:column;text-align:left;gap:.1rem;
-    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);
-    padding:.45rem .6rem;cursor:pointer;transition:border-color .16s}
-  .mlsugrow b{font-size:var(--t2);font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .mlsugrow span{font-size:var(--t1);color:var(--ink3);font-family:var(--fm)}
-  .mlsugrow:hover{border-color:var(--aurora)}
   /* Suche zuerst: Eingabe und Scanner in einer Zeile, statt der Scanner als
      eigener Vollbreite-Knopf ueber dem Feld -- das war der Umweg, den jede
      Mahlzeit brauchte, bevor man ueberhaupt zu tippen anfing. */
-  #sheet .mlsearchctl{display:flex;align-items:center;gap:.4rem}
-  #sheet .mlsearchctl input{flex:1;min-width:0}
-  #sheet .mlscanbtn{flex:none;width:38px;height:38px;border-radius:999px;
+  #sheet .mlsearchctl,#v-food .mlsearchctl{display:flex;align-items:center;gap:.4rem}
+  #sheet .mlsearchctl input,#v-food .mlsearchctl input{flex:1;min-width:0}
+  #sheet .mlscanbtn,#v-food .mlscanbtn{flex:none;width:38px;height:38px;border-radius:999px;
     display:flex;align-items:center;justify-content:center;
     border:1px solid var(--line);background:var(--surf2);color:var(--ink2);transition:.16s}
-  #sheet .mlscanbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  #sheet .mlscanbtn:hover,#v-food .mlscanbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  /* v29: Hinzufuegen-Seite. Zeilen wie die Eintragszeilen der Mahlzeit-
+     Karten (.mrow-Sprache): Name und Metazeile links, kcal rechts,
+     Trennlinie OBEN wie bei .mrow (unten stuende nach der letzten Zeile
+     eine schwebende Linie) -- keine Kaesten-in-Kaesten. Einziger
+     bewusster Unterschied: mehr Polster, die Zeilen sind hier die
+     Haupt-Tippflaechen einer ganzen Seite. */
+  #foodBody{padding-top:.4rem}
+  #v-food .savebar .tbtn{min-height:44px}
+  .frow{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;background:none;
+    border:0;border-top:1px solid var(--line2);border-radius:0;padding:.72rem .1rem;
+    color:var(--ink);font-family:var(--fb);cursor:pointer;transition:opacity .16s}
+  .frow:hover{opacity:.8}
+  .frow .fn{flex:1;min-width:0}
+  .frow .fn b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t3);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .frow .fn i{display:block;font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.08em;color:var(--ink3);margin-top:.1rem}
+  .frow .fk{font-family:var(--fd);font-weight:600;font-size:var(--t3);
+    font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink2)}
   /* Zuletzt gegessen: Schnellzugriff, solange das Suchfeld leer ist. */
   .mlrchip{border:1px solid var(--line);background:var(--surf2);color:var(--ink2);
     border-radius:999px;padding:.4rem .8rem;font-family:var(--fb);font-size:var(--t3);
@@ -953,8 +966,8 @@
      zurueckgeholt. Gleiches Spiel bei den Vorschlags-/Zuletzt-Zeilen. */
   #sheet .mlqchips .mlrchip{width:auto;display:inline-flex;align-items:center;justify-content:center;
     gap:0;padding:.4rem .8rem;margin-bottom:0;border-radius:999px;text-align:center}
-  #sheet .mlsugrow{display:flex;flex-direction:column;align-items:flex-start;text-align:left;
-    gap:.1rem;padding:.45rem .6rem;margin-bottom:0;border-radius:var(--r1)}
+  /* (.mlsugrow ist mit dem Umzug der Suche auf die Vollbild-Seite weg --
+     die Zeilen heissen jetzt .frow und teilen die .mrow-Sprache.) */
   /* Manuelle Makros: eingeklappt bis eine Quelle feststeht (Suche, Zuletzt,
      Scan) oder jemand ausdruecklich selbst eintragen will. Dieselbe
      Kastenlogik wie .dsh, damit der Abstand zwischen den Feldern beim
@@ -3537,6 +3550,15 @@
     </details>
   </section>
 
+  <!-- v29: Hinzufuegen als eigene Vollbild-Seite (YAZIO). Das Blatt wuchs
+       und schrumpfte mit jeder Eingabe und die Tastatur schoss waehrend der
+       Einblend-Animation hoch -- eine feste Seite mit ruhiger Liste ersetzt
+       es. Inhalt baut openMeal() in #foodBody. -->
+  <section class="view pushv" id="v-food">
+    <div class="pushhead"><button type="button" class="pushback" aria-label="Zurück"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg></button><b id="foodTitle">Hinzufügen</b></div>
+    <div id="foodBody"></div>
+  </section>
+
   <!-- v19: Vollbild-Scanner (MCI-Kamera). Zwei Modi: Barcode liest live,
        Tabelle friert das Bild ein und liest die Naehrwerttabelle per
        Texterkennung. Logik in kamStart()/kamStop(). -->
@@ -3830,7 +3852,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='28.0';
+var VERSION='29.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6638,7 +6660,7 @@ function pauseHiddenSvg(){
     svgDecide(s);
   }
 }
-var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',posture:'v-posture',test:'v-test',catalog:'v-catalog',fuel:'v-fuel',kam:'v-kam',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
+var VS={today:'v-today',plan:'v-plan',train:'v-train',ranks:'v-ranks',stat:'v-stat',detail:'v-detail',skills:'v-skills',mobility:'v-mobility',posture:'v-posture',test:'v-test',catalog:'v-catalog',fuel:'v-fuel',kam:'v-kam',food:'v-food',you:'v-you',coach:'v-coach',learn:'v-learn',access:'v-access',settings:'v-settings'};
 
 /* ---------- oberste Ebene: sieben Ziele statt vierzehn -------------------
    Vierzehn Reiter bekommt kein Design aufgeraeumt -- das ist keine Frage von
@@ -6672,12 +6694,12 @@ var GROUP={
   learn:   {v:['learn']},
   settings:{v:['settings','access'],                l:[['Settings','Einstellungen'],['Access','Zugang']]}
 };
-var PUSHV={detail:1,coach:1,learn:1,settings:1,access:1,kam:1};
+var PUSHV={detail:1,coach:1,learn:1,settings:1,access:1,kam:1,food:1};
 function istHandy(){return window.matchMedia&&window.matchMedia('(max-width:640px)').matches;}
 /* Rueckwaerts: welcher Abschnitt gehoert zu welchem Bereich. Damit fuehrt
    jedes vorhandene show('test') weiterhin ans Ziel, ohne dass eine einzige
    Aufrufstelle angefasst werden musste. */
-var PARENT={detail:'train',kam:'fuel'};
+var PARENT={detail:'train',kam:'fuel',food:'fuel'};
 Object.keys(GROUP).forEach(function(g){GROUP[g].v.forEach(function(x){PARENT[x]=g;});});
 
 /* Der Test-Reiter zeigt sich erst, wenn er gebraucht wird: der Hinweistext
@@ -6968,6 +6990,13 @@ document.addEventListener('keydown',function(e){
     if(typeof setOffen!=='undefined'&&setOffen>=0){
       var sv=$('v-settings');
       if(sv&&sv.classList.contains('on')){setIndexShow();return;}
+    }
+    /* Wer aus der Hinzufuegen-Seite heraus scannt, kommt dorthin zurueck --
+       nicht auf den Tab. Der Seiteninhalt steht noch, kamZiel sagt uns,
+       dass der Scan von dort kam (YAZIO kehrt auch zur Suche zurueck). */
+    var kv=$('v-kam');
+    if(kv&&kv.classList.contains('on')&&typeof kamZiel!=='undefined'&&kamZiel){
+      show('food');return;
     }
     popPush();
   });
@@ -8547,7 +8576,7 @@ function mlRevealManual(){
   var s1=$('mlSave'),s2=$('mlSave2');
   if(s1)s1.hidden=false;
   if(s2)s2.hidden=false;
-  var sb=$('sheetBody');if(sb)sb.dataset.fix='1';
+  var sb=$('foodBody');if(sb)sb.dataset.fix='1';
   var lb=$('mlNameLbl');if(lb)lb.textContent='Name';
   var sug=$('mlSug');if(sug){sug.hidden=true;sug.innerHTML='';}
 }
@@ -8708,7 +8737,6 @@ function openMeal(idx,slot){
   var slotName='';
   mealSlots(DE).forEach(function(sl){if(sl[0]===(m.s||'s'))slotName=sl[1];});
   var html=
-    '<h4>'+slotName+' &middot; '+(neu?(DE?'hinzufügen':'add'):(DE?'bearbeiten':'edit'))+'</h4>'+
     '<div class="dsh">'+
       '<div class="field mlsearch"><label for="mlName" id="mlNameLbl">'+(neu?(DE?'Suchen oder eingeben':'Search or type'):'Name')+'</label>'+
         '<div class="ctl mlsearchctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'">'+
@@ -8754,22 +8782,31 @@ function openMeal(idx,slot){
         (neu?'':'<button class="tbtn dngr" data-mlact="del">'+(DE?'Löschen':'Delete')+'</button>')+
       '</div>'+
     '</div>';
-  openSheet(html);
-  $('sheetBody').dataset.meal=(neu?'neu':String(idx));
-  if(neu)delete $('sheetBody').dataset.fix;else $('sheetBody').dataset.fix='1';
-  delete $('sheetBody').dataset.mikro;
-  delete $('sheetBody').dataset.b100;
-  if(!neu&&m.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:m.z,bl:m.bl,sa:m.sa,gf:m.gf});
+  /* Vollbild-Seite statt Blatt: feste Flaeche, die Liste wechselt in sich.
+     Das Blatt wuchs mit jedem Tastendruck und animierte beim Oeffnen gegen
+     die hochschiessende Tastatur an. */
+  var fb=$('foodBody');
+  fb.innerHTML=html;
+  var ft=$('foodTitle');
+  if(ft)ft.textContent=slotName+' · '+(neu?(DE?'hinzufügen':'add'):(DE?'bearbeiten':'edit'));
+  show('food');
+  fb.dataset.meal=(neu?'neu':String(idx));
+  if(neu)delete fb.dataset.fix;else fb.dataset.fix='1';
+  delete fb.dataset.mikro;
+  delete fb.dataset.b100;
+  if(!neu&&m.z!==undefined)fb.dataset.mikro=JSON.stringify({z:m.z,bl:m.bl,sa:m.sa,gf:m.gf});
   /* Je-100-g-Eintrag: Basis und Menge zurueckholen -- das Mengenfeld
      rechnet dann beim Bearbeiten wieder. */
   if(!neu&&m.b&&m.g){
-    $('sheetBody').dataset.b100=JSON.stringify(m.b);
+    fb.dataset.b100=JSON.stringify(m.b);
     var gr0=$('mlGRow');if(gr0){gr0.hidden=false;}
     var gi0=$('mlG');if(gi0)gi0.value=m.g;
   }
   $('mlName').value=m.n;
-  if(neu)$('mlName').focus();
-  if(typeof ctlUpgrade==='function')ctlUpgrade($('sheetBody'));
+  /* Kein Auto-Fokus mehr: er riss die Tastatur mitten in der Einblend-
+     Animation hoch -- zwei Animationen uebereinander, DAS war der Ruckler
+     beim Oeffnen. YAZIO fokussiert auch erst beim Antippen. */
+  if(typeof ctlUpgrade==='function')ctlUpgrade(fb);
   [].forEach.call(document.querySelectorAll('#mslotPick .mslotopt'),function(b){
     b.addEventListener('click',function(){
       $('mlSlot').value=b.dataset.slot;
@@ -8791,11 +8828,12 @@ function openMeal(idx,slot){
   if(recents.length){
     var rc=$('mlRecent');
     rc.innerHTML='<p class="eyebrow" style="margin:0 0 .3rem">'+(DE?'Zuletzt gegessen':'Recent')+'</p>'+
-      recents.map(function(r,i){return '<button type="button" class="mlsugrow" data-r="'+i+'">'+
-        '<b></b><span>'+mealKcal(r)+' kcal · '+mzahl(r.p)+' P · '+mzahl(r.f)+' F · '+mzahl(r.c)+' '+(DE?'KH':'C')+'</span></button>';}).join('');
+      recents.map(function(r,i){return '<button type="button" class="frow" data-r="'+i+'">'+
+        '<span class="fn"><b></b><i>'+mzahl(r.p)+' P · '+mzahl(r.f)+' F · '+mzahl(r.c)+' '+(DE?'KH':'C')+'</i></span>'+
+        '<span class="fk">'+mealKcal(r)+' kcal</span></button>';}).join('');
     rc.hidden=false;
-    var rnm=rc.querySelectorAll('.mlsugrow b');
-    [].forEach.call(rc.querySelectorAll('.mlsugrow'),function(ch,i){
+    var rnm=rc.querySelectorAll('.frow .fn b');
+    [].forEach.call(rc.querySelectorAll('.frow'),function(ch,i){
       rnm[i].textContent=(recents[i].n||'?');
       ch.addEventListener('click',function(){
         var r=recents[i];
@@ -8803,8 +8841,8 @@ function openMeal(idx,slot){
         $('mlName').value=(r.n||'').slice(0,40);
         $('mlP').value=r.p;$('mlF').value=r.f;$('mlC').value=r.c;
         if(r.z!==undefined||r.bl!==undefined||r.sa!==undefined||r.gf!==undefined)
-          $('sheetBody').dataset.mikro=JSON.stringify({z:r.z,bl:r.bl,sa:r.sa,gf:r.gf});
-        else delete $('sheetBody').dataset.mikro;
+          fb.dataset.mikro=JSON.stringify({z:r.z,bl:r.bl,sa:r.sa,gf:r.gf});
+        else delete fb.dataset.mikro;
         mlRevealManual();
         /* Kam der Eintrag aus einer je-100-g-Quelle, bleibt die Portion
            aenderbar: Basis zurueckholen, Mengenfeld zeigen. */
@@ -8821,19 +8859,19 @@ function openMeal(idx,slot){
      setzen, und beim Speichern wandert sie mit in den Eintrag -- die
      Portion bleibt dadurch spaeter aenderbar. */
   function basisSet(x){
-    if(x)$('sheetBody').dataset.b100=JSON.stringify({p:x.p,f:x.f,c:x.c,z:x.z,bl:x.bl,sa:x.sa,gf:x.gf});
-    else delete $('sheetBody').dataset.b100;
+    if(x)fb.dataset.b100=JSON.stringify({p:x.p,f:x.f,c:x.c,z:x.z,bl:x.bl,sa:x.sa,gf:x.gf});
+    else delete fb.dataset.b100;
   }
   function skala(){
     var sugBase=null;
-    try{sugBase=JSON.parse($('sheetBody').dataset.b100||'null');}catch(e){}
+    try{sugBase=JSON.parse(fb.dataset.b100||'null');}catch(e){}
     if(!sugBase)return;
     var g=Math.max(1,parseFloat($('mlG').value)||100)/100;
     $('mlP').value=Math.round(sugBase.p*g*10)/10;
     $('mlF').value=Math.round(sugBase.f*g*10)/10;
     $('mlC').value=Math.round(sugBase.c*g*10)/10;
     if(sugBase.z!==undefined||sugBase.bl!==undefined||sugBase.sa!==undefined||sugBase.gf!==undefined){
-      $('sheetBody').dataset.mikro=JSON.stringify({
+      fb.dataset.mikro=JSON.stringify({
         z:sugBase.z!==undefined?Math.round(sugBase.z*g*10)/10:undefined,
         bl:sugBase.bl!==undefined?Math.round(sugBase.bl*g*10)/10:undefined,
         sa:sugBase.sa!==undefined?Math.round(sugBase.sa*g*100)/100:undefined,
@@ -8846,12 +8884,13 @@ function openMeal(idx,slot){
     if(!liste.length){el.hidden=true;el.innerHTML='';return;}
     el.hidden=false;
     el.innerHTML=liste.map(function(x,i){
-      return '<button type="button" class="mlsugrow" data-sug="'+i+'">'+
-        '<b></b><span>'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal · '+mzahl(x.p)+' P · '+mzahl(x.f)+' F · '+mzahl(x.c)+' '+(DE?'KH':'C')+
-        (x.quelle==='off'?' · OFF':'')+'</span></button>';
+      return '<button type="button" class="frow" data-sug="'+i+'">'+
+        '<span class="fn"><b></b><i>'+mzahl(x.p)+' P · '+mzahl(x.f)+' F · '+mzahl(x.c)+' '+(DE?'KH':'C')+
+        (x.quelle==='off'?' · OFF':'')+'</i></span>'+
+        '<span class="fk">'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal</span></button>';
     }).join('');
-    var namen=el.querySelectorAll('.mlsugrow b');
-    [].forEach.call(el.querySelectorAll('.mlsugrow'),function(row,ri){
+    var namen=el.querySelectorAll('.frow .fn b');
+    [].forEach.call(el.querySelectorAll('.frow'),function(row,ri){
       namen[ri].textContent=liste[+row.dataset.sug].n;
       row.addEventListener('click',function(){
         var wahl=liste[+row.dataset.sug];
@@ -8873,7 +8912,7 @@ function openMeal(idx,slot){
   $('mlName').addEventListener('input',function(){
     /* Stufe 2: das Feld ist der Name, keine Suche mehr -- sonst poppt beim
        Umbenennen die Vorschlagsliste unter die Makros. */
-    if($('sheetBody').dataset.fix==='1')return;
+    if(fb.dataset.fix==='1')return;
     var q=this.value.trim().toLowerCase();
     basisSet(null);$('mlGRow').hidden=true;
     if($('mlRecent')&&recents.length)$('mlRecent').hidden=q.length>0;
@@ -9087,11 +9126,11 @@ $('recipeRow').addEventListener('click',function(e){
        und "Als Rezept merken" ist der EINE Hauptknopf. */
     openMeal(null,'s');
     mlRevealManual();
-    var rh=$('sheetBody').querySelector('h4');
+    var rh=$('foodTitle');
     if(rh)rh.textContent=DE?'Neues Rezept':'New recipe';
     var rs1=$('mlSave');if(rs1)rs1.hidden=true;
     var rsl=$('mlSlotLbl');if(rsl&&rsl.parentNode)rsl.parentNode.hidden=true;
-    var rbtn=$('sheetBody').querySelector('button[data-mlact="rezept"]');
+    var rbtn=$('foodBody').querySelector('button[data-mlact="rezept"]');
     if(rbtn){rbtn.className='tbtn go';rbtn.style.flex='1';}
     return;}
   if(!e.target.closest('#rzAll'))return;
@@ -9136,7 +9175,7 @@ $('recipeRow').addEventListener('click',function(e){
       closeSheet();
       openMeal(null,'s');
       $('mlName').value=r2.n;$('mlP').value=r2.p;$('mlF').value=r2.f;$('mlC').value=r2.c;
-      if(r2.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:r2.z,bl:r2.bl,sa:r2.sa,gf:r2.gf});
+      if(r2.z!==undefined)$('foodBody').dataset.mikro=JSON.stringify({z:r2.z,bl:r2.bl,sa:r2.sa,gf:r2.gf});
       /* Vorher blieb das Blatt in Stufe 1 stehen -- die Werte sassen in
          unsichtbaren Feldern. Jetzt klappt es sichtbar auf. */
       if(typeof mlRevealManual==='function')mlRevealManual();
@@ -10030,14 +10069,18 @@ function kamResult(food){
 }
 function kamUebernehmen(food,g){
   var ziel=kamZiel;kamZiel=null;
-  show('fuel');
+  /* openMeal() zeigt die Hinzufuegen-Seite selbst -- der Umweg ueber den
+     Tab wuerde nur einen zweiten Ansichtswechsel animieren. */
   openMeal(ziel?ziel.idx:null,(ziel&&ziel.slot)||'s');
   $('mlName').value=food.n.slice(0,40);
   $('mlP').value=Math.round(food.p*g*10)/10;
   $('mlF').value=Math.round(food.f*g*10)/10;
   $('mlC').value=Math.round(food.c*g*10)/10;
   if(food.z!==undefined||food.bl!==undefined||food.sa!==undefined||food.gf!==undefined){
-    $('sheetBody').dataset.mikro=JSON.stringify({
+    /* foodBody, nicht sheetBody: der Speicherpfad liest NUR von der
+       Hinzufuegen-Seite -- die alte Blatt-Referenz haette die gescannten
+       Mikronaehrwerte still verloren. */
+    $('foodBody').dataset.mikro=JSON.stringify({
       z:food.z!==undefined?Math.round(food.z*g*10)/10:undefined,
       bl:food.bl!==undefined?Math.round(food.bl*g*10)/10:undefined,
       sa:food.sa!==undefined?Math.round(food.sa*g*100)/100:undefined,
@@ -10047,7 +10090,7 @@ function kamUebernehmen(food,g){
   if(typeof mlRevealManual==='function')mlRevealManual();
   /* Auch der Scan ist eine je-100-g-Quelle: Basis ans Blatt, Menge zeigen --
      dann bleibt die Portion hier und beim spaeteren Bearbeiten aenderbar. */
-  $('sheetBody').dataset.b100=JSON.stringify({p:food.p,f:food.f,c:food.c,z:food.z,bl:food.bl,sa:food.sa,gf:food.gf});
+  $('foodBody').dataset.b100=JSON.stringify({p:food.p,f:food.f,c:food.c,z:food.z,bl:food.bl,sa:food.sa,gf:food.gf});
   var gr=$('mlGRow');if(gr){gr.hidden=false;}
   var gi=$('mlG');if(gi)gi.value=Math.round(g*100);
 }
@@ -10114,22 +10157,21 @@ $('kamEanGo').addEventListener('click',function(){
   if(v.length>=8)kamFood(v);
 });
 $('fuelCam').addEventListener('click',function(){kamZiel=null;show('kam');});
-$('sheetBody').addEventListener('click',function(e){
+$('foodBody').addEventListener('click',function(e){
   if(!e.target.closest('#mlScan'))return;
-  var roh=$('sheetBody').dataset.meal;
+  var roh=$('foodBody').dataset.meal;
   kamZiel={idx:(roh&&roh!=='neu')?+roh:null,slot:($('mlSlot')&&$('mlSlot').value)||'s'};
-  closeSheet();
   show('kam');
 });
 $('mealList').addEventListener('click',function(e){
   var b=e.target.closest('button[data-meal]');if(b)openMeal(+b.dataset.meal);
 });
-$('sheetBody').addEventListener('click',function(e){
+$('foodBody').addEventListener('click',function(e){
   var b=e.target.closest('button[data-mlact]');if(!b)return;
-  var roh=$('sheetBody').dataset.meal,k=iso(fuelTag());
+  var roh=$('foodBody').dataset.meal,k=iso(fuelTag());
   if(!meals[k])meals[k]=[];
   if(b.dataset.mlact==='del'){
-    meals[k].splice(+roh,1);saveMeals();fuelPaint();closeSheet();return;
+    meals[k].splice(+roh,1);saveMeals();fuelPaint();show('fuel');return;
   }
   var eintrag={
     n:($('mlName').value.trim()||(cfg.lang==='de'?'Mahlzeit':'Meal')),
@@ -10140,11 +10182,11 @@ $('sheetBody').addEventListener('click',function(e){
   };
   /* Mikronaehrwerte reisen unsichtbar mit, wenn der Eintrag aus Scanner,
      Suche oder Rezept kam -- das Blatt fragt sie nie ab. */
-  var mk=$('sheetBody').dataset.mikro;
+  var mk=$('foodBody').dataset.mikro;
   if(mk){try{var mo=JSON.parse(mk);eintrag.z=mo.z;eintrag.bl=mo.bl;eintrag.sa=mo.sa;eintrag.gf=mo.gf;}catch(err){}}
   /* Je-100-g-Quelle: Basis und Menge mitspeichern, damit die Portion beim
      Bearbeiten aenderbar bleibt. */
-  var b100=$('sheetBody').dataset.b100,gRow=$('mlGRow');
+  var b100=$('foodBody').dataset.b100,gRow=$('mlGRow');
   if(b100&&gRow&&!gRow.hidden){
     try{eintrag.b=JSON.parse(b100);eintrag.g=Math.max(1,parseFloat($('mlG').value)||100);}catch(err2){}
   }
@@ -10161,7 +10203,7 @@ $('sheetBody').addEventListener('click',function(e){
     return;
   }
   if(roh==='neu')meals[k].push(eintrag);else meals[k][+roh]=eintrag;
-  saveMeals();fuelPaint();closeSheet();
+  saveMeals();fuelPaint();show('fuel');
 });
 function bx(l,v,u,hi){return '<div class="obox'+(hi?' hi':'')+'"><em>'+l+'</em><b>'+v+' <i>'+u+'</i></b></div>';}
 ['f-sex','f-age','f-h','f-w','f-act','f-goal'].forEach(function(id){$(id).addEventListener('input',function(){calc();refresh();});$(id).addEventListener('change',function(){calc();refresh();});});
