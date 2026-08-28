@@ -642,6 +642,36 @@
   #sheet .dshRow b{font-family:var(--fd);font-weight:600;font-size:.95rem;font-variant-numeric:tabular-nums}
   #sheet .savebar{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.2rem}
   #sheet .savebar .tbtn{flex:1 1 auto;min-height:44px}
+  /* Die Sammelregel "#sheet button" oben schlaegt jede reine Klassenregel
+     (ID-Spezifitaet). Bauteile, die im Blatt wie ueberall sonst aussehen
+     sollen, brauchen deshalb hier ihre Gegenregel -- sonst rendern Pille,
+     Hauptknopf und Loeschknopf als identische graue Balken. */
+  #sheet .txtbtn{width:auto;height:38px;padding:0 .95rem;border:0;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:0;
+    color:var(--ink);background:var(--surf3);font-family:var(--fd);font-size:var(--t3);
+    font-weight:600;text-align:center;flex:none;white-space:nowrap;
+    /* .dsh ist eine Flex-Spalte mit stretch -- ohne das hier wuerde die
+       Pille auf volle Blattbreite gezogen. */
+    align-self:flex-start}
+  #sheet .txtbtn:hover{background:var(--line);color:var(--ink);border-color:transparent}
+  #sheet .tbtn{width:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+    margin-bottom:0;text-align:center;font-family:var(--fd);font-size:var(--t4);font-weight:650;
+    border:1px solid color-mix(in srgb,#fff 8%,transparent);
+    padding:.62rem 1rem;border-radius:999px;
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--surf3) 88%,transparent),
+      color-mix(in srgb,var(--surf2) 82%,transparent))}
+  #sheet .tbtn.go{border-color:transparent;color:var(--bg);font-weight:700;
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--aurora) 100%,#fff 0%),
+      color-mix(in srgb,var(--aurora) 84%,#000))}
+  #sheet .tbtn.go:hover{filter:brightness(1.08);border-color:transparent;
+    background:linear-gradient(180deg,
+      color-mix(in srgb,var(--aurora) 100%,#fff 0%),
+      color-mix(in srgb,var(--aurora) 84%,#000))}
+  #sheet .tbtn.dngr{background:color-mix(in srgb,var(--ember) 16%,transparent);
+    color:var(--ember);border-color:transparent}
+  #sheet .tbtn.dngr:hover{background:var(--ember);color:#fff;border-color:transparent}
   #sheet .hint{margin:0;font-size:var(--t2);color:var(--ink3);line-height:1.45}
   #sheet .field{gap:.3rem}
 
@@ -896,45 +926,62 @@
     border:1px solid var(--line);background:var(--surf2);color:var(--ink2);transition:.16s}
   #sheet .mlscanbtn:hover{border-color:var(--aurora);color:var(--aurora)}
   /* Zuletzt gegessen: Schnellzugriff, solange das Suchfeld leer ist. */
-  .mlrchips{display:flex;flex-wrap:wrap;gap:.4rem}
   .mlrchip{border:1px solid var(--line);background:var(--surf2);color:var(--ink2);
     border-radius:999px;padding:.4rem .8rem;font-family:var(--fb);font-size:var(--t3);
     transition:border-color .16s,color .16s}
   .mlrchip:hover{border-color:var(--aurora);color:var(--ink)}
+  /* Die Sammelregel "#sheet button" (ID-Spezifitaet) macht aus jedem Chip
+     sonst einen Vollbreiten-Balken mit Blatt-Polster -- gemessen: vier
+     gestapelte 346px-Riegel statt einer Chip-Reihe. Deshalb ausdruecklich
+     zurueckgeholt. Gleiches Spiel bei den Vorschlags-/Zuletzt-Zeilen. */
+  #sheet .mlqchips .mlrchip{width:auto;display:inline-flex;align-items:center;justify-content:center;
+    gap:0;padding:.4rem .8rem;margin-bottom:0;border-radius:999px;text-align:center}
+  #sheet .mlsugrow{display:flex;flex-direction:column;align-items:flex-start;text-align:left;
+    gap:.1rem;padding:.45rem .6rem;margin-bottom:0;border-radius:var(--r1)}
   /* Manuelle Makros: eingeklappt bis eine Quelle feststeht (Suche, Zuletzt,
      Scan) oder jemand ausdruecklich selbst eintragen will. Dieselbe
      Kastenlogik wie .dsh, damit der Abstand zwischen den Feldern beim
      Aufklappen nicht zusammenfaellt. */
   .mlmanual{display:flex;flex-direction:column;gap:.7rem}
-  /* Mahlzeit-Kacheln: dieselbe Glas-plus-Farbe-Sprache wie die Antwortkarten
-     der Einfuehrung (--oc je Kachel, gefuellt bei Auswahl) statt der
-     schmalen, einfarbigen Segmentleiste von vorher -- eine 2x2-Flaeche mit
-     Icon und Wort statt vier duenner Pillen, in denen laengere Woerter
-     abgeschnitten wurden. Der eigene Haken (.chk) ist die klare
-     Auswahlmarkierung; die Segmentleiste hatte dafuer nur einen kaum
-     sichtbaren Farbwechsel im Hintergrund. */
-  .mslotpick{display:grid;grid-template-columns:repeat(2,1fr);gap:.5rem}
-  .mslotopt{--oc:var(--aurora);position:relative;display:flex;align-items:center;gap:.55rem;
-    text-align:left;padding:.6rem .7rem;border-radius:var(--r2);border:1px solid var(--line);
-    background:linear-gradient(160deg,
-      color-mix(in srgb,var(--surf3) 55%,transparent) 0%,
-      color-mix(in srgb,var(--surf) 72%,transparent) 100%);
-    transition:.16s;min-height:52px}
-  .mslotopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent)}
-  .mslotopt .ic{width:32px;height:32px;flex:none;border-radius:9px;display:flex;align-items:center;justify-content:center;
-    background:color-mix(in srgb,var(--oc) 16%,transparent);color:var(--oc)}
-  .mslotopt .ic svg{width:18px;height:18px}
-  .mslotopt b{font-family:var(--fd);font-weight:600;font-size:.88rem;flex:1;min-width:0}
-  .mslotopt .chk{position:absolute;top:.45rem;right:.45rem;width:16px;height:16px;flex:none;
-    border-radius:50%;border:1.4px solid var(--line2);display:flex;align-items:center;justify-content:center;
-    color:transparent;font-size:10px;transition:.16s}
-  .mslotopt[aria-pressed="true"]{
+  /* v27.0: Makros kompakt in einer Dreierzeile, Mengen-Schnellwahl als
+     Chips, "Zuletzt" als informative Zeilen statt nackter Namens-Chips,
+     Kalorien als eigene grosse Zeile. */
+  .mlmacros{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
+  .mlmacros .field label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .mlqchips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
+  .mlrecent{display:flex;flex-direction:column;gap:.3rem;margin:-.2rem 0 .4rem}
+  .mlrecent[hidden]{display:none}
+  .mlkcalRow{display:flex;align-items:baseline;justify-content:space-between;
+    background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);padding:.55rem .7rem}
+  .mlkcalRow b{font-family:var(--fd);font-weight:700;font-size:var(--t7);font-variant-numeric:tabular-nums}
+  .mlkcalRow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
+  /* v27.0: Mahlzeit-Wahl als EINE kompakte Viererzeile statt 2x2-Flaeche --
+     der Slot ist beim Plus schon gewaehlt, die Zeile bestaetigt ihn nur noch
+     und laesst ihn umsetzen. ALLE Zustaende tragen das #sheet-Praefix, weil
+     die Sammelregel "#sheet button" (ID-Spezifitaet) sonst Vollbreite,
+     Polster, 22px-Aurora-Icons und ihren eigenen Grund hineindrueckt --
+     der gewaehlte Slot sah dadurch exakt aus wie die anderen drei.
+     Gewaehlt heisst jetzt: Rand, Toenung UND Beschriftung/Symbol in der
+     Slotfarbe; ungewaehlt bleibt das Symbol grau. Drei Signale, wie beim
+     .chip-Baustein. */
+  .mslotpick{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
+  #sheet .mslotopt,.mslotopt{--oc:var(--aurora);display:flex;flex-direction:column;align-items:center;gap:.25rem;
+    width:auto;padding:.45rem .2rem;margin-bottom:0;border-radius:var(--r1);border:1px solid var(--line);
+    background:var(--surf2);transition:.16s;min-width:0;text-align:center}
+  #sheet .mslotopt:hover,.mslotopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent);
+    background:var(--surf2)}
+  #sheet .mslotopt .ic,.mslotopt .ic{width:26px;height:26px;flex:none;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--surf3);color:var(--ink3)}
+  #sheet .mslotopt .ic svg,.mslotopt .ic svg{width:15px;height:15px;color:inherit}
+  #sheet .mslotopt b,.mslotopt b{font-family:var(--fm);font-weight:600;font-size:var(--t1);letter-spacing:.02em;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
+  #sheet .mslotopt[aria-pressed="true"],.mslotopt[aria-pressed="true"]{
     border-color:color-mix(in srgb,var(--oc) 60%,transparent);
-    background:linear-gradient(160deg,
-      color-mix(in srgb,var(--oc) 22%,transparent) 0%,
-      color-mix(in srgb,var(--surf3) 78%,transparent) 100%);
-    box-shadow:inset 0 1px 0 0 color-mix(in srgb,#fff 12%,transparent)}
-  .mslotopt[aria-pressed="true"] .chk{border-color:var(--oc);background:var(--oc);color:var(--hero)}
+    background:color-mix(in srgb,var(--oc) 16%,transparent)}
+  #sheet .mslotopt[aria-pressed="true"] .ic,.mslotopt[aria-pressed="true"] .ic{
+    background:color-mix(in srgb,var(--oc) 22%,transparent);color:var(--oc)}
+  #sheet .mslotopt[aria-pressed="true"] b,.mslotopt[aria-pressed="true"] b{color:var(--oc)}
 
   /* ── Leistung auf schwachen Geraeten: lange Listen und das eingebettete
      Buch werden erst gerechnet, wenn sie ins Bild scrollen. Der Browser
@@ -1608,7 +1655,7 @@
   .delta.up{color:var(--aurora)}.delta.flat{color:var(--ink3)}.delta.down{color:var(--ember)}
 
   .chips{display:flex;flex-wrap:wrap;gap:.34rem}
-  .chip{border:1px solid var(--line);background:var(--surf2);padding:.38rem .64rem;border-radius:3px;font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);transition:.18s}
+  .chip{border:1px solid var(--line);background:var(--surf2);padding:.38rem .64rem;border-radius:3px;font-family:var(--fm);font-size:var(--t2);letter-spacing:.08em;text-transform:uppercase;color:var(--ink2);transition:.18s;min-height:34px}
   .chip:hover{transform:translateY(-2px);border-color:var(--ice)}
   /* Gewaehlter Filter: getoent statt vollflaechig. Vorher trug er dieselbe
      volle Akzentfarbe wie der Haupt-Handlungsknopf -- auf dem Trainings-
@@ -2733,14 +2780,25 @@
     border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
   .prrow .mchip svg{width:17px;height:17px}
   /* ── v18: Mahlzeiten-Slots + Barcode-Scanner ── */
-  .mslot{margin-bottom:.7rem}
+  .mslot{margin-bottom:.55rem}
   .mslot:last-child{margin-bottom:0}
-  .mslotHead{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+  /* v27.0: Slot-Zeile wie MCI -- flache Karte, Icon-Kreis links, kcal grau,
+     rechts zwei runde Ghost-Knoepfe: "wie zuletzt" und Plus. */
+  .mslotHead{display:flex;align-items:center;gap:.65rem;background:var(--surf);
+    border:1px solid var(--line);border-radius:var(--r2);padding:.55rem .7rem;
+    min-height:60px;box-shadow:var(--sh);margin-bottom:.35rem}
+  .mslotHead .mchip{width:36px;height:36px;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;
+    color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
+    border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
+  .mslotHead .mchip svg{width:19px;height:19px}
   .mslotHead b{flex:1;min-width:0;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
   .mslotHead .mslotK{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;color:var(--ink3);font-variant-numeric:tabular-nums}
-  .mslotHead .mslotAdd{width:30px;height:30px;border-radius:999px;border:1px solid var(--line);background:var(--surf2);
-    color:var(--ink);font-size:var(--t5);line-height:1;flex:none;transition:.16s}
-  .mslotHead .mslotAdd:hover{border-color:var(--aurora);color:var(--aurora)}
+  .mslotHead .mslotAdd,.mslotHead .mslotRep{width:34px;height:34px;border-radius:999px;border:1px solid var(--line);
+    background:var(--surf2);color:var(--ink);flex:none;transition:.16s;
+    display:flex;align-items:center;justify-content:center}
+  .mslotHead .mslotAdd{font-size:var(--t5);line-height:1}
+  .mslotHead .mslotRep svg{width:16px;height:16px}
+  .mslotHead .mslotAdd:hover,.mslotHead .mslotRep:hover{border-color:var(--aurora);color:var(--aurora)}
   .mslot .prrow{margin-bottom:.35rem}
   /* ── v18: Uebungs-Tausch als Blatt-Liste. Zeilen mit Strichmaennchen-
      Vorschau, aktuelle Wahl markiert, Suche und Filter-Chips darueber. ── */
@@ -3339,19 +3397,11 @@
     </details>
   </section>
   <section class="view" id="v-fuel">
-    <!-- v25.3: die Zielwerte-Kacheln standen vorher in einem geschlossenen
-         Ausklapper ganz unten -- Kcal, Protein, Fett, Kohlenhydrate, die
-         wichtigsten Zahlen des ganzen Tabs, hinter einem Klick. Jetzt stehen
-         sie fest oben, unveraendert aus drawMacros()/macroNow gespeist, nur
-         der Ort ist neu. Rechner und Detailwerte bleiben Ausklapper --
-         die werden selten angefasst und oft nur gelesen. -->
-    <div class="form" id="fuelTargetHead">
-      <div class="savebar" style="justify-content:space-between">
-        <p class="eyebrow" style="margin:0" data-i18n="fuel.targets">Your targets &mdash; edit any of them</p>
-        <button class="tbtn" id="resetMacros" data-i18n="btn.auto">Reset to auto</button>
-      </div>
-      <div class="cards" id="macroCards"></div>
-    </div>
+    <!-- v27.0: die Zielwerte-Kacheln sind zu den Rechner-Feldern in den
+         Ausklapper gezogen. Oben stand zweimal dasselbe: Kacheln UND die
+         Ringkarte direkt darunter zeigen Ziel und Makros. MCI zeigt genau
+         eine Uebersicht und legt die Ziele hinter den CTA
+         "Kalorienberechnung optimieren" -- so jetzt auch hier. -->
     <!-- Derselbe Aufbau wie der Kalender im Training, nicht nur derselbe
          Kasten: Wochentag-Kopfzeile einmal oben (.calhead), darunter nur
          noch Zahlen. Vorher stand der Wochentag in jedem einzelnen Knopf
@@ -3366,31 +3416,36 @@
       <div class="savebar" style="justify-content:space-between;align-items:center">
         <div class="gtitle" style="margin:0"><span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20c0-4.4 3.6-8 8-8s8 3.6 8 8"/><path d="M2.5 20h19M12 8V5.5M9.5 4h5"/></svg></span>
           <div class="gt"><b data-i18n="fuel.today">Eaten today</b></div></div>
-        <button class="tbtn go" id="mealAdd" data-i18n="btn.addMeal">Add meal</button>
       </div>
       <div class="cards" id="mealSum"></div>
       <div class="prlist" id="mealList"></div>
     </div>
+    <!-- Reihenfolge wie MCI: Mahlzeiten, Rezepte, Gewicht, Naehrstoffe. -->
+    <p class="eyebrow" data-i18n="fuel.recipes">Recipes</p>
+    <div class="habgrid" id="recipeRow"></div>
     <div id="fuelWeight"></div>
     <p class="eyebrow" data-i18n="fuel.micro">Nutrients</p>
     <div class="habgrid" id="mikroGrid"></div>
-    <p class="eyebrow" data-i18n="fuel.recipes">Recipes</p>
-    <div class="habgrid" id="recipeRow"></div>
     <details class="fold" id="foldCalc">
       <summary><svg class="fc" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>
-        <span class="ft" data-i18n="fuel.calcFold">Calculator &mdash; your data</span></summary>
+        <span class="ft" data-i18n="fuel.calcFold">Calculator &amp; targets</span></summary>
       <div class="foldBody"><div class="form">
       <div class="gtitle"><span class="ichip" style="--chip:var(--aurora)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3.1-5.6 7-5.6s7 2 7 5.6"/></svg></span>
         <div class="gt"><b data-i18n="fuel.about">About you</b></div></div>
       <div class="fgrid">
         <div class="field"><label for="f-sex" data-i18n="f.sex">Sex</label><div class="ctl"><select id="f-sex"><option value="m" data-i18n="f.m">Male</option><option value="f" data-i18n="f.f">Female</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
-        <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" placeholder="20" min="14" max="90"><span class="unit">yrs</span></div></div>
+        <div class="field"><label for="f-age" data-i18n="f.age">Age</label><div class="ctl hasunit"><input id="f-age" type="number" placeholder="20" min="14" max="90"><span class="unit" data-i18n="f.yrs">yrs</span></div></div>
         <div class="field"><label for="f-h" data-i18n="f.height">Height</label><div class="ctl hasunit"><input id="f-h" type="number" placeholder="180" min="140" max="220"><span class="unit" id="u-h">cm</span></div></div>
         <div class="field"><label for="f-w" data-i18n="f.weight">Weight</label><div class="ctl hasunit"><input id="f-w" type="number" placeholder="78" min="35" max="200" step="0.5"><span class="unit" id="u-w">kg</span></div></div>
         <div class="field"><label for="f-act" data-i18n="f.act">Daily activity</label><div class="ctl"><select id="f-act"><option value="1.2" data-i18n="f.a1">Mostly sitting</option><option value="1.375" selected data-i18n="f.a2">On feet some</option><option value="1.55" data-i18n="f.a3">On feet a lot</option><option value="1.725" data-i18n="f.a4">Physical job</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label for="f-goal" data-i18n="f.goal">Goal</label><div class="ctl"><select id="f-goal"><option value="300" selected data-i18n="f.g1">Build muscle</option><option value="0" data-i18n="f.g2">Maintain</option><option value="-450" data-i18n="f.g3">Lean out</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
       </div>
       <div class="out" id="est"></div>
+      <div class="savebar" style="justify-content:space-between;margin-top:.8rem">
+        <p class="eyebrow" style="margin:0" data-i18n="fuel.targets">Your targets &mdash; edit any of them</p>
+        <button class="tbtn" id="resetMacros" data-i18n="btn.auto">Reset to auto</button>
+      </div>
+      <div class="cards" id="macroCards"></div>
     </div></div>
     </details>
     <details class="fold">
@@ -3398,7 +3453,7 @@
         <span class="ft" data-i18n="fuel.targetDetail">Breakdown &mdash; per kilogram</span></summary>
       <div class="foldBody"><div class="form">
       <div><div class="macrobar" id="mbar"></div>
-        <div class="mkey"><span><u style="background:var(--aurora)"></u>Protein</span><span><u style="background:var(--brass)"></u>Fat</span><span><u style="background:var(--ice)"></u>Carbs</span></div></div>
+        <div class="mkey"><span><u style="background:var(--aurora)"></u>Protein</span><span><u style="background:var(--brass)"></u><span data-i18n="mk.fat">Fat</span></span><span><u style="background:var(--ice)"></u><span data-i18n="mk.carbs">Carbs</span></span></div></div>
       <div class="out" id="perkg"></div>
       <p class="hint" id="f-note"></p>
     </div></div>
@@ -3724,7 +3779,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='26.21';
+var VERSION='27.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -3941,9 +3996,9 @@ var DICT={
     sagt "Uebersicht". */
  'home.habits':['Overview','Übersicht'],'home.improve':['Improve','Verbessern'],
  'fuel.micro':['Nutrients','Nährstoffe'],'fuel.recipes':['Recipes','Rezepte'],
- 'fuel.calcFold':['Calculator — your data','Rechner — deine Daten'],
+ 'fuel.calcFold':['Calculator & targets — your data','Rechner & Ziele — deine Daten'],
  'fuel.targetDetail':['Breakdown — per kilogram','Aufschlüsselung — pro Kilogramm'],
- 'fuel.suppHydr':['Supplements & hydration','Supplements & Flüssigkeit'],
+ 'fuel.suppHydr':['Supplements & hydration','Supplemente & Flüssigkeit'],
  'rk.h':['Ranks and achievements','Ränge und Erfolge'],
  'rk.s':['From your level, not from sweat.','Aus deinem Level, nicht aus Schweiß.'],
  'rk.level':['Level','Level'],'rk.xp':['XP','XP'],'rk.badges':['Badges','Abzeichen'],
@@ -4005,13 +4060,13 @@ var DICT={
  'test.s':['Four tests, 20 minutes. Your lowest score counts.','Vier Tests, 20 Minuten. Der schwächste Wert zählt.'],
  'test.tbl':['Test','Test'],'test.retest':['Retest at week 6 and week 12','Wiederholung in Woche 6 und 12'],
  'test.retestP':['Same warm-up, same standards. Loosening your form only flatters you.','Gleiches Aufwärmen, gleiche Maßstäbe. Lockere Form betrügt nur dich.'],
- 'fuel.h':['Fuel','Ernährung'],'fuel.s':['Mifflin–St Jeor. Tap a target to change it.','Nach Mifflin-St-Jeor. Zielwert antippen zum Ändern.'],
+ 'fuel.h':['Fuel','Ernährung'],'fuel.s':['Log your day — targets sit in the calculator below.','Tagebuch führen — Ziele stehen unten im Rechner.'],
  'fuel.about':['About you','Über dich'],'fuel.targets':['Your targets — edit any of them','Deine Ziele — alles änderbar'],
- 'fuel.today':['Eaten today','Heute gegessen'],'btn.addMeal':['Add meal','Mahlzeit hinzufügen'],'fuel.hydr':['Water and caffeine','Wasser und Koffein'],
+ 'fuel.today':['Eaten today','Heute gegessen'],'fuel.hydr':['Water and caffeine','Wasser und Koffein'],
  'fuel.hydrNote':['Thirst is a decent guide. The number is a floor, not a quota. Caffeine: eight hours before bed.','Durst ist ein guter Maßstab. Die Zahl ist Untergrenze, kein Soll. Koffein: acht Stunden vor dem Schlafen.'],
- 'fuel.supps':['Supplements — hover for the detail','Supplements — für Details drüberfahren'],
+ 'fuel.supps':['Supplements — hover for the detail','Supplemente — für Details drüberfahren'],
  'fuel.suppNote':['Green: evidence is decent. Amber: works for some. Orange: save your money. Not medical advice — ask a doctor if you take medication.','Grün: Datenlage ordentlich. Gelb: wirkt bei manchen. Orange: spar dir das Geld. Keine medizinische Beratung — bei Medikamenten zum Arzt.'],
- 'f.sex':['Sex','Geschlecht'],'f.age':['Age','Alter'],'f.height':['Height','Größe'],'f.weight':['Weight','Gewicht'],
+ 'f.sex':['Sex','Geschlecht'],'f.age':['Age','Alter'],'f.yrs':['yrs','J.'],'mk.fat':['Fat','Fett'],'mk.carbs':['Carbs','KH'],'f.height':['Height','Größe'],'f.weight':['Weight','Gewicht'],
  'f.m':['Male','Männlich'],'f.f':['Female','Weiblich'], 'f.a1':['Mostly sitting','Überwiegend sitzend'],'f.a2':['On feet some','Teils auf den Beinen'], 'f.a3':['On feet a lot','Viel auf den Beinen'],'f.a4':['Physical job','Körperliche Arbeit'], 'f.g1':['Build muscle','Muskeln aufbauen'],'f.g2':['Maintain','Halten'],'f.g3':['Lean out','Abnehmen'],
  'f.act':['Daily activity','Alltagsaktivität'],'f.goal':['Goal','Ziel'],'f.cal':['Calories','Kalorien'],
  'f.pro':['Protein','Protein'],'f.fat':['Fat','Fett'],'f.carb':['Carbs (derived)','Kohlenhydrate (abgeleitet)'],
@@ -8433,6 +8488,33 @@ function mlRevealManual(){
   if(box)box.hidden=false;
   if(tog)tog.hidden=true;
   if(rec)rec.hidden=true;
+  /* Stufe 2: Speichern-Leisten zeigen, Suche stilllegen (das Feld ist ab
+     jetzt der Name), Vorschlagsliste weg. */
+  var s1=$('mlSave'),s2=$('mlSave2');
+  if(s1)s1.hidden=false;
+  if(s2)s2.hidden=false;
+  var sb=$('sheetBody');if(sb)sb.dataset.fix='1';
+  var lb=$('mlNameLbl');if(lb)lb.textContent='Name';
+  var sug=$('mlSug');if(sug){sug.hidden=true;sug.innerHTML='';}
+}
+/* MCI-Doppelaktion am Slot: neben dem Plus ein "wie zuletzt". Holt alle
+   Eintraege dieses Slots vom juengsten frueheren Tag, der welche hat --
+   das uebliche Fruehstueck kostet damit einen Tipp statt vier. */
+function slotLetzte(slot,ohneTag){
+  var tage=Object.keys(meals).sort().reverse();
+  for(var d=0;d<tage.length;d++){
+    if(tage[d]===ohneTag)continue;
+    var hit=(meals[tage[d]]||[]).filter(function(m){return (m.s||'s')===slot;});
+    if(hit.length)return hit;
+  }
+  return [];
+}
+function slotWiederholen(slot){
+  var k=iso(fuelTag()),hit=slotLetzte(slot,k);
+  if(!hit.length)return;
+  if(!meals[k])meals[k]=[];
+  hit.forEach(function(m){meals[k].push(JSON.parse(JSON.stringify(m)));});
+  saveMeals();fuelPaint();
 }
 /* v19: das Tagebuch hat einen waehlbaren Tag (Wochenstreifen), nicht nur
    heute. Alle Lese- und Schreibwege laufen ueber fuelTag(). */
@@ -8503,15 +8585,20 @@ function drawMeals(){
      Icons an beiden Stellen statt einer zweiten Kopie, die auseinanderlaufen
      koennte. */
   var SLOTS=mealSlots(DE);
+  var REPIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6L3.5 8.5"/><path d="M3.5 3.5v5h5"/></svg>';
   var h='';
   SLOTS.forEach(function(sl){
     var eintraege=[];
     ms.forEach(function(m,i){if((m.s||'s')===sl[0])eintraege.push([m,i]);});
     var slotK=0;eintraege.forEach(function(x){slotK+=mealKcal(x[0]);});
+    /* "Wie zuletzt" nur, wenn ein fruehererer Tag diesen Slot hat -- ein
+       toter Knopf waere eine Einladung ins Leere. */
+    var wdh=slotLetzte(sl[0],k).length>0;
     h+='<div class="mslot"><div class="mslotHead">'+
       '<span class="mchip" style="--chip:'+sl[2]+'">'+sl[3]+'</span>'+
       '<b>'+sl[1]+'</b><span class="mslotK">'+(slotK?Math.round(slotK)+' kcal':'')+'</span>'+
-      '<button type="button" class="mslotAdd" data-slot="'+sl[0]+'" aria-label="+">+</button></div>';
+      (wdh?'<button type="button" class="mslotRep" data-slot="'+sl[0]+'" title="'+(DE?'Wie zuletzt':'Same as last time')+'" aria-label="'+(DE?'Wie zuletzt':'Same as last time')+'">'+REPIC+'</button>':'')+
+      '<button type="button" class="mslotAdd" data-slot="'+sl[0]+'" aria-label="'+(DE?'Hinzufügen':'Add')+'">+</button></div>';
     eintraege.forEach(function(x){
       var m=x[0];
       h+='<button type="button" class="prrow" data-meal="'+x[1]+'">'+
@@ -8530,6 +8617,9 @@ function drawMeals(){
   [].forEach.call(listEl.querySelectorAll('.mslotAdd'),function(b){
     b.addEventListener('click',function(e){e.stopPropagation();openMeal(null,b.dataset.slot);});
   });
+  [].forEach.call(listEl.querySelectorAll('.mslotRep'),function(b){
+    b.addEventListener('click',function(e){e.stopPropagation();slotWiederholen(b.dataset.slot);});
+  });
 }
 /* Blatt zum Anlegen und Aendern. idx null heisst: neue Mahlzeit; slot ist
    der Ziel-Slot (b/l/d/s), beim Bearbeiten kommt er aus dem Eintrag. */
@@ -8542,54 +8632,74 @@ function openMeal(idx,slot){
      sichtbaren Feldern, die Suche nur eines davon. Jetzt fuehrt die Suche,
      und Protein/Fett/Kohlenhydrate zeigen sich erst, sobald eine Quelle
      feststeht oder jemand ausdruecklich "manuell" waehlt. */
+  /* Stufe 1 (neu): nur Suche, Scanner und "Zuletzt" -- sonst nichts.
+     Stufe 2 (Quelle gewaehlt, Handeingabe oder Bearbeiten): Menge mit
+     Schnell-Chips, Makros in einer Dreierzeile, Kalorien gross, Slot-Wahl
+     als schmale Viererzeile, EIN primaerer Knopf. Vorher stand alles auf
+     einmal da: Suche, Chips, 2x2-Slotflaeche, drei Reglerfelder und drei
+     Knoepfe -- das war die Unuebersichtlichkeit, um die es hier ging. */
+  var slotName='';
+  mealSlots(DE).forEach(function(sl){if(sl[0]===(m.s||'s'))slotName=sl[1];});
   var html=
-    '<h4>'+(neu?(DE?'Neue Mahlzeit':'New meal'):(DE?'Mahlzeit':'Meal'))+'</h4>'+
+    '<h4>'+slotName+' &middot; '+(neu?(DE?'hinzufügen':'add'):(DE?'bearbeiten':'edit'))+'</h4>'+
     '<div class="dsh">'+
-      '<div class="field mlsearch"><label for="mlName">'+(DE?'Suchen oder eingeben':'Search or type')+'</label>'+
+      '<div class="field mlsearch"><label for="mlName" id="mlNameLbl">'+(neu?(DE?'Suchen oder eingeben':'Search or type'):'Name')+'</label>'+
         '<div class="ctl mlsearchctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'">'+
         '<button type="button" class="mlscanbtn" id="mlScan" aria-label="'+(DE?'Barcode scannen':'Scan barcode')+'">'+
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>'+
         '</button></div></div>'+
       '<div class="mlrecent" id="mlRecent" hidden></div>'+
       '<div class="mlsug" id="mlSug" hidden></div>'+
-      '<div class="field"><label id="mlSlotLbl">'+(DE?'Mahlzeit':'Meal slot')+'</label>'+
+      (neu?'<button type="button" class="txtbtn" id="mlManualToggle">'+(DE?'Von Hand eintragen':'Enter by hand')+'</button>':'')+
+      '<div class="mlmanual" id="mlManualBox"'+(neu?' hidden':'')+'>'+
+        '<div class="field" id="mlGRow" hidden><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div>'+
+          '<div class="mlqchips" id="mlQ">'+[50,100,150,200].map(function(g){
+            return '<button type="button" class="mlrchip" data-g="'+g+'">'+g+'&nbsp;g</button>';}).join('')+'</div></div>'+
+        '<div class="mlmacros">'+
+        '<div class="field"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
+        '<div class="field"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
+        '<div class="field"><label for="mlC">'+(DE?'Kohlenh.':'Carbs')+'</label>'+
+          '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
+        '</div>'+
+        '<div class="mlkcalRow"><span>'+(DE?'Kalorien':'Calories')+'</span><b id="mlKcal">'+mealKcal(m)+' kcal</b></div>'+
+        '<div class="field"><label id="mlSlotLbl">'+(DE?'Mahlzeit':'Meal slot')+'</label>'+
         '<select id="mlSlot" data-noup="1" hidden aria-hidden="true" tabindex="-1">'+
           '<option value="b"'+(m.s==='b'?' selected':'')+'>'+(DE?'Frühstück':'Breakfast')+'</option>'+
           '<option value="l"'+(m.s==='l'?' selected':'')+'>'+(DE?'Mittag':'Lunch')+'</option>'+
           '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abend':'Dinner')+'</option>'+
           '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
         '</select>'+
-        '<div class="mslotpick" id="mslotPick" role="radiogroup" aria-labelledby="mlSlotLbl">'+
+        '<div class="mslotpick" id="mslotPick">'+
           mealSlots(DE).map(function(sl){
             return '<button type="button" class="mslotopt" data-slot="'+sl[0]+'" aria-pressed="'+((m.s||'s')===sl[0])+'" style="--oc:'+sl[2]+'">'+
-              '<span class="ic">'+sl[3]+'</span><b>'+sl[1]+'</b><i class="chk" aria-hidden="true">&#10003;</i></button>';
+              '<span class="ic">'+sl[3]+'</span><b>'+sl[1]+'</b></button>';
           }).join('')+
         '</div></div>'+
-      (neu?'<button type="button" class="txtbtn" id="mlManualToggle">'+(DE?'Makros manuell eintragen':'Enter macros manually')+'</button>':'')+
-      '<div class="mlmanual" id="mlManualBox"'+(neu?' hidden':'')+'>'+
-        '<div class="field" id="mlGRow" hidden><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
-        '<div class="field hasSlide"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
-        '<div class="field hasSlide"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
-        '<div class="field hasSlide"><label for="mlC">'+(DE?'Kohlenhydrate':'Carbs')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
-        '<p class="hint">'+(DE
-          ?'Kalorien rechnet der Hub: Protein und Kohlenhydrate mal vier, Fett mal neun. Nährwerte stehen auf jeder Packung.'
-          :'The hub works out the calories: protein and carbs times four, fat times nine. The macros are on every label.')+'</p>'+
-        '<div class="dshHead"><b>'+(DE?'Kalorien':'Calories')+'</b><span id="mlKcal">'+mealKcal(m)+' kcal</span></div>'+
       '</div>'+
-      '<div class="savebar">'+
-        '<button class="tbtn go" data-mlact="save">'+(neu?(DE?'Hinzufügen':'Add'):(DE?'Speichern':'Save'))+'</button>'+
-        '<button class="tbtn" data-mlact="rezept">'+(DE?'Als Rezept merken':'Save as recipe')+'</button>'+
+      '<div class="savebar" id="mlSave"'+(neu?' hidden':'')+'>'+
+        '<button class="tbtn go" data-mlact="save" style="flex:1">'+(neu?(DE?'Hinzufügen':'Add'):(DE?'Speichern':'Save'))+'</button>'+
+      '</div>'+
+      '<div class="savebar" id="mlSave2"'+(neu?' hidden':'')+' style="justify-content:space-between">'+
+        '<button class="txtbtn" data-mlact="rezept">'+(DE?'Als Rezept merken':'Save as recipe')+'</button>'+
         (neu?'':'<button class="tbtn dngr" data-mlact="del">'+(DE?'Löschen':'Delete')+'</button>')+
       '</div>'+
     '</div>';
   openSheet(html);
   $('sheetBody').dataset.meal=(neu?'neu':String(idx));
+  if(neu)delete $('sheetBody').dataset.fix;else $('sheetBody').dataset.fix='1';
   delete $('sheetBody').dataset.mikro;
+  delete $('sheetBody').dataset.b100;
   if(!neu&&m.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:m.z,bl:m.bl,sa:m.sa,gf:m.gf});
+  /* Je-100-g-Eintrag: Basis und Menge zurueckholen -- das Mengenfeld
+     rechnet dann beim Bearbeiten wieder. */
+  if(!neu&&m.b&&m.g){
+    $('sheetBody').dataset.b100=JSON.stringify(m.b);
+    var gr0=$('mlGRow');if(gr0){gr0.hidden=false;}
+    var gi0=$('mlG');if(gi0)gi0.value=m.g;
+  }
   $('mlName').value=m.n;
   if(neu)$('mlName').focus();
   if(typeof ctlUpgrade==='function')ctlUpgrade($('sheetBody'));
@@ -8600,9 +8710,6 @@ function openMeal(idx,slot){
         x.setAttribute('aria-pressed',String(x===b));});
     });
   });
-  pairSlider('mlP',{min:0,max:120,step:1,empty:0});
-  pairSlider('mlF',{min:0,max:80,step:1,empty:0});
-  pairSlider('mlC',{min:0,max:200,step:5,empty:0});
   function nach(){
     var p=parseFloat($('mlP').value)||0,f=parseFloat($('mlF').value)||0,c=parseFloat($('mlC').value)||0;
     $('mlKcal').textContent=Math.round(p*4+f*9+c*4)+' kcal';
@@ -8613,31 +8720,46 @@ function openMeal(idx,slot){
   if(manToggle)manToggle.addEventListener('click',mlRevealManual);
   /* Zuletzt gegessen: nur bei einer neuen Mahlzeit, nur solange das Suchfeld
      leer ist -- sobald getippt wird, geht es erkennbar um etwas anderes. */
-  var recents=neu?recentFoods(6):[];
+  var recents=neu?recentFoods(5):[];
   if(recents.length){
     var rc=$('mlRecent');
-    rc.innerHTML='<p class="eyebrow" style="margin:0 0 .3rem">'+(DE?'Zuletzt':'Recent')+'</p><div class="mlrchips">'+
-      recents.map(function(r,i){return '<button type="button" class="mlrchip" data-r="'+i+'">'+(r.n||'?').slice(0,28)+'</button>';}).join('')+'</div>';
+    rc.innerHTML='<p class="eyebrow" style="margin:0 0 .3rem">'+(DE?'Zuletzt gegessen':'Recent')+'</p>'+
+      recents.map(function(r,i){return '<button type="button" class="mlsugrow" data-r="'+i+'">'+
+        '<b></b><span>'+mealKcal(r)+' kcal · '+r.p+' P · '+r.f+' F · '+r.c+' '+(DE?'KH':'C')+'</span></button>';}).join('');
     rc.hidden=false;
-    [].forEach.call(rc.querySelectorAll('.mlrchip'),function(ch,i){
+    var rnm=rc.querySelectorAll('.mlsugrow b');
+    [].forEach.call(rc.querySelectorAll('.mlsugrow'),function(ch,i){
+      rnm[i].textContent=(recents[i].n||'?');
       ch.addEventListener('click',function(){
         var r=recents[i];
-        sugBase=null;$('mlGRow').hidden=true;
+        basisSet(null);$('mlGRow').hidden=true;
         $('mlName').value=(r.n||'').slice(0,40);
         $('mlP').value=r.p;$('mlF').value=r.f;$('mlC').value=r.c;
         if(r.z!==undefined||r.bl!==undefined||r.sa!==undefined||r.gf!==undefined)
           $('sheetBody').dataset.mikro=JSON.stringify({z:r.z,bl:r.bl,sa:r.sa,gf:r.gf});
         else delete $('sheetBody').dataset.mikro;
         mlRevealManual();
-        $('mlSug').hidden=true;$('mlSug').innerHTML='';
+        /* Kam der Eintrag aus einer je-100-g-Quelle, bleibt die Portion
+           aenderbar: Basis zurueckholen, Mengenfeld zeigen. */
+        if(r.b&&r.g){basisSet(r.b);$('mlGRow').hidden=false;$('mlG').value=r.g;skala();}
         nach();
       });
     });
   }
   /* Suche: lokale Grundnahrungsmittel sofort, Open Food Facts kurz danach.
      Ein Treffer setzt die Basis je 100 g; das Mengenfeld skaliert. */
-  var sugBase=null,sugTimer=null;
+  var sugTimer=null;
+  /* Die je-100-g-Basis liegt am Blatt (dataset), nicht in einer lokalen
+     Variablen: so koennen auch Scanner-Uebernahme und Bearbeiten sie
+     setzen, und beim Speichern wandert sie mit in den Eintrag -- die
+     Portion bleibt dadurch spaeter aenderbar. */
+  function basisSet(x){
+    if(x)$('sheetBody').dataset.b100=JSON.stringify({p:x.p,f:x.f,c:x.c,z:x.z,bl:x.bl,sa:x.sa,gf:x.gf});
+    else delete $('sheetBody').dataset.b100;
+  }
   function skala(){
+    var sugBase=null;
+    try{sugBase=JSON.parse($('sheetBody').dataset.b100||'null');}catch(e){}
     if(!sugBase)return;
     var g=Math.max(1,parseFloat($('mlG').value)||100)/100;
     $('mlP').value=Math.round(sugBase.p*g*10)/10;
@@ -8658,15 +8780,16 @@ function openMeal(idx,slot){
     el.hidden=false;
     el.innerHTML=liste.map(function(x,i){
       return '<button type="button" class="mlsugrow" data-sug="'+i+'">'+
-        '<b></b><span>'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal · '+x.p+' P · '+x.f+' F · '+x.c+' KH'+
+        '<b></b><span>'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal · '+x.p+' P · '+x.f+' F · '+x.c+' '+(DE?'KH':'C')+
         (x.quelle==='off'?' · OFF':'')+'</span></button>';
     }).join('');
     var namen=el.querySelectorAll('.mlsugrow b');
     [].forEach.call(el.querySelectorAll('.mlsugrow'),function(row,ri){
       namen[ri].textContent=liste[+row.dataset.sug].n;
       row.addEventListener('click',function(){
-        sugBase=liste[+row.dataset.sug];
-        $('mlName').value=sugBase.n.slice(0,40);
+        var wahl=liste[+row.dataset.sug];
+        basisSet(wahl);
+        $('mlName').value=wahl.n.slice(0,40);
         el.hidden=true;el.innerHTML='';
         $('mlGRow').hidden=false;$('mlG').value=100;
         mlRevealManual();
@@ -8675,9 +8798,17 @@ function openMeal(idx,slot){
     });
   }
   $('mlG').addEventListener('input',skala);
+  var q1=$('mlQ');
+  if(q1)q1.addEventListener('click',function(e){
+    var b=e.target.closest('button[data-g]');if(!b)return;
+    $('mlG').value=b.dataset.g;skala();
+  });
   $('mlName').addEventListener('input',function(){
+    /* Stufe 2: das Feld ist der Name, keine Suche mehr -- sonst poppt beim
+       Umbenennen die Vorschlagsliste unter die Makros. */
+    if($('sheetBody').dataset.fix==='1')return;
     var q=this.value.trim().toLowerCase();
-    sugBase=null;$('mlGRow').hidden=true;
+    basisSet(null);$('mlGRow').hidden=true;
     if($('mlRecent')&&recents.length)$('mlRecent').hidden=q.length>0;
     if(q.length<2){sugZeigen([]);return;}
     var lok=[];
@@ -8690,6 +8821,11 @@ function openMeal(idx,slot){
     }
     sugZeigen(lok);
     clearTimeout(sugTimer);
+    /* Offline keine Anfrage: sie kann nur scheitern und fuellt die Konsole
+       bei jedem Tippstopp mit Fehlern. Die lokalen Vorschlaege stehen dann
+       schon. (Endpunkt bewusst der CGI-Weg: die v2-API kann keine
+       Freitextsuche, und CORS ist hier geprueft offen.) */
+    if(!navigator.onLine)return;
     sugTimer=setTimeout(function(){
       fetch('https://de.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+
         '&search_simple=1&action=process&json=1&page_size=7&fields=product_name,brands,nutriments')
@@ -8839,18 +8975,42 @@ function drawRecipes(){
 }
 $('recipeRow').addEventListener('click',function(e){
   var DE=cfg.lang==='de';
-  if(e.target.closest('#rzNew')){openMeal(null,'s');return;}
+  if(e.target.closest('#rzNew')){
+    /* Vorher oeffnete die Karte das normale Mahlzeit-Blatt in Stufe 1 mit
+       Titel "Snacks · hinzufuegen" -- kein Wort von Rezept. Jetzt: eigener
+       Titel, Wertemodus offen, Slot-Wahl weg (ein Rezept hat keinen Slot),
+       und "Als Rezept merken" ist der EINE Hauptknopf. */
+    openMeal(null,'s');
+    mlRevealManual();
+    var rh=$('sheetBody').querySelector('h4');
+    if(rh)rh.textContent=DE?'Neues Rezept':'New recipe';
+    var rs1=$('mlSave');if(rs1)rs1.hidden=true;
+    var rsl=$('mlSlotLbl');if(rsl&&rsl.parentNode)rsl.parentNode.hidden=true;
+    var rbtn=$('sheetBody').querySelector('button[data-mlact="rezept"]');
+    if(rbtn){rbtn.className='tbtn go';rbtn.style.flex='1';}
+    return;}
   if(!e.target.closest('#rzAll'))return;
   var rz=get('recipes',[]);
   var html='<h4>'+(DE?'Rezepte':'Recipes')+'</h4><div class="swaplist">'+
     (rz.length?rz.map(function(r,i){
-      return '<button type="button" class="swaprow" data-rz="'+i+'">'+
-        '<span class="swnm"><b></b><span>'+mealKcal(r)+' kcal · '+r.p+' P · '+r.f+' F · '+r.c+' KH</span></span>'+
-        '<span class="swtick">＋</span></button>';
+      return '<div style="display:flex;gap:.4rem;align-items:stretch">'+
+        '<button type="button" class="swaprow" data-rz="'+i+'" style="flex:1;margin-bottom:0">'+
+        '<span class="swnm"><b></b><span>'+mealKcal(r)+' kcal · '+r.p+' P · '+r.f+' F · '+r.c+' '+(DE?'KH':'C')+'</span></span>'+
+        '<span class="swtick">＋</span></button>'+
+        '<button type="button" class="tbtn dngr" data-rzdel="'+i+'" aria-label="'+(DE?'Rezept löschen':'Delete recipe')+'" style="flex:none;width:auto">✕</button>'+
+        '</div>';
     }).join(''):'<p class="hint" style="padding:.6rem 0">'+(DE
       ?'Noch keine. In jeder Mahlzeit gibt es „Als Rezept merken".'
       :'None yet. Every meal sheet has “Save as recipe”.')+'</p>')+'</div>';
   openSheet(html);
+  [].forEach.call($('sheetBody').querySelectorAll('button[data-rzdel]'),function(db){
+    db.addEventListener('click',function(e){
+      e.stopPropagation();
+      rz.splice(+db.dataset.rzdel,1);
+      set('recipes',rz);drawRecipes();
+      var wieder=$('rzAll');if(wieder)wieder.click();
+    });
+  });
   var namen=$('sheetBody').querySelectorAll('.swaprow b');
   [].forEach.call($('sheetBody').querySelectorAll('.swaprow'),function(row,ri){
     var r=rz[+row.dataset.rz];if(r)namen[ri].textContent=r.n;
@@ -8860,6 +9020,9 @@ $('recipeRow').addEventListener('click',function(e){
       openMeal(null,'s');
       $('mlName').value=r2.n;$('mlP').value=r2.p;$('mlF').value=r2.f;$('mlC').value=r2.c;
       if(r2.z!==undefined)$('sheetBody').dataset.mikro=JSON.stringify({z:r2.z,bl:r2.bl,sa:r2.sa,gf:r2.gf});
+      /* Vorher blieb das Blatt in Stufe 1 stehen -- die Werte sassen in
+         unsichtbaren Feldern. Jetzt klappt es sichtbar auf. */
+      if(typeof mlRevealManual==='function')mlRevealManual();
       var kb=$('mlKcal');if(kb)kb.textContent=mealKcal(r2)+' kcal';
     });
   });
@@ -9755,6 +9918,11 @@ function kamUebernehmen(food,g){
   }
   ['mlP','mlF','mlC'].forEach(function(id){$(id).dispatchEvent(new Event('input'));});
   if(typeof mlRevealManual==='function')mlRevealManual();
+  /* Auch der Scan ist eine je-100-g-Quelle: Basis ans Blatt, Menge zeigen --
+     dann bleibt die Portion hier und beim spaeteren Bearbeiten aenderbar. */
+  $('sheetBody').dataset.b100=JSON.stringify({p:food.p,f:food.f,c:food.c,z:food.z,bl:food.bl,sa:food.sa,gf:food.gf});
+  var gr=$('mlGRow');if(gr){gr.hidden=false;}
+  var gi=$('mlG');if(gi)gi.value=Math.round(g*100);
 }
 /* Texterkennung: Tesseract kommt erst bei Bedarf aus dem Netz. */
 var ocrLaedt=null;
@@ -9826,7 +9994,6 @@ $('sheetBody').addEventListener('click',function(e){
   closeSheet();
   show('kam');
 });
-$('mealAdd').addEventListener('click',function(){openMeal(null);});
 $('mealList').addEventListener('click',function(e){
   var b=e.target.closest('button[data-meal]');if(b)openMeal(+b.dataset.meal);
 });
@@ -9848,6 +10015,12 @@ $('sheetBody').addEventListener('click',function(e){
      Suche oder Rezept kam -- das Blatt fragt sie nie ab. */
   var mk=$('sheetBody').dataset.mikro;
   if(mk){try{var mo=JSON.parse(mk);eintrag.z=mo.z;eintrag.bl=mo.bl;eintrag.sa=mo.sa;eintrag.gf=mo.gf;}catch(err){}}
+  /* Je-100-g-Quelle: Basis und Menge mitspeichern, damit die Portion beim
+     Bearbeiten aenderbar bleibt. */
+  var b100=$('sheetBody').dataset.b100,gRow=$('mlGRow');
+  if(b100&&gRow&&!gRow.hidden){
+    try{eintrag.b=JSON.parse(b100);eintrag.g=Math.max(1,parseFloat($('mlG').value)||100);}catch(err2){}
+  }
   else if(roh!=='neu'&&meals[k][+roh]){
     var altE=meals[k][+roh];
     if(altE.z!==undefined){eintrag.z=altE.z;eintrag.bl=altE.bl;eintrag.sa=altE.sa;eintrag.gf=altE.gf;}
@@ -9905,6 +10078,29 @@ var SUP=[
  ['Mass gainer','r','Sugar and cheap protein at a premium. Blended oats, milk and peanut butter do the same for a fraction.','Make your own.'],
  ['Detox teas','r','Nothing to detox. You have a liver and kidneys. Some contain laxatives, which is where the results come from.','Avoid.']
 ];
+/* Deutsche Fassung, gleiche Reihenfolge und Kategorien. Vorher stand die
+   ganze Bewertungstabelle englisch auf der deutschen Seite -- direkt neben
+   den eingedeutschten Chips. */
+var SUPD=[
+ ['Kreatin-Monohydrat','g','Erhöht den Kreatinphosphat-Speicher, das hilft bei kurzen, harten Anstrengungen. Das bestuntersuchte Sport-Supplement überhaupt — und eins der billigsten.','3–5 g täglich, Uhrzeit egal. Keine Ladephase nötig.'],
+ ['Whey- oder Casein-Protein','g','Kein Zauber, nur Essen in praktischer Form. Sinnvoll nur, wenn du dein Proteinziel aus Mahlzeiten nicht erreichst.','20–40 g, wenn es dir hilft, aufs Tagesziel zu kommen.'],
+ ['Vitamin D','g','Relevant vor allem bei wenig Sonne, etwa Innenarbeit durch einen Winter im Norden.','Erst testen. Die Dosis kommt aus dem Ergebnis, nicht aus dem Bauch.'],
+ ['Koffein','g','Verbessert Trainingsleistung und gefühlte Anstrengung zuverlässig. Ruiniert aber auch den Schlaf, und der ist mehr wert als die Einheit.','3–6 mg/kg, und nichts mehr nach dem frühen Nachmittag.'],
+ ['Mikronisiertes Kreatin','a','Dasselbe Molekül wie Monohydrat, feineres Pulver, höherer Preis. Löst sich besser. Das ist der ganze Unterschied.','Nur, wenn normales Monohydrat auf den Magen schlägt.'],
+ ['Omega-3 / Fischöl','a','Allgemeine Gesundheit, ordentliche Datenlage. Für den Muskelaufbau bestenfalls ein kleiner Effekt.','1–2 g EPA und DHA kombiniert, wenn du kaum Fisch isst.'],
+ ['Beta-Alanin','a','Hilft bei Belastungen von etwa ein bis vier Minuten. Die meisten Calisthenics-Sätze sind deutlich kürzer.','3–6 g täglich. Das Hautkribbeln ist harmlos.'],
+ ['Citrullin-Malat','a','Mäßiger Effekt aufs Trainingsvolumen in manchen Studien. Spürbar vor allem als Pump.','6–8 g etwa eine Stunde vor dem Training.'],
+ ['Magnesium','a','Bringt nur etwas, wenn du wirklich unterversorgt bist. Häufig genug, dass sich Nachmessen lohnt.','200–400 mg bei schlechter Ernährung. Testen statt raten.'],
+ ['Elektrolyte','a','Sinnvoll bei echter Hitze oder langen, schweißtreibenden Einheiten. Nicht für 45 Minuten drinnen.','Nur situativ.'],
+ ['Multivitamin','a','Schwache Versicherung gegen schlechte Ernährung. Kein Ersatz für Gemüse.','Billig, wenig Risiko, wenig Nutzen.'],
+ ['Ashwagandha','a','Etwas Evidenz für Stress und Schlafqualität. Die Kraft-Effekte überzeugen nicht.','Bei Schilddrüsenproblemen weglassen. Vorher zum Arzt.'],
+ ['BCAAs','r','Zwanzig Jahre hart verkauft. Reicht dein Gesamtprotein, bringen sie nichts. Reicht es nicht, reparier das Protein.','Keine Dosis, die sich empfehlen lässt.'],
+ ['Glutamin','r','In den Neunzigern populär. Hat bei gesunden Trainierten wiederholt keinen Nutzen gezeigt.','Spar dir das Geld.'],
+ ['Testo-Booster','r','Fast nichts am Markt hebt bei gesunden jungen Männern das Testosteron messbar. Marketing, keine Pharmakologie.','Spar dir das Geld.'],
+ ['Fatburner','r','Meist Koffein plus Füllstoff zum zehnfachen Koffeinpreis. Das Defizit macht die Arbeit, nicht die Pille.','Spar dir das Geld.'],
+ ['Mass Gainer','r','Zucker und billiges Protein mit Aufschlag. Haferflocken, Milch und Erdnussbutter können dasselbe für einen Bruchteil.','Mach es selbst.'],
+ ['Detox-Tees','r','Da ist nichts zu entgiften. Du hast Leber und Nieren. Manche enthalten Abführmittel — daher die „Ergebnisse“.','Finger weg.']
+];
 var VD={g:['Worth it','Lohnt sich'],a:['Situational','Situativ'],r:['Skip it','Spar es dir']};
 var tipT=null,tipEl=null;
 /* Nicht jeder Tipp hat einen Verdict-Badge und eine Dosis -- die Muster-
@@ -9945,11 +10141,12 @@ function hideTip(){
    liest, muss nicht performant nichts lesen. */
 function buildSup(){
   var L=cfg.lang==='de'?1:0;
-  $('supgrid').innerHTML=SUP.map(function(s){
+  var T=(L===1)?SUPD:SUP;
+  $('supgrid').innerHTML=T.map(function(s){
     return '<div class="sup '+s[1]+'" tabindex="0"><b></b><span class="vd">'+VD[s[1]][L]+'</span></div>';}).join('');
   [].forEach.call(document.querySelectorAll('.sup'),function(el,i){
-    el.querySelector('b').textContent=SUP[i][0];
-    el.dataset.verdict=VD[SUP[i][1]][L];el.dataset.body=SUP[i][2];el.dataset.dose=SUP[i][3];
+    el.querySelector('b').textContent=T[i][0];
+    el.dataset.verdict=VD[T[i][1]][L];el.dataset.body=T[i][2];el.dataset.dose=T[i][3];
     el.addEventListener('mouseenter',function(){hideTip();tipT=setTimeout(function(){showTip(el);},450);});
     el.addEventListener('mouseleave',hideTip);
     el.addEventListener('focus',function(){hideTip();showTip(el);});
@@ -10220,20 +10417,28 @@ $('wAdd').addEventListener('click',function(){
   set('wlog',wlog);$('wIn').value='';$('f-w').value=v;drawW();calc();refresh();});
 $('wClear').addEventListener('click',function(){wlog=[];set('wlog',wlog);drawW();refresh();});
 var SUPPS=get('suppList',['Creatine','Protein powder','Vitamin D','Caffeine','Omega-3','Beta-alanine','BCAAs','Fat burner','Test booster','Mass gainer']);
+/* Anzeige-Uebersetzung der bekannten Namen. Die Schluessel bleiben englisch,
+   weil BADS und die gespeicherte Auswahl (Index-basiert) daran haengen --
+   eigene Eintraege der Nutzer erscheinen unveraendert. */
+var SUPDE={'Creatine':'Kreatin','Protein powder':'Proteinpulver','Caffeine':'Koffein',
+  'Beta-alanine':'Beta-Alanin','Fat burner':'Fatburner','Test booster':'Testo-Booster',
+  'Mass gainer':'Mass Gainer','Glutamine':'Glutamin','Detox tea':'Detox-Tee',
+  'Vitamin D':'Vitamin D','Omega-3':'Omega-3','BCAAs':'BCAAs'};
+function supName(sx){return (cfg.lang==='de'&&SUPDE[sx])||sx;}
 var BADS={'BCAAs':1,'Fat burner':1,'Test booster':1,'Mass gainer':1,'Glutamine':1,'Detox tea':1};
 var taken=get('supps',{});
 function buildChips(){
   var c=$('suppchips');c.innerHTML='';
   SUPPS.forEach(function(s,i){
     var b=document.createElement('button');b.className='chip';b.type='button';
-    b.setAttribute('aria-pressed',taken[i]?'true':'false');b.textContent=s;
+    b.setAttribute('aria-pressed',taken[i]?'true':'false');b.textContent=supName(s);
     b.addEventListener('click',function(){taken[i]=!taken[i];b.setAttribute('aria-pressed',taken[i]?'true':'false');set('supps',taken);suppNote();refresh();});
     c.appendChild(b);});
   suppNote();
 }
 $('supAdd').addEventListener('click',function(){var n=$('supName').value.trim();if(!n)return;SUPPS.push(n);set('suppList',SUPPS);$('supName').value='';buildChips();});
 function suppNote(){
-  var w=[];SUPPS.forEach(function(s,i){if(taken[i]&&BADS[s])w.push(s);});
+  var w=[];SUPPS.forEach(function(s,i){if(taken[i]&&BADS[s])w.push(supName(s));});
   $('suppnote').innerHTML=w.length?'<b>'+w.join(', ')+'</b> — '+(cfg.lang==='de'?'keine belastbare Evidenz. Das Geld ist in Essen besser angelegt.':'no good evidence these do anything for you. That money buys a lot of food.'):(cfg.lang==='de'?'Nichts auf deiner Liste ist verbranntes Geld. Gut.':'Nothing on your list is wasted money. Good.');
 }
 function readiness(){
