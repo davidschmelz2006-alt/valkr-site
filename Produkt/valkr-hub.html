@@ -569,8 +569,6 @@
     line-height:1.1;margin-top:.3rem;font-variant-numeric:tabular-nums}
   .mcard b i{font-style:normal;font-size:.58em;font-weight:400;color:var(--ink3);margin-left:.18em}
   .mcard .sub{font-size:var(--t2);color:var(--ink3);line-height:1.35}
-  .mcard .viz{margin-top:auto;padding-top:.5rem}
-  .mcard .viz svg{display:block;width:100%;height:34px;overflow:visible}
   /* Der Pfeil sagt: hier steckt mehr dahinter. Ohne ihn probiert niemand,
      auf eine Kachel zu tippen -- eine Flaeche sieht nicht nach Knopf aus. */
   .mcard .go{position:absolute;top:.8rem;right:.75rem;width:15px;height:15px;
@@ -609,8 +607,12 @@
      einzigen Ausgang -- schliessen ging nur ueber Hintergrund-Tipp oder die
      Zurueck-Taste, per Tastatur und Vorleser gar nicht. Die sichtbare Pille
      bleibt klein, die Trefflaeche nicht. */
-  #sheet .grip{display:block;width:64px;height:22px;padding:0;border:0;
-    background:none;margin:0 auto .35rem;cursor:pointer;position:relative}
+  /* 34px Trefferflaeche (vorher 22) -- bewusst APP-WEIT: der Griff ist eine
+     geteilte Komponente aller Blaetter, und eine groessere Tippflaeche ist
+     ueberall richtig. Optisch unveraendert, die sichtbare Linie zeichnet
+     ::before. */
+  #sheet .grip{display:block;width:64px;height:34px;padding:0;border:0;
+    background:none;margin:-.2rem auto .15rem;cursor:pointer;position:relative}
   #sheet .grip::before{content:"";position:absolute;left:50%;top:50%;
     transform:translate(-50%,-50%);width:38px;height:4px;border-radius:999px;
     background:var(--line2)}
@@ -628,7 +630,6 @@
   #sheet button .st{flex:1;min-width:0;display:flex;flex-direction:column;gap:.08rem}
   #sheet button b{font-family:var(--fd);font-weight:600;font-size:.9rem}
   #sheet button span{font-size:.74rem;color:var(--ink3);line-height:1.3}
-  #sheet button .arw{color:var(--ink3);flex:none;width:16px;height:16px}
   /* Inhalt eines Detailblatts. Bewusst dieselbe Flaeche wie das Menue: eine
      Form, die man einmal versteht, statt zweier, die sich aehneln. */
   #sheet .dsh{display:flex;flex-direction:column;gap:.7rem;padding-bottom:.3rem}
@@ -903,6 +904,22 @@
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     transition:border-color .16s}
   .wbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  /* Wasser-Tracker: Glaeser-Reihe, gefuellt in Ice. */
+  .wglasses{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.55rem}
+  .wglass{width:34px;height:42px;border:0;background:none;padding:0;cursor:pointer;
+    color:var(--ink3);display:flex;align-items:center;justify-content:center;transition:color .16s}
+  .wglass svg{width:24px;height:34px}
+  .wglass svg path{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linejoin:round}
+  .wglass:hover{color:var(--ice)}
+  .wglass.voll{color:var(--ice)}
+  .wglass.voll svg path{fill:color-mix(in srgb,var(--ice) 26%,transparent)}
+  /* .wkopf, nicht .whead: den Namen traegt schon die Wochenzeilen-
+     Kopfleiste des Trainingsplans (samt Partikel-Handler und eigenem
+     Polster). Layout (flex, gap, .gt-Dehnung) kommt komplett vom
+     gtitle-Baustein, an dem der Kopf haengt -- hier steht nur, was
+     .wkopf ZUSAETZLICH braucht: die Summe rechts. */
+  .wkopf .wsum{font-family:var(--fd);font-weight:600;font-size:var(--t4);
+    font-variant-numeric:tabular-nums;color:var(--ink2)}
   .habcard.mikro{min-height:0;cursor:default}
   .habcard.mikro .track{height:4px;border-radius:999px;background:var(--surf2);
     overflow:hidden;margin-top:.15rem}
@@ -995,6 +1012,12 @@
   .accBody .book{content-visibility:auto;contain-intrinsic-size:auto 2400px}
   .supgrid>*{content-visibility:auto;contain-intrinsic-size:auto 120px}
   #weeks>*{content-visibility:auto;contain-intrinsic-size:auto 64px}
+  /* Ernaehrungs-Tab: alles unterhalb der Mahlzeiten erst rechnen, wenn es
+     ins Bild scrollt. */
+  #waterCard{content-visibility:auto;contain-intrinsic-size:auto 180px}
+  #fuelWeight{content-visibility:auto;contain-intrinsic-size:auto 150px}
+  #mikroGrid{content-visibility:auto;contain-intrinsic-size:auto 190px}
+  #recipeRow{content-visibility:auto;contain-intrinsic-size:auto 120px}
   /* Statistik-Karten (MCI): Kopf mit Titel + Delta-Chip, Chart darunter. */
   .statcard{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);
     padding:.85rem .9rem;box-shadow:var(--sh);margin-bottom:.7rem}
@@ -1438,7 +1461,12 @@
   .obox em{display:block;font-family:var(--fm);font-style:normal;font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink2)}
   .obox b{display:block;font-family:var(--fd);font-size:1.12rem;font-weight:600;margin-top:.18rem;font-variant-numeric:tabular-nums}
   .obox b i{font-style:normal;font-size:var(--t2);color:var(--ink3);font-weight:400}
-  .macrobar i{display:block;height:100%;transition:width .45s ease}
+  /* Die Basisregel fehlte seit v20 -- die drei Prozent-Segmente stapelten
+     sich als Bloecke UNTEREINANDER statt eine Leiste zu bilden. Ohne
+     width-Transition: Layout-Animationen haben im Ernaehrungs-Tab nichts
+     mehr verloren. */
+  .macrobar{display:flex;height:8px;border-radius:999px;overflow:hidden;background:var(--surf2)}
+  .macrobar i{display:block;height:100%}
   .mkey{display:flex;gap:.85rem;flex-wrap:wrap;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-top:.38rem}
   .mkey span{display:flex;align-items:center;gap:.3rem}
   .mkey u{width:9px;height:9px;text-decoration:none;display:block;border-radius:2px}
@@ -2615,9 +2643,7 @@
   :root[data-spar="1"] nav#nav,
   :root[data-spar="1"] #runner,
   :root[data-spar="1"] #sheet,
-  :root[data-spar="1"] #toast,
-  :root[data-spar="1"] .macroCard{backdrop-filter:none;-webkit-backdrop-filter:none}
-  :root[data-spar="1"] .macroCard{background:var(--surf)}
+  :root[data-spar="1"] #toast{backdrop-filter:none;-webkit-backdrop-filter:none}
   :root[data-spar="1"] .bar{background:var(--bg)}
   :root[data-spar="1"] #tabbar,
   :root[data-spar="1"] nav#nav{background:var(--surf)}
@@ -2751,11 +2777,13 @@
   .rung .rdemo{width:40px;height:40px;flex:none;display:flex;align-items:center;justify-content:center}
   .rung .rdemo svg{width:100%;height:100%}
   /* ── v17 (Baustelle 5): Ernaehrung nach App-Standard. Ring in der Mitte
-     (Uebrig), links Gegessen, rechts Ziel, darunter drei Makro-Balken.
-     Glasflaeche mit Unschaerfe -- der Sparmodus schaltet sie unten ab. ── */
+     (Uebrig), links Gegessen, rechts Ziel; seit v28.0 darunter drei
+     Makro-Spalten (YAZIO) auf schlichter Karte ohne Unschaerfe. ── */
+  /* v28.0: backdrop-filter weg -- eine Unschaerfe muss der Browser bei
+     jedem Scrollen unter der Karte neu rechnen, und die Karte sieht mit
+     schlichtem Grund identisch aus. */
   .macroCard{background:var(--surf);border:1px solid var(--line);
-    border-radius:var(--r2);padding:1rem;box-shadow:var(--sh);
-    backdrop-filter:var(--glass);-webkit-backdrop-filter:var(--glass)}
+    border-radius:var(--r2);padding:1rem;box-shadow:var(--sh)}
   .macroRing{display:flex;align-items:center;justify-content:space-between;gap:.6rem}
   .macroRing .mcol{flex:1;text-align:center;min-width:0}
   .macroRing .mcol b{font-family:var(--fd);font-weight:600;font-size:var(--t6);display:block;font-variant-numeric:tabular-nums}
@@ -2766,27 +2794,36 @@
   .macroRing .ringTxt b{font-family:var(--fd);font-weight:600;font-size:var(--t7);font-variant-numeric:tabular-nums}
   .macroRing .ringTxt span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
   .macroRing .ringTxt b.over{color:var(--ember)}
-  .macroBars{margin-top:.95rem;display:flex;flex-direction:column;gap:.55rem}
-  .mbar .mtop{display:flex;justify-content:space-between;align-items:baseline;font-size:var(--t2);color:var(--ink2);margin-bottom:.2rem}
-  .mbar .mtop b{font-family:var(--fd);font-weight:600;color:var(--ink);font-size:var(--t3)}
-  .mbar .mtop span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;color:var(--ink3);font-variant-numeric:tabular-nums}
-  .mbar .track{height:7px;border-radius:999px;background:var(--surf2);border:1px solid var(--line2);overflow:hidden}
-  .mbar .track i{display:block;height:100%;border-radius:999px;transition:width .4s cubic-bezier(.2,.7,.2,1)}
+  /* v28.0 (YAZIO): drei Makro-SPALTEN unter dem Ring statt drei
+     gestapelter Balken -- halbe Hoehe, ein Blick. Der Fuellstand laeuft
+     als transform:scaleX statt als width-Animation: transform komponiert
+     der Browser auf der GPU, width erzwingt Layout in jedem Frame --
+     das war einer der Ruckler auf dem Telefon. */
+  /* Mittlere Spalte breiter: "Kohlenhydrate" ist das laengste Label und
+     wurde bei 375px sonst abgeschnitten. Die Sperrung bleibt bei .08em --
+     dieselbe wie in der Tab-Leiste, die Verbreiterung reicht allein. */
+  .ymacros{margin-top:.9rem;display:grid;grid-template-columns:1fr 1.35fr 1fr;gap:.45rem}
+  .ycol{min-width:0;display:flex;flex-direction:column;gap:.28rem}
+  .ycol em{font-style:normal;font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;
+    text-transform:uppercase;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ycol .ytrack{display:block;height:5px;border-radius:999px;background:var(--surf2);overflow:hidden}
+  .ycol .ytrack i{display:block;height:100%;border-radius:999px;
+    transform-origin:left center;transform:scaleX(0);transition:transform .4s cubic-bezier(.2,.7,.2,1)}
+  .ycol .yval{font-family:var(--fd);font-weight:600;font-size:var(--t2);
+    font-variant-numeric:tabular-nums;color:var(--ink2);white-space:nowrap}
   /* Mahlzeiten-Zeilen: farbiger Symbol-Chip wie in den Einstellungen. */
-  .prrow .prtop.hasChip{align-items:center}
-  .prrow .prtop.hasChip b{flex:1}
-  .prrow .mchip{width:30px;height:30px;border-radius:var(--r1);flex:none;display:flex;align-items:center;justify-content:center;
-    color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
-    border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
-  .prrow .mchip svg{width:17px;height:17px}
   /* ── v18: Mahlzeiten-Slots + Barcode-Scanner ── */
-  .mslot{margin-bottom:.55rem}
+  /* v28.0 (YAZIO): eine Karte je Mahlzeit -- Kopf mit Icon-Kreis, Name,
+     "gegessen / Budget kcal" und den zwei Ghost-Knoepfen ("wie zuletzt",
+     Plus); die Eintraege stehen IN der Karte als schlanke Zeilen mit
+     Trennlinie statt als eigene Rahmen-Kaesten. Spart je Eintrag einen
+     kompletten Kasten (Grund, Rand, Radius) -- weniger DOM, weniger
+     Layoutarbeit, ruhigeres Bild. */
+  .mslot{margin-bottom:.55rem;background:var(--surf);border:1px solid var(--line);
+    border-radius:var(--r2);padding:.5rem .7rem;box-shadow:var(--sh);
+    content-visibility:auto;contain-intrinsic-size:auto 64px}
   .mslot:last-child{margin-bottom:0}
-  /* v27.0: Slot-Zeile wie MCI -- flache Karte, Icon-Kreis links, kcal grau,
-     rechts zwei runde Ghost-Knoepfe: "wie zuletzt" und Plus. */
-  .mslotHead{display:flex;align-items:center;gap:.65rem;background:var(--surf);
-    border:1px solid var(--line);border-radius:var(--r2);padding:.55rem .7rem;
-    min-height:60px;box-shadow:var(--sh);margin-bottom:.35rem}
+  .mslotHead{display:flex;align-items:center;gap:.65rem;padding:.1rem 0;min-height:48px}
   .mslotHead .mchip{width:36px;height:36px;border-radius:999px;flex:none;display:flex;align-items:center;justify-content:center;
     color:var(--chip,var(--aurora));background:color-mix(in srgb,var(--chip,var(--aurora)) 14%,transparent);
     border:1px solid color-mix(in srgb,var(--chip,var(--aurora)) 30%,transparent)}
@@ -2799,7 +2836,18 @@
   .mslotHead .mslotAdd{font-size:var(--t5);line-height:1}
   .mslotHead .mslotRep svg{width:16px;height:16px}
   .mslotHead .mslotAdd:hover,.mslotHead .mslotRep:hover{border-color:var(--aurora);color:var(--aurora)}
-  .mslot .prrow{margin-bottom:.35rem}
+  .mrow{display:flex;align-items:center;gap:.7rem;width:100%;text-align:left;
+    background:none;border:0;border-top:1px solid var(--line2);border-radius:0;
+    padding:.5rem .1rem;color:var(--ink);font-family:var(--fb);cursor:pointer;
+    transition:opacity .16s}
+  .mrow:hover{opacity:.8}
+  .mrow .mn{flex:1;min-width:0}
+  .mrow .mn b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t3);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .mrow .mn i{display:block;font-style:normal;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.08em;color:var(--ink3);margin-top:.1rem}
+  .mrow .mk{font-family:var(--fd);font-weight:600;font-size:var(--t3);
+    font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink2)}
   /* ── v18: Uebungs-Tausch als Blatt-Liste. Zeilen mit Strichmaennchen-
      Vorschau, aktuelle Wahl markiert, Suche und Filter-Chips darueber. ── */
   .swapcur{display:flex;align-items:center;gap:.7rem;background:var(--surf3);border:1px solid var(--line);
@@ -3420,7 +3468,10 @@
       <div class="cards" id="mealSum"></div>
       <div class="prlist" id="mealList"></div>
     </div>
-    <!-- Reihenfolge wie MCI: Mahlzeiten, Rezepte, Gewicht, Naehrstoffe. -->
+    <!-- v28.0: Wasser-Tracker wie YAZIO -- Glaeser antippen, je 0,25 l.
+         Reihenfolge des Tabs: Mahlzeiten, Wasser, Rezepte, Gewicht,
+         Naehrstoffe. -->
+    <div class="form" id="waterCard"></div>
     <p class="eyebrow" data-i18n="fuel.recipes">Recipes</p>
     <div class="habgrid" id="recipeRow"></div>
     <div id="fuelWeight"></div>
@@ -3779,7 +3830,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='27.0';
+var VERSION='28.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8346,19 +8397,19 @@ function calc(){
   drawMacros(macroNow,kg);
   var pc=pro*4,fc=fat*9,cc=carb*4,t=Math.max(1,pc+fc+cc);
   $('mbar').innerHTML='<i style="background:var(--aurora);width:'+(pc/t*100)+'%"></i><i style="background:var(--brass);width:'+(fc/t*100)+'%"></i><i style="background:var(--ice);width:'+(cc/t*100)+'%"></i>';
-  $('perkg').innerHTML=bx((cfg.lang==='de'?'Protein / kg':'Protein / kg'),(pro/kg).toFixed(1),'g')+bx((cfg.lang==='de'?'Fett / kg':'Fat / kg'),(fat/kg).toFixed(1),'g')+bx((cfg.lang==='de'?'Kohlenhydrate / kg':'Carbs / kg'),(carb/kg).toFixed(1),'g')+bx((cfg.lang==='de'?'Kalorien / kg':'Cal / kg'),Math.round(cal/kg),'kcal');
+  $('perkg').innerHTML=bx((cfg.lang==='de'?'Protein / kg':'Protein / kg'),mzahl((pro/kg).toFixed(1)),'g')+bx((cfg.lang==='de'?'Fett / kg':'Fat / kg'),mzahl((fat/kg).toFixed(1)),'g')+bx((cfg.lang==='de'?'Kohlenhydrate / kg':'Carbs / kg'),mzahl((carb/kg).toFixed(1)),'g')+bx((cfg.lang==='de'?'Kalorien / kg':'Cal / kg'),Math.round(cal/kg),'kcal');
   var warn='';
   if(pro/kg<1.6)warn=' <b style="color:var(--ember)">'+(cfg.lang==='de'?'Protein unter 1,6 g/kg begrenzt, was dein Training aufbauen kann.':'Protein is below 1.6 g/kg, which limits what your training can build.')+'</b>';
-  else if(pro/kg>2.4)warn=' <b style="color:var(--brass)">'+(cfg.lang==='de'?'Über 2,2 g/kg bringt nichts mehr.':'Above 2.2 g/kg adds nothing.')+'</b>';
+  else if(pro/kg>2.2)warn=' <b style="color:var(--brass)">'+(cfg.lang==='de'?'Über 2,2 g/kg bringt nichts mehr.':'Above 2.2 g/kg adds nothing.')+'</b>';
   if(fat/kg<0.7)warn+=' <b style="color:var(--ember)">'+(cfg.lang==='de'?'Fett unter 0,7 g/kg ist langfristig kein guter Tausch.':'Fat below 0.7 g/kg is not a good trade long term.')+'</b>';
-  $('f-note').innerHTML=(goal>0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+toDisp(kg*0.0035,'w').toFixed(1)+' '+uw()+(cfg.lang==='de'?' pro Woche. Schneller ist überwiegend Fett.':' per week. Faster and most of it is fat.'))
-    :goal<0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+toDisp(kg*0.006,'w').toFixed(1)+' '+uw()+(cfg.lang==='de'?' pro Woche. Protein hoch halten.':' per week. Keep protein high.'))
+  $('f-note').innerHTML=(goal>0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+mzahl(toDisp(kg*0.0035,'w').toFixed(1))+' '+uw()+(cfg.lang==='de'?' pro Woche. Schneller ist überwiegend Fett.':' per week. Faster and most of it is fat.'))
+    :goal<0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+mzahl(toDisp(kg*0.006,'w').toFixed(1))+' '+uw()+(cfg.lang==='de'?' pro Woche. Protein hoch halten.':' per week. Keep protein high.'))
     :(cfg.lang==='de'?'Erhaltung. Sinnvoll in den ersten Monaten oder wenn die Regeneration eng ist.':'Maintenance. Sensible in your first months or any stretch where recovery is tight.'))+warn;
   drawMeals();
-  var water=(kg*0.033).toFixed(1),caf=Math.round(kg*4);
+  var water=mzahl((kg*0.033).toFixed(1)),caf=Math.round(kg*4);
   var sleepH=parseFloat($('y-sleep').value)||7;
   $('hydrOut').innerHTML=bx(cfg.lang==='de'?'Wasser, Basis':'Water, floor',water,'L',1)+
-    bx(cfg.lang==='de'?'+ pro Einheit':'+ per session','0.5','L')+
+    bx(cfg.lang==='de'?'+ pro Einheit':'+ per session',cfg.lang==='de'?'0,5':'0.5','L')+
     bx(cfg.lang==='de'?'Koffein max':'Caffeine max',caf,'mg')+
     bx(cfg.lang==='de'?'Letzter Kaffee':'Cut-off','8h',cfg.lang==='de'?'vor Bett':'before bed');
   /* calc() schreibt Kalorien, Protein und Fett von Hand ins Feld -- ein
@@ -8388,7 +8439,7 @@ function drawMacros(vals,kg){
       ? (DE?'Tagesziel':'daily target')
       : (m.k==='carb'
           ? (DE?'ergibt sich aus dem Rest':'what is left over')
-          : (kg?((v/kg).toFixed(1)+' g/kg'):'&nbsp;'));
+          : (kg?(mzahl((v/kg).toFixed(1))+' g/kg'):'&nbsp;'));
     var tap=m.k!=='carb';
     return '<'+(tap?'button':'div')+' class="mcard'+(eigen?' edited':'')+'"'+(tap?' data-macro="'+m.k+'"':'')+'>'+
       (tap?'<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>':'')+
@@ -8421,7 +8472,7 @@ function openMacro(k){
       '<div class="dshHead"><b>'+m.n[L]+'</b><span>'+cur+' '+m.u+'</span></div>'+
       '<div class="field hasSlide"><label for="mcIn">'+(DE?'Wert':'Value')+'</label>'+
         '<div class="ctl hasunit"><input id="mcIn" type="number" step="'+sl[2]+'" value="'+cur+'"><span class="unit">'+m.u+'</span></div></div>'+
-      (kg&&k!=='cal'?'<div class="dshRow"><span>'+(DE?'Je Kilogramm':'Per kilogram')+'</span><b id="mcPer">'+(cur/kg).toFixed(1)+' g/kg</b></div>':'')+
+      (kg&&k!=='cal'?'<div class="dshRow"><span>'+(DE?'Je Kilogramm':'Per kilogram')+'</span><b id="mcPer">'+mzahl((cur/kg).toFixed(1))+' g/kg</b></div>':'')+
       '<div class="dshRow"><span>'+(DE?'Automatik':'Auto')+'</span><b>'+autoMacro(k)+' '+m.u+'</b></div>'+
       '<p class="hint">'+why+'</p>'+
       '<div class="savebar">'+
@@ -8437,7 +8488,7 @@ function openMacro(k){
       var v=parseFloat(this.value);
       if(!isNaN(v)&&v>0){
         over[k]=Math.round(v);set('over',over);calc();refresh();
-        var p=$('mcPer');if(p&&kg)p.textContent=(over[k]/kg).toFixed(1)+' g/kg';
+        var p=$('mcPer');if(p&&kg)p.textContent=mzahl((over[k]/kg).toFixed(1))+' g/kg';
         var h=$('sheetBody').querySelector('.dshHead span');if(h)h.textContent=over[k]+' '+m.u;
         var b=$('sheetBody').querySelector('button[data-mcact="auto"]');if(b)b.disabled=false;
       }
@@ -8453,6 +8504,9 @@ function openMacro(k){
    vermischt, ist keins. */
 var meals=get('meals',{});
 function mealKcal(m){return Math.round(m.p*4+m.f*9+m.c*4);}
+/* Zahl fuer die Anzeige: deutsches Komma statt Punkt. Wasser, Gewicht und
+   Naehrstoffe formatieren so -- die Makro-Zeilen taten es bisher nicht. */
+function mzahl(x){return String(x).replace('.',cfg.lang==='de'?',':'.');}
 /* Vier Mahlzeit-Slots mit eigener Farbe und Icon -- geteilt zwischen der
    Tagesliste und dem Hinzufuegen-Blatt, damit beide dieselbe Sprache
    sprechen statt zwei verschiedene Darstellungen fuer dieselbe Sache. */
@@ -8503,7 +8557,9 @@ function mlRevealManual(){
 function slotLetzte(slot,ohneTag){
   var tage=Object.keys(meals).sort().reverse();
   for(var d=0;d<tage.length;d++){
-    if(tage[d]===ohneTag)continue;
+    /* >= statt ===: wer einen Vergangenheitstag ansieht, soll nur aus noch
+       FRUEHEREN Tagen kopieren -- sonst wandert Zukunft in die Vergangenheit. */
+    if(tage[d]>=ohneTag)continue;
     var hit=(meals[tage[d]]||[]).filter(function(m){return (m.s||'s')===slot;});
     if(hit.length)return hit;
   }
@@ -8526,8 +8582,9 @@ function drawMeals(){
   var DE=cfg.lang==='de',k=iso(fuelTag()),ms=mealsOf(k);
   var kcal=0,pro=0,fat=0,carb=0;
   ms.forEach(function(m){kcal+=mealKcal(m);pro+=m.p;fat+=m.f;carb+=m.c;});
-  /* v17 (Baustelle 5): Ring in der Mitte, Gegessen links, Ziel rechts,
-     darunter die drei Makros als Balken. Ziele kommen aus dem Rechner
+  /* v17 (Baustelle 5): Ring in der Mitte, Gegessen links, Ziel rechts;
+     seit v28.0 darunter die drei Makros als SPALTEN (YAZIO, ycol()).
+     Ziele kommen aus dem Rechner
      inklusive Nutzer-Overrides (curMacro) -- ohne Koerperdaten gibt es
      keine erfundene Messlatte, dann zeigt der Ring nur das Gegessene. */
   var zielK=curMacro('cal')||0,zielP=curMacro('pro')||0,zielF=curMacro('fat')||0,zielC=curMacro('carb')||0;
@@ -8544,10 +8601,13 @@ function drawMeals(){
   var modus=zielWert==='-450'?[DE?'Abnehmen':'Lean out','var(--ember)']
     :zielWert==='0'?[DE?'Halten':'Maintain','var(--ice)']
     :[DE?'Aufbauen':'Build','var(--aurora)'];
-  function mbar(lbl,wert,ziel,farbe){
-    var pct=ziel?Math.min(100,wert/ziel*100):0;
-    return '<div class="mbar"><div class="mtop"><b>'+lbl+'</b><span>'+Math.round(wert)+(ziel?' / '+Math.round(ziel):'')+' g</span></div>'+
-      '<div class="track"><i style="width:'+pct.toFixed(0)+'%;background:'+farbe+'"></i></div></div>';
+  /* YAZIO-Spalte: Label, duenner Balken (scaleX -- keine Layoutarbeit),
+     Wert darunter. */
+  function ycol(lbl,wert,ziel,farbe){
+    var pct=ziel?Math.min(1,wert/ziel):0;
+    return '<div class="ycol"><em>'+lbl+'</em>'+
+      '<span class="ytrack"><i style="transform:scaleX('+pct.toFixed(3)+');background:'+farbe+'"></i></span>'+
+      '<span class="yval">'+Math.round(wert)+(ziel?' / '+Math.round(ziel):'')+' g</span></div>';
   }
   sumEl.innerHTML='<div class="macroCard">'+
     '<span class="modechip" style="--mc:'+modus[1]+'">'+modus[0]+'</span>'+
@@ -8559,10 +8619,10 @@ function drawMeals(){
       '</svg><div class="ringTxt">'+mitte+'</div></div>'+
       '<div class="mcol"><b>'+(zielK?Math.round(zielK):'—')+'</b><span>'+(DE?'Ziel':'Target')+'</span></div>'+
     '</div>'+
-    '<div class="macroBars">'+
-      mbar('Protein',pro,zielP,'var(--aurora)')+
-      mbar(DE?'Kohlenhydrate':'Carbs',carb,zielC,'var(--ice)')+
-      mbar(DE?'Fett':'Fat',fat,zielF,'var(--brass)')+
+    '<div class="ymacros">'+
+      ycol('Protein',pro,zielP,'var(--aurora)')+
+      ycol(DE?'Kohlenhydrate':'Carbs',carb,zielC,'var(--ice)')+
+      ycol(DE?'Fett':'Fat',fat,zielF,'var(--brass)')+
     '</div>'+
     (zielK?'':'<p class="hint" style="margin:.6rem 0 0">'+(DE?'Kein Ziel gesetzt — oben Körperdaten eintragen.':'No target set — enter your body data above.')+'</p>')+
     '<div class="savebar" style="margin-top:.7rem"><button type="button" class="tbtn" id="optCal" style="width:100%">'+
@@ -8591,27 +8651,34 @@ function drawMeals(){
     var eintraege=[];
     ms.forEach(function(m,i){if((m.s||'s')===sl[0])eintraege.push([m,i]);});
     var slotK=0;eintraege.forEach(function(x){slotK+=mealKcal(x[0]);});
-    /* "Wie zuletzt" nur, wenn ein fruehererer Tag diesen Slot hat -- ein
-       toter Knopf waere eine Einladung ins Leere. */
-    var wdh=slotLetzte(sl[0],k).length>0;
+    /* "Wie zuletzt" nur, wenn ein fruehererer Tag diesen Slot hat UND der
+       Slot heute noch leer ist -- nach dem Einfuegen wuerde ein zweites
+       Tippen sonst alles duplizieren (YAZIO blendet die Kopier-Option nach
+       Gebrauch ebenfalls aus). */
+    var wdh=eintraege.length===0&&slotLetzte(sl[0],k).length>0;
+    /* YAZIO: jede Mahlzeit traegt ihr Kalorien-Budget (Anteil vom
+       Tagesziel: 25/35/30/10). Ohne Ziel steht nur das Gegessene. */
+    var ANTEIL={b:.25,l:.35,d:.30,s:.10};
+    var budget=zielK?Math.round(zielK*ANTEIL[sl[0]]):0;
+    var kZeile=budget?(Math.round(slotK)+' / '+budget+' kcal'):(slotK?Math.round(slotK)+' kcal':'');
     h+='<div class="mslot"><div class="mslotHead">'+
       '<span class="mchip" style="--chip:'+sl[2]+'">'+sl[3]+'</span>'+
-      '<b>'+sl[1]+'</b><span class="mslotK">'+(slotK?Math.round(slotK)+' kcal':'')+'</span>'+
+      '<b>'+sl[1]+'</b><span class="mslotK">'+kZeile+'</span>'+
       (wdh?'<button type="button" class="mslotRep" data-slot="'+sl[0]+'" title="'+(DE?'Wie zuletzt':'Same as last time')+'" aria-label="'+(DE?'Wie zuletzt':'Same as last time')+'">'+REPIC+'</button>':'')+
       '<button type="button" class="mslotAdd" data-slot="'+sl[0]+'" aria-label="'+(DE?'Hinzufügen':'Add')+'">+</button></div>';
     eintraege.forEach(function(x){
       var m=x[0];
-      h+='<button type="button" class="prrow" data-meal="'+x[1]+'">'+
-        '<span class="prtop"><b></b><span class="prv">'+mealKcal(m)+'<i>kcal</i></span></span>'+
-        '<span class="prfoot"><span class="delta flat">'+m.p+' g P · '+m.f+' g F · '+m.c+' g '+(DE?'KH':'C')+'</span>'+
-        '<svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></span>'+
+      h+='<button type="button" class="mrow" data-meal="'+x[1]+'">'+
+        '<span class="mn"><b></b><i>'+mzahl(m.p)+' P · '+mzahl(m.f)+' F · '+mzahl(m.c)+' '+(DE?'KH':'C')+
+        (m.g?' · '+mzahl(m.g)+' g':'')+'</i></span>'+
+        '<span class="mk">'+mealKcal(m)+' kcal</span>'+
         '</button>';
     });
     h+='</div>';
   });
   listEl.innerHTML=h;
-  var nms=listEl.querySelectorAll('.prrow b');
-  [].forEach.call(listEl.querySelectorAll('.prrow'),function(r,ri){
+  var nms=listEl.querySelectorAll('.mrow .mn b');
+  [].forEach.call(listEl.querySelectorAll('.mrow'),function(r,ri){
     var m=ms[+r.dataset.meal];if(m)nms[ri].textContent=m.n;
   });
   [].forEach.call(listEl.querySelectorAll('.mslotAdd'),function(b){
@@ -8725,7 +8792,7 @@ function openMeal(idx,slot){
     var rc=$('mlRecent');
     rc.innerHTML='<p class="eyebrow" style="margin:0 0 .3rem">'+(DE?'Zuletzt gegessen':'Recent')+'</p>'+
       recents.map(function(r,i){return '<button type="button" class="mlsugrow" data-r="'+i+'">'+
-        '<b></b><span>'+mealKcal(r)+' kcal · '+r.p+' P · '+r.f+' F · '+r.c+' '+(DE?'KH':'C')+'</span></button>';}).join('');
+        '<b></b><span>'+mealKcal(r)+' kcal · '+mzahl(r.p)+' P · '+mzahl(r.f)+' F · '+mzahl(r.c)+' '+(DE?'KH':'C')+'</span></button>';}).join('');
     rc.hidden=false;
     var rnm=rc.querySelectorAll('.mlsugrow b');
     [].forEach.call(rc.querySelectorAll('.mlsugrow'),function(ch,i){
@@ -8780,7 +8847,7 @@ function openMeal(idx,slot){
     el.hidden=false;
     el.innerHTML=liste.map(function(x,i){
       return '<button type="button" class="mlsugrow" data-sug="'+i+'">'+
-        '<b></b><span>'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal · '+x.p+' P · '+x.f+' F · '+x.c+' '+(DE?'KH':'C')+
+        '<b></b><span>'+Math.round(x.p*4+x.f*9+x.c*4)+' kcal · '+mzahl(x.p)+' P · '+mzahl(x.f)+' F · '+mzahl(x.c)+' '+(DE?'KH':'C')+
         (x.quelle==='off'?' · OFF':'')+'</span></button>';
     }).join('');
     var namen=el.querySelectorAll('.mlsugrow b');
@@ -8899,6 +8966,44 @@ $('fstrip').addEventListener('click',function(e){
   fuelOff=Math.round((sod(z)-TODAY)/86400000);
   fuelPaint();
 });
+/* Wasser (YAZIO): Glaeser antippen, je 0,25 l, gespeichert je Tag.
+   Ziel aus dem Koerpergewicht (0,033 l je kg), 6 bis 12 Glaeser. */
+var water=get('water',{});
+function drawWater(){
+  var el=$('waterCard');if(!el)return;
+  var DE=cfg.lang==='de',k=iso(fuelTag());
+  var kg=(profile&&profile.weight)||0;
+  if(!kg){var wv=parseFloat(($('f-w')||{value:''}).value);if(wv)kg=fromDisp(wv,'w');}
+  var zielL=kg?Math.round(kg*0.033*10)/10:2.0;
+  /* ceil, nicht round: mit allen Glaesern voll muss das Ziel erreichbar
+     sein -- 10 Glaeser waeren bei 2,6 l Ziel fuer immer "2,50 / 2,6". */
+  var glaeser=Math.max(6,Math.min(12,Math.ceil(zielL/0.25)));
+  var n=Math.min(glaeser,water[k]||0);
+  var GL='<path d="M7 4.5h10l-1.3 15h-7.4Z"/>';
+  /* gtitle dazu: NUR die Regel ".gtitle .gt b" setzt Titel in die
+     Display-Schrift -- ohne sie stuende "Wasser" in Fliesstext-Fett,
+     direkt neben der korrekt gesetzten "Gegessen heute"-Zeile. */
+  var h='<div class="gtitle wkopf" style="margin:0">'+
+    '<span class="ichip" style="--chip:var(--ice)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5c3.2 4.2 6 7.4 6 10.7a6 6 0 0 1-12 0c0-3.3 2.8-6.5 6-10.7Z"/></svg></span>'+
+    '<div class="gt"><b>'+(DE?'Wasser':'Water')+'</b></div>'+
+    '<span class="wsum">'+String((n*0.25).toFixed(2)).replace('.',DE?',':'.')+' / '+String(zielL.toFixed(1)).replace('.',DE?',':'.')+'&nbsp;L</span></div>'+
+    '<div class="wglasses">';
+  for(var i=0;i<glaeser;i++){
+    h+='<button type="button" class="wglass'+(i<n?' voll':'')+'" data-gl="'+(i+1)+'" aria-label="'+(DE?'Glas ':'Glass ')+(i+1)+'" aria-pressed="'+(i<n)+'">'+
+      '<svg viewBox="0 0 24 24" aria-hidden="true">'+GL+'</svg></button>';
+  }
+  h+='</div>';
+  el.innerHTML=h;
+}
+$('waterCard').addEventListener('click',function(e){
+  var b=e.target.closest('button[data-gl]');if(!b)return;
+  var k=iso(fuelTag()),n=+b.dataset.gl,cur=water[k]||0;
+  /* Antippen fuellt bis zu diesem Glas; das oberste volle Glas nochmal
+     antippen leert es -- ein Weg vor, ein Weg zurueck. */
+  water[k]=(cur===n)?n-1:n;
+  set('water',water);
+  drawWater();
+});
 /* Gewicht: Stepper-Karte (MCI), schreibt ins bestehende Wiegelog. */
 function drawWeight(){
   var el=$('fuelWeight');if(!el)return;
@@ -8956,9 +9061,9 @@ function drawMikro(){
     el.parentNode.insertBefore(p,el.nextSibling);alt=p;
   }
   alt.textContent=DE
-    ?(mit?'Aus '+mit+' Einträgen mit Nährwertdaten (Scanner, Suche, Rezepte). Handeinträge ohne Detailwerte zählen hier nicht.'
+    ?(mit?'Aus '+mit+(mit===1?' Eintrag':' Einträgen')+' mit Nährwertdaten (Scanner, Suche, Rezepte). Handeinträge ohne Detailwerte zählen hier nicht.'
          :'Füllt sich, sobald Einträge aus Scanner, Suche oder Rezepten kommen — Handeinträge tragen keine Detailwerte.')
-    :(mit?'From '+mit+' entries with detailed data (scanner, search, recipes).'
+    :(mit?'From '+mit+(mit===1?' entry':' entries')+' with detailed data (scanner, search, recipes).'
          :'Fills up once entries come from the scanner, search or recipes.');
 }
 /* Rezepte: eigene Mahlzeiten wiederverwenden. */
@@ -8995,7 +9100,7 @@ $('recipeRow').addEventListener('click',function(e){
     (rz.length?rz.map(function(r,i){
       return '<div style="display:flex;gap:.4rem;align-items:stretch">'+
         '<button type="button" class="swaprow" data-rz="'+i+'" style="flex:1;margin-bottom:0">'+
-        '<span class="swnm"><b></b><span>'+mealKcal(r)+' kcal · '+r.p+' P · '+r.f+' F · '+r.c+' '+(DE?'KH':'C')+'</span></span>'+
+        '<span class="swnm"><b></b><span>'+mealKcal(r)+' kcal · '+mzahl(r.p)+' P · '+mzahl(r.f)+' F · '+mzahl(r.c)+' '+(DE?'KH':'C')+'</span></span>'+
         '<span class="swtick">＋</span></button>'+
         '<button type="button" class="tbtn dngr" data-rzdel="'+i+'" aria-label="'+(DE?'Rezept löschen':'Delete recipe')+'" style="flex:none;width:auto">✕</button>'+
         '</div>';
@@ -9006,6 +9111,18 @@ $('recipeRow').addEventListener('click',function(e){
   [].forEach.call($('sheetBody').querySelectorAll('button[data-rzdel]'),function(db){
     db.addEventListener('click',function(e){
       e.stopPropagation();
+      /* Zwei Tippen: das erste macht scharf (Haken), das zweite loescht.
+         Ein Fehltipp direkt neben der Einfuegen-Zeile waere sonst
+         unumkehrbar. Nach 2,5 s entschaerft sich der Knopf von selbst. */
+      if(db.dataset.arm!=='1'){
+        /* Warnzeichen, kein Haken: ein Haken auf einem Loesch-Knopf liest
+           sich als "gespeichert". */
+        db.dataset.arm='1';db.textContent='!';
+        db.setAttribute('aria-label',DE?'Nochmal tippen zum Löschen':'Tap again to delete');
+        setTimeout(function(){if(db.isConnected){db.dataset.arm='';db.textContent='✕';
+          db.setAttribute('aria-label',DE?'Rezept löschen':'Delete recipe');}},2500);
+        return;
+      }
       rz.splice(+db.dataset.rzdel,1);
       set('recipes',rz);drawRecipes();
       var wieder=$('rzAll');if(wieder)wieder.click();
@@ -9027,9 +9144,15 @@ $('recipeRow').addEventListener('click',function(e){
     });
   });
 });
-/* Ein Pinselstrich fuer den ganzen Bereich. */
+/* Ein Pinselstrich fuer den ganzen Bereich. Oben (Streifen, Ringkarte,
+   Mahlzeiten, Wasser) sofort; Gewicht, Naehrstoffe und Rezepte liegen
+   unterhalb der ersten Bildschirmhoehe und kommen einen Tick spaeter --
+   halbiert die synchrone Blockierzeit beim Betreten des Tabs. */
+var fuelSpaet=null;
 function fuelPaint(mitZaehler){
-  drawFstrip();drawMeals();drawWeight();drawMikro();drawRecipes();
+  drawFstrip();drawMeals();drawWater();
+  clearTimeout(fuelSpaet);
+  fuelSpaet=setTimeout(function(){drawWeight();drawMikro();drawRecipes();},0);
   if(mitZaehler)zaehlHoch($('ovRest'));
 }
 /* ---------- v19 Scanner-Bausteine (generiert und numerisch validiert:
@@ -9885,16 +10008,20 @@ function kamResult(food){
   if(food.bl!==undefined)mikro.push((DE?'Ballaststoffe ':'fibre ')+food.bl+' g');
   if(food.sa!==undefined)mikro.push((DE?'Salz ':'salt ')+food.sa+' g');
   r.hidden=false;
-  r.innerHTML='<b style="font-family:var(--fd);font-weight:700">'+food.n+'</b>'+
+  /* Name per textContent, nie per innerHTML: er kommt roh aus der
+     Open-Food-Facts-Antwort -- ein praepariertes Produkt koennte sonst
+     Markup in die Seite bringen. */
+  r.innerHTML='<b style="font-family:var(--fd);font-weight:700"></b>'+
     '<p class="hint" style="margin:.3rem 0 .55rem">'+(DE?'Je 100 g: ':'Per 100 g: ')+
-      Math.round(food.p*4+food.f*9+food.c*4)+' kcal · '+food.p+' P · '+food.f+' F · '+food.c+' '+(DE?'KH':'C')+
+      Math.round(food.p*4+food.f*9+food.c*4)+' kcal · '+mzahl(food.p)+' P · '+mzahl(food.f)+' F · '+mzahl(food.c)+' '+(DE?'KH':'C')+
       (mikro.length?'<br>'+mikro.join(' · '):'')+
-      (food.por?'<br>'+(DE?'Portion laut Packung: ':'Serving: ')+food.por:'')+'</p>'+
+      (food.por?'<br>'+(DE?'Portion laut Packung: ':'Serving: ')+String(food.por).replace(/[<>&"']/g,''):'')+'</p>'+
     '<div class="field"><label for="kamG">'+(DE?'Menge':'Amount')+'</label>'+
       '<div class="ctl hasunit"><input id="kamG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
     '<div class="savebar">'+
       '<button type="button" class="tbtn go" id="kamUse">'+(DE?'In Mahlzeit übernehmen':'Add to a meal')+'</button>'+
       '<button type="button" class="tbtn" id="kamAgain">'+(DE?'Weiter scannen':'Scan again')+'</button></div>';
+  r.querySelector('b').textContent=food.n;
   $('kamUse').addEventListener('click',function(){
     var g=Math.max(1,parseFloat($('kamG').value)||100)/100;
     kamUebernehmen(food,g);
@@ -12514,7 +12641,7 @@ function syncSettings(){
   $('setStart').value=ST;
   $('u-h').textContent=ul();$('u-w').textContent=uw();$('u-w2').textContent=uw();
 }
-$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildPost();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();drawW();refresh();testCalc();});
+$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildPost();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();if(typeof fuelPaint==='function')fuelPaint();drawW();refresh();testCalc();});
 $('setUnits').addEventListener('change',function(){
   var oldW=fromDisp(nv('f-w'),'w'),oldH=fromDisp(nv('f-h'),'l');
   cfg.units=this.value;saveCfg();
