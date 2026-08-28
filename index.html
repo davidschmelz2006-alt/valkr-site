@@ -114,7 +114,7 @@
       <svg width="24" height="24" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="#D4A73C" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
       <div><b>Valkr</b><span>Cockpit</span></div>
     </div>
-    <div class="asof"><!--ASOF-->23.08.2026, 18:07<!--/ASOF--><br><span id="mode"></span></div>
+    <div class="asof"><!--ASOF-->28.08.2026, 20:29<!--/ASOF--><br><span id="mode"></span></div>
   </div>
 
   <div class="status">
@@ -162,8 +162,8 @@
     <div class="grid">
       <div class="file">
         <span class="fn">Produkt/valkr-hub.html</span>
-        <span class="fv">v24.2</span>
-        <span class="fm"><b>12.843</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
+        <span class="fv">v28.0</span>
+        <span class="fm"><b>14.329</b> Zeilen<span class="ok">&nbsp;&middot;&nbsp;ok</span></span>
       </div>
       <div class="file">
         <span class="fn">Produkt/valkr-identity.html</span>
@@ -176,11 +176,11 @@
   <div>
     <h2>Letzte Änderungen</h2>
     <div class="log">
-      <div class="row"><span class="h">b96507c</span><div class="t"><b>Hub v24.2: Kalender zeigt geplante, erledigte und verpasste Trainingstage; Glasoptik</b></div></div>
-      <div class="row"><span class="h">86ca164</span><div class="t"><b>Hub v24.1: Kalender klappt auf den Monat auf und ist aufgeraeumt; Reset loescht jetzt wirklich alles; Wischen wechselt Abschnitte statt Bereiche; Seitenfueller und leere Zustandskarten raus; Pruefwerkzeuge, Skill und Hook ins Uebergabesystem</b></div></div>
-      <div class="row"><span class="h">6b55d4f</span><div class="t"><b>Hub v24.1: Kalender aufgeraeumt; Pruefwerkzeuge, Skill und Hook ins Uebergabesystem</b></div></div>
-      <div class="row"><span class="h">d18f6a0</span><div class="t"><b>Hub v24.0: Kalender klappt auf den ganzen Monat auf</b></div></div>
-      <div class="row"><span class="h">8c6b6e0</span><div class="t"><b>Hub v23.9: Reset loescht wirklich alles - nach Praefix statt nach veralteter Liste</b></div></div>
+      <div class="row"><span class="h">df17b2e</span><div class="t"><b>Hub v28.0: Ernaehrung nach YAZIO-Vorbild plus Leistung fuers Telefon - Makro-Spalten statt Balken (scaleX statt width-Animation), eine Karte je Mahlzeit mit Kalorien-Budget und Trennlinien-Zeilen, Wasser-Tracker mit Glaeser-Reihe, backdrop-filter von der Ringkarte weg, fuelPaint zweigeteilt, content-visibility unter den Mahlzeiten; zehn Gauntlet-Runden mit ~20 Befunden, darunter whead-Klassenkollision, kaputte Verteilungsleiste seit v20, Zukunfts-Kopie bei wie-zuletzt, OFF-innerHTML-Injektion, Komma-Sweep</b></div></div>
+      <div class="row"><span class="h">0c96ecc</span><div class="t"><b>Hub v27.0: Ernaehrungs-Tab entruempelt, Hinzufuegen zweistufig nach MCI-Vorbild - Zielkacheln in den Rechner-Ausklapper (Dopplung mit Ringkarte weg), Slot-Zeilen mit wie-zuletzt- und Plus-Knopf, Blatt erst Suche/Zuletzt, dann Menge mit Gramm-Chips, Makro-Dreierzeile, ein gefuellter Hauptknopf; drei Gauntlet-Runden mit 30 Befunden: sheet-button-Spezifitaet repariert, Supplement-Tabelle deutsch, Portion bleibt beim Bearbeiten aenderbar, Rezept-Kontext und -Loeschen</b></div></div>
+      <div class="row"><span class="h">71d38f3</span><div class="t"><b>Hub v26.21: Tab-Wechsel entruckelt -- synchrone Blockierzeit vor 9.8ms -&gt; ~5ms</b></div></div>
+      <div class="row"><span class="h">d2f407c</span><div class="t"><b>Hub v26.20: Verstrichene Zeit in der Floating-Bar, Runner-Stepper und Sheets geprueft</b></div></div>
+      <div class="row"><span class="h">c9fc950</span><div class="t"><b>Hub v26.19: HEUTE-Dashboard als 2x2-Raster, echter Schrittzaehler per DeviceMotion</b></div></div>
     </div>
   </div>
 
@@ -194,11 +194,13 @@
       <li class="star"><b>Sieben Belege fachlich gegenlesen lassen</b>, dazu Satz-Autoregulation und Einmess-Heuristiken (v13.7). Vor kommerzieller Nutzung.</li>
       <li class="star"><b>Deutsche Buchfassung fachlich gegenlesen</b> (12 Kapitel in <code>02 Manuskript DE</code>, seit v17.0 auch komplett im Hub-Wissensbereich). Übersetzung ist durch drei Kritikerrunden, die fachliche Freigabe ist Menschensache.</li>
       <li class="big">Aus dem v23-Umbau — offen</li>
-      <li class="star"><b>Wortkur zu Ende führen.</b> Die auffälligsten Stellen sind kürzer (Optionstexte, Einmess-Hinweis, fünf doppelte Überschriften), aber es stehen noch 59 <code>.hint</code>- Absätze und rund 40 sperrige Großschrift-Beschriftungen in der App. Kein Fehler, nur zu viel Text.</li>
+      <li class="star"><b>Wortkur — geprüft, kleiner als gedacht.</b> Alle 57 <code>.hint</code>-Absätze einzeln gelesen (v24.9), nicht nur gezählt: die meisten erklären etwas Echtes (Sicherheitshinweise, nicht offensichtliche Mechanik) und sind kein Füllstoff. Ein veralteter Satz gefunden und korrigiert.</li>
+      <li class="star"><b>Großschrift-Beschriftungen durchgegangen (v26.7).</b> Alle rund 90 <code>text-transform:uppercase</code>-Stellen einzeln geprüft — CSS-Regel plus tatsächlicher Text bei 375px, nicht nur gezählt: fast alle sind kurze, etablierte Labels (Tab-Titel, Feldbeschriftungen, Badges) und passen anstandslos in ihre Kästen, kein Umbruch, keine Enge. Drei echte Treffer geglättet: die Footer-Zeile (wrappte auf zwei Zeilen, jetzt normale Groß-/Kleinschreibung), der Schmerz-Chip „Unterer Rücken" (sprengte die Chip-Reihe, jetzt „Rücken") und die vier Mobility-Zweckzeilen („Für Klimmzüge und Handstände" u. Ä. — ganze Wortgruppen, jetzt lesbar statt schreiend).</li>
       <li class="star"><b>Auf echter Hardware nachmessen.</b> Gummiband, Startfolge, schwebende Tableiste und Wischen sind auf dem Rechner geprüft und rechnerisch für iPhone und Android ausgelegt — gesehen habe ich sie dort nicht. Die Abstände der Tableiste sind an MCIs Aufnahme gemessen (65 px hoch, 6 px unten).</li>
-      <li class="star"><b>Restliche Bereiche gestalterisch nachziehen.</b> Skills, Test, Mobility, Wochen und Statistik laufen fehlerfrei und haben das neue Farb- und Kartensystem, aber noch nicht den Feinschliff von Heute, Training, Ränge und Einstellungen.</li>
-      <li class="star"><b>Zugang und Wissen</b> stehen noch im alten Aufbau (lange Fließtexte).</li>
+      <li class="star"><b>Gestalterischer Feinschliff aller Bereiche erledigt.</b> Heute und Einstellungen in v26.8/v26.9, Training und Ränge in v26.10 — alle Bereiche laufen jetzt im selben Glas-Kartensystem wie Skills, Mobility, Wochen und Statistik. In Ränge stand die letzte flache Karte (Abzeichen, <code>.ach</code>) noch mit 4px-Radius ohne Glas, jetzt im selben Kartensatz wie <code>.rankRow</code>. Test ist seit v24.7/v24.10 durch (Fällig-Punkt, Level-Umbau, Row/Press-Lücke geschlossen).</li>
+      <li>~~Zugang und Wissen stehen noch im alten Aufbau (lange Fließtexte).~~ Geprüft (v24.9): beide sind bereits Karten/Tabelle plus Ausklapper, keine Fließtext-Seiten. Der Hinweis war veraltet.</li>
       <li class="big">Produkt — offen, ohne Termin</li>
+      <li class="star"><b>Totes CSS im Bestand aufräumen</b> (Fund aus dem v28-Gauntlet, außerhalb des Ernährungs-Umbaus): Selektoren ohne jede Verwendung — <code>#subnav .subdot</code>, <code>.habring</code>, <code>.wlist</code>/<code>.wdots</code>/<code>.wbody</code>, <code>.quickchips</code>, dazu laut Scan <code>achCat</code>, <code>blob</code>, <code>bodymap</code>, <code>dgrid</code>, <code>legal</code>, <code>swrow</code>. Vor dem Löschen jeden einzeln gegen Markup UND JS-Stringbau greppen.</li>
       <li class="star"><b>Onboarding-Screenshots als Beweismaterial</b> nachliefern, sobald das Browser-Panel offen ist (v16/v17-Wizard, Körperfett-Figur, Trainingstage-Pillen, Stufenbänder, Ernährungs-Ring).</li>
       <li class="star"><b>Ersatzübungen — Rest:</b> Seit v18.0 hat jede Übung ein Tausch-Blatt mit Filtern (Leichter/Schwerer/Ohne Gerät) — deckt „keine Stange" und Niveau ab. Offen bleibt gezielte Führung bei Schmerz (welcher Tausch bei welchem Zwicken) und Platzmangel/unterwegs als eigene Filter.</li>
       <li>Bestenliste: aus der Oberfläche entfernt, weil neun von zehn Zeilen erfunden waren. Kommt zurück, wenn es einen Server gibt. Code liegt in <code>renderBoard()</code>.</li>
