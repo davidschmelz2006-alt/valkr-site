@@ -632,7 +632,10 @@
   #sheet button span{font-size:.74rem;color:var(--ink3);line-height:1.3}
   /* Inhalt eines Detailblatts. Bewusst dieselbe Flaeche wie das Menue: eine
      Form, die man einmal versteht, statt zweier, die sich aehneln. */
-  #sheet .dsh{display:flex;flex-direction:column;gap:.7rem;padding-bottom:.3rem}
+  /* Auch #v-food: openMeal() baut denselben .dsh-Wrapper seit v29 auf der
+     Vollbild-Seite -- ohne diese Haelfte fehlte dort das Spalten-Layout
+     samt .7rem-Abstand zwischen den Abschnitten. */
+  #sheet .dsh,#v-food .dsh{display:flex;flex-direction:column;gap:.7rem;padding-bottom:.3rem}
   #sheet .dshHead{display:flex;align-items:baseline;justify-content:space-between;gap:.8rem}
   #sheet .dshHead b{font-family:var(--fd);font-weight:600;font-size:1.15rem}
   #sheet .dshHead span{font-family:var(--fm);font-size:var(--t3);color:var(--aurora);font-variant-numeric:tabular-nums}
@@ -647,14 +650,15 @@
      (ID-Spezifitaet). Bauteile, die im Blatt wie ueberall sonst aussehen
      sollen, brauchen deshalb hier ihre Gegenregel -- sonst rendern Pille,
      Hauptknopf und Loeschknopf als identische graue Balken. */
-  #sheet .txtbtn{width:auto;height:38px;padding:0 .95rem;border:0;border-radius:999px;
+  /* Auch #v-food: seit v29 steht dieselbe Pille im .dsh der Vollbild-
+     Seite -- ohne die zweite Selektorhaelfte wuerde sie dort auf volle
+     Breite gezogen (Flex-Spalte, Default-Stretch). */
+  #sheet .txtbtn,#v-food .txtbtn{width:auto;height:38px;padding:0 .95rem;border:0;border-radius:999px;
     display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:0;
     color:var(--ink);background:var(--surf3);font-family:var(--fd);font-size:var(--t3);
     font-weight:600;text-align:center;flex:none;white-space:nowrap;
-    /* .dsh ist eine Flex-Spalte mit stretch -- ohne das hier wuerde die
-       Pille auf volle Blattbreite gezogen. */
     align-self:flex-start}
-  #sheet .txtbtn:hover{background:var(--line);color:var(--ink);border-color:transparent}
+  #sheet .txtbtn:hover,#v-food .txtbtn:hover{background:var(--line);color:var(--ink);border-color:transparent}
   #sheet .tbtn{width:auto;display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
     margin-bottom:0;text-align:center;font-family:var(--fd);font-size:var(--t4);font-weight:650;
     border:1px solid color-mix(in srgb,#fff 8%,transparent);
@@ -924,8 +928,12 @@
   .habcard.mikro .track{height:4px;border-radius:999px;background:var(--surf2);
     overflow:hidden;margin-top:.15rem}
   .habcard.mikro .track i{display:block;height:100%;border-radius:999px}
-  /* Vorschlagsliste der Lebensmittel-Suche im Mahlzeit-Blatt. */
-  .mlsug{display:flex;flex-direction:column;gap:.3rem;margin:-.3rem 0 .5rem}
+  /* Vorschlagsliste der Lebensmittel-Suche. gap:0, nicht .3rem: die
+     .frow-Zeilen bringen ihre Trennlinie als border-top mit -- jeder
+     Zwischenraum liesse die Linie in der Luft haengen statt direkt
+     zwischen den Zeilen zu sitzen (wie bei .mrow, deren Eltern auch
+     keinen gap haben). */
+  .mlsug{display:flex;flex-direction:column;gap:0;margin:-.3rem 0 .5rem}
   .mlsug[hidden]{display:none}
   /* Suche zuerst: Eingabe und Scanner in einer Zeile, statt der Scanner als
      eigener Vollbreite-Knopf ueber dem Feld -- das war der Umweg, den jede
@@ -955,19 +963,20 @@
     letter-spacing:.08em;color:var(--ink3);margin-top:.1rem}
   .frow .fk{font-family:var(--fd);font-weight:600;font-size:var(--t3);
     font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink2)}
-  /* Zuletzt gegessen: Schnellzugriff, solange das Suchfeld leer ist. */
+  /* Gramm-Schnellwahl-Chips (50/100/150/200 g) im Mengenblock -- seit v29
+     ihre einzige Verwendung; die Zuletzt-Liste rendert als .frow-Zeilen. */
   .mlrchip{border:1px solid var(--line);background:var(--surf2);color:var(--ink2);
     border-radius:999px;padding:.4rem .8rem;font-family:var(--fb);font-size:var(--t3);
-    transition:border-color .16s,color .16s}
+    transition:border-color .16s,color .16s;
+    /* explizite Mindest-Tippflaeche wie beim .chip-Baustein -- Padding
+       plus Zeilenhoehe landete rechnerisch nur knapp darueber. */
+    min-height:34px}
   .mlrchip:hover{border-color:var(--aurora);color:var(--ink)}
-  /* Die Sammelregel "#sheet button" (ID-Spezifitaet) macht aus jedem Chip
-     sonst einen Vollbreiten-Balken mit Blatt-Polster -- gemessen: vier
-     gestapelte 346px-Riegel statt einer Chip-Reihe. Deshalb ausdruecklich
-     zurueckgeholt. Gleiches Spiel bei den Vorschlags-/Zuletzt-Zeilen. */
-  #sheet .mlqchips .mlrchip{width:auto;display:inline-flex;align-items:center;justify-content:center;
-    gap:0;padding:.4rem .8rem;margin-bottom:0;border-radius:999px;text-align:center}
-  /* (.mlsugrow ist mit dem Umzug der Suche auf die Vollbild-Seite weg --
-     die Zeilen heissen jetzt .frow und teilen die .mrow-Sprache.) */
+  /* (Die frueheren "#sheet ..."-Gegenregeln fuer Gramm-Chips und
+     Vorschlags-Zeilen sind mit dem Umzug des Mahlzeit-Flusses auf die
+     Vollbild-Seite weg -- dort gibt es keine "#sheet button"-Sammelregel,
+     die Grundklassen wirken direkt. Die Zeilen heissen jetzt .frow und
+     teilen die .mrow-Sprache.) */
   /* Manuelle Makros: eingeklappt bis eine Quelle feststeht (Suche, Zuletzt,
      Scan) oder jemand ausdruecklich selbst eintragen will. Dieselbe
      Kastenlogik wie .dsh, damit der Abstand zwischen den Feldern beim
@@ -979,7 +988,7 @@
   .mlmacros{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem}
   .mlmacros .field label{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
   .mlqchips{display:flex;flex-wrap:wrap;gap:.35rem;margin-top:.4rem}
-  .mlrecent{display:flex;flex-direction:column;gap:.3rem;margin:-.2rem 0 .4rem}
+  .mlrecent{display:flex;flex-direction:column;gap:0;margin:-.2rem 0 .4rem}
   .mlrecent[hidden]{display:none}
   .mlkcalRow{display:flex;align-items:baseline;justify-content:space-between;
     background:var(--surf2);border:1px solid var(--line);border-radius:var(--r1);padding:.55rem .7rem}
@@ -987,31 +996,29 @@
   .mlkcalRow span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.14em;text-transform:uppercase;color:var(--ink3)}
   /* v27.0: Mahlzeit-Wahl als EINE kompakte Viererzeile statt 2x2-Flaeche --
      der Slot ist beim Plus schon gewaehlt, die Zeile bestaetigt ihn nur noch
-     und laesst ihn umsetzen. ALLE Zustaende tragen das #sheet-Praefix, weil
-     die Sammelregel "#sheet button" (ID-Spezifitaet) sonst Vollbreite,
-     Polster, 22px-Aurora-Icons und ihren eigenen Grund hineindrueckt --
-     der gewaehlte Slot sah dadurch exakt aus wie die anderen drei.
-     Gewaehlt heisst jetzt: Rand, Toenung UND Beschriftung/Symbol in der
-     Slotfarbe; ungewaehlt bleibt das Symbol grau. Drei Signale, wie beim
-     .chip-Baustein. */
+     und laesst ihn umsetzen. Gewaehlt heisst: Rand, Toenung UND
+     Beschriftung/Symbol in der Slotfarbe; ungewaehlt bleibt das Symbol
+     grau. Drei Signale, wie beim .chip-Baustein. (Die frueheren
+     "#sheet ..."-Selektorhaelften sind seit dem v29-Umzug auf die
+     Vollbild-Seite tote Zeichenketten und darum raus.) */
   .mslotpick{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem}
-  #sheet .mslotopt,.mslotopt{--oc:var(--aurora);display:flex;flex-direction:column;align-items:center;gap:.25rem;
+  .mslotopt{--oc:var(--aurora);display:flex;flex-direction:column;align-items:center;gap:.25rem;
     width:auto;padding:.45rem .2rem;margin-bottom:0;border-radius:var(--r1);border:1px solid var(--line);
     background:var(--surf2);transition:.16s;min-width:0;text-align:center}
-  #sheet .mslotopt:hover,.mslotopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent);
+  .mslotopt:hover{border-color:color-mix(in srgb,var(--oc) 55%,transparent);
     background:var(--surf2)}
-  #sheet .mslotopt .ic,.mslotopt .ic{width:26px;height:26px;flex:none;border-radius:8px;
+  .mslotopt .ic{width:26px;height:26px;flex:none;border-radius:8px;
     display:flex;align-items:center;justify-content:center;
     background:var(--surf3);color:var(--ink3)}
-  #sheet .mslotopt .ic svg,.mslotopt .ic svg{width:15px;height:15px;color:inherit}
-  #sheet .mslotopt b,.mslotopt b{font-family:var(--fm);font-weight:600;font-size:var(--t1);letter-spacing:.02em;
+  .mslotopt .ic svg{width:15px;height:15px;color:inherit}
+  .mslotopt b{font-family:var(--fm);font-weight:600;font-size:var(--t1);letter-spacing:.02em;
     max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ink2)}
-  #sheet .mslotopt[aria-pressed="true"],.mslotopt[aria-pressed="true"]{
+  .mslotopt[aria-pressed="true"]{
     border-color:color-mix(in srgb,var(--oc) 60%,transparent);
     background:color-mix(in srgb,var(--oc) 16%,transparent)}
-  #sheet .mslotopt[aria-pressed="true"] .ic,.mslotopt[aria-pressed="true"] .ic{
+  .mslotopt[aria-pressed="true"] .ic{
     background:color-mix(in srgb,var(--oc) 22%,transparent);color:var(--oc)}
-  #sheet .mslotopt[aria-pressed="true"] b,.mslotopt[aria-pressed="true"] b{color:var(--oc)}
+  .mslotopt[aria-pressed="true"] b{color:var(--oc)}
 
   /* ── Leistung auf schwachen Geraeten: lange Listen und das eingebettete
      Buch werden erst gerechnet, wenn sie ins Bild scrollen. Der Browser
@@ -3852,7 +3859,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='29.0';
+var VERSION='29.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6996,6 +7003,9 @@ document.addEventListener('keydown',function(e){
        dass der Scan von dort kam (YAZIO kehrt auch zur Suche zurueck). */
     var kv=$('v-kam');
     if(kv&&kv.classList.contains('on')&&typeof kamZiel!=='undefined'&&kamZiel){
+      /* Zurueck heisst: Scan aufgegeben -- das Ziel wird genullt, damit
+         kein kuenftiger Kamera-Einstieg still den alten Kontext erbt. */
+      kamZiel=null;
       show('food');return;
     }
     popPush();
@@ -8738,7 +8748,7 @@ function openMeal(idx,slot){
   mealSlots(DE).forEach(function(sl){if(sl[0]===(m.s||'s'))slotName=sl[1];});
   var html=
     '<div class="dsh">'+
-      '<div class="field mlsearch"><label for="mlName" id="mlNameLbl">'+(neu?(DE?'Suchen oder eingeben':'Search or type'):'Name')+'</label>'+
+      '<div class="field"><label for="mlName" id="mlNameLbl">'+(neu?(DE?'Suchen oder eingeben':'Search or type'):'Name')+'</label>'+
         '<div class="ctl mlsearchctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'">'+
         '<button type="button" class="mlscanbtn" id="mlScan" aria-label="'+(DE?'Barcode scannen':'Scan barcode')+'">'+
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>'+
@@ -8812,6 +8822,14 @@ function openMeal(idx,slot){
       $('mlSlot').value=b.dataset.slot;
       [].forEach.call(document.querySelectorAll('#mslotPick .mslotopt'),function(x){
         x.setAttribute('aria-pressed',String(x===b));});
+      /* Kopf folgt der Wahl: wer den Slot umstellt, soll oben nicht mehr
+         den alten lesen. "Neues Rezept" traegt keinen Punkt-Titel und
+         bleibt unangetastet. */
+      var ft2=$('foodTitle');
+      if(ft2&&ft2.textContent.indexOf('·')>=0){
+        var nm2='';mealSlots(DE).forEach(function(s2){if(s2[0]===b.dataset.slot)nm2=s2[1];});
+        ft2.textContent=nm2+' · '+(neu?(DE?'hinzufügen':'add'):(DE?'bearbeiten':'edit'));
+      }
     });
   });
   function nach(){
@@ -8880,6 +8898,12 @@ function openMeal(idx,slot){
     nach();
   }
   function sugZeigen(liste){
+    /* Waechter gegen die spaete Netz-Antwort: ist die Quelle schon
+       gewaehlt (Stufe 2, fix gesetzt), darf eine noch laufende Suche die
+       Vorschlagsliste nicht mitten in die Makro-Felder zurueckblenden --
+       der Namensvergleich allein schuetzt nicht, wenn der gewaehlte Name
+       exakt der Tippeingabe entspricht. */
+    if(fb.dataset.fix==='1')return;
     var el=$('mlSug');if(!el)return;
     if(!liste.length){el.hidden=true;el.innerHTML='';return;}
     el.hidden=false;
@@ -8893,6 +8917,8 @@ function openMeal(idx,slot){
     [].forEach.call(el.querySelectorAll('.frow'),function(row,ri){
       namen[ri].textContent=liste[+row.dataset.sug].n;
       row.addEventListener('click',function(){
+        /* Laufende Netz-Suche abraeumen -- die Wahl ist getroffen. */
+        clearTimeout(sugTimer);
         var wahl=liste[+row.dataset.sug];
         basisSet(wahl);
         $('mlName').value=wahl.n.slice(0,40);
@@ -10093,6 +10119,15 @@ function kamUebernehmen(food,g){
   $('foodBody').dataset.b100=JSON.stringify({p:food.p,f:food.f,c:food.c,z:food.z,bl:food.bl,sa:food.sa,gf:food.gf});
   var gr=$('mlGRow');if(gr){gr.hidden=false;}
   var gi=$('mlG');if(gi)gi.value=Math.round(g*100);
+  /* Kam der Scan aus dem "Neues Rezept"-Kontext, wird er wiederhergestellt --
+     openMeal() hat die Seite frisch als Mahlzeit aufgebaut. */
+  if(ziel&&ziel.rz){
+    var rhx=$('foodTitle');if(rhx)rhx.textContent=(cfg.lang==='de')?'Neues Rezept':'New recipe';
+    var rsx=$('mlSave');if(rsx)rsx.hidden=true;
+    var rslx=$('mlSlotLbl');if(rslx&&rslx.parentNode)rslx.parentNode.hidden=true;
+    var rbx=$('foodBody').querySelector('button[data-mlact="rezept"]');
+    if(rbx){rbx.className='tbtn go';rbx.style.flex='1';}
+  }
 }
 /* Texterkennung: Tesseract kommt erst bei Bedarf aus dem Netz. */
 var ocrLaedt=null;
@@ -10160,7 +10195,12 @@ $('fuelCam').addEventListener('click',function(){kamZiel=null;show('kam');});
 $('foodBody').addEventListener('click',function(e){
   if(!e.target.closest('#mlScan'))return;
   var roh=$('foodBody').dataset.meal;
-  kamZiel={idx:(roh&&roh!=='neu')?+roh:null,slot:($('mlSlot')&&$('mlSlot').value)||'s'};
+  /* Rezept-Kontext mitgeben: sein Titel traegt keinen Punkt-Trenner.
+     Ohne das Merkmal wuerde die Scanner-Uebernahme still im normalen
+     Mahlzeit-Kontext landen. */
+  var ftx=$('foodTitle');
+  kamZiel={idx:(roh&&roh!=='neu')?+roh:null,slot:($('mlSlot')&&$('mlSlot').value)||'s',
+    rz:!!(ftx&&ftx.textContent.indexOf('·')<0)};
   show('kam');
 });
 $('mealList').addEventListener('click',function(e){
