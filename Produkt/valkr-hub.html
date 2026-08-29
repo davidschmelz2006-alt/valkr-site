@@ -938,12 +938,39 @@
   /* Suche zuerst: Eingabe und Scanner in einer Zeile, statt der Scanner als
      eigener Vollbreite-Knopf ueber dem Feld -- das war der Umweg, den jede
      Mahlzeit brauchte, bevor man ueberhaupt zu tippen anfing. */
-  #sheet .mlsearchctl,#v-food .mlsearchctl{display:flex;align-items:center;gap:.4rem}
-  #sheet .mlsearchctl input,#v-food .mlsearchctl input{flex:1;min-width:0}
-  #sheet .mlscanbtn,#v-food .mlscanbtn{flex:none;width:38px;height:38px;border-radius:999px;
+  /* v30: Suchzeile als Glas-Pille (Lupe, randloses Feld, Scanner) und
+     Glas-Karten -- derselbe Verlaufs-Grund wie der Kalenderkasten (.cal),
+     nicht die flache .card: DAS ist die Glas-Sprache der App. */
+  .fsuch{display:flex;align-items:center;gap:.55rem;
+    background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 58%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 72%,transparent) 46%,
+      color-mix(in srgb,var(--surf2) 80%,transparent) 100%);
+    border:1px solid var(--line);border-radius:999px;box-shadow:var(--sh);
+    padding:.3rem .4rem .3rem .85rem;transition:border-color .16s}
+  .fsuch:focus-within{border-color:color-mix(in srgb,var(--aurora) 55%,transparent)}
+  .fsuch .fsIc{color:var(--aurora);flex:none;display:flex}
+  .fsuch .fsIc svg{width:17px;height:17px}
+  .fsuch input{flex:1;min-width:0;border:0;background:none;color:var(--ink);
+    font-family:var(--fb);font-size:var(--t4);padding:.5rem 0;outline:none}
+  .fsuch input::placeholder{color:var(--ink3)}
+  .mlscanbtn{flex:none;width:38px;height:38px;border-radius:999px;
     display:flex;align-items:center;justify-content:center;
     border:1px solid var(--line);background:var(--surf2);color:var(--ink2);transition:.16s}
-  #sheet .mlscanbtn:hover,#v-food .mlscanbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  .mlscanbtn:hover{border-color:var(--aurora);color:var(--aurora)}
+  .fcard{background:linear-gradient(160deg,
+      color-mix(in srgb,var(--surf3) 58%,transparent) 0%,
+      color-mix(in srgb,var(--surf) 72%,transparent) 46%,
+      color-mix(in srgb,var(--surf2) 80%,transparent) 100%);
+    border:1px solid var(--line);border-radius:var(--r2);
+    padding:.3rem .8rem;box-shadow:var(--sh)}
+  .fcard.fpad{padding:.7rem .8rem}
+  @supports not (background:color-mix(in srgb,red 50%,transparent)){
+    .fsuch,.fcard{background:var(--surf)}}
+  #mlSug.fcard .frow:first-child{border-top:0}
+  /* Drei Signale wie beim .chip-Baustein: Rand, Toenung UND Akzentfarbe. */
+  .mlrchip[aria-pressed="true"]{border-color:var(--aurora);color:var(--aurora);
+    background:color-mix(in srgb,var(--aurora) 14%,transparent)}
   /* v29: Hinzufuegen-Seite. Zeilen wie die Eintragszeilen der Mahlzeit-
      Karten (.mrow-Sprache): Name und Metazeile links, kcal rechts,
      Trennlinie OBEN wie bei .mrow (unten stuende nach der letzten Zeile
@@ -963,15 +990,19 @@
     letter-spacing:.08em;color:var(--ink3);margin-top:.1rem}
   .frow .fk{font-family:var(--fd);font-weight:600;font-size:var(--t3);
     font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--ink2)}
-  /* Gramm-Schnellwahl-Chips (50/100/150/200 g) im Mengenblock -- seit v29
-     ihre einzige Verwendung; die Zuletzt-Liste rendert als .frow-Zeilen. */
+  /* Mengen-Chips im Portionsblock: benannte Portionen ("1 Stück · 118 g",
+     "1 Dose · 250 ml") und Standardwerte, in Gramm oder Millilitern --
+     gebaut von chipsBau() (v30). */
   .mlrchip{border:1px solid var(--line);background:var(--surf2);color:var(--ink2);
     border-radius:999px;padding:.4rem .8rem;font-family:var(--fb);font-size:var(--t3);
     transition:border-color .16s,color .16s;
     /* explizite Mindest-Tippflaeche wie beim .chip-Baustein -- Padding
        plus Zeilenhoehe landete rechnerisch nur knapp darueber. */
     min-height:34px}
-  .mlrchip:hover{border-color:var(--aurora);color:var(--ink)}
+  /* :not(pressed): die Hover-Regel stuende sonst per Quellordnung UEBER
+     der Aktiv-Regel und naehme dem eben angetippten Chip die Aurora-
+     Textfarbe (sticky hover auf Touch). */
+  .mlrchip:hover:not([aria-pressed="true"]){border-color:var(--aurora);color:var(--ink)}
   /* (Die frueheren "#sheet ..."-Gegenregeln fuer Gramm-Chips und
      Vorschlags-Zeilen sind mit dem Umzug des Mahlzeit-Flusses auf die
      Vollbild-Seite weg -- dort gibt es keine "#sheet button"-Sammelregel,
@@ -3859,7 +3890,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='29.1';
+var VERSION='30.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8573,6 +8604,41 @@ function recentFoods(limit){
   }
   return out;
 }
+/* v30: Einheit und Portionen haengen als dataset an der Hinzufuegen-Seite
+   (einh, por) -- so koennen Suche, Zuletzt, Bearbeiten UND die Scanner-
+   Uebernahme sie setzen, und die Chips bauen sich daraus. */
+function einheitVon(){var fb=$('foodBody');return (fb&&fb.dataset.einh==='ml')?'ml':'g';}
+function porZeig(an){var w=$('mlPor');if(w)w.hidden=!an;}
+function chipsBau(){
+  var el=$('mlQ');if(!el)return;
+  var fb=$('foodBody'),u=einheitVon();
+  var pr=null;try{pr=JSON.parse(fb.dataset.por||'null');}catch(e){}
+  var h='',belegt={};
+  (pr||[]).forEach(function(p){
+    belegt[p[1]]=1;
+    h+='<button type="button" class="mlrchip" data-g="'+p[1]+'">'+p[0]+' · '+p[1]+'&nbsp;'+u+'</button>';});
+  /* Standardwerte, die schon als Portion dastehen, entfallen -- sonst
+     staenden zwei Chips fuer dieselbe Menge da und beide leuchteten als
+     aktiv (Cola: Glas 250 / Dose 330 / Flasche 500 decken alle drei
+     ml-Standards ab). */
+  ((u==='ml')?[200,250,330,500]:[50,100,150,200]).forEach(function(g2){
+    if(belegt[g2])return;
+    h+='<button type="button" class="mlrchip" data-g="'+g2+'">'+g2+'&nbsp;'+u+'</button>';});
+  el.innerHTML=h;
+  var gu=$('mlGU');if(gu)gu.textContent=u;
+  chipMark();
+}
+function chipMark(){
+  var g=parseFloat(($('mlG')||{value:''}).value)||0;
+  [].forEach.call(document.querySelectorAll('#mlQ .mlrchip'),function(c){
+    c.setAttribute('aria-pressed',String(+c.dataset.g===g));});
+}
+function quelleSetzen(u,pr){
+  var fb=$('foodBody');
+  if(u==='ml')fb.dataset.einh='ml';else delete fb.dataset.einh;
+  if(pr&&pr.length)fb.dataset.por=JSON.stringify(pr);else delete fb.dataset.por;
+  chipsBau();
+}
 /* Sobald eine Quelle feststeht (Suche, Zuletzt, Scan), zeigt sich die manuelle
    Eingabe von selbst -- niemand muss sie noch aufklappen, um zu sehen, was
    uebernommen wurde. */
@@ -8709,7 +8775,7 @@ function drawMeals(){
       var m=x[0];
       h+='<button type="button" class="mrow" data-meal="'+x[1]+'">'+
         '<span class="mn"><b></b><i>'+mzahl(m.p)+' P · '+mzahl(m.f)+' F · '+mzahl(m.c)+' '+(DE?'KH':'C')+
-        (m.g?' · '+mzahl(m.g)+' g':'')+'</i></span>'+
+        (m.g?' · '+mzahl(m.g)+' '+((PORT[m.n]?PORT[m.n][0]==='ml':m.u==='ml')?'ml':'g'):'')+'</i></span>'+
         '<span class="mk">'+mealKcal(m)+' kcal</span>'+
         '</button>';
     });
@@ -8748,41 +8814,48 @@ function openMeal(idx,slot){
   mealSlots(DE).forEach(function(sl){if(sl[0]===(m.s||'s'))slotName=sl[1];});
   var html=
     '<div class="dsh">'+
-      '<div class="field"><label for="mlName" id="mlNameLbl">'+(neu?(DE?'Suchen oder eingeben':'Search or type'):'Name')+'</label>'+
-        '<div class="ctl mlsearchctl"><input id="mlName" type="text" maxlength="40" autocomplete="off" placeholder="'+(DE?'z. B. Haferflocken, Skyr, Banane':'e.g. oats, skyr, banana')+'">'+
+      '<div class="fsuch"><span class="fsIc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.8-3.8"/></svg></span>'+
+        '<input id="mlName" type="text" maxlength="40" autocomplete="off" aria-label="'+(neu?(DE?'Suchen oder eingeben':'Search or type'):'Name')+'" placeholder="'+(DE?'Lebensmittel suchen …':'Search foods …')+'">'+
         '<button type="button" class="mlscanbtn" id="mlScan" aria-label="'+(DE?'Barcode scannen':'Scan barcode')+'">'+
           '<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 7V4h3M21 7V4h-3M3 17v3h3M21 17v3h-3M7 8v8M10 8v8M13 8v8M17 8v8"/></svg>'+
-        '</button></div></div>'+
-      '<div class="mlrecent" id="mlRecent" hidden></div>'+
-      '<div class="mlsug" id="mlSug" hidden></div>'+
+        '</button></div>'+
+      '<div class="fcard mlrecent" id="mlRecent" hidden></div>'+
+      '<div class="fcard mlsug" id="mlSug" hidden></div>'+
       (neu?'<button type="button" class="txtbtn" id="mlManualToggle">'+(DE?'Von Hand eintragen':'Enter by hand')+'</button>':'')+
       '<div class="mlmanual" id="mlManualBox"'+(neu?' hidden':'')+'>'+
-        '<div class="field" id="mlGRow" hidden><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div>'+
-          '<div class="mlqchips" id="mlQ">'+[50,100,150,200].map(function(g){
-            return '<button type="button" class="mlrchip" data-g="'+g+'">'+g+'&nbsp;g</button>';}).join('')+'</div></div>'+
-        '<div class="mlmacros">'+
-        '<div class="field"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
-        '<div class="field"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
-        '<div class="field"><label for="mlC">'+(DE?'Kohlenh.':'Carbs')+'</label>'+
-          '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
+        '<div id="mlPor" hidden><p class="eyebrow" style="margin:0 0 .35rem">'+(DE?'Portion':'Portion')+'</p>'+
+          '<div class="fcard fpad">'+
+          '<div class="field"><label for="mlG">'+(DE?'Menge':'Amount')+'</label>'+
+            '<div class="ctl hasunit"><input id="mlG" type="number" min="1" max="2000" value="100"><span class="unit" id="mlGU">g</span></div>'+
+            '<div class="mlqchips" id="mlQ"></div></div>'+
+          '</div></div>'+
+        '<p class="eyebrow" style="margin:0 0 .35rem">'+(DE?'Nährwerte':'Nutrition')+'</p>'+
+        '<div class="fcard fpad">'+
+          '<div class="mlmacros">'+
+          '<div class="field"><label for="mlP">'+(DE?'Protein':'Protein')+'</label>'+
+            '<div class="ctl hasunit"><input id="mlP" type="number" min="0" max="300" value="'+m.p+'"><span class="unit">g</span></div></div>'+
+          '<div class="field"><label for="mlF">'+(DE?'Fett':'Fat')+'</label>'+
+            '<div class="ctl hasunit"><input id="mlF" type="number" min="0" max="200" value="'+m.f+'"><span class="unit">g</span></div></div>'+
+          '<div class="field"><label for="mlC">'+(DE?'Kohlenh.':'Carbs')+'</label>'+
+            '<div class="ctl hasunit"><input id="mlC" type="number" min="0" max="400" value="'+m.c+'"><span class="unit">g</span></div></div>'+
+          '</div>'+
+          '<div class="mlkcalRow" style="margin-top:.6rem"><span>'+(DE?'Kalorien':'Calories')+'</span><b id="mlKcal">'+mealKcal(m)+' kcal</b></div>'+
         '</div>'+
-        '<div class="mlkcalRow"><span>'+(DE?'Kalorien':'Calories')+'</span><b id="mlKcal">'+mealKcal(m)+' kcal</b></div>'+
-        '<div class="field"><label id="mlSlotLbl">'+(DE?'Mahlzeit':'Meal slot')+'</label>'+
-        '<select id="mlSlot" data-noup="1" hidden aria-hidden="true" tabindex="-1">'+
-          '<option value="b"'+(m.s==='b'?' selected':'')+'>'+(DE?'Frühstück':'Breakfast')+'</option>'+
-          '<option value="l"'+(m.s==='l'?' selected':'')+'>'+(DE?'Mittag':'Lunch')+'</option>'+
-          '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abend':'Dinner')+'</option>'+
-          '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
-        '</select>'+
-        '<div class="mslotpick" id="mslotPick">'+
-          mealSlots(DE).map(function(sl){
-            return '<button type="button" class="mslotopt" data-slot="'+sl[0]+'" aria-pressed="'+((m.s||'s')===sl[0])+'" style="--oc:'+sl[2]+'">'+
-              '<span class="ic">'+sl[3]+'</span><b>'+sl[1]+'</b></button>';
-          }).join('')+
-        '</div></div>'+
+        '<div id="mlSlotWrap"><p class="eyebrow" style="margin:0 0 .35rem">'+(DE?'Mahlzeit':'Meal')+'</p>'+
+          '<div class="fcard fpad">'+
+          '<select id="mlSlot" data-noup="1" hidden aria-hidden="true" tabindex="-1">'+
+            '<option value="b"'+(m.s==='b'?' selected':'')+'>'+(DE?'Frühstück':'Breakfast')+'</option>'+
+            '<option value="l"'+(m.s==='l'?' selected':'')+'>'+(DE?'Mittag':'Lunch')+'</option>'+
+            '<option value="d"'+(m.s==='d'?' selected':'')+'>'+(DE?'Abend':'Dinner')+'</option>'+
+            '<option value="s"'+((m.s||'s')==='s'?' selected':'')+'>Snacks</option>'+
+          '</select>'+
+          '<div class="mslotpick" id="mslotPick">'+
+            mealSlots(DE).map(function(sl){
+              return '<button type="button" class="mslotopt" data-slot="'+sl[0]+'" aria-pressed="'+((m.s||'s')===sl[0])+'" style="--oc:'+sl[2]+'">'+
+                '<span class="ic">'+sl[3]+'</span><b>'+sl[1]+'</b></button>';
+            }).join('')+
+          '</div>'+
+          '</div></div>'+
       '</div>'+
       '<div class="savebar" id="mlSave"'+(neu?' hidden':'')+'>'+
         '<button class="tbtn go" data-mlact="save" style="flex:1">'+(neu?(DE?'Hinzufügen':'Add'):(DE?'Speichern':'Save'))+'</button>'+
@@ -8809,7 +8882,6 @@ function openMeal(idx,slot){
      rechnet dann beim Bearbeiten wieder. */
   if(!neu&&m.b&&m.g){
     fb.dataset.b100=JSON.stringify(m.b);
-    var gr0=$('mlGRow');if(gr0){gr0.hidden=false;}
     var gi0=$('mlG');if(gi0)gi0.value=m.g;
   }
   $('mlName').value=m.n;
@@ -8817,6 +8889,14 @@ function openMeal(idx,slot){
      Animation hoch -- zwei Animationen uebereinander, DAS war der Ruckler
      beim Oeffnen. YAZIO fokussiert auch erst beim Antippen. */
   if(typeof ctlUpgrade==='function')ctlUpgrade(fb);
+  /* v30: Einheit und Portionen der Quelle herstellen (beim Bearbeiten aus
+     dem Eintrag und der Portions-Tabelle), dann die Chips bauen. */
+  /* Hat die Portions-Tabelle Vorrang, dann auch mit IHRER Einheit --
+     ganz, nicht per ODER: sonst bekaeme ein ml-Eintrag mit g-PORT-Namen
+     die Stueck-Portionen mit ml-Suffix. */
+  quelleSetzen((!neu&&(PORT[m.n]?PORT[m.n][0]==='ml':m.u==='ml'))?'ml':null,
+    (!neu&&PORT[m.n])?PORT[m.n][1]:((!neu&&m.pr)||null));
+  porZeig(!neu&&!!(m.b&&m.g));
   [].forEach.call(document.querySelectorAll('#mslotPick .mslotopt'),function(b){
     b.addEventListener('click',function(){
       $('mlSlot').value=b.dataset.slot;
@@ -8855,16 +8935,19 @@ function openMeal(idx,slot){
       rnm[i].textContent=(recents[i].n||'?');
       ch.addEventListener('click',function(){
         var r=recents[i];
-        basisSet(null);$('mlGRow').hidden=true;
+        basisSet(null);porZeig(false);
         $('mlName').value=(r.n||'').slice(0,40);
         $('mlP').value=r.p;$('mlF').value=r.f;$('mlC').value=r.c;
         if(r.z!==undefined||r.bl!==undefined||r.sa!==undefined||r.gf!==undefined)
           fb.dataset.mikro=JSON.stringify({z:r.z,bl:r.bl,sa:r.sa,gf:r.gf});
         else delete fb.dataset.mikro;
         mlRevealManual();
-        /* Kam der Eintrag aus einer je-100-g-Quelle, bleibt die Portion
-           aenderbar: Basis zurueckholen, Mengenfeld zeigen. */
-        if(r.b&&r.g){basisSet(r.b);$('mlGRow').hidden=false;$('mlG').value=r.g;skala();}
+        /* Kam der Eintrag aus einer je-100-Quelle, bleibt die Portion
+           aenderbar: Basis, Einheit und Portions-Chips zurueckholen. */
+        if(r.b&&r.g){basisSet(r.b);
+          quelleSetzen((PORT[r.n]?PORT[r.n][0]==='ml':r.u==='ml')?'ml':null,
+            (PORT[r.n]||[])[1]||r.pr||null);
+          porZeig(true);$('mlG').value=r.g;skala();}
         nach();
       });
     });
@@ -8896,6 +8979,7 @@ function openMeal(idx,slot){
         gf:sugBase.gf!==undefined?Math.round(sugBase.gf*g*10)/10:undefined});
     }
     nach();
+    chipMark();
   }
   function sugZeigen(liste){
     /* Waechter gegen die spaete Netz-Antwort: ist die Quelle schon
@@ -8923,7 +9007,11 @@ function openMeal(idx,slot){
         basisSet(wahl);
         $('mlName').value=wahl.n.slice(0,40);
         el.hidden=true;el.innerHTML='';
-        $('mlGRow').hidden=false;$('mlG').value=100;
+        /* YAZIO: traegt die Quelle Portionen, ist die erste die Vorgabe --
+           Banane startet mit 118 g, der Energydrink mit der 250er-Dose. */
+        quelleSetzen(wahl.u,wahl.pr||null);
+        porZeig(true);
+        $('mlG').value=(wahl.pr&&wahl.pr.length)?wahl.pr[0][1]:100;
         mlRevealManual();
         skala();
       });
@@ -8933,22 +9021,26 @@ function openMeal(idx,slot){
   var q1=$('mlQ');
   if(q1)q1.addEventListener('click',function(e){
     var b=e.target.closest('button[data-g]');if(!b)return;
-    $('mlG').value=b.dataset.g;skala();
+    $('mlG').value=b.dataset.g;skala();chipMark();
   });
   $('mlName').addEventListener('input',function(){
     /* Stufe 2: das Feld ist der Name, keine Suche mehr -- sonst poppt beim
        Umbenennen die Vorschlagsliste unter die Makros. */
     if(fb.dataset.fix==='1')return;
     var q=this.value.trim().toLowerCase();
-    basisSet(null);$('mlGRow').hidden=true;
+    basisSet(null);porZeig(false);quelleSetzen(null,null);
     if($('mlRecent')&&recents.length)$('mlRecent').hidden=q.length>0;
     if(q.length<2){sugZeigen([]);return;}
     var lok=[];
     if(typeof STAPLES!=='undefined'){
       for(var i=0;i<STAPLES.length&&lok.length<6;i++){
-        if(STAPLES[i][0].toLowerCase().indexOf(q)>=0)
-          lok.push({n:STAPLES[i][0],p:STAPLES[i][1],f:STAPLES[i][2],c:STAPLES[i][3],
-            z:STAPLES[i][4],bl:STAPLES[i][5],sa:STAPLES[i][6],gf:STAPLES[i][7],quelle:'lokal'});
+        if(STAPLES[i][0].toLowerCase().indexOf(q)>=0){
+          var oX={n:STAPLES[i][0],p:STAPLES[i][1],f:STAPLES[i][2],c:STAPLES[i][3],
+            z:STAPLES[i][4],bl:STAPLES[i][5],sa:STAPLES[i][6],gf:STAPLES[i][7],quelle:'lokal'};
+          var pX=PORT[STAPLES[i][0]];
+          if(pX){oX.u=pX[0];oX.pr=pX[1];}
+          lok.push(oX);
+        }
       }
     }
     sugZeigen(lok);
@@ -8960,7 +9052,7 @@ function openMeal(idx,slot){
     if(!navigator.onLine)return;
     sugTimer=setTimeout(function(){
       fetch('https://de.openfoodfacts.org/cgi/search.pl?search_terms='+encodeURIComponent(q)+
-        '&search_simple=1&action=process&json=1&page_size=7&fields=product_name,brands,nutriments')
+        '&search_simple=1&action=process&json=1&page_size=7&fields=product_name,brands,nutriments,serving_size,quantity')
         .then(function(r){return r.json();})
         .then(function(j){
           if($('mlName').value.trim().toLowerCase()!==q)return;
@@ -8968,12 +9060,21 @@ function openMeal(idx,slot){
           ((j&&j.products)||[]).forEach(function(pr){
             var nu=pr.nutriments;
             if(!nu||nu['proteins_100g']===undefined)return;
-            off.push({n:(pr.product_name||'Produkt')+(pr.brands?' ('+String(pr.brands).split(',')[0]+')':''),
+            var oo={n:(pr.product_name||'Produkt')+(pr.brands?' ('+String(pr.brands).split(',')[0]+')':''),
               p:+nu['proteins_100g']||0,f:+nu['fat_100g']||0,c:+nu['carbohydrates_100g']||0,
               z:nu['sugars_100g']!==undefined?+nu['sugars_100g']:undefined,
               bl:nu['fiber_100g']!==undefined?+nu['fiber_100g']:undefined,
               sa:nu['salt_100g']!==undefined?+nu['salt_100g']:undefined,
-              gf:nu['saturated-fat_100g']!==undefined?+nu['saturated-fat_100g']:undefined,quelle:'off'});
+              gf:nu['saturated-fat_100g']!==undefined?+nu['saturated-fat_100g']:undefined,quelle:'off'};
+            /* Getraenke-Erkennung und Portionsgroesse aus den Packungs-
+               angaben: "250 ml" in Menge oder Portion heisst Milliliter,
+               eine lesbare Portionsangabe wird zum Chip. */
+            var qs=String(pr.quantity||'')+' '+String(pr.serving_size||'');
+            if(/\d\s*(ml|cl|l)\b/i.test(qs))oo.u='ml';
+            var sm=String(pr.serving_size||'').match(/([\d.,]+)\s*(g|ml)/i);
+            if(sm){var sv=Math.round(parseFloat(String(sm[1]).replace(',','.')));
+              if(sv>0)oo.pr=[[cfg.lang==='de'?'1 Portion':'1 serving',sv]];}
+            off.push(oo);
           });
           if(off.length)sugZeigen(lok.concat(off).slice(0,10));
         })
@@ -9155,7 +9256,7 @@ $('recipeRow').addEventListener('click',function(e){
     var rh=$('foodTitle');
     if(rh)rh.textContent=DE?'Neues Rezept':'New recipe';
     var rs1=$('mlSave');if(rs1)rs1.hidden=true;
-    var rsl=$('mlSlotLbl');if(rsl&&rsl.parentNode)rsl.parentNode.hidden=true;
+    var rsl=$('mlSlotWrap');if(rsl)rsl.hidden=true;
     var rbtn=$('foodBody').querySelector('button[data-mlact="rezept"]');
     if(rbtn){rbtn.className='tbtn go';rbtn.style.flex='1';}
     return;}
@@ -9694,6 +9795,86 @@ var STAPLES=[
 ["Zwieback",10.0,4.5,72.0,8.0,3.5,0.5,2.0],
 ["Zwiebel",1.2,0.2,4.9,4.3,1.8,0.0,0.0]
 ];
+/* v30 (YAZIO): Alltagsportionen und Einheiten fuer die Grundnahrungsmittel.
+   Schluessel = exakter STAPLES-Name. Wert = [Einheit, Portionen], Portionen
+   als [Beschriftung, Menge]. Die erste Portion ist die Vorgabe beim
+   Auswaehlen (Banane -> 118 g statt 100 g). Getraenke laufen in Millilitern;
+   bei den ueblichen Getraenken entspricht 100 ml naeherungsweise 100 g,
+   die Naehrwerte je 100 bleiben also dieselben. Werte sind Durchschnitte
+   gaengiger Naehrwertdatenbanken. */
+var PORT={
+ 'Banane':['g',[['1 Stück',118]]],'Apfel':['g',[['1 Stück',180]]],
+ 'Birne':['g',[['1 Stück',160]]],'Orange':['g',[['1 Stück',150]]],
+ 'Mandarine':['g',[['1 Stück',75]]],'Clementine':['g',[['1 Stück',70]]],
+ 'Kiwi':['g',[['1 Stück',75]]],'Pfirsich':['g',[['1 Stück',150]]],
+ 'Nektarine':['g',[['1 Stück',140]]],'Pflaume':['g',[['1 Stück',65]]],
+ 'Aprikose':['g',[['1 Stück',50]]],
+ 'Avocado':['g',[['½ Frucht',70],['1 Frucht',140]]],
+ 'Tomate':['g',[['1 Stück',120]]],'Karotte':['g',[['1 Stück',100]]],
+ 'Paprika, rot':['g',[['1 Stück',150]]],'Paprika, gruen':['g',[['1 Stück',150]]],
+ 'Zwiebel':['g',[['1 Stück',90]]],'Zitrone':['g',[['1 Stück',60]]],
+ 'Huehnerei':['g',[['1 Ei (M)',58],['1 Ei (L)',68]]],
+ 'Eigelb':['g',[['1 Eigelb',18]]],'Eiklar':['g',[['1 Eiklar',33]]],
+ 'Toastbrot':['g',[['1 Scheibe',25]]],'Weissbrot':['g',[['1 Scheibe',30]]],
+ 'Roggenmischbrot':['g',[['1 Scheibe',45]]],'Dinkelbrot':['g',[['1 Scheibe',45]]],
+ 'Vollkornbrot':['g',[['1 Scheibe',50]]],'Pumpernickel':['g',[['1 Scheibe',48]]],
+ 'Knaeckebrot (Roggen)':['g',[['1 Scheibe',10]]],
+ 'Broetchen (Weizen)':['g',[['1 Stück',60]]],'Vollkornbroetchen':['g',[['1 Stück',70]]],
+ 'Croissant':['g',[['1 Stück',65]]],'Laugenbrezel':['g',[['1 Stück',85]]],
+ 'Weizentortilla (Wrap)':['g',[['1 Wrap',62]]],
+ 'Reiswaffeln':['g',[['1 Waffel',8]]],'Zwieback':['g',[['1 Scheibe',10]]],
+ 'Muesliriegel':['g',[['1 Riegel',25]]],'Berliner (Krapfen)':['g',[['1 Stück',65]]],
+ 'Pfannkuchen':['g',[['1 Stück',80]]],'Frikadelle, gebraten':['g',[['1 Stück',100]]],
+ 'Bratwurst':['g',[['1 Stück',110]]],
+ 'Wiener Wuerstchen':['g',[['1 Stück',50],['1 Paar',100]]],
+ 'Weisswurst':['g',[['1 Stück',85]]],'Fischstaebchen':['g',[['1 Stück',28]]],
+ 'Mozzarella':['g',[['½ Kugel',63],['1 Kugel',125]]],
+ 'Naturjoghurt, 1,5% Fett':['g',[['1 Becher',150]]],
+ 'Naturjoghurt, 3,5% Fett':['g',[['1 Becher',150]]],
+ 'Griechischer Joghurt, 10% Fett':['g',[['1 Becher',150]]],
+ 'Skyr, natur':['g',[['1 Portion',150]]],'Huettenkaese':['g',[['1 Becher',200]]],
+ 'Magerquark':['g',[['1 Portion',250]]],
+ 'Haferflocken':['g',[['1 Portion',50]]],'Muesli, ungesuesst':['g',[['1 Portion',50]]],
+ 'Cornflakes':['g',[['1 Portion',40]]],
+ 'Molkenproteinpulver':['g',[['1 Messlöffel',30]]],
+ 'Pizza Margherita, TK':['g',[['1 Pizza',350]]],
+ 'Kartoffelchips':['g',[['1 Handvoll',30]]],'Gummibaerchen':['g',[['1 Handvoll',25]]],
+ 'Butter':['g',[['1 Portion',10]]],'Margarine':['g',[['1 Portion',10]]],
+ 'Honig':['g',[['1 EL',20],['1 TL',10]]],'Erdbeermarmelade':['g',[['1 EL',20]]],
+ 'Nuss-Nougat-Creme':['g',[['1 EL',20]]],'Erdnussmus':['g',[['1 EL',15]]],
+ 'Mandelmus':['g',[['1 EL',15]]],'Ketchup':['g',[['1 EL',15]]],
+ 'Mayonnaise':['g',[['1 EL',15]]],'Senf, mittelscharf':['g',[['1 TL',5]]],
+ 'Olivenoel':['g',[['1 EL',10],['1 TL',4]]],'Rapsoel':['g',[['1 EL',10]]],
+ 'Leinoel':['g',[['1 EL',10]]],'Sonnenblumenoel':['g',[['1 EL',10]]],
+ 'Kokosoel':['g',[['1 EL',10]]],'Zucker, weiss':['g',[['1 TL',4],['1 EL',10]]],
+ 'Vollmilchschokolade':['g',[['1 Riegel',17],['1 Tafel',100]]],
+ 'Zartbitterschokolade, 70%':['g',[['1 Riegel',17],['1 Tafel',100]]],
+ 'Apfelsaft':['ml',[['1 Glas',200]]],
+ 'Apfelschorle':['ml',[['1 Glas',250],['1 Flasche',500]]],
+ 'Cola':['ml',[['1 Glas',250],['1 Dose',330],['1 Flasche',500]]],
+ 'Cola, zuckerfrei':['ml',[['1 Glas',250],['1 Dose',330],['1 Flasche',500]]],
+ 'Orangensaft':['ml',[['1 Glas',200]]],
+ 'Orangenlimonade':['ml',[['1 Glas',250],['1 Dose',330]]],
+ 'Eistee':['ml',[['1 Glas',250],['1 Flasche',500]]],
+ 'Energydrink':['ml',[['1 Dose',250],['1 Dose',355],['1 Dose',473]]],
+ 'Bier, Pils':['ml',[['1 Glas',330],['1 Flasche',500]]],
+ 'Bier, alkoholfrei':['ml',[['1 Glas',330],['1 Flasche',500]]],
+ 'Weisswein, trocken':['ml',[['1 Glas',125]]],'Rotwein':['ml',[['1 Glas',125]]],
+ 'Kaffee, schwarz':['ml',[['1 Tasse',200],['1 Becher',300]]],
+ 'Schwarzer Tee, ungesuesst':['ml',[['1 Tasse',250]]],
+ 'Milch, fettarm, 1,5% Fett':['ml',[['1 Glas',200]]],
+ 'Vollmilch, 3,5% Fett':['ml',[['1 Glas',200]]],
+ 'Magermilch, 0,3% Fett':['ml',[['1 Glas',200]]],
+ 'Buttermilch':['ml',[['1 Glas',250]]],'Kefir':['ml',[['1 Glas',250]]],
+ 'Haferdrink':['ml',[['1 Glas',200]]],
+ 'Sojadrink, ungesuesst':['ml',[['1 Glas',200]]],
+ 'Mandeldrink, ungesuesst':['ml',[['1 Glas',200]]],
+ 'Mineralwasser':['ml',[['1 Glas',250],['1 Flasche',500]]],
+ 'Traubensaft':['ml',[['1 Glas',200]]],'Tomatensaft':['ml',[['1 Glas',200]]],
+ 'Karottensaft':['ml',[['1 Glas',200]]],
+ 'Gemuesebruehe, zubereitet':['ml',[['1 Tasse',250]]],
+ 'Kakao, mit Vollmilch zubereitet':['ml',[['1 Tasse',250]]]
+};
 // ============================================================
 // parseNaehrwerte -- Parser fuer OCR-Text von Naehrwerttabellen
 // (deutsch und englisch), striktes ES5, JScript-tauglich.
@@ -10039,7 +10220,7 @@ function kamFood(ean){
   var DE=cfg.lang==='de';
   if(foodCache[ean]){kamResult(foodCache[ean]);return;}
   kamMsgSet(DE?'Suche '+ean+' …':'Looking up '+ean+' …');
-  fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=product_name,brands,nutriments,serving_size')
+  fetch('https://world.openfoodfacts.org/api/v2/product/'+ean+'.json?fields=product_name,brands,nutriments,serving_size,quantity')
     .then(function(r){return r.json();})
     .then(function(j){
       var p=j&&j.product,nu=p&&p.nutriments;
@@ -10055,6 +10236,11 @@ function kamFood(ean){
         sa:nu['salt_100g']!==undefined?+nu['salt_100g']:undefined,
         gf:nu['saturated-fat_100g']!==undefined?+nu['saturated-fat_100g']:undefined,
         por:p.serving_size||null};
+      /* Getraenke-Erkennung wie in der Suche: ml in Menge/Portion. */
+      if(/\d\s*(ml|cl|l)\b/i.test(String(p.quantity||'')+' '+String(p.serving_size||'')))food.u='ml';
+      var svm=String(p.serving_size||'').match(/([\d.,]+)\s*(g|ml)/i);
+      if(svm){var svv=Math.round(parseFloat(String(svm[1]).replace(',','.')));
+        if(svv>0)food.pr=[[cfg.lang==='de'?'1 Portion':'1 serving',svv]];}
       foodCache[ean]=food;set('foods',foodCache);
       kamResult(food);
     })
@@ -10077,12 +10263,12 @@ function kamResult(food){
      Open-Food-Facts-Antwort -- ein praepariertes Produkt koennte sonst
      Markup in die Seite bringen. */
   r.innerHTML='<b style="font-family:var(--fd);font-weight:700"></b>'+
-    '<p class="hint" style="margin:.3rem 0 .55rem">'+(DE?'Je 100 g: ':'Per 100 g: ')+
+    '<p class="hint" style="margin:.3rem 0 .55rem">'+(food.u==='ml'?(DE?'Je 100 ml: ':'Per 100 ml: '):(DE?'Je 100 g: ':'Per 100 g: '))+
       Math.round(food.p*4+food.f*9+food.c*4)+' kcal · '+mzahl(food.p)+' P · '+mzahl(food.f)+' F · '+mzahl(food.c)+' '+(DE?'KH':'C')+
       (mikro.length?'<br>'+mikro.join(' · '):'')+
       (food.por?'<br>'+(DE?'Portion laut Packung: ':'Serving: ')+String(food.por).replace(/[<>&"']/g,''):'')+'</p>'+
     '<div class="field"><label for="kamG">'+(DE?'Menge':'Amount')+'</label>'+
-      '<div class="ctl hasunit"><input id="kamG" type="number" min="1" max="2000" value="100"><span class="unit">g</span></div></div>'+
+      '<div class="ctl hasunit"><input id="kamG" type="number" min="1" max="2000" value="'+((food.pr&&food.pr.length)?food.pr[0][1]:100)+'"><span class="unit">'+(food.u==='ml'?'ml':'g')+'</span></div></div>'+
     '<div class="savebar">'+
       '<button type="button" class="tbtn go" id="kamUse">'+(DE?'In Mahlzeit übernehmen':'Add to a meal')+'</button>'+
       '<button type="button" class="tbtn" id="kamAgain">'+(DE?'Weiter scannen':'Scan again')+'</button></div>';
@@ -10117,14 +10303,16 @@ function kamUebernehmen(food,g){
   /* Auch der Scan ist eine je-100-g-Quelle: Basis ans Blatt, Menge zeigen --
      dann bleibt die Portion hier und beim spaeteren Bearbeiten aenderbar. */
   $('foodBody').dataset.b100=JSON.stringify({p:food.p,f:food.f,c:food.c,z:food.z,bl:food.bl,sa:food.sa,gf:food.gf});
-  var gr=$('mlGRow');if(gr){gr.hidden=false;}
+  quelleSetzen(food.u,food.pr||null);
+  porZeig(true);
   var gi=$('mlG');if(gi)gi.value=Math.round(g*100);
+  chipMark();
   /* Kam der Scan aus dem "Neues Rezept"-Kontext, wird er wiederhergestellt --
      openMeal() hat die Seite frisch als Mahlzeit aufgebaut. */
   if(ziel&&ziel.rz){
     var rhx=$('foodTitle');if(rhx)rhx.textContent=(cfg.lang==='de')?'Neues Rezept':'New recipe';
     var rsx=$('mlSave');if(rsx)rsx.hidden=true;
-    var rslx=$('mlSlotLbl');if(rslx&&rslx.parentNode)rslx.parentNode.hidden=true;
+    var rslx=$('mlSlotWrap');if(rslx)rslx.hidden=true;
     var rbx=$('foodBody').querySelector('button[data-mlact="rezept"]');
     if(rbx){rbx.className='tbtn go';rbx.style.flex='1';}
   }
@@ -10226,9 +10414,16 @@ $('foodBody').addEventListener('click',function(e){
   if(mk){try{var mo=JSON.parse(mk);eintrag.z=mo.z;eintrag.bl=mo.bl;eintrag.sa=mo.sa;eintrag.gf=mo.gf;}catch(err){}}
   /* Je-100-g-Quelle: Basis und Menge mitspeichern, damit die Portion beim
      Bearbeiten aenderbar bleibt. */
-  var b100=$('foodBody').dataset.b100,gRow=$('mlGRow');
-  if(b100&&gRow&&!gRow.hidden){
-    try{eintrag.b=JSON.parse(b100);eintrag.g=Math.max(1,parseFloat($('mlG').value)||100);}catch(err2){}
+  var b100=$('foodBody').dataset.b100,gWrap=$('mlPor');
+  if(b100&&gWrap&&!gWrap.hidden){
+    try{eintrag.b=JSON.parse(b100);eintrag.g=Math.max(1,parseFloat($('mlG').value)||100);
+      if($('foodBody').dataset.einh==='ml')eintrag.u='ml';
+      /* Portionsliste mitspeichern: Online-Produkte haben keinen
+         PORT-Eintrag -- ohne das verschwaende ihr Portions-Chip beim
+         Bearbeiten und beim Zuletzt-Klick still. */
+      var prj=$('foodBody').dataset.por;
+      if(prj){try{eintrag.pr=JSON.parse(prj);}catch(err3){}}
+    }catch(err2){}
   }
   else if(roh!=='neu'&&meals[k][+roh]){
     var altE=meals[k][+roh];
