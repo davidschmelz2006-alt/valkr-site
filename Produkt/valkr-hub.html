@@ -3199,7 +3199,7 @@
          sieht -- so machen es auch Liftoff und MCI mit ihrem Zeichen. -->
     <div class="brandfoot" aria-hidden="true">
       <svg viewBox="0 0 512 512" width="22" height="22"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg>
-      <span><b>VALKR</b><em>Calisthenics</em></span>
+      <span><b>VALKR</b><em>Athletik</em></span>
     </div>
   </section>
 
@@ -3212,6 +3212,11 @@
     <div><h2 class="sec"></h2><p class="sub"></p></div>
         <div class="kpis" id="planKpis"></div>
     <div class="weeks" id="weeks"></div>
+    <!-- v31: Sportarten-Strategien. buildWeeks() fuellt den Kasten nur bei
+         gewaehlter Sportart -- Anforderungsprofil, die belegten Strategien
+         samt Quelle und der Praeventionsblock. Bei Calisthenics bleibt er
+         leer und unsichtbar. -->
+    <div id="sportStrat"></div>
     <div class="noteblk">
       <p class="eyebrow" data-i18n="plan.miles">Milestones</p>
       <div class="savebar">
@@ -3804,6 +3809,14 @@
         <div class="field"><label data-i18n="set.lang">Language</label><div class="ctl"><select id="setLang"><option value="en">English</option><option value="de">Deutsch</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.units">Units</label><div class="ctl"><select id="setUnits"><option value="metric" data-i18n="opt.metric">kg · cm</option><option value="imperial" data-i18n="opt.imperial">lb · in</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.start">Programme start</label><div class="ctl"><input id="setStart" type="date"></div></div>
+        <!-- v31: Sportart nachtraeglich wechselbar -- Optionen fuellt
+             syncSettings() aus SPORT, damit Namen und Sprachen an einer
+             Stelle bleiben. -->
+        <div class="field"><label data-i18n="set.sport">Sport</label><div class="ctl"><select id="setSport"></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+        <!-- v31: Schwaechen auch nachtraeglich waehlbar (max. zwei) -- sonst
+             waere die Einfuehrung der einzige Weg dorthin. Sichtbar nur im
+             Sportmodus; syncSettings() fuellt die Chips aus SPORT. -->
+        <div class="field" id="setSchwFeld" hidden><label id="setSchwLabel">Schwächen</label><div class="chips" id="setSchw" style="justify-content:flex-end"></div></div>
         <div class="field"><label data-i18n="set.track">Training days</label><div class="ctl"><select id="setTrack"><option value="1" data-i18n="opt.d1">1 Tag</option><option value="2" data-i18n="opt.d2">2 Tage</option><option value="3" data-i18n="opt.d3">3 Tage</option><option value="4" data-i18n="opt.d4">4 Tage</option><option value="5" data-i18n="opt.d5">5 Tage</option><option value="6" data-i18n="opt.d6">6 Tage</option><option value="7" data-i18n="opt.d7">7 Tage</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <div class="field"><label data-i18n="set.motion">Ambient effects</label><div class="ctl"><select id="setMotion"><option value="calm" selected data-i18n="opt.calm">Ruhig</option><option value="full" data-i18n="opt.full">Voll</option><option value="off" data-i18n="opt.off">Aus</option></select><svg class="chev" width="11" height="7" viewBox="0 0 11 7"><path d="M1 1 L5.5 5.5 L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
         <!-- Der Sparmodus laeuft automatisch nach Geraeteleistung. Hier laesst
@@ -3892,7 +3905,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='30.2';
+var VERSION='31.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -4089,10 +4102,14 @@ function storeNote(){
 }
 
 /* ---------- settings ---------- */
-var cfg=get('cfg',{lang:'en',units:'metric',track:'3',motion:'calm',sound:'off',health:'off'});
+var cfg=get('cfg',{lang:'en',units:'metric',track:'3',motion:'calm',sound:'off',health:'off',sport:'cali',schwaechen:[]});
 /* Allererster Start: Geraetesprache uebernehmen. Wer schon eine Einstellung
    hat, behaelt sie. */
 if(rawGet('cfg')===null&&/^de/i.test(navigator.language||''))cfg.lang='de';
+/* v31: Bestand von vor der Sportarten-Wahl traegt keine Sportart -- er
+   bleibt auf der Calisthenics-Progression, exakt dem Verhalten von davor. */
+if(!cfg.sport)cfg.sport='cali';
+if(!cfg.schwaechen)cfg.schwaechen=[];
 /* Altbestand: die Auswahl "Voll" speicherte bis v21 den Wert 'on'. */
 if(cfg.motion==='on'){cfg.motion='full';saveCfg();}
 function saveCfg(){set('cfg',cfg);}
@@ -4217,6 +4234,7 @@ var DICT={
  'set.motionNote':['Calm shows just the app. Full brings scenery and particles.','Ruhig zeigt nur die App. Voll bringt Kulisse und Partikel.'],
  'set.themeNote':['Each theme changes the palette. Ambient effect only on Full.','Jedes Design ändert die Farben. Hintergrund nur auf Voll.'],
  'set.display':['Display and units','Anzeige und Einheiten'],'set.lang':['Language','Sprache'],
+ 'set.sport':['Sport','Sportart'],
  'set.units':['Units','Einheiten'],'set.start':['Programme start','Programmstart'],'set.track':['Training days','Trainingstage'],
  'set.spar':['Performance mode','Sparmodus'],
  'set.motion':['Ambient effects','Hintergrundeffekte'],'set.sound':['Timer sound','Timer-Ton'],
@@ -4383,8 +4401,21 @@ function curBlock(){return blockOf(blockNo);}
 function phase(w){
   var L=cfg.lang==='de'?1:0;
   if(w===11)return{name:L?'Deload':'Deload',sets:2,reps:'8-10',rest:L?'2 Min':'2 min',rs:120};
-  if(w===12)return{name:L?'Wiederholungstest':'Retest',sets:3,reps:'test',rest:L?'3 Min':'3 min',rs:180};
+  /* v31: Im Sportmodus heisst Woche 12 Leistungstest -- Sprintzeit,
+     Sprunghoehe, Intervall-Kontrolle unter gleichen Bedingungen. Der
+     'Wiederholungstest' (Calisthenics-Stufen) existiert dort nicht. */
+  if(w===12)return sportAkt()
+    ?{name:L?'Leistungstest':'Performance test',sets:3,reps:'test',rest:L?'3 Min':'3 min',rs:180}
+    :{name:L?'Wiederholungstest':'Retest',sets:3,reps:'test',rest:L?'3 Min':'3 min',rs:180};
   var p=curBlock().ph[w<=4?0:(w<=8?1:2)];
+  /* v31: Der ANZEIGE-Name folgt im Sportmodus dem Athletikbogen (Grundlage/
+     Aufbau/Zuspitzung) statt der Calisthenics-Blockphase; sets/reps/rs
+     bleiben unveraendert -- daran haengen XP-Gewichtung und Cali-Pfade. */
+  if(sportAkt()){
+    var spn=w<=4?['Phase 1 · Foundation','Phase 1 · Grundlage']
+      :(w<=8?['Phase 2 · Build','Phase 2 · Aufbau']:['Phase 3 · Sharpen','Phase 3 · Zuspitzung']);
+    return{name:spn[L],sets:p.sets,reps:p.reps,rest:p.rest[L],rs:p.rs};
+  }
   return{name:p.n[L],sets:p.sets,reps:p.reps,rest:p.rest[L],rs:p.rs};
 }
 /* Anzeigenamen der Sitzungen und ihrer Plaetze.
@@ -4492,6 +4523,402 @@ var TRACKS={
  '7':{order:['pull','push','legs','pull','push','legs',null],dflt:[0,1,2,3,4,5,6],
    rhythm:[{k:'pull'},{k:'push'},{k:'legs'},{k:'pull'},{k:'push'},{k:'legs'},{f:'easy'}]}
 };
+/* ---------- Sportarten (v31) ---------------------------------------------
+   Die App traegt seit v31 Athletiktraining fuer waehlbare Sportarten; die
+   Calisthenics-Progression bleibt als eine davon bestehen (cfg.sport==='cali',
+   zugleich der Bestand aller Nutzer von davor). Jede Sportart belegt die
+   sieben vorhandenen Session-Schluessel der TRACKS neu -- Rhythmus, Kalender,
+   Runner und XP bleiben unangetastet. Items tragen id:null wie die
+   Skill-Uebung: feste Vorgabe (v), kein Katalog-Tausch. Inhalte sind aus
+   Studien destilliert; jede Strategie im Plan-Bereich nennt ihre Quelle.
+   Textfelder sind [EN,DE]; spTxt() loest sie beim Anzeigen auf. */
+var AIT={
+ fifaVoll:{w:1,l:['FIFA 11+ complete','FIFA 11+ komplett'],v:['20 min','20 Min'],k:['All three parts, progress the level every 3-4 weeks','Alle drei Teile, Stufe alle 3-4 Wochen steigern']},
+ dynWarm:{w:1,l:['Dynamic warm-up','Dynamisches Aufwärmen'],v:['8-10 min','8-10 Min'],k:['Lunges with rotation, leg swings, skips','Ausfallschritte mit Rotation, Beinpendel, Skippings']},
+ nmWarm:{w:1,l:['Neuromuscular warm-up','Neuromuskuläres Aufwärmen'],v:['15 min','15 Min'],k:['Landing technique, knee control, balance','Landetechnik, Beinachse, Gleichgewicht']},
+ antritt:{l:['Accelerations','Antritte'],v:'4 x 10 m',k:['Full rest between reps','Volle Pause zwischen den Antritten']},
+ sprint30:{l:['Sprints','Sprints'],v:'6 x 30 m',k:['20-30 s rest, maximal effort','20-30 s Pause, maximale Intensität']},
+ rsa:{l:['Repeated sprints','Wiederholte Sprints'],v:'2 x 6 x 20 m',k:['20 s rest, 3-4 min between sets','20 s Pause, 3-4 Min zwischen den Sätzen']},
+ cmj:{l:['Counter-movement jumps','Strecksprünge (CMJ)'],v:'3 x 6',k:['Maximal intent, full recovery','Maximale Absprungabsicht, volle Pause']},
+ dropJump:{l:['Drop jumps','Drop Jumps'],v:'3 x 6',k:['20-40 cm box, ground contact short','Kasten 20-40 cm, Bodenkontakt kurz']},
+ huerden:{l:['Hurdle jumps','Hürdensprünge'],v:'3 x 6',k:['Stick the landing quietly','Leise, stabile Landung']},
+ skater:{l:['Lateral skater jumps','Seitliche Skater-Sprünge'],v:['3 x 6/side','3 x 6/Seite'],k:['Stick each landing on one leg','Jede Landung einbeinig stabilisieren']},
+ kniebeuge:{l:['Heavy squat','Kniebeuge, schwer'],v:'4 x 5',k:['80-90% effort, 2-3 min rest','80-90 % Last, 2-3 Min Pause']},
+ splitSq:{l:['Split squats','Split Squats'],v:['3 x 6/leg','3 x 6/Bein'],k:['Torso tall, knee tracks the foot','Oberkörper aufrecht, Knie über dem Fuß']},
+ rdl:{l:['Romanian deadlift','Rumänisches Kreuzheben'],v:'3 x 6',k:['Hinge, flat back, hamstrings load','Hüftbeuge, Rücken lang, Zug auf die Beinrückseite']},
+ hipThrust:{l:['Hip thrusts','Hip Thrusts'],v:'3 x 8',k:['Squeeze at the top','Oben bewusst anspannen']},
+ nordic:{l:['Nordic hamstring curls','Nordic Hamstring Curls'],v:'3 x 6',k:['Lower as slowly as possible; build 2x5 to 3x8 over 10 weeks','So langsam wie möglich ablassen; über 10 Wochen von 2x5 auf 3x8 steigern']},
+ cph:{l:['Copenhagen adduction','Copenhagen Adduction'],v:['2 x 6/side','2 x 6/Seite'],k:['Progress short to long lever over 8 weeks','Über 8 Wochen vom Kurz- zum Langhebel steigern']},
+ wadeExz:{l:['Single-leg calf raises, eccentric','Einbeiniges Wadenheben, exzentrisch'],v:'3 x 12',k:['Up fast, three seconds down','Zügig hoch, drei Sekunden runter']},
+ int44:{l:['4x4 intervals','4x4-Intervalle'],v:['4 x 4 min','4 x 4 Min'],k:['90-95% HRmax, 3 min jog between','90-95 % HFmax, 3 Min Traben dazwischen']},
+ zehn2030:{l:['10-20-30 runs','10-20-30-Läufe'],v:['3 blocks of 5 min','3 Blöcke à 5 Min'],k:['30 s easy, 20 s brisk, 10 s near-max','30 s locker, 20 s zügig, 10 s fast maximal']},
+ hiit1515:{l:['15/15 interval blocks','15/15-Intervallblöcke'],v:['2 x 7 min','2 x 7 Min'],k:['15 s fast run, 15 s jog','15 s schnell, 15 s Trab']},
+ cod:{l:['Change-of-direction drills','Richtungswechsel-Drills'],v:'4 x 5-10-5',k:['Low hips, short final steps','Tiefer Schwerpunkt, letzte Schritte kurz']},
+ spider:{l:['Spider drill','Spider-Drill'],v:['4 rounds','4 Runden'],k:['Start each pick-up explosively','Jeden Antritt explosiv starten']},
+ mbRot:{l:['Med-ball rotation throws','Medizinball-Rotationswürfe'],v:['3 x 6/side','3 x 6/Seite'],k:['Throw from the hips, full intent','Aus der Hüfte werfen, maximale Absicht']},
+ mbSlam:{l:['Med-ball overhead throws','Medizinball-Überkopfwürfe'],v:'3 x 6',k:['Whole chain, legs to arms','Ganze Kette, Beine bis Arme']},
+ bankRudern:{l:['Bench press + rows','Bankdrücken + Rudern'],v:['3 x 5-8 each','je 3 x 5-8'],k:['Pull at least as much as you press','Mindestens so viel ziehen wie drücken']},
+ ostrc:{l:['OSTRC shoulder block','OSTRC-Schulterblock'],v:['10 min','10 Min'],k:['Band external rotation, Y-T-W, sleeper stretch','Band-Außenrotation, Y-T-W, Sleeper Stretch']},
+ balance:{l:['Single-leg balance','Einbeinstand-Balance'],v:['4 x 30 s/leg','4 x 30 s/Bein'],k:['Progress: eyes closed, unstable surface','Steigern: Augen zu, instabile Unterlage']},
+ lande:{l:['Landing technique','Landetechnik'],v:'3 x 5',k:['Knee over foot, land soft','Knie über Fuß, weich landen']},
+ stuetz:{l:['Front + side planks','Front- und Seitstütz'],v:'3 x 40 s',k:['One line, no sagging hips','Eine Linie, Hüfte nicht durchhängen']},
+ pallof:{l:['Pallof press','Pallof Press'],v:['3 x 10/side','3 x 10/Seite'],k:['Resist the rotation','Gegen die Drehung halten']},
+ deadBug:{l:['Dead bugs','Dead Bugs'],v:['3 x 10/side','3 x 10/Seite'],k:['Lower back stays down','Unterer Rücken bleibt am Boden']},
+ laufAbc:{w:1,l:['Running drills','Lauf-ABC'],v:['10 min','10 Min'],k:['Skips, heel flicks, strides','Skippings, Anfersen, Steigerungen']},
+ seilspringen:{l:['Rope skipping','Seilspringen'],v:'3 x 30 s',k:['Stiff ankles, quiet contacts','Feste Sprunggelenke, leise Kontakte']},
+ shortFoot:{l:['Short-foot exercise','Short-Foot-Übung'],v:'3 x 10',k:['Arch up, toes stay long','Gewölbe aufbauen, Zehen lang lassen']},
+ stepDown:{l:['Single-leg step-downs','Einbeinige Step-Downs'],v:['3 x 8/leg','3 x 8/Bein'],k:['Knee steady over the foot','Knie ruhig über dem Fuß führen']},
+ auslauf:{w:1,l:['Cool-down jog','Auslaufen'],v:['10 min','10 Min'],k:['Very easy pace','Ganz lockeres Tempo']}
+};
+var SPORT={
+ fussball:{n:['Football','Fußball'],
+  prof:['Football mixes 10-13 km of running with a sprint every ~90 seconds, hundreds of cuts and heavy eccentric load on hamstrings and groin. The plan builds sprint speed, leg strength, repeated-sprint capacity and the proven injury-prevention block.',
+        'Fußball mischt 10-13 km Laufarbeit mit einem Sprint etwa alle 90 Sekunden, hunderten Richtungswechseln und hoher exzentrischer Last auf Beinrückseite und Leiste. Der Plan baut Sprintschnelligkeit, Beinkraft, wiederholte Sprintfähigkeit und den belegten Präventionsblock auf.'],
+  sess:{
+   /* FIFA 11+ KOMPLETT liegt auf den zwei Kern-Einheiten (Tempo+Kraft)
+      und den 4er-Pendants -- so liefert jede Trackwahl ab 2 Tagen die
+      studienkonforme Dosis 'komplett, mindestens 2x/Woche' (Thorborg
+      2017), nicht nur Track 4. */
+   pull:{t:['Speed','Tempo'],s:['Sprints / Jumps / Core','Sprints / Sprünge / Rumpf'],it:['fifaVoll','antritt','sprint30','cmj','stuetz']},
+   push:{t:['Strength','Kraft'],s:['Squat / Hinge / Hamstrings / Groin','Beugen / Hüfte / Beinrückseite / Leiste'],it:['fifaVoll','kniebeuge','hipThrust','nordic','cph']},
+   /* Richtungswechsel VOR den Intervallen: koordinativ anspruchsvolle,
+      verletzungsrelevante Qualitaet gehoert vor die metabolische
+      Ermuedung -- dieselbe Logik, die die eigene Praevention lehrt. */
+   legs:{t:['Engine','Motor'],s:['Cuts / 4x4 / Core','Richtungswechsel / 4x4 / Rumpf'],it:['dynWarm','cod','int44','pallof','deadBug']},
+   upA:{t:['Speed + Plyo','Tempo + Plyo'],s:['Sprints / Jumps / RSA','Sprints / Sprünge / RSA'],it:['fifaVoll','antritt','dropJump','huerden','rsa']},
+   lowA:{t:['Strength A','Kraft A'],s:['Squat / Hinge / Groin / Calf','Beugen / Hüfte / Leiste / Wade'],it:['fifaVoll','kniebeuge','rdl','cph','wadeExz']},
+   upB:{t:['Engine + RSA','Motor + RSA'],s:['Intervals / Sprints / Core','Intervalle / Sprints / Rumpf'],it:['dynWarm','int44','rsa','stuetz']},
+   /* Bewusst OHNE Sprungelemente: der Praeventionstag folgt im 4er-Rhythmus
+      direkt auf den Motor-Tag und ist der niedrig-intensive Part des
+      Hoch/Niedrig-Wechsels -- Plyo dort wuerde zwei neuromuskulaer hohe
+      Tage aneinanderreihen. */
+   lowB:{t:['Prevention','Prävention'],s:['FIFA 11+ / Hamstrings / Core','FIFA 11+ / Beinrückseite / Rumpf'],it:['fifaVoll','nordic','cph','pallof']}
+  },
+  strat:[
+   {n:'Nordic Hamstring Curls',
+    was:['2-3x/week, build from 2x5 to 3x8-12 over 10 weeks, lower as slowly as possible; in season 1-2x/week 2x6 as maintenance.','2-3x/Woche, über 10 Wochen von 2x5 auf 3x8-12 steigern, exzentrisch so langsam wie möglich; in der Saison 1-2x/Woche 2x6 als Erhaltung.'],
+    warum:['Halves the rate of hamstring injuries (-51%) across all levels of play.','Halbiert die Rate an Hamstring-Verletzungen (-51 %) über alle Leistungsniveaus.'],
+    q:'van Dyk et al. 2019, Br J Sports Med (Meta-Analyse, 8459 Athleten)'},
+   {n:'Copenhagen Adduction',
+    was:['2-3x/week in the warm-up, 8 weeks from short to long lever (up to 2x6/side), 3 s eccentric.','2-3x/Woche im Aufwärmen, 8 Wochen vom Kurz- zum Langhebel (bis 2x6/Seite), 3 s exzentrisch.'],
+    warum:['Cut groin problems by 41% in a cluster RCT with 652 footballers.','Senkte Leistenprobleme im Cluster-RCT mit 652 Fußballern um 41 %.'],
+    q:'Harøy et al. 2019, Br J Sports Med (Cluster-RCT)'},
+   {n:'FIFA 11+',
+    was:['The complete 20-minute programme at least 2x/week as the standard warm-up; progress the levels every 3-4 weeks.','Komplettes 20-Minuten-Programm mindestens 2x/Woche als Standard-Aufwärmen, Stufen alle 3-4 Wochen steigern.'],
+    warum:['Reduces the overall injury rate by 30-39%, strongest with high compliance.','Reduziert die Gesamtverletzungsrate um 30-39 %, bei hoher Compliance am stärksten.'],
+    q:'Thorborg et al. 2017, Br J Sports Med (Meta-Analyse)'},
+   {n:['Maximal leg strength','Maximalkraft Unterkörper'],
+    was:['2x/week squat or trap bar 3-4x3-6 at 80-90%, full rests; in season 1-2 short sessions, 48 h from match day.','2x/Woche Kniebeuge oder Trap-Bar 3-4x3-6 bei 80-90 %, volle Pausen; in der Saison 1-2 kurze Einheiten mit 48 h Abstand zum Spiel.'],
+    warum:['Strength gains transfer directly to sprint performance (5-20 m).','Kraftzuwächse übertragen sich direkt auf die Sprintleistung (5-20 m).'],
+    q:'Seitz et al. 2014, Sports Med (Meta-Analyse); Styles et al. 2016, JSCR'},
+   {n:['Plyometrics','Plyometrie'],
+    was:['2x/week, 60-100 ground contacts: CMJ, drop jumps 20-40 cm, hurdle jumps; maximal intent, full rests, never heavily fatigued.','2x/Woche 60-100 Bodenkontakte: CMJ, Drop Jumps 20-40 cm, Hürdensprünge; maximale Absicht, volle Pausen, nie stark ermüdet.'],
+    warum:['Improves jump height by ~5-9% plus sprint and change-of-direction performance.','Verbessert Sprunghöhe um ~5-9 % sowie Sprint- und Richtungswechselleistung.'],
+    q:'Markovic 2007, Br J Sports Med (Meta-Analyse)'},
+   {n:['4x4 intervals','4x4-Intervalle'],
+    was:['2x/week 4x4 min at 90-95% HRmax, 3 min active rest; or small-sided games steered by heart rate.','2x/Woche 4x4 Min bei 90-95 % HFmax, 3 Min aktive Pause; alternativ Small-Sided Games mit HF-Steuerung.'],
+    warum:['VO2max +10.8%; in matches +20% distance covered and twice the sprints.','VO2max +10,8 %, im Spiel +20 % Laufdistanz und doppelt so viele Sprints.'],
+    q:'Helgerud et al. 2001, Med Sci Sports Exerc (RCT)'},
+   {n:['Repeated-sprint training','Repeated-Sprint-Training'],
+    was:['1-2x/week 2-3x6 sprints over 20-30 m, 20-30 s rest, 3-4 min between sets.','1-2x/Woche 2-3x6 Sprints über 20-30 m, 20-30 s Pause, 3-4 Min zwischen Sätzen.'],
+    warum:['Improves repeated-sprint ability, Yo-Yo performance and linear speed.','Verbessert wiederholte Sprintleistung, Yo-Yo-Leistung und lineare Schnelligkeit.'],
+    q:'Taylor et al. 2015, Sports Med (Meta-Analyse)'},
+   {n:['Core strength','Rumpfkraft'],
+    was:['2-3x/week 15-20 min: plank variations, Pallof press, dead bugs, progressive.','2-3x/Woche 15-20 Min: Stütz-Varianten, Pallof Press, Dead Bugs, progressiv.'],
+    warum:['Improves trunk strength and performance-relevant tests in elite youth players.','Verbessert Rumpfkraft und leistungsrelevante Tests bei Nachwuchs-Elite.'],
+    q:'Prieske et al. 2016, Scand J Med Sci Sports (RCT)'}
+  ],
+  schw:[
+   {key:'schnelligkeit',l:['Speed','Schnelligkeit'],it:{l:['Focus: accelerations','Schwerpunkt: Antritte'],v:'+3 x 10 m',k:['Full rest, maximal intent','Volle Pause, maximale Absicht']}},
+   {key:'sprungkraft',l:['Jumping power','Sprungkraft'],it:{l:['Focus: hurdle jumps','Schwerpunkt: Hürdensprünge'],v:'+3 x 6',k:['Quiet, stable landings','Leise, stabile Landungen']}},
+   {key:'ausdauer',l:['Endurance','Ausdauer'],it:{l:['Focus: 10-20-30 block','Schwerpunkt: 10-20-30-Block'],v:['+1 x 5 min','+1 x 5 Min'],k:['30 easy, 20 brisk, 10 near-max','30 locker, 20 zügig, 10 fast maximal']}},
+   {key:'wiederholte-sprints',l:['Repeated sprints','Wiederholte Sprints'],it:{l:['Focus: sprint set','Schwerpunkt: Sprint-Serie'],v:'+1 x 6 x 20 m',k:['20 s rest between sprints','20 s Pause zwischen den Sprints']}},
+   {key:'rumpfstabilitaet',l:['Core stability','Rumpfstabilität'],it:{l:['Focus: side planks','Schwerpunkt: Seitstütz'],v:['+3 x 30 s/side','+3 x 30 s/Seite'],k:['Hips stacked, one line','Hüfte hoch, eine Linie']}},
+   {key:'schusskraft',l:['Shooting power','Schusskraft'],it:{l:['Focus: hip thrusts','Schwerpunkt: Hip Thrusts'],v:'+2 x 8',k:['Explosive up, controlled down','Explosiv hoch, kontrolliert runter']}},
+   {key:'verletzungsanfaelligkeit',l:['Injury resilience','Verletzungsschutz'],it:{l:['Focus: Copenhagen adduction','Schwerpunkt: Copenhagen Adduction'],v:['+2 x 6/side','+2 x 6/Seite'],k:['Slow eccentric lowering','Langsam exzentrisch ablassen']}}
+  ],
+  /* Leistungstest-Woche (12): messen statt trainieren -- gleiche
+     Bedingungen, Werte ins Tagebuch, Vergleich beim naechsten Block. */
+  test:{t:['Performance test','Leistungstest'],s:['Sprint / Jump / Interval','Sprint / Sprung / Intervall'],
+   it:['dynWarm',{l:['Sprint test','Sprint-Test'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['20-30 m, full recovery — note the time in the log','20-30 m, volle Pause — Zeit im Tagebuch notieren']},{l:['Jump-height test (CMJ)','Sprunghöhen-Test (CMJ)'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['Hands on hips, note the height or reach mark','Hände an die Hüfte, Höhe oder Wandmarke notieren']},{l:['Interval check','Intervall-Kontrolle'],v:['1 x 4 min','1 x 4 Min'],k:['Same course as last time — note the distance','Gleiche Strecke wie beim letzten Mal — Distanz notieren']}]},
+  prev:{p:['FIFA 11+ complete at least 2x/week, Nordic hamstring on the 10-week progression, Copenhagen adduction 2-3x/week — together they address hamstring (-51%), groin (-41%) and overall injuries (-30-39%).','FIFA 11+ mindestens 2x/Woche komplett, Nordic Hamstring mit 10-Wochen-Progression, Copenhagen Adduction 2-3x/Woche — zusammen adressieren sie Hamstring- (-51 %), Leisten- (-41 %) und Gesamtverletzungen (-30-39 %).'],q:'Thorborg 2017; van Dyk 2019; Harøy 2019 — alle Br J Sports Med'},
+  ern:{choT:6,choR:4,pro:1.8,
+   note:['Carb periodisation: 6-8 g/kg on match days, ~6 g/kg on hard days, 3-4 g/kg on rest days; 30-60 g/h during matches (UEFA statement: Collins 2021). Spread protein over 4-5 servings of 0.3-0.4 g/kg (Morton 2018).',
+         'Kohlenhydrate nach Belastung: 6-8 g/kg an Spieltagen, ~6 g/kg an harten Tagen, 3-4 g/kg an Ruhetagen; im Spiel 30-60 g/h (UEFA-Statement: Collins 2021). Protein auf 4-5 Portionen à 0,3-0,4 g/kg verteilen (Morton 2018).'],
+   supp:[[['Creatine monohydrate','Kreatin-Monohydrat'],['3-5 g daily','3-5 g täglich'],'Kreider 2017 (ISSN); Maughan 2018 (IOC)'],[['Caffeine','Koffein'],['3-6 mg/kg, 45-60 min before','3-6 mg/kg, 45-60 Min vorher'],'Guest 2021 (ISSN)'],[['Vitamin D','Vitamin D'],['only with a confirmed deficiency','nur bei geprüftem Mangel'],'Collins 2021 (UEFA)']]}
+ },
+ basketball:{n:['Basketball','Basketball'],
+  prof:['Basketball packs ~1000 activity changes, 35-50 maximal jumps and hard eccentric landings into a game. The plan develops vertical power, acceleration, change of direction and repeated-sprint capacity — with proven ankle, knee and hamstring prevention.',
+        'Basketball packt rund 1000 Aktionswechsel, 35-50 maximale Sprünge und harte Landungen in ein Spiel. Der Plan entwickelt Sprungkraft, Antritt, Richtungswechsel und wiederholte Sprintfähigkeit — mit belegter Prävention für Sprunggelenk, Knie und Beinrückseite.'],
+  sess:{
+   pull:{t:['Jump power','Sprungkraft'],s:['Landings / Jumps / Core','Landungen / Sprünge / Rumpf'],it:['nmWarm','lande','cmj','dropJump','stuetz']},
+   push:{t:['Strength','Kraft'],s:['Squat / Hinge / Split / Hamstrings','Beugen / Hüfte / Split / Beinrückseite'],it:['dynWarm','kniebeuge','rdl','splitSq','nordic']},
+   legs:{t:['Engine + COD','Motor + Richtungswechsel'],s:['Agility / 15/15 / Balance','Agilität / 15/15 / Balance'],it:['dynWarm','cod','hiit1515','balance','pallof']},
+   upA:{t:['Jump power A','Sprungkraft A'],s:['Jumps / Hurdles / Core','Sprünge / Hürden / Rumpf'],it:['nmWarm','cmj','huerden','dropJump','deadBug']},
+   lowA:{t:['Strength A','Kraft A'],s:['Squat / Split / Calf','Beugen / Split / Wade'],it:['dynWarm','kniebeuge','splitSq','wadeExz','stuetz']},
+   upB:{t:['Engine + RSA','Motor + RSA'],s:['15/15 / Shuttle sprints','15/15 / Shuttle-Sprints'],it:['dynWarm','hiit1515','rsa','pallof']},
+   lowB:{t:['Prevention','Prävention'],s:['Balance / Landings / Hamstrings','Balance / Landungen / Beinrückseite'],it:['nmWarm','balance','lande','nordic','stuetz']}
+  },
+  strat:[
+   {n:['Plyometric jump training','Plyometrisches Sprungtraining'],
+    was:['2x/week, 60-100 ground contacts: CMJ 3x8, drop jumps 20-40 cm 3x6 (contact < 250 ms), hurdle jumps, single-leg bounds; 48 h apart.','2x/Woche, 60-100 Bodenkontakte: CMJ 3x8, Drop Jumps 20-40 cm 3x6 (Kontakt < 250 ms), Hürdensprünge, einbeinige Bounds; 48 h Abstand.'],
+    warum:['Improves jump height by ~5-9% — the best-evidenced method for jumping power.','Verbessert die Sprunghöhe um ~5-9 % — die bestbelegte Methode für Sprungkraft.'],
+    q:'Markovic 2007, Br J Sports Med (Meta-Analyse)'},
+   {n:['Maximal leg strength','Maximalkraft Unterkörper'],
+    was:['2x/week squat 4x3-6 at 80-90%, trap bar 3x4-6, split squats, calf raises; in season cut volume, keep intensity.','2x/Woche Kniebeuge 4x3-6 bei 80-90 %, Trap-Bar 3x4-6, Split Squats, Wadenheben; in der Saison Volumen senken, Intensität halten.'],
+    warum:['Greater leg strength consistently accompanies better jump, sprint and COD performance and lowers injury risk.','Höhere Beinkraft geht konsistent mit besserer Sprung-, Sprint- und COD-Leistung einher und senkt das Verletzungsrisiko.'],
+    q:'Suchomel et al. 2016, Sports Med (Review)'},
+   {n:['Ankle prevention','Sprunggelenk-Prävention'],
+    was:['Balance programme 5x/week, 5 min, for 4 weeks, then 3x/week; after an ankle sprain additionally a lace-up brace.','Balance-Programm 5x/Woche à 5 Min über 4 Wochen, danach 3x/Woche; nach Sprunggelenksverletzung zusätzlich Lace-up-Orthese.'],
+    warum:['Balance training cuts sprains by ~38%; braces cut acute ankle injuries by up to 68%.','Balance-Training senkt Distorsionen um ~38 %, Braces akute Sprunggelenksverletzungen um bis zu 68 %.'],
+    q:'McGuine & Keene 2006; McGuine et al. 2011, Am J Sports Med (RCTs)'},
+   {n:['Neuromuscular warm-up','Neuromuskuläres Warm-up'],
+    was:['15-20 min before every session: landing technique, single-leg strength, deceleration drills, core; actively correct knee valgus.','15-20 Min vor jedem Training: Landetechnik, einbeinige Kraft, Abbrems-Drills, Rumpf; Knievalgus aktiv korrigieren.'],
+    warum:['Cuts ACL injuries by ~50%, in female athletes up to ~67%.','Reduziert VKB-Verletzungen um ~50 %, bei Athletinnen bis ~67 %.'],
+    q:'Webster & Hewett 2018, J Orthop Res (Meta-Analyse)'},
+   {n:'Nordic Hamstring Curls',
+    was:['10-week progression up to 3x6-8; in season 1x/week 2x6.','10-Wochen-Progression bis 3x6-8, in der Saison 1x/Woche 2x6.'],
+    warum:['Halves hamstring injuries (-51%).','Halbiert Hamstring-Verletzungen (-51 %).'],
+    q:'van Dyk et al. 2019, Br J Sports Med (Meta-Analyse)'},
+   {n:'HIIT & Repeated Sprints',
+    was:['15/15 blocks (2x6-8 min) or shuttle RSA (3x6x20 m), 1-2x/week.','15/15-Blöcke (2x6-8 Min) oder Shuttle-RSA (3x6x20 m), 1-2x/Woche.'],
+    warum:['Improves VO2max and recovery between high-intensity actions more efficiently than steady runs.','Verbessert VO2max und die Erholung zwischen hochintensiven Aktionen effizienter als Dauerläufe.'],
+    q:'Buchheit & Laursen 2013, Sports Med (Review)'},
+   {n:['Change-of-direction training','Change-of-Direction-Training'],
+    was:['2x/week 15-20 min: deceleration technique, 505 drill, pro-agility, later reactive on a signal.','2x/Woche 15-20 Min: Abbremstechnik, 505-Drill, Pro-Agility, später reaktiv auf Signal.'],
+    warum:['Plyometrics plus COD drills improve change-of-direction performance with moderate to large effects.','Plyometrie + COD-Drills verbessern die Richtungswechselleistung mit moderaten bis großen Effekten.'],
+    q:'Asadi et al. 2016, Int J Sports Physiol Perform (Meta-Analyse)'},
+   {n:['Core strength','Rumpfkraft'],
+    was:['2-3x/week 10-15 min: plank variations, Pallof, dead bugs, carries; progress via leverage.','2-3x/Woche 10-15 Min: Stütz-Varianten, Pallof, Dead Bugs, Carries; Progression über Hebel.'],
+    warum:['Small to moderate performance effects, better force transfer in jumps and contact.','Kleine bis moderate Leistungseffekte, bessere Kraftübertragung bei Sprüngen und Kontakt.'],
+    q:'Prieske et al. 2016, Sports Med (Meta-Analyse)'}
+  ],
+  schw:[
+   {key:'sprungkraft',l:['Jumping power','Sprungkraft'],it:{l:['Focus: drop jumps','Schwerpunkt: Drop Jumps'],v:'+3 x 6',k:['Short ground contact','Kurzer Bodenkontakt']}},
+   {key:'schnelligkeit',l:['Speed','Schnelligkeit'],it:{l:['Focus: accelerations','Schwerpunkt: Antritte'],v:'+4 x 10 m',k:['Full rest between reps','Volle Pause zwischen den Antritten']}},
+   {key:'richtungswechsel',l:['Agility','Richtungswechsel'],it:{l:['Focus: 505 drill','Schwerpunkt: 505-Drill'],v:['+4/side','+4/Seite'],k:['Brake low, cut hard','Tief abbremsen, hart abdrücken']}},
+   {key:'ausdauer',l:['Endurance','Ausdauer'],it:{l:['Focus: 15/15 block','Schwerpunkt: 15/15-Block'],v:['+1 x 6 min','+1 x 6 Min'],k:['15 s fast, 15 s jog','15 s schnell, 15 s Trab']}},
+   {key:'beweglichkeit',l:['Flexibility','Beweglichkeit'],it:{l:['Focus: hip + ankle mobility','Schwerpunkt: Hüft- und Sprunggelenksmobilität'],v:['+8 min','+8 Min'],k:['Stretch after, not before','Dehnen ans Ende der Einheit']}},
+   {key:'rumpfstabilitaet',l:['Core stability','Rumpfstabilität'],it:{l:['Focus: Pallof press','Schwerpunkt: Pallof Press'],v:['+3 x 10/side','+3 x 10/Seite'],k:['Resist the rotation','Gegen die Drehung halten']}},
+   {key:'verletzungsanfaelligkeit',l:['Injury resilience','Verletzungsschutz'],it:{l:['Focus: balance block','Schwerpunkt: Balance-Block'],v:['+5 min','+5 Min'],k:['Single-leg, progress difficulty','Einbeinig, Schwierigkeit steigern']}}
+  ],
+  /* Leistungstest-Woche (12): messen statt trainieren -- gleiche
+     Bedingungen, Werte ins Tagebuch, Vergleich beim naechsten Block. */
+  test:{t:['Performance test','Leistungstest'],s:['Sprint / Jump / Interval','Sprint / Sprung / Intervall'],
+   it:['dynWarm',{l:['Sprint test','Sprint-Test'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['20-30 m, full recovery — note the time in the log','20-30 m, volle Pause — Zeit im Tagebuch notieren']},{l:['Jump-height test (CMJ)','Sprunghöhen-Test (CMJ)'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['Hands on hips, note the height or reach mark','Hände an die Hüfte, Höhe oder Wandmarke notieren']},{l:['Interval check','Intervall-Kontrolle'],v:['1 x 4 min','1 x 4 Min'],k:['Same course as last time — note the distance','Gleiche Strecke wie beim letzten Mal — Distanz notieren']}]},
+  prev:{p:['Neuromuscular warm-up before every session (ACL ~-50%), the ankle balance programme (~-38%, with brace up to -68%), Nordic hamstring (-51%); count jump load and build it with 48 h spacing.','Neuromuskuläres Warm-up vor jeder Einheit (VKB ~-50 %), Balance-Programm fürs Sprunggelenk (~-38 %, mit Brace bis -68 %), Nordic Hamstring (-51 %); Sprunglast zählen und mit 48 h Abstand steigern.'],q:'Webster & Hewett 2018; McGuine 2006/2011; van Dyk 2019'},
+  ern:{choT:6,choR:4,pro:1.8,
+   note:['Indoor sport: check vitamin D in winter (Maughan 2018, IOC); 1-4 g/kg carbs 1-4 h before tip-off, 1-1.2 g/kg/h in the first 4 h after on tight schedules (Thomas 2016). Spread protein over 4-5 servings, one before sleep (Morton 2018).',
+         'Hallensport: Vitamin-D-Status im Winter prüfen (Maughan 2018, IOC). An Spieltagen 1-4 g/kg Kohlenhydrate 1-4 h vor Tip-off, bei engen Spielplänen 1-1,2 g/kg/h in den ersten 4 h danach (Thomas 2016). Protein auf 4-5 Portionen verteilen, eine vor dem Schlafen (Morton 2018).'],
+   supp:[[['Creatine monohydrate','Kreatin-Monohydrat'],['3-5 g daily','3-5 g täglich'],'Kreider 2017 (ISSN)'],[['Caffeine','Koffein'],['3-6 mg/kg, 60 min before; mind sleep after evening games','3-6 mg/kg, 60 Min vorher; abends Schlaf beachten'],'Guest 2021 (ISSN)'],[['Vitamin D3','Vitamin D3'],['only with a confirmed deficiency','nur bei geprüftem Mangel'],'Maughan 2018 (IOC)']]}
+ },
+ tennis:{n:['Tennis','Tennis'],
+  prof:['Tennis is played in 5-10 s bursts with short rests over up to 4+ hours: hundreds of first steps, mostly lateral, plus rotational power from legs to racquet arm. The plan builds first-step speed, leg and core power, serve power and a robust shoulder.',
+        'Tennis lebt von 5-10-Sekunden-Ballwechseln mit kurzen Pausen über bis zu vier Stunden: hunderte Antritte, meist seitlich, plus Rotationspower von den Beinen bis zum Schlagarm. Der Plan baut Antritt, Bein- und Rumpfpower, Aufschlagkraft und eine belastbare Schulter auf.'],
+  sess:{
+   pull:{t:['First step','Antritt'],s:['Short sprints / Spider / Lateral','Kurzsprints / Spider / Lateral'],it:['dynWarm','antritt','spider','skater','stuetz']},
+   push:{t:['Strength + shoulder','Kraft + Schulter'],s:['Squat / Hinge / Shoulder care','Beugen / Hüfte / Schulterpflege'],it:['dynWarm','kniebeuge','rdl','ostrc','nordic']},
+   legs:{t:['Power + engine','Power + Motor'],s:['Med-ball / HIIT / Core','Medizinball / HIIT / Rumpf'],it:['dynWarm','mbRot','mbSlam','hiit1515','pallof']},
+   upA:{t:['First step A','Antritt A'],s:['Sprints / Direction changes','Sprints / Richtungswechsel'],it:['dynWarm','antritt','cod','skater','deadBug']},
+   lowA:{t:['Strength A','Kraft A'],s:['Squat / Split / Groin','Beugen / Split / Leiste'],it:['dynWarm','kniebeuge','splitSq','cph','wadeExz']},
+   upB:{t:['Serve power','Aufschlagpower'],s:['Med-ball / Shoulder / Core','Medizinball / Schulter / Rumpf'],it:['dynWarm','mbSlam','mbRot','ostrc','stuetz']},
+   lowB:{t:['Engine','Motor'],s:['HIIT shuttles / Balance','HIIT-Shuttles / Balance'],it:['dynWarm','hiit1515','spider','balance']}
+  },
+  strat:[
+   {n:['Heavy leg strength work','Schweres Beinkrafttraining'],
+    was:['2x/week squat, trap bar, Bulgarian split squats 3-5x3-6 at 80-90%; maintain 1x/week in tournament phases.','2x/Woche Kniebeuge, Trap-Bar, Bulgarian Split Squats 3-5x3-6 bei 80-90 %; in Turnierphasen 1x/Woche erhalten.'],
+    warum:['Leg strength transfers to sprint and change-of-direction performance and carries the serve chain.','Beinkraft transferiert auf Sprint- und Richtungswechselleistung und trägt die Aufschlagkette.'],
+    q:'Seitz et al. 2014, Sports Med (Meta-Analyse)'},
+   {n:['Plyometrics','Plyometrie'],
+    was:['2x/week 80-120 ground contacts: CMJ, hurdles, lateral jumps, low drop jumps; full rests.','2x/Woche 80-120 Bodenkontakte: CMJ, Hürden, laterale Sprünge, niedrige Drop Jumps; volle Pausen.'],
+    warum:['Jump height +4-9%, more explosive first steps and serve leg drive.','Sprunghöhe +4-9 %, mehr Explosivkraft für Antritt und Aufschlag-Beinarbeit.'],
+    q:'Markovic 2007, Br J Sports Med (Meta-Analyse)'},
+   {n:['First-step and COD training','Antritts- und COD-Training'],
+    was:['2x/week short sprints 5-20 m from the split step, spider drill, 505, lateral shuffles; work:rest at least 1:6.','2x/Woche Kurzsprints 5-20 m aus Split-Step, Spider-Drill, 505, laterale Shuffles; Belastung:Pause mind. 1:6.'],
+    warum:['Nearly every point is decided by first steps and direction changes, not top speed.','Fast alle Punkte entscheiden Antritte und Richtungswechsel, nicht Höchstgeschwindigkeit.'],
+    q:'Asadi et al. 2016, Int J Sports Physiol Perform (Meta-Analyse)'},
+   {n:['Tennis-specific HIIT','Tennisspezifisches HIIT'],
+    was:['2x/week: 3x10x5-s shuttles (20 s rest) or 4x4 min drill intervals at 90-95% HRmax.','2x/Woche: 3x10x5-s-Shuttles (20 s Pause) oder 4x4 Min Drill-Intervalle bei 90-95 % HFmax.'],
+    warum:['VO2peak +5-6% in 6 weeks plus better tennis-specific endurance.','VO2peak +5-6 % in 6 Wochen und bessere tennisspezifische Ausdauer.'],
+    q:'Fernandez-Fernandez et al. 2012, JSCR (RCT)'},
+   {n:['Med-ball power','Medizinball-Power'],
+    was:['3x/week rotation throws, overhead slams, throws from the serve stance (2-3 kg, 3x6-8) plus a core block.','3x/Woche Rotationswürfe, Overhead-Slams, Würfe aus Aufschlagposition (2-3 kg, 3x6-8) plus Rumpfblock.'],
+    warum:['Raised junior serve velocity significantly.','Steigerte die Aufschlaggeschwindigkeit bei Junioren signifikant.'],
+    q:'Fernandez-Fernandez et al. 2013, J Sports Sci Med (RCT)'},
+   {n:['Shoulder prevention (OSTRC)','Schulterprävention (OSTRC)'],
+    was:['3x/week 10 min: band external rotation with eccentric focus, Y-T-W, sleeper stretch.','3x/Woche 10 Min: Band-Außenrotation exzentrisch, Y-T-W, Sleeper Stretch.'],
+    warum:['Cut shoulder problems in overhead athletes by 28%.','Senkte Schulterprobleme bei Überkopfathleten um 28 %.'],
+    q:'Andersson et al. 2017, Br J Sports Med (Cluster-RCT)'},
+   {n:'Nordic Hamstring + Copenhagen',
+    was:['2x/week Nordic up to 3x8-10, Copenhagen up to 2x6-15/side over 8 weeks.','2x/Woche Nordic bis 3x8-10, Copenhagen bis 2x6-15/Seite über 8 Wochen.'],
+    warum:['Hamstring injuries -51%, groin problems -41% — against the stop-and-slide loads.','Hamstring-Verletzungen -51 %, Leistenprobleme -41 % — gegen die Stopp- und Rutschlasten.'],
+    q:'van Dyk 2019; Harøy 2019, Br J Sports Med'},
+   {n:['Flexibility','Beweglichkeit'],
+    was:['Dynamic before play; static 2-3x/week ~60 s per muscle (hip flexors, chest, posterior shoulder capsule).','Dynamisch vor dem Spiel, statisch 2-3x/Woche ~60 s je Muskel (Hüftbeuger, Brust, hintere Schulterkapsel).'],
+    warum:['Regular stretching demonstrably improves range of motion.','Regelmäßiges Dehnen verbessert den Bewegungsumfang nachweislich.'],
+    q:'Garber et al. 2011, MSSE (ACSM Position Stand)'}
+  ],
+  schw:[
+   {key:'schnelligkeit',l:['Speed & first step','Antritt & Schnelligkeit'],it:{l:['Focus: split-step sprints','Schwerpunkt: Split-Step-Antritte'],v:'+6 x 10 m',k:['Start from the split step','Aus dem Split-Step starten']}},
+   {key:'sprungkraft',l:['Explosiveness','Explosivität'],it:{l:['Focus: lateral skater jumps','Schwerpunkt: Skater-Sprünge'],v:['+3 x 6/side','+3 x 6/Seite'],k:['Stick each landing','Jede Landung stabil']}},
+   {key:'ausdauer',l:['Match endurance','Match-Ausdauer'],it:{l:['Focus: 5-s shuttle set','Schwerpunkt: 5-s-Shuttle-Serie'],v:'+10 x 5 s',k:['20 s rest between reps','20 s Pause dazwischen']}},
+   {key:'schlagkraft',l:['Serve & stroke power','Aufschlag- & Schlagkraft'],it:{l:['Focus: med-ball serve throws','Schwerpunkt: Aufschlag-Würfe'],v:'+3 x 6',k:['From serve stance, full chain','Aus der Aufschlagposition, ganze Kette']}},
+   {key:'rumpfstabilitaet',l:['Core stability','Rumpfstabilität'],it:{l:['Focus: Pallof press','Schwerpunkt: Pallof Press'],v:['+3 x 10/side','+3 x 10/Seite'],k:['Resist the rotation','Gegen die Drehung halten']}},
+   {key:'beweglichkeit',l:['Mobility','Beweglichkeit'],it:{l:['Focus: sleeper stretch','Schwerpunkt: Sleeper Stretch'],v:'+3 x 30 s',k:['Racquet-arm side, gentle','Schlagarmseite, sanft']}},
+   {key:'verletzungsanfaelligkeit',l:['Injury resilience','Verletzungsschutz'],it:{l:['Focus: OSTRC shoulder block','Schwerpunkt: OSTRC-Schulterblock'],v:['+10 min','+10 Min'],k:['External rotation eccentric','Außenrotation exzentrisch betont']}}
+  ],
+  /* Leistungstest-Woche (12): messen statt trainieren -- gleiche
+     Bedingungen, Werte ins Tagebuch, Vergleich beim naechsten Block. */
+  test:{t:['Performance test','Leistungstest'],s:['Sprint / Jump / Interval','Sprint / Sprung / Intervall'],
+   it:['dynWarm',{l:['Sprint test','Sprint-Test'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['20-30 m, full recovery — note the time in the log','20-30 m, volle Pause — Zeit im Tagebuch notieren']},{l:['Jump-height test (CMJ)','Sprunghöhen-Test (CMJ)'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['Hands on hips, note the height or reach mark','Hände an die Hüfte, Höhe oder Wandmarke notieren']},{l:['Interval check','Intervall-Kontrolle'],v:['1 x 4 min','1 x 4 Min'],k:['Same course as last time — note the distance','Gleiche Strecke wie beim letzten Mal — Distanz notieren']}]},
+  prev:{p:['OSTRC shoulder block 3x/week, Nordic hamstring, Copenhagen adduction, lateral landing technique plus single-leg balance — strength work is the strongest lever: acute injuries to under a third, overuse roughly halved.','OSTRC-Schulterblock 3x/Woche, Nordic Hamstring, Copenhagen Adduction, laterale Landetechnik plus Einbein-Balance — Krafttraining ist der stärkste Hebel: akute Verletzungen auf unter ein Drittel, Überlastung etwa halbiert.'],q:'Andersson 2017; Lauersen 2014 — Br J Sports Med'},
+  ern:{choT:6,choR:3.5,pro:1.8,
+   note:['Match length is unpredictable: 30-60 g carbs + 400-800 ml fluids with sodium per hour in matches over 90 min; after tournament matches 1-1.2 g/kg/h plus 20-25 g protein (Thomas 2016). Spread protein over ~4 servings of 0.4 g/kg (Morton 2018).',
+         'Matchdauer ist unplanbar: ab 90 Min 30-60 g Kohlenhydrate und 400-800 ml Flüssigkeit mit Natrium pro Stunde; an Turniertagen direkt nach dem Match 1-1,2 g/kg/h plus 20-25 g Protein (Thomas 2016). Protein über ~4 Portionen à 0,4 g/kg (Morton 2018).'],
+   supp:[[['Creatine monohydrate','Kreatin-Monohydrat'],['3-5 g daily','3-5 g täglich'],'Kreider 2017 (ISSN)'],[['Caffeine','Koffein'],['3-6 mg/kg, 45-60 min before the match','3-6 mg/kg, 45-60 Min vor dem Match'],'Guest 2021 (ISSN); Maughan 2018 (IOC)'],[['Sodium/electrolytes','Natrium/Elektrolyte'],['300-600 mg/h in hot matches','300-600 mg/h bei Hitze-Matches'],'Thomas 2016 (ACSM)']]}
+ },
+ handball:{n:['Handball','Handball'],
+  prof:['Handball is a contact sport built on sprints, jump throws, cuts and duels — with throwing-shoulder load on top. The plan develops leg power, throwing velocity, repeated-sprint capacity and the proven shoulder, knee and groin prevention blocks.',
+        'Handball ist ein Kontaktsport aus Sprints, Sprungwürfen, Richtungswechseln und Zweikämpfen — plus der Dauerlast auf der Wurfschulter. Der Plan entwickelt Beinpower, Wurfgeschwindigkeit, wiederholte Sprintfähigkeit und die belegten Präventionsblöcke für Schulter, Knie und Leiste.'],
+  sess:{
+   pull:{t:['Jump + speed','Sprung + Tempo'],s:['Sprints / Jumps / Core','Sprints / Sprünge / Rumpf'],it:['nmWarm','antritt','cmj','huerden','stuetz']},
+   push:{t:['Strength','Kraft'],s:['Squat / Press + row / Hamstrings','Beugen / Drücken + Ziehen / Beinrückseite'],it:['dynWarm','kniebeuge','bankRudern','nordic','cph']},
+   legs:{t:['Throw + engine','Wurf + Motor'],s:['Med-ball / Shoulder / Intervals','Medizinball / Schulter / Intervalle'],it:['dynWarm','mbSlam','ostrc','int44','pallof']},
+   upA:{t:['Jump power A','Sprungkraft A'],s:['Jumps / Landings / RSA','Sprünge / Landungen / RSA'],it:['nmWarm','lande','dropJump','rsa','deadBug']},
+   lowA:{t:['Strength A','Kraft A'],s:['Squat / Hip / Groin','Beugen / Hüfte / Leiste'],it:['dynWarm','kniebeuge','hipThrust','cph','wadeExz']},
+   upB:{t:['Throw power','Wurfkraft'],s:['Med-ball / Press + row / Core','Medizinball / Drücken + Ziehen / Rumpf'],it:['dynWarm','mbRot','mbSlam','bankRudern','stuetz']},
+   lowB:{t:['Prevention','Prävention'],s:['Balance / Landings / Shoulder','Balance / Landungen / Schulter'],it:['nmWarm','balance','lande','ostrc','nordic']}
+  },
+  strat:[
+   {n:['Maximal leg strength','Maximalkraft Unterkörper'],
+    was:['Squat, hip thrust, Romanian deadlift: 3-5x3-6 at 80-90%, 2x/week; progression via load.','Kniebeuge, Hip Thrust, RDL 3-5x3-6 bei 80-90 %, 2x/Woche; Progression über die Last.'],
+    warum:['Leg-strength gains transfer to sprint performance in a dose-dependent way.','Beinkraftzuwächse übertragen sich dosisabhängig auf die Sprintleistung.'],
+    q:'Seitz et al. 2014, Sports Med (Meta-Analyse)'},
+   {n:['Plyometrics + COD','Plyometrie + COD'],
+    was:['2x/week 60-100 contacts: CMJ, drop jumps, hurdles, bounds plus pro-agility/T-test drills.','2x/Woche 60-100 Kontakte: CMJ, Drop Jumps, Hürden, Bounds plus Pro-Agility/T-Test-Drills.'],
+    warum:['Jump height +4-9%, faster direction changes — jump throw, defence, fast break.','Sprunghöhe +4-9 %, schnellere Richtungswechsel — Sprungwurf, Abwehr, Tempogegenstoß.'],
+    q:'Markovic 2007; Asadi et al. 2016 (Meta-Analysen)'},
+   {n:'HIIT',
+    was:['4x4 min at 90-95% HRmax or 10-20-30 blocks, 2x/week.','4x4 Min bei 90-95 % HFmax oder 10-20-30-Blöcke, 2x/Woche.'],
+    warum:['VO2max +11%, more distance covered and more ball actions in matches.','VO2max +11 %, mehr Laufdistanz und Ballaktionen im Spiel.'],
+    q:'Helgerud et al. 2001, MSSE; Gunnarsson & Bangsbo 2012, J Appl Physiol'},
+   {n:['OSTRC shoulder programme','OSTRC-Schulterprogramm'],
+    was:['3x/week ~10 min in the warm-up: external rotation, scapular control, posterior capsule, kinetic chain.','3x/Woche ~10 Min im Aufwärmen: Außenrotation, Skapula-Kontrolle, hintere Kapsel, kinetische Kette.'],
+    warum:['Cut shoulder problems in elite handballers by 28%.','Senkte Schulterprobleme bei Elite-Handballern um 28 %.'],
+    q:'Andersson et al. 2017, Br J Sports Med (Cluster-RCT, 660 Spieler)'},
+   {n:['Upper-body strength + throwing','Oberkörperkraft + Wurf'],
+    was:['2x/week bench press 3-4x4-6, pulling at least 1:1, plus ballistic med-ball throws 3-4x6-8.','2x/Woche Bankdrücken 3-4x4-6, Zug mindestens 1:1, plus ballistische Medizinballwürfe 3-4x6-8.'],
+    warum:['Raised bench-press and ball-throwing velocity significantly in professionals.','Steigerte bei Profis Bankdrück- und Ballwurfgeschwindigkeit signifikant.'],
+    q:'Marques & González-Badillo 2006, JSCR'},
+   {n:['Core stability','Rumpfstabilität'],
+    was:['3x/week 15-20 min: plank variations, Pallof, single-leg RDL, sling exercises.','3x/Woche 15-20 Min: Stütz-Varianten, Pallof, einbeiniges RDL, Sling-Übungen.'],
+    warum:['Sling training raised throwing velocity by ~4.9%.','Sling-Training erhöhte die Wurfgeschwindigkeit um ~4,9 %.'],
+    q:'Saeterbakken et al. 2011, JSCR'},
+   {n:'Nordic + Copenhagen',
+    was:['Nordic up to 3x8-10 over 10 weeks; Copenhagen in 3 stages, pre-season 3x/week, in season 1x.','Nordic bis 3x8-10 über 10 Wochen; Copenhagen 3 Stufen, Vorsaison 3x/Woche, Saison 1x.'],
+    warum:['Hamstring -51%, groin problems -41%.','Hamstring -51 %, Leistenprobleme -41 %.'],
+    q:'van Dyk 2019; Harøy 2019, Br J Sports Med'},
+   {n:['Neuromuscular warm-up','Neuromuskuläres Aufwärmen'],
+    was:['15 min, at least 2-3x/week: balance, landing technique, knee control, partner drills.','15 Min, mind. 2-3x/Woche: Balance, Landetechnik, Beinachsenkontrolle, Partnerübungen.'],
+    warum:['Halved acute knee and ankle injuries in youth handballers.','Halbierte akute Knie- und Sprunggelenksverletzungen bei Jugendlichen.'],
+    q:'Olsen et al. 2005, BMJ (Cluster-RCT, 1837 Spieler)'}
+  ],
+  schw:[
+   {key:'schnelligkeit',l:['Speed','Schnelligkeit'],it:{l:['Focus: accelerations','Schwerpunkt: Antritte'],v:'+4 x 15 m',k:['Full rest, maximal intent','Volle Pause, maximale Absicht']}},
+   {key:'sprungkraft',l:['Jumping power','Sprungkraft'],it:{l:['Focus: hurdle jumps','Schwerpunkt: Hürdensprünge'],v:'+3 x 6',k:['Quiet, stable landings','Leise, stabile Landungen']}},
+   {key:'ausdauer',l:['Endurance','Ausdauer'],it:{l:['Focus: 10-20-30 block','Schwerpunkt: 10-20-30-Block'],v:['+1 x 5 min','+1 x 5 Min'],k:['30 easy, 20 brisk, 10 near-max','30 locker, 20 zügig, 10 fast maximal']}},
+   {key:'wendigkeit',l:['Agility','Wendigkeit'],it:{l:['Focus: pro-agility drill','Schwerpunkt: Pro-Agility-Drill'],v:['+4 runs','+4 Läufe'],k:['Brake low, push hard','Tief abbremsen, hart abdrücken']}},
+   {key:'wurfkraft',l:['Throwing power','Wurfkraft'],it:{l:['Focus: med-ball overhead throws','Schwerpunkt: Überkopf-Würfe'],v:'+3 x 6',k:['Whole chain, maximal intent','Ganze Kette, maximale Absicht']}},
+   {key:'rumpfstabilitaet',l:['Core stability','Rumpfstabilität'],it:{l:['Focus: side planks','Schwerpunkt: Seitstütz'],v:['+3 x 30 s/side','+3 x 30 s/Seite'],k:['Hips stacked, one line','Hüfte hoch, eine Linie']}},
+   {key:'verletzungsanfaelligkeit',l:['Injury resilience','Verletzungsschutz'],it:{l:['Focus: OSTRC shoulder block','Schwerpunkt: OSTRC-Schulterblock'],v:['+10 min','+10 Min'],k:['External rotation eccentric','Außenrotation exzentrisch betont']}}
+  ],
+  /* Leistungstest-Woche (12): messen statt trainieren -- gleiche
+     Bedingungen, Werte ins Tagebuch, Vergleich beim naechsten Block. */
+  test:{t:['Performance test','Leistungstest'],s:['Sprint / Jump / Interval','Sprint / Sprung / Intervall'],
+   it:['dynWarm',{l:['Sprint test','Sprint-Test'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['20-30 m, full recovery — note the time in the log','20-30 m, volle Pause — Zeit im Tagebuch notieren']},{l:['Jump-height test (CMJ)','Sprunghöhen-Test (CMJ)'],v:['3 attempts, best counts','3 Versuche, bester zählt'],k:['Hands on hips, note the height or reach mark','Hände an die Hüfte, Höhe oder Wandmarke notieren']},{l:['Interval check','Intervall-Kontrolle'],v:['1 x 4 min','1 x 4 Min'],k:['Same course as last time — note the distance','Gleiche Strecke wie beim letzten Mal — Distanz notieren']}]},
+  prev:{p:['Neuromuscular warm-up (acute knee/ankle injuries ~-50%), OSTRC shoulder module 3x/week (-28% shoulder problems), Nordic + Copenhagen as a weekly routine; female players: additional ACL landing and cutting drills.','Neuromuskuläres Aufwärmen (akute Knie-/Sprunggelenksverletzungen ~-50 %), OSTRC-Schultermodul 3x/Woche (-28 % Schulterprobleme), Nordic + Copenhagen als Wochenroutine; Spielerinnen: zusätzliche VKB-Lande- und Cutting-Schulung.'],q:'Olsen 2005, BMJ; Myklebust 2003; Andersson 2017, Br J Sports Med'},
+  ern:{choT:6,choR:4,pro:1.8,
+   note:['Indoor sport: check vitamin D in winter (Maughan 2018, IOC); 1-4 g/kg carbs before games, 30-60 g/h during, 1-1.2 g/kg/h in the first 4 h after at tournaments (Thomas 2016). Spread protein over ~4 servings of 0.4 g/kg, one after training (Morton 2018).',
+         'Hallensport: Vitamin-D-Status im Winter prüfen (Maughan 2018). Vor dem Spiel 1-4 g/kg Kohlenhydrate, im Spiel 30-60 g/h, bei Turnieren 1-1,2 g/kg/h in den ersten 4 h danach (Thomas 2016). Protein auf ~4 Mahlzeiten à 0,4 g/kg, eine nach dem Training (Morton 2018).'],
+   supp:[[['Creatine monohydrate','Kreatin-Monohydrat'],['3-5 g daily','3-5 g täglich'],'Kreider 2017 (ISSN)'],[['Caffeine','Koffein'],['3-6 mg/kg, 45-60 min before','3-6 mg/kg, 45-60 Min vorher'],'Guest 2021 (ISSN)'],[['Beta-alanine','Beta-Alanin'],['3.2-6.4 g/day for 4+ weeks','3,2-6,4 g/Tag über 4+ Wochen'],'Trexler 2015 (ISSN)']]}
+ },
+ laufen:{n:['Running','Laufen'],
+  prof:['Distance running is decided by VO2max, lactate threshold and above all running economy — while half of all injuries are overload damage. The plan pairs a polarised running structure with heavy strength work, plyometrics and foot-core prevention.',
+        'Ausdauerlauf entscheidet sich über VO2max, Schwellenleistung und vor allem Laufökonomie — während die Hälfte aller Verletzungen Überlastungsschäden sind. Der Plan kombiniert eine polarisierte Laufstruktur mit schwerem Krafttraining, Plyometrie und Fuß-Prävention.'],
+  sess:{
+   pull:{t:['Key session: VO2max','Schlüssel: VO2max'],s:['Drills / 4x4 / Core / Cool-down','Lauf-ABC / 4x4 / Rumpf / Auslaufen'],it:['laufAbc','int44','stuetz','auslauf']},
+   push:{t:['Strength + reactive','Kraft + Reaktiv'],s:['Squat / Hinge / Calf / Jumps','Beugen / Hüfte / Wade / Sprünge'],it:['dynWarm','kniebeuge','rdl','wadeExz','dropJump']},
+   legs:{t:['10-20-30 + foot','10-20-30 + Fuß'],s:['Speed blocks / Foot core','Tempo-Blöcke / Fußmuskulatur'],it:['laufAbc','zehn2030','shortFoot','balance','auslauf']},
+   upA:{t:['Key session: VO2max','Schlüssel: VO2max'],s:['Drills / 4x4 / Core / Cool-down','Lauf-ABC / 4x4 / Rumpf / Auslaufen'],it:['laufAbc','int44','deadBug','auslauf']},
+   lowA:{t:['Strength A','Kraft A'],s:['Squat / Split / Calf','Beugen / Split / Wade'],it:['dynWarm','kniebeuge','splitSq','wadeExz','seilspringen']},
+   upB:{t:['Speed: 10-20-30','Tempo: 10-20-30'],s:['Speed blocks / Strides','Tempo-Blöcke / Steigerungen'],it:['laufAbc','zehn2030','auslauf']},
+   lowB:{t:['Foot + hip care','Fuß + Hüfte'],s:['Foot core / Step-downs / Core','Fußmuskulatur / Step-Downs / Rumpf'],it:['shortFoot','balance','stepDown','wadeExz','stuetz']}
+  },
+  strat:[
+   {n:['Heavy strength training','Schweres Krafttraining'],
+    was:['2x/week year-round: squat/leg press 4x4-6 at 80-90%, RDL, lunges, heavy calf raises; no muscular-endurance sets.','2x/Woche ganzjährig: Kniebeuge/Beinpresse 4x4-6 bei 80-90 %, RDL, Ausfallschritte, schweres Wadenheben; keine Muskelausdauer-Sätze.'],
+    warum:['Improves running economy by 2-4% without weight gain, plus time-trial and finishing speed.','Verbessert die Laufökonomie um 2-4 % ohne Gewichtszunahme, plus Zeitfahr- und Endspurtleistung.'],
+    q:'Balsalobre-Fernández et al. 2016, JSCR; Blagrove et al. 2018, Sports Med'},
+   {n:['Plyometrics & bounding','Plyometrie & Sprungläufe'],
+    was:['2x/week before the run: rope skipping, hurdle jumps, drop jumps (short contact), bounding; build over 6-9 weeks.','2x/Woche vor dem Lauf: Seilspringen, Hürdensprünge, Drop Jumps (Kontakt kurz), Bounding; über 6-9 Wochen steigern.'],
+    warum:['Improved running economy and 3-km race time significantly (muscle-tendon stiffness).','Verbesserte Laufökonomie und 3-km-Zeit signifikant (Muskel-Sehnen-Steifigkeit).'],
+    q:'Spurrs et al. 2003, Eur J Appl Physiol (RCT)'},
+   {n:['4x4 intervals','4x4-Intervalle'],
+    was:['1-2x/week 4x4 min at 90-95% HRmax, 3 min jog recovery.','1-2x/Woche 4x4 Min bei 90-95 % HFmax, 3 Min Trabpause.'],
+    warum:['Raises VO2max more than volume-matched steady or threshold running.','Steigert die VO2max stärker als umfangsgleiches Dauerlauf- oder Schwellentraining.'],
+    q:'Helgerud et al. 2007, MSSE (RCT); Milanović et al. 2015, Sports Med'},
+   {n:['10-20-30 runs','10-20-30-Läufe'],
+    was:['2-3x/week instead of a steady run: 3-4 blocks of 5 min (30 s easy, 20 s brisk, 10 s near-max), 2 min rest.','2-3x/Woche statt eines Dauerlaufs: 3-4 Blöcke à 5 Min (30 s locker, 20 s zügig, 10 s fast maximal), 2 Min Pause.'],
+    warum:['Despite ~50% less volume: VO2max +4%, faster 1500-m and 5-km times.','Trotz ~50 % weniger Umfang: VO2max +4 %, schnellere 1500-m- und 5-km-Zeiten.'],
+    q:'Gunnarsson & Bangsbo 2012, J Appl Physiol'},
+   {n:['Polarised distribution','Polarisierte Verteilung'],
+    was:['75-80% of volume easy below the first threshold, 15-20% hard; 2 key sessions plus easy runs, hard days never back-to-back.','75-80 % des Umfangs locker unter der ersten Schwelle, 15-20 % hart; 2 Schlüsseleinheiten plus lockere Läufe, harte Tage nie hintereinander.'],
+    warum:['Larger VO2peak gains than threshold or HIIT-only training.','Größere VO2peak-Zuwächse als Schwellen- oder reines HIIT-Training.'],
+    q:'Stöggl & Sperlich 2014, Front Physiol (RCT)'},
+   {n:['Cadence optimisation','Kadenz-Optimierung'],
+    was:['Raise step rate by 5-10% (usually towards 170-180/min): 4-6x2 min with a metronome per run, automate over 4-6 weeks.','Schrittfrequenz um 5-10 % anheben (Ziel meist 170-180/min): 4-6x2 Min mit Metronom je Lauf, 4-6 Wochen automatisieren.'],
+    warum:['Clearly reduces joint loads at knee and hip and braking forces.','Reduziert Gelenklasten an Knie und Hüfte sowie Bremskräfte deutlich.'],
+    q:'Heiderscheit et al. 2011, MSSE'},
+   {n:['Foot-core training','Foot-Core-Training'],
+    was:['3x/week 15-20 min: short-foot, toe work, single-leg stance on an unstable surface, eccentric calf raises; build for 8 weeks.','3x/Woche 15-20 Min: Short-Foot, Zehengreifen, Einbeinstand instabil, exzentrisches Wadenheben; 8 Wochen aufbauen.'],
+    warum:['Cut running-injury risk over 12 months by a factor of 2.4.','Senkte das Laufverletzungsrisiko über 12 Monate um den Faktor 2,4.'],
+    q:'Taddei et al. 2020, Am J Sports Med (RCT)'},
+   {n:['Core circuit','Rumpfkraft-Zirkel'],
+    was:['3x/week ~20 min: plank variations, bird dog, dead bug, single-leg hip raises; progress via leverage.','3x/Woche ~20 Min: Stütz-Varianten, Bird-Dog, Dead Bug, einbeiniges Hüftheben; Progression über Hebel.'],
+    warum:['Improved core strength, balance and running economy significantly.','Verbesserte Rumpfkraft, Balance und Laufökonomie signifikant.'],
+    q:'Hung et al. 2019, PLoS ONE (RCT)'}
+  ],
+  schw:[
+   {key:'grundlagenausdauer',l:['Endurance','Ausdauer'],it:{l:['Focus: easy volume','Schwerpunkt: Lockerer Umfang'],v:['+15-20 min easy','+15-20 Min locker'],k:['Conversational pace only','Nur Gesprächstempo']}},
+   {key:'tempohaerte',l:['Speed','Tempohärte'],it:{l:['Focus: 10-20-30 block','Schwerpunkt: 10-20-30-Block'],v:['+1 x 5 min','+1 x 5 Min'],k:['10-s surges near-max','10-s-Spitzen fast maximal']}},
+   {key:'laufoekonomie',l:['Running economy','Laufökonomie'],it:{l:['Focus: cadence intervals','Schwerpunkt: Kadenz-Intervalle'],v:['+4 x 2 min','+4 x 2 Min'],k:['5-10% above usual cadence','5-10 % über der gewohnten Frequenz']}},
+   {key:'reaktivkraft',l:['Reactive strength','Reaktivkraft'],it:{l:['Focus: rope skipping','Schwerpunkt: Seilspringen'],v:'+3 x 30 s',k:['Stiff ankles, quiet contacts','Feste Sprunggelenke, leise Kontakte']}},
+   {key:'rumpfstabilitaet',l:['Core stability','Rumpfstabilität'],it:{l:['Focus: bird dog + dead bug','Schwerpunkt: Bird-Dog + Dead Bug'],v:['+3 x 10/side','+3 x 10/Seite'],k:['Slow, controlled reps','Langsam und kontrolliert']}},
+   {key:'verletzungsanfaelligkeit',l:['Injury resilience','Verletzungsschutz'],it:{l:['Focus: foot-core block','Schwerpunkt: Foot-Core-Block'],v:['+10 min','+10 Min'],k:['Short-foot, toe work, balance','Short-Foot, Zehenarbeit, Balance']}}
+  ],
+  test:{t:['Performance test','Leistungstest'],s:['3-km time trial','3-km-Zeitlauf'],
+   it:['laufAbc',{l:['3-km time trial','3-km-Zeitlauf'],v:['all-out, even pacing','voll, gleichmäßig eingeteilt'],k:['Same course, rested — note the time in the log','Gleiche Strecke, ausgeruht — Zeit im Tagebuch notieren']},'auslauf']},
+  prev:{p:['Foot-core programme 3x/week (injury risk 2.4x lower), eccentric calf raises, hip and knee control (step-downs), build volume moderately, hard days never back-to-back; never drop the strength work entirely.','Foot-Core-Programm 3x/Woche (Verletzungsrisiko Faktor 2,4 niedriger), exzentrisches Wadenheben, Hüft- und Kniekontrolle (Step-Downs), Umfang nur moderat steigern, harte Tage nie hintereinander; Krafttraining nie ganz streichen.'],q:'Taddei et al. 2020, Am J Sports Med; Lauersen et al. 2014, Br J Sports Med'},
+  ern:{choT:7,choR:4,pro:1.8,
+   note:['Periodise carbs by volume: 5-7 g/kg at ~1 h/day, 6-10 g/kg at 1-3 h/day; 30-60 g/h beyond 75 min (Thomas 2016). Runners are a risk group for low energy availability (RED-S) — warning signs: cycle disruption, stress fractures, stalling (Mountjoy 2018, IOC). Check ferritin regularly (Sim 2019). Spread protein over 4-5 servings, one before sleep (Morton 2018).',
+         'Kohlenhydrate nach Umfang: 5-7 g/kg bei ~1 h/Tag, 6-10 g/kg bei 1-3 h/Tag; ab 75 Min zusätzlich 30-60 g/h (Thomas 2016). Läufer sind Risikogruppe für zu niedrige Energieverfügbarkeit (RED-S) — Warnzeichen: Zyklusstörungen, Ermüdungsbrüche, Stagnation (Mountjoy 2018, IOC). Eisenstatus (Ferritin) regelmäßig prüfen (Sim 2019). Protein auf 4-5 Portionen verteilen, eine vor dem Schlafen (Morton 2018).'],
+   supp:[[['Caffeine','Koffein'],['3-6 mg/kg, 45-60 min before key sessions','3-6 mg/kg, 45-60 Min vor Schlüsseleinheiten'],'Maughan 2018 (IOC)'],[['Nitrate (beetroot)','Nitrat (Rote Bete)'],['400-800 mg, 2-3 h before','400-800 mg, 2-3 h vorher'],'Maughan 2018 (IOC)'],[['Creatine monohydrate','Kreatin-Monohydrat'],['3-5 g/day in strength blocks','3-5 g/Tag in Kraftblöcken'],'Kreider 2017 (ISSN)']]}
+ }
+};
+/* Aktive Sportart, oder null wenn Calisthenics (= Bestandsverhalten). */
+function sportAkt(){var s=SPORT[cfg.sport];return (cfg.sport&&cfg.sport!=='cali'&&s)?s:null;}
+/* Der Protein-Referenzfaktor an EINER Stelle -- calc(), Coach-Puls,
+   snapState und Abzeichen rechnen sonst mit driftenden Kopien derselben
+   Zahl. */
+function proFaktor(){var s=sportAkt();return s?s.ern.pro:1.9;}
+function spTxt(x){return Array.isArray(x)?x[cfg.lang==='de'?1:0]:x;}
+/* Ein Item aus der Bausteintabelle (oder ein Inline-Item) in die Form
+   aufloesen, die renderDay/Runner erwarten: id:null wie die Skill-Uebung. */
+function spItem(x){
+  var b=typeof x==='string'?AIT[x]:x;
+  if(!b)return null;
+  return{id:null,l:spTxt(b.l),k:b.k?spTxt(b.k):undefined,v:spTxt(b.v),w:b.w};
+}
 /* ---------- Uebungskatalog ------------------------------------------------
    [Name, Stufe 0-5, Equipment, Schonungs-Flags, Cue]
    Equipment: ''=nichts noetig, wl=Wand, tb=Tisch, ch=Stuhl/Erhoehung,
@@ -4796,7 +5223,11 @@ function applyProfile(){
 function plan(d){
   var w=wkOf(d);
   if(w<1)return{kind:'pre',title:cfg.lang==='de'?'Noch nicht gestartet':'Not started yet',sub:'',note:(cfg.lang==='de'?'Programm beginnt ':'Programme begins ')+STD.toLocaleDateString(),items:[],w:w};
-  if(w>12)return{kind:'post',title:cfg.lang==='de'?'Block abgeschlossen':'Block complete',sub:'',note:cfg.lang==='de'?'Nochmal laufen lassen, von deinen neuen Stufen aus.':'Run it again from your new steps.',items:[],w:w};
+  /* v31: 'von deinen neuen Stufen aus' meint die Calisthenics-Leitern --
+     im Sportmodus misst der Leistungstest den Fortschritt. */
+  if(w>12)return{kind:'post',title:cfg.lang==='de'?'Block abgeschlossen':'Block complete',sub:'',note:sportAkt()
+    ?(cfg.lang==='de'?'Nochmal laufen lassen — der nächste Leistungstest misst gegen diese Runde.':'Run it again — the next performance test measures against this round.')
+    :(cfg.lang==='de'?'Nochmal laufen lassen, von deinen neuen Stufen aus.':'Run it again from your new steps.'),items:[],w:w};
   /* Der Tag im Rhythmus, gezaehlt ab dem Start -- nicht der Kalenderwochentag.
 
      Vorher lagen die Einheiten fest auf Montag, Mittwoch, Freitag. Wer
@@ -4809,7 +5240,7 @@ function plan(d){
   var wd=((dIdx(d)%7)+7)%7,ph=phase(w);
   var TR=TRACKS[cfg.track]||TRACKS['3'];
   var S=SESSALL;
-  var key=null,ftype=null;
+  var key=null,ftype=null,ersterTrain=false;
   var td=tdaysValid();
   if(td){
     /* Der Nutzer hat echte Wochentage gewaehlt (v17): Einheiten liegen auf
@@ -4820,7 +5251,7 @@ function plan(d){
     var w7=(d.getDay()+6)%7;
     var i=td.indexOf(w7);
     var order=TR.order;
-    if(i>=0){var ok=order[i];if(ok)key=ok;else ftype='easy';}
+    if(i>=0){var ok=order[i];if(ok){key=ok;if(i===0)ersterTrain=true;}else ftype='easy';}
     else{
       var free=[0,1,2,3,4,5,6].filter(function(x){return td.indexOf(x)<0;});
       var fi=free.indexOf(w7);
@@ -4834,14 +5265,60 @@ function plan(d){
        TR.rhythm ist der feste 7-Platz-Wochenplan der Frequenz -- fuer 3/4
        bit-identisch zum alten map3/map4 nachgebaut. */
     var slot=TR.rhythm[wd];
-    if(slot.k)key=slot.k;else ftype=slot.f;
+    if(slot.k){key=slot.k;
+      var f1=-1;for(var q7=0;q7<7;q7++)if(TR.rhythm[q7].k){f1=q7;break;}
+      if(wd===f1)ersterTrain=true;
+    }else ftype=slot.f;
   }
-  if(key)return{kind:'train',title:sessDe(S[key].title),sub:sessDe(S[key].sub),s:key,ph:ph,w:w};
+  if(key){
+    var spp=sportAkt();
+    if(spp&&spp.sess[key]){
+      /* Titel/Unterzeile muessen dieselbe Sprache sprechen wie der Inhalt,
+         den sessOf() fuer diese Woche liefert -- sonst hiesse die
+         Leistungstest-Woche im Kopf weiter 'Tempo'. */
+      if(w===12&&spp.test){
+        /* Getestet wird EINMAL, am ersten Trainingstag der Woche -- der
+           Rest der Testwoche laeuft locker mit halben Umfaengen. Taeglich
+           ein Maximaltest (beim Laufen: taeglich 3 km all-out) waere das
+           Gegenteil von 'ausgeruht antreten'. */
+        if(ersterTrain)return{kind:'train',title:spTxt(spp.test.t),sub:spTxt(spp.test.s),s:key,ph:ph,w:w,w12test:true};
+        return{kind:'train',title:spTxt(spp.sess[key].t),
+          sub:(cfg.lang==='de'?'Testwoche — locker halten':'Test week — keep it easy'),
+          s:key,ph:ph,w:w,w12locker:true};
+      }
+      return{kind:'train',title:spTxt(spp.sess[key].t),
+        sub:(w===11
+          ?(cfg.lang==='de'?'Deload — halbe Umfänge':'Deload — half volumes')
+          :(profile&&profile.exp==='0'&&blockNo===1&&w<=2)
+          ?(cfg.lang==='de'?'Einstieg — Technik zuerst, halbe Umfänge':'Ramp-in — technique first, half volumes')
+          :spTxt(spp.sess[key].s)),
+        s:key,ph:ph,w:w};
+    }
+    return{kind:'train',title:sessDe(S[key].title),sub:sessDe(S[key].sub),s:key,ph:ph,w:w};
+  }
   var easy=cfg.lang==='de'?'Lockerer Tag':'Easy day',opt=cfg.lang==='de'?'Optional':'Optional',rest=cfg.lang==='de'?'Ruhetag':'Rest';
-  if(ftype==='easy')return{kind:'move',title:easy,sub:(cfg.lang==='de'?'Gehen und Beweglichkeit':'Walk and mobility'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30 Min'},{l:(cfg.lang==='de'?'Handgelenke':'Wrist prep'),v:'2 min'},{l:'Mobility set',v:'8 min'}],note:cfg.lang==='de'?'Danach solltest du dich besser fühlen als vorher.':'Finish this feeling better than you started.'};
-  if(ftype==='opt')return{kind:'move',title:opt,sub:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),v:'10 Min'},{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30-45 Min'}],note:cfg.lang==='de'?'Ohne schlechtes Gewissen streichen, wenn die Woche hart war.':'Skip it guilt-free if the week was heavy.'};
+  /* v31: Auch die freien Tage sprechen die Sportart -- 'Handgelenke' und
+     'Skill-Uebung' sind Calisthenics-Vokabular; ein Fussballer bekommt
+     dort Beweglichkeit fuer Huefte/Sprunggelenk bzw. lockere Ball- und
+     Technikarbeit. */
+  var spF=sportAkt();
+  var mn=cfg.lang==='de'?'Min':'min';
+  if(ftype==='easy')return{kind:'move',title:easy,sub:(cfg.lang==='de'?'Gehen und Beweglichkeit':'Walk and mobility'),ph:ph,w:w,items:spF
+    ?[{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30 '+mn},{l:(cfg.lang==='de'?'Hüfte und Sprunggelenke mobilisieren':'Hip and ankle mobility'),v:'8 '+mn},{l:(cfg.lang==='de'?'Lockeres Dehnen':'Easy stretching'),v:'5 '+mn}]
+    :[{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30 Min'},{l:(cfg.lang==='de'?'Handgelenke':'Wrist prep'),v:'2 min'},{l:'Mobility set',v:'8 min'}],note:cfg.lang==='de'?'Danach solltest du dich besser fühlen als vorher.':'Finish this feeling better than you started.'};
+  if(ftype==='opt')return{kind:'move',title:opt,sub:spF
+    ?(cfg.lang==='de'?'Technik, locker':'Light technique work')
+    :(cfg.lang==='de'?'Skill-Übung':'Skill practice'),ph:ph,w:w,items:spF
+    ?[{l:(cfg.lang==='de'?'Technik- oder Ballarbeit, locker':'Light technique or ball work'),v:'15-20 '+mn},{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30-45 '+mn}]
+    :[{l:(cfg.lang==='de'?'Skill-Übung':'Skill practice'),v:'10 Min'},{l:(cfg.lang==='de'?'Spazieren':'Walk'),v:'30-45 Min'}],note:cfg.lang==='de'?'Ohne schlechtes Gewissen streichen, wenn die Woche hart war.':'Skip it guilt-free if the week was heavy.'};
   if(ftype==='rest')return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung':'Recovery'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Protein-Ziel':'Protein target'),v:(cfg.lang==='de'?'treffen':'hit it')},{l:(cfg.lang==='de'?'Schlaf':'Sleep'),v:'7-9 h'}],note:cfg.lang==='de'?'Hier entsteht der Muskel.':'This is where the muscle is built.'};
-  return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung und Rückblick':'Recovery and review'),ph:ph,w:w,items:[{l:(cfg.lang==='de'?'Wiege-Schnitt':'Weigh-in average'),v:(cfg.lang==='de'?'eintragen':'write it')},{l:(cfg.lang==='de'?'Harte Sätze zählen':'Count hard sets'),v:(cfg.lang==='de'?'je Muster':'per pattern')}],note:cfg.lang==='de'?'Zwei Minuten. Das macht Woche 12 aussagekräftig.':'Two minutes. This makes week 12 mean something.'};
+  /* v31: 'Harte Saetze je Muster zaehlen' verweist auf die Muster-Anzeige,
+     die im Sportmodus bewusst ausgeblendet ist -- dort zaehlt der
+     Wochenrueckblick stattdessen die Abhak-Quote (die Statistik-Karte
+     dafuer existiert seit dieser Version). */
+  return{kind:'rest',title:rest,sub:(cfg.lang==='de'?'Erholung und Rückblick':'Recovery and review'),ph:ph,w:w,items:spF
+    ?[{l:(cfg.lang==='de'?'Wiege-Schnitt':'Weigh-in average'),v:(cfg.lang==='de'?'eintragen':'write it')},{l:(cfg.lang==='de'?'Abhak-Quote der Woche ansehen':'Check the week’s tick rate'),v:(cfg.lang==='de'?'Fortschritt > Statistik':'Progress > Stats')}]
+    :[{l:(cfg.lang==='de'?'Wiege-Schnitt':'Weigh-in average'),v:(cfg.lang==='de'?'eintragen':'write it')},{l:(cfg.lang==='de'?'Harte Sätze zählen':'Count hard sets'),v:(cfg.lang==='de'?'je Muster':'per pattern')}],note:cfg.lang==='de'?'Zwei Minuten. Das macht Woche 12 aussagekräftig.':'Two minutes. This makes week 12 mean something.'};
 }
 /* Gewaehlte Trainingstage (Mo=0..So=6), nur gueltig wenn die Anzahl zur
    Spur passt -- sonst faellt alles auf den Start-Rhythmus zurueck. */
@@ -6754,10 +7231,17 @@ Object.keys(GROUP).forEach(function(g){GROUP[g].v.forEach(function(x){PARENT[x]=
    war der Reiter ohnehin nur ein Punkt auf einer Liste, den man nicht braucht. */
 function visGroup(g){
   var G=GROUP[g];
-  if(!G||g!=='train'||typeof testDue==='function'&&testDue())return G;
-  var i=G.v.indexOf('test');if(i<0)return G;
-  var v=G.v.slice();v.splice(i,1);
-  var l=G.l?G.l.slice():G.l;if(l)l.splice(i,1);
+  if(!G)return G;
+  var weg=[];
+  if(g==='train'&&!(typeof testDue==='function'&&testDue()))weg.push('test');
+  /* v31: Skills, Wiederholungstest und Uebungskatalog sind die
+     calisthenics-eigenen Unterbereiche (Stufen-Progression). Im Sportmodus
+     fuehren sie zu Inhalten, die dort nicht existieren -- sie gehoeren dem
+     Calisthenics-Weg und verschwinden aus der Leiste. */
+  if(g==='train'&&sportAkt()){if(weg.indexOf('test')<0)weg.push('test');weg.push('skills','catalog');}
+  if(!weg.length)return G;
+  var v=G.v.slice(),l=G.l?G.l.slice():G.l;
+  for(var i=v.length-1;i>=0;i--)if(weg.indexOf(v[i])>=0){v.splice(i,1);if(l)l.splice(i,1);}
   return{v:v,l:l};
 }
 function drawSub(g,cur){
@@ -6773,6 +7257,12 @@ function drawSub(g,cur){
 
 var fxWechselT=null;
 function show(n,fromBack){
+  /* v31: Skills/Katalog/Level-Test existieren im Sportmodus nicht -- die
+     Leiste filtert sie, aber der Ansichts-Stapel (Zuruecktaste!) und alte
+     Sprungziele kennen sie noch. Wer nach einem Sportwechsel per
+     Zuruecktaste dorthin gepoppt wuerde, landet stattdessen auf der
+     Einheiten-Ansicht -- sonst staende er auf einer Flaeche ohne Reiter. */
+  if(sportAkt()&&(n==='skills'||n==='catalog'||n==='test'))n='train';
   /* Die Bewegungsdemo aus dem Speicher nehmen, sobald man die Ansicht verlaesst.
      Eine SVG-Animation laeuft auch in einem display:none-Bereich weiter -- man
      sieht sie nicht, der Browser rechnet sie trotzdem in jedem Bild. */
@@ -6940,7 +7430,14 @@ function histBackStep(){
   var el;
   el=$('intro');
   if(el&&el.classList.contains('on')){
-    if(inIdx>0){inIdx--;renderIntro();}
+    if(inIdx>0){
+      /* Dieselbe Sprunglogik wie der Pfeil oben links (inSkip): die
+         Telefon-Zuruecktaste darf keine dritte Route auf Schritte sein,
+         die es im gewaehlten Weg nicht gibt. */
+      var schutz=0;
+      do{inIdx=Math.max(0,inIdx-1);}while(typeof inSkip==='function'&&inSkip(ISTEPS[inIdx])&&inIdx>0&&++schutz<5);
+      renderIntro();
+    }
     return true;                    /* auf Schritt 1 bleibt die Einleitung stehen */
   }
   el=$('runner');
@@ -7147,6 +7644,62 @@ function paintLog(){
 
 /* ---------- today ---------- */
 function sessOf(pl){
+  /* v31: Bei gewaehlter Sportart kommt der Einheiteninhalt aus SPORT --
+     dieselben Session-Schluessel, andere Fuellung. Die im Onboarding
+     angekreuzten Schwaechen haengen als bis zu zwei konkrete
+     Schwerpunkt-Zusatzuebungen an jeder Einheit (die Gegenmittel dazu
+     stehen mit Quelle im Plan-Bereich). */
+  var sp=sportAkt();
+  if(sp&&sp.sess[pl.s]){
+    var DE31=cfg.lang==='de';
+    /* Woche 12 ist im Sportmodus keine normale Woche: der ERSTE
+       Trainingstag ist der Leistungstest (ausgeruht, gleiche Bedingungen),
+       die restlichen Tage laufen als lockere Erhaltung mit halben
+       Umfaengen -- ein all-out-Test an jedem Wochentag (beim Laufen: taeglich
+       ein 3-km-Zeitlauf) widerspraeche dem eigenen 'ausgeruht antreten'. */
+    if(pl.w===12&&sp.test&&pl.w12test){
+      return{title:spTxt(sp.test.t),sub:spTxt(sp.test.s),items:sp.test.it.map(spItem).filter(Boolean)};
+    }
+    var ss=sp.sess[pl.s];
+    var its=ss.it.map(spItem).filter(Boolean);
+    (cfg.schwaechen||[]).slice(0,2).forEach(function(kk){
+      for(var i=0;i<sp.schw.length;i++)if(sp.schw[i].key===kk&&sp.schw[i].it){its.push(spItem(sp.schw[i].it));break;}
+    });
+    /* Deload wirkt auch auf die festen Sport-Vorgaben, nicht nur als
+       Coach-Satz: die fuehrende Satz-/Serienzahl wird halbiert (aufgerundet,
+       mindestens 1), Aufwaerm- und Auslauf-Bausteine (w-Markierung) bleiben
+       unangetastet -- ein halbiertes Aufwaermen waere das Gegenteil von
+       Erholung. Dieselbe Maschinerie traegt die Einstiegsrampe: wer im
+       Onboarding 'Fange gerade an' waehlt, faehrt die ersten zwei Wochen
+       mit halben Umfaengen -- schwere Kniebeugen und Plyometrie in voller
+       Dosis waeren fuer echte Neulinge das falsche Wochenende eins, und
+       genau das verspricht der exp-Schritt ('wie fordernd die ersten
+       Wochen dosiert werden'). */
+    /* Nur im ERSTEN Block: wer zwoelf Wochen absolviert hat, ist kein
+       Neuling mehr -- die Folgebloecke starten in voller Dosis, wie es die
+       Abschluss-Karte verspricht. */
+    var anfaenger=profile&&profile.exp==='0'&&blockNo===1&&pl.w>=1&&pl.w<=2;
+    var subTxt=spTxt(ss.s);
+    if(pl.w===11||pl.w12locker||anfaenger){
+      its=its.map(function(x){
+        if(x.w)return x;
+        /* Halbiert wird die Zahl VOR der Einheiten-Kennung (x/Bloecke/
+           Runden), nicht blind die erste Ziffer im String -- 'je 3 x 5-8'
+           beginnt mit einem Wort, und '+15-20 Min locker' ist ein
+           Zeitbereich, dessen erste Zahl zu halbieren Unsinn ergaebe
+           ('+8-20'). Was keine solche Kennung traegt (lockere Minuten),
+           bleibt im Deload bewusst stehen. */
+        var nv=String(x.v).replace(/(\d+)(\s*(?:x|Blöcke|blocks|Runden|rounds|Läufe|runs))/i,function(_,z,suf){return Math.max(1,Math.ceil(parseInt(z,10)/2))+suf;});
+        return{id:x.id,l:x.l,k:x.k,w:x.w,v:nv};
+      });
+      subTxt=pl.w===11
+        ?(DE31?'Deload — halbe Umfänge':'Deload — half volumes')
+        :pl.w12locker
+        ?(DE31?'Testwoche — locker halten':'Test week — keep it easy')
+        :(DE31?'Einstieg — Technik zuerst, halbe Umfänge':'Ramp-in — technique first, half volumes');
+    }
+    return{title:spTxt(ss.t),sub:subTxt,items:its};
+  }
   var base=SESSALL[pl.s];
   if(!base||curBlock().id!=='skill')return base;
   /* Skill-Block: die Skill-Uebung kommt nach vorn, weil sie frisch etwas
@@ -7432,8 +7985,12 @@ function renderDay(){
   /* Kurz halten: "Block 1 Basis · Woche 1/12 · Phase 1 · Basis" nannte den
      Blocknamen zweimal und lief auf dem Handy ueber drei Zeilen. Die Phase
      steht ohnehin gleich darunter in der Kachel. */
+  /* v31: Im Sportmodus traegt die Zeile die Sportart statt des
+     Calisthenics-Blocknamens (Basis/Dichte/Koennen) -- der Block-Zyklus
+     spricht dort nicht. */
+  var spDM=sportAkt();
   $('dayMeta').textContent=relTxt+(pl.w>=1&&pl.w<=12
-    ?' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+curBlock().n[cfg.lang==='de'?1:0]:'');
+    ?' · '+(cfg.lang==='de'?'Woche ':'Week ')+pl.w+'/12 · '+(spDM?spTxt(spDM.n):curBlock().n[cfg.lang==='de'?1:0]):'');
   $('jumpToday').style.display=isT?'none':'';
   drawStrip();
   /* Ausserhalb der zwoelf Wochen traegt schon die Kopfzeile der Karte die
@@ -7443,8 +8000,19 @@ function renderDay(){
   var tagNote=!(pl.w>=1&&pl.w<=12);
   $('h-tag').textContent=tagNote?(pl.note||''):((cfg.lang==='de'?'Tag ':'Day ')+(((dIdx(d)%7)+7)%7+1)+(cfg.lang==='de'?' der Woche':' of the week'));
   $('h-title').textContent=pl.title;$('h-sub').textContent=pl.sub||'';
+  /* v31: 'Saetze 3 · Wdh 8-12' stammt aus dem Calisthenics-Block und
+     widerspraeche im Sportmodus jeder Zeile darunter -- dort traegt jede
+     Uebung ihre eigene Vorgabe, und der Kopf sagt genau das. */
   $('h-meta').innerHTML=pl.kind==='train'
-    ?'<span>'+(cfg.lang==='de'?'Sätze':'Sets')+' <b>'+pl.ph.sets+'</b></span><span>'+(cfg.lang==='de'?'Wdh':'Reps')+' <b>'+pl.ph.reps+'</b></span><span>'+(cfg.lang==='de'?'Pause':'Rest')+' <b>'+pl.ph.rest+'</b></span>'
+    ?(spDM
+      ?'<span>'+(cfg.lang==='de'?'Übungen':'Exercises')+' <b>'+sessOf(pl).items.length+'</b></span><span>'+(pl.w===11
+          ?(cfg.lang==='de'?'Deload — halbe Umfänge':'Deload — half volumes')
+          :pl.w12test
+          ?(cfg.lang==='de'?'Leistungstest':'Performance test')
+          :pl.w12locker
+          ?(cfg.lang==='de'?'Testwoche — locker halten':'Test week — keep it easy')
+          :(cfg.lang==='de'?'Vorgabe an jeder Übung':'Target on every exercise'))+'</span>'
+      :'<span>'+(cfg.lang==='de'?'Sätze':'Sets')+' <b>'+pl.ph.sets+'</b></span><span>'+(cfg.lang==='de'?'Wdh':'Reps')+' <b>'+pl.ph.reps+'</b></span><span>'+(cfg.lang==='de'?'Pause':'Rest')+' <b>'+pl.ph.rest+'</b></span>')
     :((pl.note&&!tagNote)?'<span>'+pl.note+'</span>':'');
   var list=$('today-list');list.innerHTML='';
   var dn=doneMap[key]||{};
@@ -7481,10 +8049,18 @@ function renderDay(){
     var hist=get('blocks',[]),climbed=0,pk;
     var prev=hist.length?hist[hist.length-1].steps:null;
     for(pk in steps){if(prev&&typeof prev[pk]==='number')climbed+=Math.max(0,steps[pk]-prev[pk]);}
-    bb.innerHTML='<div class="card"><h4>'+(L?'Block ':'Block ')+blockNo+' — '+cb.n[L]+(L?' abgeschlossen':' complete')+'</h4>'+
+    /* v31: Der kroenende Bildschirm der zwoelf Wochen darf im Sportmodus
+       weder 'Stufen' zaehlen noch die Cali-Blockbeschreibung versprechen
+       (Pausen/Volumen aendern sich dort nicht ueber den Block) -- dort
+       zaehlt der Vergleich mit den Leistungstest-Werten. */
+    var spPost=sportAkt();
+    bb.innerHTML='<div class="card"><h4>'+(L?'Block ':'Block ')+blockNo+' — '+(spPost?spTxt(spPost.n):cb.n[L])+(L?' abgeschlossen':' complete')+'</h4>'+
       '<p class="hint">'+(L?'Zwölf Wochen, ':'Twelve weeks, ')+totalSets()+(L?' Blöcke abgehakt':' blocks ticked')+
-      (prev?(L?', '+climbed+' Stufen seit dem letzten Block':', '+climbed+' steps since the last block'):'')+'.</p>'+
-      '<p class="hint"><b>'+(L?'Block ':'Block ')+(blockNo+1)+' — '+nb.n[L]+'</b><br>'+nb.d[L]+'</p>'+
+      ((prev&&!spPost)?(L?', '+climbed+' Stufen seit dem letzten Block':', '+climbed+' steps since the last block'):'')+'.</p>'+
+      '<p class="hint"><b>'+(L?'Block ':'Block ')+(blockNo+1)+(spPost?'':' — '+nb.n[L])+'</b><br>'+(spPost
+        ?(L?'Gleiche Bausteine, nächste Runde: Progression läuft über die Übungs-Hinweise (Nordic, Copenhagen, FIFA-Stufen) — und dein neuer Leistungstest in Woche 12 misst sie gegen die Werte von diesem Mal.'
+            :'Same building blocks, next round: progression runs through the exercise cues (Nordic, Copenhagen, FIFA levels) — and your next week-12 test measures them against this round’s numbers.')
+        :nb.d[L])+'</p>'+
       '<div class="savebar"><button class="tbtn go" id="nextBlockBtn">'+
       (L?'Block '+(blockNo+1)+' starten':'Start block '+(blockNo+1))+'</button></div></div>';
     $('nextBlockBtn').addEventListener('click',startNextBlock);
@@ -7525,7 +8101,10 @@ function renderDay(){
     heroEl.classList.toggle('go',heroGo);
     heroEl.onclick=heroGo?function(e){if(e.target.closest('button'))return;openSessOv();}:null;
   }
-  var tot=items.length,dc=0;for(var k in dn){if(dn[k])dc++;}
+  /* Nur Haken innerhalb der AKTUELLEN Item-Anzahl zaehlen: ein Schwaechen-
+     oder Sportwechsel kann die Liste verkuerzen, und alte Haken jenseits
+     des Endes trieben den Ring sonst dauerhaft ueber 100 %. */
+  var tot=items.length,dc=0;for(var k in dn){if(dn[k]&&parseInt(k,10)<tot)dc++;}
   var pct=tot?Math.round(dc/tot*100):0;
   $('ringArc').setAttribute('stroke-dashoffset',String(163.4*(1-pct/100)));
   $('ringTxt').textContent=pct+'%';
@@ -7536,10 +8115,13 @@ function renderDay(){
    Der alte Block wandert mit seinen Stufen in die Historie, daraus entsteht
    der Langzeitverlauf. */
 function startNextBlock(){
-  var DE=cfg.lang==='de',nb=blockOf(blockNo+1);
+  var DE=cfg.lang==='de',nb=blockOf(blockNo+1),spNB=sportAkt();
   openModal(DE?('Block '+(blockNo+1)+' starten?'):('Start block '+(blockNo+1)+'?'),
-    DE?('Schwerpunkt: '+nb.n[1]+'. Dein Level, Rekorde, XP und Erfolge bleiben alle erhalten — nur der Plan beginnt wieder bei Woche 1, von da an, wo du jetzt stehst.')
-      :('Emphasis: '+nb.n[0]+'. Your levels, records, XP and achievements all stay — only the plan restarts at week 1, from where you are now.'),
+    spNB
+    ?(DE?'XP, Erfolge und deine Testwerte bleiben erhalten — der Plan beginnt wieder bei Woche 1, und der nächste Leistungstest misst gegen diese Runde.'
+        :'XP, achievements and your test numbers stay — the plan restarts at week 1, and the next performance test measures against this round.')
+    :(DE?('Schwerpunkt: '+nb.n[1]+'. Dein Level, Rekorde, XP und Erfolge bleiben alle erhalten — nur der Plan beginnt wieder bei Woche 1, von da an, wo du jetzt stehst.')
+      :('Emphasis: '+nb.n[0]+'. Your levels, records, XP and achievements all stay — only the plan restarts at week 1, from where you are now.')),
     DE?'Block starten':'Start block',
     function(){
       var hist=get('blocks',[]);
@@ -7602,8 +8184,14 @@ function buildWeeks(){
   /* Ueberschrift traegt den Block, sonst sehen zwoelf Wochen im Block 3
      genauso aus wie zwoelf Wochen im Block 1. */
   var LB=cfg.lang==='de'?1:0,cbk=curBlock(),hd=document.querySelector('#v-plan h2.sec'),sb=document.querySelector('#v-plan p.sub');
-  if(hd)hd.textContent=(LB?'Block ':'Block ')+blockNo+' · '+cbk.n[LB];
-  if(sb)sb.textContent=cbk.d[LB];
+  /* v31: Kopf und Beschreibung sprechen im Sportmodus den Athletikbogen --
+     'Basis/Dichte/Koennen' sind die Calisthenics-Bloecke. */
+  var spBW=sportAkt();
+  if(hd)hd.textContent=(LB?'Block ':'Block ')+blockNo+' · '+(spBW?spTxt(spBW.n):cbk.n[LB]);
+  if(sb)sb.textContent=spBW
+    ?(LB?'Zehn Wochen Aufbau, Woche 11 Deload mit halben Umfängen, Woche 12 Leistungstest. Die Bausteine dazu stehen unten — jede Strategie mit ihrer Studie.'
+        :'Ten weeks of building, week 11 deload at half volume, week 12 performance test. The building blocks sit below — every strategy with its study.')
+    :cbk.d[LB];
   var curW=wkOf(TODAY),totDone=0,totTrain=0;
   var STAGES=[[1,4],[5,8],[9,10],[11,11],[12,12]];
   STAGES.forEach(function(rng){
@@ -7615,7 +8203,11 @@ function buildWeeks(){
     totDone+=done;totTrain+=tot;
     var row=document.createElement('div');row.className='wrow'+(curW>=w0&&curW<=w1?' cur':'');
     row.innerHTML='<div class="whead"><span class="wno">'+ph.name+'</span>'+
-      '<span class="wph">'+ph.sets+' x '+ph.reps+' · '+ph.rest+'</span>'+
+      '<span class="wph">'+(spBW
+        ?(w0===11?(LB?'halbe Umfänge':'half volumes')
+          :w0===12?(LB?'messen statt trainieren':'measure, not train')
+          :(LB?'Vorgabe an jeder Übung':'target on every exercise'))
+        :(ph.sets+' x '+ph.reps+' · '+ph.rest))+'</span>'+
       '<span class="wpct">'+(tot?Math.round(done/tot*100):0)+'%</span></div>';
     wrap.appendChild(row);
   });
@@ -7624,6 +8216,70 @@ function buildWeeks(){
     kpi(cfg.lang==='de'?'Aktuelle Woche':'Current week',(curW<1?'-':(curW>12?'12+':curW)),'of 12')+
     kpi(cfg.lang==='de'?'Logs':'Logs written',logged,cfg.lang==='de'?'Tage':'days')+
     kpi(cfg.lang==='de'?'Meilensteine':'Milestones',wins.length,'logged');
+  drawSportStrat();
+}
+/* v31: Die Strategien der gewaehlten Sportart im Plan-Bereich -- das
+   fachliche Rueckgrat des Plans, jede mit ihrer Studienquelle. textContent
+   statt innerHTML fuer alle Inhalte aus SPORT: die Daten sind zwar lokal,
+   aber die Regel "Anzeige baut nie Markup aus Datenstrings" hat sich beim
+   Scanner schon einmal ausgezahlt. */
+function drawSportStrat(){
+  var el=$('sportStrat');if(!el)return;
+  var sp=sportAkt();
+  if(!sp){el.innerHTML='';el.hidden=true;return;}
+  el.hidden=false;
+  var DE=cfg.lang==='de';
+  el.innerHTML='';
+  var blk=document.createElement('div');blk.className='noteblk';
+  var eb=document.createElement('p');eb.className='eyebrow';
+  eb.textContent=(DE?'Warum dieser Plan — ':'Why this plan — ')+spTxt(sp.n);
+  blk.appendChild(eb);
+  var prof=document.createElement('p');prof.className='hint';prof.style.marginTop='0';
+  prof.textContent=spTxt(sp.prof);
+  blk.appendChild(prof);
+  /* Ohne diesen Satz laese sich jede Strategie als Versprechen, ihre volle
+     Studien-Dosis stuende komplett in den geplanten Einheiten -- die
+     Wochendosis verteilt sich aber auf Athletik-Einheiten HIER plus
+     Vereins-/Sporttraining (Praevention gehoert z. B. auch ins
+     Mannschafts-Aufwaermen). */
+  var dosH=document.createElement('p');dosH.className='hint';
+  dosH.textContent=DE
+    ?'Die Strategien nennen die Wochendosis aus den Studienprotokollen. Deine Einheiten hier tragen den Athletik-Anteil — der Rest gehört in dein Vereins- und Sporttraining, etwa die Prävention ins Mannschafts-Aufwärmen.'
+    :'Each strategy states the weekly dose from the study protocols. Your sessions here carry the athletic share — the rest belongs in your club and sport practice, e.g. prevention inside the team warm-up.';
+  blk.appendChild(dosH);
+  sp.strat.forEach(function(st){
+    var qa=document.createElement('div');qa.className='qa';qa.style.marginTop='.42rem';
+    var b=document.createElement('b');b.textContent=spTxt(st.n);
+    var p1=document.createElement('p');p1.textContent=spTxt(st.was);
+    var p2=document.createElement('p');p2.style.marginTop='.3rem';p2.style.color='var(--ink3)';
+    p2.textContent=spTxt(st.warum)+' — '+st.q;
+    qa.appendChild(b);qa.appendChild(p1);qa.appendChild(p2);
+    blk.appendChild(qa);
+  });
+  var pv=document.createElement('div');pv.className='qa';pv.style.marginTop='.42rem';
+  var pvb=document.createElement('b');pvb.textContent=DE?'Verletzungsprävention':'Injury prevention';
+  var pvp=document.createElement('p');pvp.textContent=spTxt(sp.prev.p);
+  var pvq=document.createElement('p');pvq.style.marginTop='.3rem';pvq.style.color='var(--ink3)';
+  pvq.textContent=sp.prev.q;
+  pv.appendChild(pvb);pv.appendChild(pvp);pv.appendChild(pvq);
+  blk.appendChild(pv);
+  /* Supplemente mit Evidenzlage -- Teil des Ernaehrungsauftrags. Nur die
+     wenigen mit belastbarer Beleglage, jede Zeile mit Quelle. */
+  if(sp.ern.supp&&sp.ern.supp.length){
+    var sup=document.createElement('div');sup.className='qa';sup.style.marginTop='.42rem';
+    var supb=document.createElement('b');supb.textContent=DE?'Supplemente mit Beleglage':'Supplements with evidence';
+    sup.appendChild(supb);
+    sp.ern.supp.forEach(function(zeile){
+      var pz=document.createElement('p');pz.style.marginTop='.3rem';
+      pz.textContent=spTxt(zeile[0])+' — '+spTxt(zeile[1]);
+      var pq=document.createElement('span');pq.style.color='var(--ink3)';
+      pq.textContent=' ('+zeile[2]+')';
+      pz.appendChild(pq);
+      sup.appendChild(pz);
+    });
+    blk.appendChild(sup);
+  }
+  el.appendChild(blk);
 }
 function kpi(l,v,s){return '<div class="mcard"><em>'+l+'</em><b>'+v+'</b><span class="sub">'+s+'</span></div>';}
 function renderWins(){
@@ -7648,6 +8304,10 @@ $('winAdd').addEventListener('click',function(){
 /* ---------- tiles / detail ---------- */
 function buildTiles(){
   var t=$('tiles');t.innerHTML='';
+  /* v31: Die Kacheln sind die Calisthenics-Stufenleitern je Muster -- im
+     Sportmodus gibt es keine Leitern, die Kacheln blieben leer bzw. fremd. */
+  t.hidden=!!sportAkt();
+  if(t.hidden)return;
   PAT.forEach(function(p){
     var b=document.createElement('button');b.className='tile';
     var s=steps[p.id]||0,pct=Math.round((s+1)/p.ladder.length*100);
@@ -7711,6 +8371,18 @@ function ladder(){
    Und die Balken zeigen erledigt gegen geplant, sind also waehrend der Woche
    in Bewegung statt fuer zwoelf Wochen dieselben. */
 function volBar(){
+  /* v31: Die Aufstellung rechnet ueber die Calisthenics-Muster (push/pull/
+     row/...). Sport-Items tragen keine Muster-ID -- hier stand sonst ein
+     fremdes Soll aus dem Calisthenics-Programm mit ewigen 0 Prozent. Lieber
+     kein Kasten als ein falscher. */
+  var vbx=$('volbar'),kart=vbx?vbx.closest('.chartbox'):null;
+  if(sportAkt()){
+    if(vbx)vbx.innerHTML='';
+    var vn0=$('volNote');if(vn0)vn0.textContent='';
+    if(kart)kart.hidden=true;
+    return;
+  }
+  if(kart)kart.hidden=false;
   var w=Math.min(12,Math.max(1,wkOf(TODAY))),ph=phase(w),TR=TRACKS[cfg.track]||TRACKS['3'];
   var DE=cfg.lang==='de';
   var soll={push:0,pull:0,row:0,press:0,legs:0,core:0};
@@ -8225,7 +8897,7 @@ function runItems(){
         else if(rp>0&&rp<=6&&h.reps.every(function(n){return n>=top;}))pa=1;
       }
     }
-    return{id:x.id,l:l,k:x.k,fixed:!!x.v,label:x.v||null,cal:cal,
+    return{id:x.id,l:l,k:x.k,w:x.w,fixed:!!x.v,label:x.v||null,cal:cal,
            sets:x.v?1:(cal?3:Math.min(5,Math.max(2,pl.ph.sets+adj+pa))),
            reps:cal?'max':pl.ph.reps,rest:pl.ph.rs};
   });
@@ -8244,7 +8916,10 @@ function runItems(){
    Uebung ohnehin nichts unterscheiden koennte. */
 function microPick(it){
   var idx=[];
-  for(var i=0;i<it.length&&idx.length<2;i++)if(it[i].id&&it[i].id!=='core')idx.push(i);
+  /* Sport-Items tragen keine Muster-ID -- dort zaehlen die Hauptuebungen
+     (alles ohne w-Aufwaerm-Markierung). Ein 15-Minuten-Notfalltraining,
+     das 12 Minuten Aufwaermen zieht, waere keines. */
+  for(var i=0;i<it.length&&idx.length<2;i++){var t=it[i];if(t.id?(t.id!=='core'):(!!sportAkt()&&!t.w))idx.push(i);}
   for(var i=0;i<it.length&&idx.length<2;i++)if(idx.indexOf(i)<0)idx.push(i);
   return idx;
 }
@@ -8506,8 +9181,14 @@ function runPaint(){
     return;
   }
   big.textContent=cur.fixed?cur.label:(cur.reps==='test'?(DE?'max':'max'):cur.reps);
+  /* v31: Sport-Items sind ausnahmslos fixed -- der Skill-Satz ('vor dem
+     Versagen aufhoeren') waere unter einem Aufwaermen oder Sprint fachlich
+     falsch. Dort spricht der Cue der Uebung selbst; ohne Cue ein
+     neutraler Qualitaetssatz. Der Skill-Satz bleibt dem Calisthenics-Weg. */
   hint.textContent=cur.fixed
-    ?(DE?'Frisch und kurz halten, deutlich vor dem Versagen aufhören.':'Keep it fresh and brief, stop well short of failure.')
+    ?(sportAkt()
+      ?(cur.k||(DE?'Qualität vor Menge — sauber ausführen, Pausen einhalten.':'Quality over quantity — clean execution, respect the rests.'))
+      :(DE?'Frisch und kurz halten, deutlich vor dem Versagen aufhören.':'Keep it fresh and brief, stop well short of failure.'))
     :cur.cal
     ?(DE?'Satz '+run.set+' von '+cur.sets+' · so viele saubere Wiederholungen wie möglich':'Set '+run.set+' of '+cur.sets+' · as many clean reps as possible')
     :(DE?'Satz '+run.set+' von '+cur.sets+' · Pause danach '+fmt(cur.rest):'Set '+run.set+' of '+cur.sets+' · rest after: '+fmt(cur.rest))+
@@ -8591,7 +9272,13 @@ function calc(){
   var bmr=Math.round(10*kg+6.25*cm-5*age+($('f-sex').value==='m'?5:-161));
   var tdee=Math.round(bmr*parseFloat($('f-act').value));
   var goal=parseFloat($('f-goal').value);
-  var autoCal=Math.round((tdee+goal)/10)*10,autoPro=Math.round(kg*1.9),autoFat=Math.round(kg*0.9);
+  /* v31: Das Protein-Ziel folgt der Sportart (alle im belegten Korridor
+     1,6-2,2 g/kg nach Morton 2018); Calisthenics behaelt die 1,9 des
+     Bestands. Die Kohlenhydrat-Periodisierung der Sportart steht als
+     Klartext in der f-note -- sie ist eine Tages-Entscheidung des Nutzers,
+     kein statisches Ziel. */
+  var spE=sportAkt();
+  var autoCal=Math.round((tdee+goal)/10)*10,autoPro=Math.round(kg*proFaktor()),autoFat=Math.round(kg*0.9);
   var cal=over.cal!==undefined?over.cal:autoCal;
   var pro=over.pro!==undefined?over.pro:autoPro;
   var fat=over.fat!==undefined?over.fat:autoFat;
@@ -8607,9 +9294,21 @@ function calc(){
   if(pro/kg<1.6)warn=' <b style="color:var(--ember)">'+(cfg.lang==='de'?'Protein unter 1,6 g/kg begrenzt, was dein Training aufbauen kann.':'Protein is below 1.6 g/kg, which limits what your training can build.')+'</b>';
   else if(pro/kg>2.2)warn=' <b style="color:var(--brass)">'+(cfg.lang==='de'?'Über 2,2 g/kg bringt nichts mehr.':'Above 2.2 g/kg adds nothing.')+'</b>';
   if(fat/kg<0.7)warn+=' <b style="color:var(--ember)">'+(cfg.lang==='de'?'Fett unter 0,7 g/kg ist langfristig kein guter Tausch.':'Fat below 0.7 g/kg is not a good trade long term.')+'</b>';
+  var spNote='';
+  if(spE){
+    /* Datenstrings von Markup fernhalten (dieselbe Regel wie bei
+       drawSportStrat) -- hier laeuft die f-note nun einmal ueber innerHTML,
+       also werden die Sport-Texte vorher entschaerft. */
+    var entsch=function(t){return String(t).replace(/[<>&]/g,'');};
+    var choT=Math.round(spE.ern.choT*kg),choR=Math.round(spE.ern.choR*kg);
+    spNote=' <br><b>'+entsch(spTxt(spE.n))+':</b> '+(cfg.lang==='de'
+      ?('Kohlenhydrate nach Belastung: ~'+choT+' g an Trainings-, ~'+choR+' g an Ruhetagen ('+spE.ern.choT+'/'+spE.ern.choR+' g/kg). Der Kachelwert oben ist der Rest deines Kalorienziels — das Sport-Ziel des heutigen Tagestyps steht darunter zum Abgleich; an harten Tagen dürfen Kalorien und Kohlenhydrate dorthin mitwachsen. ')
+      :('Carbs by load: ~'+choT+' g on training days, ~'+choR+' g on rest days ('+spE.ern.choT+'/'+spE.ern.choR+' g/kg). The card value above is what remains of your calorie target — today’s sport target sits beneath it for comparison; on hard days calories and carbs may grow towards it. '))
+      +entsch(spTxt(spE.ern.note));
+  }
   $('f-note').innerHTML=(goal>0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+mzahl(toDisp(kg*0.0035,'w').toFixed(1))+' '+uw()+(cfg.lang==='de'?' pro Woche. Schneller ist überwiegend Fett.':' per week. Faster and most of it is fat.'))
     :goal<0?((cfg.lang==='de'?'Ziel etwa ':'Aim for about ')+mzahl(toDisp(kg*0.006,'w').toFixed(1))+' '+uw()+(cfg.lang==='de'?' pro Woche. Protein hoch halten.':' per week. Keep protein high.'))
-    :(cfg.lang==='de'?'Erhaltung. Sinnvoll in den ersten Monaten oder wenn die Regeneration eng ist.':'Maintenance. Sensible in your first months or any stretch where recovery is tight.'))+warn;
+    :(cfg.lang==='de'?'Erhaltung. Sinnvoll in den ersten Monaten oder wenn die Regeneration eng ist.':'Maintenance. Sensible in your first months or any stretch where recovery is tight.'))+warn+spNote;
   drawMeals();
   var water=mzahl((kg*0.033).toFixed(1)),caf=Math.round(kg*4);
   var sleepH=parseFloat($('y-sleep').value)||7;
@@ -8640,10 +9339,19 @@ function drawMacros(vals,kg){
   el.innerHTML=MACROS.map(function(m){
     var v=vals[m.k],eigen=over[m.k]!==undefined;
     var tag=eigen?' <span style="color:var(--brass)">&middot; '+(DE?'eigen':'custom')+'</span>':'';
+    /* v31: Im Sportmodus nennt die Kohlenhydrat-Kachel das Sport-Ziel des
+       HEUTIGEN Tagestyps -- sonst stuende die sportwissenschaftliche
+       Empfehlung nur als Fussnote neben einer Kachel, die rechnerisch etwas
+       anderes zeigt, und niemand wuesste, welche Zahl gilt. */
+    var spM=sportAkt();
     var sub=m.k==='cal'
       ? (DE?'Tagesziel':'daily target')
       : (m.k==='carb'
-          ? (DE?'ergibt sich aus dem Rest':'what is left over')
+          ? ((spM&&kg)?(function(){
+              var tr=plan(TODAY).kind==='train';
+              var z=Math.round((tr?spM.ern.choT:spM.ern.choR)*kg);
+              return (DE?'Sport-Ziel heute':'sport target today')+' ('+(tr?(DE?'Training':'training'):(DE?'Ruhe':'rest'))+'): ~'+z+' g';
+            })():(DE?'ergibt sich aus dem Rest':'what is left over'))
           : (kg?(mzahl((v/kg).toFixed(1))+' g/kg'):'&nbsp;'));
     var tap=m.k!=='carb';
     return '<'+(tap?'button':'div')+' class="mcard'+(eigen?' edited':'')+'"'+(tap?' data-macro="'+m.k+'"':'')+'>'+
@@ -10627,7 +11335,7 @@ var SUPD=[
  ['Koffein','g','Verbessert Trainingsleistung und gefühlte Anstrengung zuverlässig. Ruiniert aber auch den Schlaf, und der ist mehr wert als die Einheit.','3–6 mg/kg, und nichts mehr nach dem frühen Nachmittag.'],
  ['Mikronisiertes Kreatin','a','Dasselbe Molekül wie Monohydrat, feineres Pulver, höherer Preis. Löst sich besser. Das ist der ganze Unterschied.','Nur, wenn normales Monohydrat auf den Magen schlägt.'],
  ['Omega-3 / Fischöl','a','Allgemeine Gesundheit, ordentliche Datenlage. Für den Muskelaufbau bestenfalls ein kleiner Effekt.','1–2 g EPA und DHA kombiniert, wenn du kaum Fisch isst.'],
- ['Beta-Alanin','a','Hilft bei Belastungen von etwa ein bis vier Minuten. Die meisten Calisthenics-Sätze sind deutlich kürzer.','3–6 g täglich. Das Hautkribbeln ist harmlos.'],
+ ['Beta-Alanin','a','Hilft bei Belastungen von etwa ein bis vier Minuten. Die meisten Kraftsätze sind deutlich kürzer.','3–6 g täglich. Das Hautkribbeln ist harmlos.'],
  ['Citrullin-Malat','a','Mäßiger Effekt aufs Trainingsvolumen in manchen Studien. Spürbar vor allem als Pump.','6–8 g etwa eine Stunde vor dem Training.'],
  ['Magnesium','a','Bringt nur etwas, wenn du wirklich unterversorgt bist. Häufig genug, dass sich Nachmessen lohnt.','200–400 mg bei schlechter Ernährung. Testen statt raten.'],
  ['Elektrolyte','a','Sinnvoll bei echter Hitze oder langen, schweißtreibenden Einheiten. Nicht für 45 Minuten drinnen.','Nur situativ.'],
@@ -11141,7 +11849,7 @@ function runCoach(){
   var out=[],w=wkOf(TODAY),DE=cfg.lang==='de';
   var sleep=parseFloat($('y-sleep').value)||0;
   var mood=parseInt($('y-mood').value,10),sore=parseInt($('y-sore').value,10),stress=parseInt($('y-stress').value,10);
-  var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*1.9);
+  var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*proFaktor());
   var rd=readiness();
   var anyTest=false;TESTS.forEach(function(t){if((testVals[t.id]||0)>0)anyTest=true;});
 
@@ -11152,8 +11860,18 @@ function runCoach(){
      Statt Beschwerden also die Reihenfolge zum Anfangen, mit Haken an dem,
      was schon erledigt ist. */
   if(totalSets()===0){
+    /* v31: Der Level-Test ist Calisthenics-Mechanik und seine Seite im
+       Sportmodus ausgeblendet -- der erste Coach-Eindruck eines Sportlers
+       darf nicht auf eine Tuer zeigen, die es nicht gibt (und deren
+       Erledigt-Bedingung dort nie wahr wuerde). Stattdessen: die
+       Strategien lesen -- das fachliche Rueckgrat des Plans. */
     var guide=[
-      {ok:anyTest,
+      sportAkt()
+      ?{ok:false,
+        t:['Step 1 — read your strategies','Schritt 1 — Strategien ansehen'],
+        d:['Under "Train > Weeks" sits "Why this plan": every strategy for your sport with its study, the prevention block and the supplement evidence. Two minutes that explain the next twelve weeks.',
+           'Unter „Training > Wochen" steht „Warum dieser Plan": jede Strategie deiner Sportart samt Studie, der Präventionsblock und die Supplement-Beleglage. Zwei Minuten, die die nächsten zwölf Wochen erklären.']}
+      :{ok:anyTest,
        t:['Step 1 — do the level test','Schritt 1 — Level-Test machen'],
        d:['Four tests, about twenty minutes, under "Test". They decide your starting level for each pattern. Without them the programme is guessing, and it lands either too hard or too easy.',
           'Vier Tests, etwa zwanzig Minuten, unter „Test". Sie legen fest, bei welchem Level du in jedem Muster startest. Ohne sie rät das Programm — und liegt entweder zu hoch oder zu niedrig.']},
@@ -11219,13 +11937,19 @@ function runCoach(){
     if(plan(d).kind==='train'){poss++;if(dayDone(ds))last14++;}
   }
   if(poss>=4&&last14/poss<0.6)out.push(['md',DE?'Du lässt Einheiten aus':'You are missing sessions',(DE?'Nur ':'Only ')+last14+(DE?' von ':' of ')+poss+(DE?' Einheiten seit dem Start. Senk die Hürde, statt zu streichen.':' sessions since you started. Lower the bar rather than skipping.')]);
-  var stall=[];PRS.forEach(function(p){if(p.b>0&&p.v<=p.b)stall.push(p.n);});
-  if(stall.length>=2)out.push(['md',DE?'Rekorde stehen':'Records are not moving',(DE?'Kein Fortschritt bei ':'No progress on ')+stall.slice(0,3).join(', ')+(DE?'. Prüfe Schlaf, Essen, Stress, Volumen, Wochen seit Deload.':'. Check sleep, food, life stress, volume, weeks since a deload.')]);
+  /* v31: Rekorde/Leitern sind Calisthenics-Groessen -- im Sportmodus gibt es
+     sie nicht, der Hinweis liefe ins Leere. */
+  if(!sportAkt()){
+    var stall=[];PRS.forEach(function(p){if(p.b>0&&p.v<=p.b)stall.push(p.n);});
+    if(stall.length>=2)out.push(['md',DE?'Rekorde stehen':'Records are not moving',(DE?'Kein Fortschritt bei ':'No progress on ')+stall.slice(0,3).join(', ')+(DE?'. Prüfe Schlaf, Essen, Stress, Volumen, Wochen seit Deload.':'. Check sleep, food, life stress, volume, weeks since a deload.')]);
+  }
   var painDays=0,recentPain=null;
   for(var i=0;i<10;i++){var k=iso(add(TODAY,-i));if(logs[k]&&logs[k].pain&&logs[k].pain!=='None'){painDays++;recentPain=logs[k].pain;}}
   if(painDays>=2){
     var fx=PAINFIX[recentPain],loc=DE?(PAINDE[recentPain]||recentPain):recentPain,pTxt='';
-    if(fx){
+    /* v31: Die Muster-Zuordnung (Push/Pull/...) ist Calisthenics-Sprache --
+       im Sportmodus bleibt der Hinweis beim Ort und beim Gegenmittel. */
+    if(fx&&!sportAkt()){
       var pn=fx.pat.map(function(i){return pid[i]?pid[i].name:'';}).filter(Boolean).join(DE?' und ':' and ');
       pTxt=(DE?(' Belastet wird die Stelle vor allem von '+pn+'.'):(' That spot is loaded mainly by '+pn+'.'));
     }
@@ -11240,7 +11964,14 @@ function runCoach(){
   var avgR=rpes.length>=3?rpes.reduce(function(a,b){return a+b;},0)/rpes.length:0;
   if(rpes.length>=3){
     if(avgR>=9)out.push(['md',DE?'Jede Einheit am Limit':'Every session at the limit',(DE?'Dein Schnitt liegt bei RPE ':'Your average is RPE ')+avgR.toFixed(1)+(DE?'. Das ist auf Dauer nicht regenerierbar. Ziel ist 7 bis 8.':'. That is not recoverable long term. Aim for 7 to 8.')]);
-    else if(avgR<=6)out.push(['md',DE?'Zu weit vom Versagen':'Too far from failure',(DE?'Schnitt RPE ':'Average RPE ')+avgR.toFixed(1)+(DE?'. Sätze bis ein bis drei Wiederholungen vor Schluss führen.':'. Take sets to within one to three reps of failure.')]);
+    else if(avgR<=6){
+      /* v31: Sprint-, Sprung- und Intervalltage erzeugen konstruktionsbedingt
+         niedrige Session-RPE -- dort waere "naeher ans Versagen" methodisch
+         falsch. Der Rat gilt im Sportmodus nur den Kraftsaetzen. */
+      out.push(sportAkt()
+        ?['md',DE?'Viel Luft in den Kraftsätzen?':'Room left in the strength sets?',(DE?'Schnitt RPE ':'Average RPE ')+avgR.toFixed(1)+(DE?'. Bei Sprints und Sprüngen ist das gewollt — nur die Kraftsätze dürfen näher ans Ende (ein bis drei Wiederholungen Reserve).':'. For sprints and jumps that is by design — only the strength sets should move closer to the end (one to three reps in reserve).')]
+        :['md',DE?'Zu weit vom Versagen':'Too far from failure',(DE?'Schnitt RPE ':'Average RPE ')+avgR.toFixed(1)+(DE?'. Sätze bis ein bis drei Wiederholungen vor Schluss führen.':'. Take sets to within one to three reps of failure.')]);
+    }
   }
   /* Einzeln je ein Hinweis, zusammen der Vorbote: viel Belastung, wenig Reparatur. */
   if(sleep>0&&sleep<7&&avgR>=8.5)out.push(['hi',
@@ -11248,8 +11979,14 @@ function runCoach(){
     (DE?('Du liegst bei '+sleep+' Stunden Schlaf und im Schnitt bei RPE '+avgR.toFixed(1)+'. Einzeln wäre das je ein Hinweis, zusammen ist es die Kombination, aus der Verletzungen und Abbrüche entstehen — maximale Belastung bei minimaler Reparatur. Entweder Schlaf hoch oder Anstrengung runter. Beides gleichzeitig laufen zu lassen geht ein paar Wochen gut und dann nicht mehr.')
        :('You are at '+sleep+' hours of sleep and averaging RPE '+avgR.toFixed(1)+'. Either one alone is a note; together they are the combination that produces injuries and quitting — maximum load on minimum repair. Push the sleep up or the effort down. Running both at once works for a few weeks and then stops.'))]);
   if(w>=8&&w<=10)out.push(['md',DE?'Deload steht an':'Deload is coming',DE?'Woche 11 ist Deload. Gleiche Übungen, halbe Sätze. Nicht überspringen, weil du dich gut fühlst.':'Week 11 is a deload. Same exercises, half the sets. Do not skip it because you feel fine.']);
-  if(w===11)out.push(['ok',DE?'Deload-Woche':'This is deload week',DE?'Halbe Sätze, vier Wiederholungen vor Schluss aufhören.':'Half the sets, stop four reps short.']);
-  if(w===12)out.push(['ok',DE?'Testwoche':'Retest week',DE?'Gleiche vier Tests, gleiche Maßstäbe.':'Same four tests, same standards.']);
+  if(w===11)out.push(['ok',DE?'Deload-Woche':'This is deload week',sportAkt()
+    ?(DE?'Umfänge halbieren, Sprints und Sprünge kurz und frisch halten.':'Halve the volumes, keep sprints and jumps short and fresh.')
+    :(DE?'Halbe Sätze, vier Wiederholungen vor Schluss aufhören.':'Half the sets, stop four reps short.')]);
+  if(w===12)out.push(['ok',sportAkt()
+    ?(DE?'Leistungstest-Woche':'Performance-test week')
+    :(DE?'Testwoche':'Retest week'),sportAkt()
+    ?(DE?'Sprintzeit, Sprunghöhe, Intervall-Kontrolle — gleiche Bedingungen wie beim letzten Mal, ausgeruht antreten.':'Sprint time, jump height, interval check — same conditions as last time, arrive rested.')
+    :(DE?'Gleiche vier Tests, gleiche Maßstäbe.':'Same four tests, same standards.')]);
   if(wlog.length>1){
     var wch=wlog[wlog.length-1].v-wlog[0].v,perWk=wch/Math.max(1,wlog.length/3);
     if(perWk>kg*0.006)out.push(['md',DE?'Zu schnelle Zunahme':'Gaining too fast',(DE?'Du bist ':'You are up ')+wch.toFixed(1)+(DE?' kg hoch. Über 0,5 % Körpergewicht pro Woche ist der Großteil Fett.':' kg. Above 0.5 % of bodyweight per week, most of it is fat.')]);
@@ -11281,8 +12018,10 @@ function runCoach(){
     (DE?' Drucksätze abgehakt. Das ist die häufigste Ursache für Schulterprobleme. Nächste Einheit: Rudern zuerst, Druck zuletzt.':' push sets ticked. That is the most common cause of shoulder trouble. Next session: rows first, pressing last.')]);
   if(pullS+pushS>=12&&legsS<(pullS+pushS)*0.25)out.push(['md',DE?'Beine kommen zu kurz':'Legs are being skipped',
     (DE?'Nur ':'Only ')+legsS+(DE?' Beinsätze gegen ':' leg sets against ')+(pullS+pushS)+(DE?' Oberkörpersätze. Kniebeuge und Hüftstreckung nicht überspringen — sonst holt es dich beim Pistol ein.':' upper-body sets. Do not skip squats and hinges — it catches up with you at the pistol.')]);
-  /* Schwaechstes Muster benennen -- konkreter Hebel statt Allgemeinplatz */
-  if(typeof patLP==='function'){
+  /* Schwaechstes Muster benennen -- konkreter Hebel statt Allgemeinplatz.
+     v31: nur auf dem Calisthenics-Weg -- die Muster-Leitern existieren im
+     Sportmodus nicht. */
+  if(typeof patLP==='function'&&!sportAkt()){
     var lps=PAT.map(function(p){return{n:p.name,lp:patLP(p),id:p.id};});
     lps.sort(function(a,b){return a.lp-b.lp;});
     var lo=lps[0],hi=lps[lps.length-1];
@@ -11292,7 +12031,10 @@ function runCoach(){
   }
   /* Level-Test nie gemacht */
   /* anyTest steht oben schon bereit -- Frischstart-Block nutzt es ebenfalls */
-  if(!anyTest)out.push(['hi',DE?'Startpunkt fehlt':'No starting point set',
+  /* v31: Der Level-Test gehoert zu den Calisthenics-Leitern; im Sportmodus
+     ist seine Seite ausgeblendet -- der Hinweis zeigte auf eine Tuer, die
+     es dort nicht gibt. */
+  if(!anyTest&&!sportAkt())out.push(['hi',DE?'Startpunkt fehlt':'No starting point set',
     DE?'Du hast den Level-Test noch nicht gemacht. Ohne ihn raten die Leitern, wo du stehst — und das Programm passt entweder nicht oder ist zu leicht. Vier Tests, zwanzig Minuten, unter „Test".'
       :'You have not done the level test. Without it the ladders are guessing where you stand, so the programme is either too hard or too easy. Four tests, twenty minutes, under "Test".']);
   /* Leiter seit Wochen unberuehrt */
@@ -11324,10 +12066,14 @@ function runCoach(){
 /* coach pulse — watches the live state and speaks up with a popup when something shifts */
 var prevSnap=null,lastRd=0;
 function snapState(){
-  var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*1.9);
+  var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*proFaktor());
   var pl=plan(TODAY),k=iso(TODAY),dn=doneMap[k]||{},dc=0,i;
   var tot=pl.kind==='train'?sessOf(pl).items.length:(pl.items||[]).length;
-  for(i in dn){if(dn[i])dc++;}
+  /* Dieselbe Indexgrenze wie beim Tagesring (renderDay): Haken jenseits
+     der aktuellen Item-Anzahl (Schwaechen-/Sportwechsel) duerfen keine
+     falsche 'Tag komplett'-Meldung ausloesen, waehrend der Ring daneben
+     korrekt 80 % zeigt. */
+  for(i in dn){if(dn[i]&&parseInt(i,10)<tot)dc++;}
   return{sleep:parseFloat($('y-sleep').value)||0,mood:parseInt($('y-mood').value,10),
     sore:parseInt($('y-sore').value,10),stress:parseInt($('y-stress').value,10),
     ppk:pro/kg,lv:levelOf(xpTotal()),tier:curTier,dayPct:tot?dc/tot:0,rd:lastRd};
@@ -11443,9 +12189,28 @@ function drawStat(){
   var el=$('statBody');if(!el)return;
   var DE=cfg.lang==='de',L=DE?1:0,h='';
   h+=statKopf();
-  /* 1. Saetze je Woche und Muster (aus dem Erledigt-Speicher, 8 Wochen). */
-  h+='<p class="eyebrow">'+(DE?'Sätze je Woche':'Sets per week')+'</p>';
+  /* 1. Saetze je Woche und Muster (aus dem Erledigt-Speicher, 8 Wochen).
+     v31: Die Muster-Rechnung lebt von Muster-IDs, die Sport-Items nicht
+     tragen -- im Sportmodus zaehlt stattdessen eine Karte die abgehakten
+     Uebungen je Woche. Zwei ewig leere Ueberschriften waeren fuer die
+     Kernzielgruppe des Pivots eine kaputt wirkende Seite. */
   var woNow=Math.min(12,Math.max(1,wkOf(TODAY)));
+  if(sportAkt()){
+    h+='<p class="eyebrow">'+(DE?'Abgehakte Übungen je Woche':'Exercises ticked per week')+'</p>';
+    var spPunkte=[];
+    for(var w=Math.max(1,woNow-7);w<=woNow;w++){
+      var summe=0;
+      for(var tg=0;tg<7;tg++){
+        var d=add(STD,(w-1)*7+tg),pl=plan(d);
+        if(pl.kind!=='train')continue;
+        var dn=doneMap[iso(d)]||{};
+        sessOf(pl).items.forEach(function(x,idx){if(dn[idx])summe++;});
+      }
+      spPunkte.push({x:'W'+w,y:summe});
+    }
+    h+=statKarte(spTxt(sportAkt().n),DE?'abgehakte Übungen':'exercises ticked',spPunkte,DE?'Übungen':'exercises',false);
+  }else{
+  h+='<p class="eyebrow">'+(DE?'Sätze je Woche':'Sets per week')+'</p>';
   PAT.forEach(function(pp){
     var punkte=[];
     for(var w=Math.max(1,woNow-7);w<=woNow;w++){
@@ -11465,8 +12230,13 @@ function drawStat(){
     var aktiv=false;punkte.forEach(function(q){if(q.y)aktiv=true;});
     if(aktiv||pp.id==='push')h+=statKarte(pp.name,DE?'erledigte Sätze':'sets done',punkte,DE?'Sätze':'sets',false);
   });
-  /* 2. Uebungs-Verlaeufe aus der Historie (bester Satz je Einheit). */
+  }
+  /* 2. Uebungs-Verlaeufe aus der Historie (bester Satz je Einheit).
+     v31: nur auf dem Calisthenics-Weg -- Sport-Items haben feste Vorgaben
+     und keine Wiederholungs-Historie; die Ueberschrift bliebe fuer immer
+     leer. */
   var eh=get('exhist',{}),namen=Object.keys(eh);
+  if(!sportAkt()){
   h+='<p class="eyebrow">'+(DE?'Übungen — bester Satz':'Exercises — best set')+'</p>';
   if(namen.length){
     namen.sort();
@@ -11484,6 +12254,7 @@ function drawStat(){
     });
   }else{
     h+=statKarte(DE?'Deine Übungen':'Your exercises',DE?'Wiederholungen je Einheit':'reps per session',[],'',false);
+  }
   }
   /* 3. Ernaehrung: 14 Tage Kalorien. */
   h+='<p class="eyebrow">'+(DE?'Ernährung — 14 Tage':'Fuel — 14 days')+'</p>';
@@ -11639,7 +12410,10 @@ function renderHome(){
        freien Tag. */
     heroEl.innerHTML='<button type="button" class="hcard" data-run="1">'+
       '<span class="hcMain"><p class="tag">'+tag+'</p><h3>'+pl.title+'</h3>'+
-      '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+' · '+Object.keys(muster).join(' · ')+'</p>'+
+      /* v31: Sport-Items tragen keine Muster-IDs -- ohne den Fallback auf
+         die Session-Unterzeile endete der Satz mit haengendem Trennzeichen
+         ('5 Übungen · '). */
+      '<p class="sub2">'+its.length+' '+(DE?'Übungen':'exercises')+(Object.keys(muster).length?' · '+Object.keys(muster).join(' · '):(pl.sub?' · '+pl.sub:''))+'</p>'+
       /* Laeuft die Einheit schon, heisst der Knopf "Weiter". "Starten" auf
          etwas Laufendes zu schreiben ist die Art kleiner Unehrlichkeit, an
          der man merkt, dass eine App ihren eigenen Zustand nicht kennt. */
@@ -11757,10 +12531,16 @@ function renderHome(){
   var ic={coach:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5a2.5 2.5 0 0 1-2.5 2.5H8l-4 3.5V6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5Z"/></svg>',
     mob:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="5" r="2.2"/><path d="M12 7.5v5M12 12.5 8 17M12 12.5l4 4.5M7 9.5l5-1.5 5 1.5"/></svg>',
     buch:'<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5Z"/><path d="M4 20.5V5.5M8 7h8"/></svg>'};
+  /* v31: Die zwoelf Kapitel sind das Calisthenics-Buch ('dein Koerper ist
+     die Hantel', Klimmzug-Leitern) -- einem Fussballer diese Lehre aktiv
+     zu bewerben, wuerde dem eigenen Plan widersprechen. Im Sportmodus
+     tritt an ihre Stelle die Strategien-Karte des Plan-Bereichs. */
   upEl.innerHTML=
     up('coach','var(--ice)',ic.coach,'Coach',offen?(DE?offen+' offen':offen+' open'):(DE?'Nichts offen':'Nothing open'),offen)+
     up('mobility','var(--aurora)',ic.mob,(DE?'Beweglichkeit':'Mobility'),(DE?'Fünf Tests, fünf Drills':'Five tests, five drills'),0)+
-    up('learn','var(--brass)',ic.buch,(DE?'Wissen':'Knowledge'),(DE?'12 Kapitel':'12 chapters'),0);
+    (sportAkt()
+      ?up('plan','var(--brass)',ic.buch,(DE?'Strategien':'Strategies'),(DE?'Warum dieser Plan — mit Studien':'Why this plan — with studies'),0)
+      :up('learn','var(--brass)',ic.buch,(DE?'Wissen':'Knowledge'),(DE?'12 Kapitel':'12 chapters'),0));
 }
 /* Klicks der Dashboard-Karten. */
 ['homeHero','homeHabits','homeCards'].forEach(function(id){
@@ -12170,10 +12950,18 @@ function renderSessOv(){
      wie in runItems(), sonst crasht pl.ph.name direkt darunter. */
   for(var vzo=1;vzo<=14&&pl.kind!=='train';vzo++)pl=plan(add(TODAY,vzo));
   $('soTitle').textContent=pl.title;
-  $('soMeta').textContent=(DE?'Woche ':'Week ')+pl.w+' · '+pl.ph.name+' · '+(DE?'Pause ':'rest ')+pl.ph.rest;
+  /* v31: Die Pausenangabe stammt aus dem Calisthenics-Block; Sport-Items
+     tragen ihre Pausen selbst im Cue. */
+  $('soMeta').textContent=(DE?'Woche ':'Week ')+pl.w+' · '+pl.ph.name+(sportAkt()?'':' · '+(DE?'Pause ':'rest ')+pl.ph.rest);
   var host=$('soBody'),h='';
   if(soView==='ov'){
-    h+='<p class="hint">'+(DE?'Das steht heute an. Antippen zum Tauschen: ⇄':'Today\u2019s work. Tap to swap: ⇄')+'</p>';
+    /* v31: Der Tausch-Hinweis nur, wenn es hier auch etwas zu tauschen gibt
+       -- Sport-Items (id:null) haben keinen Tausch-Knopf, der Satz waere
+       eine Funktionsankuendigung ins Leere. */
+    var tauschbar=it.some(function(x){return !!x.id;});
+    h+='<p class="hint">'+(tauschbar
+      ?(DE?'Das steht heute an. Antippen zum Tauschen: ⇄':'Today’s work. Tap to swap: ⇄')
+      :(DE?'Das steht heute an — Vorgaben und Hinweise stehen an jeder Übung.':'Today’s work — targets and cues sit on every exercise.'))+'</p>';
     h+='<div class="solist">'+it.map(function(x,i){
       return '<div class="sorow">'+(x.id?sv(x.id,cvar(pid[x.id].cv),30):'')+
         '<span class="nm"><b></b><span></span></span>'+
@@ -12253,6 +13041,15 @@ $('soClose').addEventListener('click',function(){soShow(false);});
    Bildschirm, Auswahl markiert nur, die Weiter-Pille schaltet. Zwischen den
    Kapiteln eine ruhige Uebergabeseite. */
 var OBL={
+ /* v31: Sportarten-Wahl. Fuenf Athletik-Wege plus Calisthenics als eigener
+    Weg (Bestand und Buch). Reihenfolge = DACH-Popularitaet. */
+ sport:[
+  ['fussball',['Football','Fußball'],['Sprints, cuts, engine','Sprints, Richtungswechsel, Motor'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 8.4 L15.4 10.9 L14.1 14.8 H9.9 L8.6 10.9 Z"/></svg>','var(--aurora)'],
+  ['basketball',['Basketball','Basketball'],['Vertical power, agility','Sprungkraft, Agilität'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5v17M6.2 6.2c2.4 2.4 2.4 9.2 0 11.6M17.8 6.2c-2.4 2.4-2.4 9.2 0 11.6"/></svg>','var(--ember)'],
+  ['tennis',['Tennis','Tennis'],['First step, serve power','Antritt, Aufschlagpower'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M4.6 8.4c4 1.6 10.8 1.6 14.8 0M4.6 15.6c4-1.6 10.8-1.6 14.8 0"/></svg>','var(--ice)'],
+  ['handball',['Handball','Handball'],['Jump throws, contact','Sprungwurf, Kontakt'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M7.8 9.4c2.6-1.6 5.8-1.6 8.4 0M7.8 14.6c2.6 1.6 5.8 1.6 8.4 0"/></svg>','var(--brass)'],
+  ['laufen',['Running','Laufen'],['Economy, speed, resilience','Ökonomie, Tempo, Robustheit'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 18.5h17M6.5 18.5l3.4-7.6 4.2 3 3.4-6.4"/></svg>','var(--aurora)'],
+  ['cali',['Calisthenics','Calisthenics'],['Bodyweight progression','Körpergewichts-Progression'],'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 5.5h15M8.4 8.5l3.6 8 3.6-8"/></svg>','var(--brass)']],
  sex:[
   ['f',['Female','Weiblich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.4"/><path d="M5.5 20c.4-4.8 2.9-7.3 6.5-7.3s6.1 2.5 6.5 7.3"/></svg>','var(--ice)'],
   ['m',['Male','Männlich'],null,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="7" r="3.4"/><path d="M4.5 20c.2-3.4 1-5.6 2.6-6.8 1.4-1 3-1.5 4.9-1.5s3.5.5 4.9 1.5c1.6 1.2 2.4 3.4 2.6 6.8"/></svg>','var(--aurora)'],
@@ -12323,11 +13120,16 @@ var OBL={
    Eimer waere neue Rechenlogik, die hier niemand verlangt hat. */
 var NGMAP={fat:'-450',recomp:'0',muscle:'300',strength:'0',athletic:'0'};
 var obState={sex:'m',age:22,height:180,weight:78,bf:20,bfTouched:false,tdays:[0,2,4],act:'1.375',ngoal:'300',
-  goal:'muscle',goalphys:'muscle',days:'3',eq:{bar:true,dip:false,rings:false,kb:false,cbl:false,mp:false,bnd:false},avoid:{},exp:'1'};
+  goal:'muscle',goalphys:'muscle',days:'3',eq:{bar:true,dip:false,rings:false,kb:false,cbl:false,mp:false,bnd:false},avoid:{},exp:'1',
+  sport:'fussball',schwaechen:{}};
 var IT={
- hello:{t:['Your body is the gym.','Dein Körper ist das Gym.'],
-  s:['VALKR builds you a 12-week calisthenics plan around what you have and what you can do. A few quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Calisthenics-Plan um das, was du hast und was du kannst. Ein paar schnelle Fragen — alles bleibt später änderbar.'],
+ hello:{t:['Train for your sport.','Trainiere für deinen Sport.'],
+  s:['VALKR builds you a 12-week plan for your sport — strategies from published studies, cut to fit you. A few quick questions — everything stays changeable later.','VALKR baut dir einen 12-Wochen-Plan für deinen Sport — Strategien aus veröffentlichten Studien, auf dich zugeschnitten. Ein paar schnelle Fragen — alles bleibt später änderbar.'],
   n:['Let\u2019s go','Los geht\u2019s']},
+ sport:{t:['What is your sport?','Was ist dein Sport?'],
+  s:['Sessions, strategies and nutrition are built for this sport — each backed by studies. Calisthenics stays available as its own track.','Einheiten, Strategien und Ernährung werden für diese Sportart gebaut — alles mit Studienbeleg. Calisthenics bleibt als eigener Weg wählbar.']},
+ schwaechen:{t:['Where are your weaknesses?','Wo liegen deine Schwächen?'],
+  s:['Pick up to two. Each session gets a concrete focus exercise against them — the evidence sits in the plan section.','Wähle bis zu zwei. Jede Einheit bekommt eine konkrete Schwerpunkt-Übung dagegen — die Belege stehen im Plan-Bereich.']},
  sex:{t:['Who is training?','Wer trainiert hier?'],
   s:['Sets the figure preview and the estimates. Nothing else hangs on it.','Bestimmt die Figur-Vorschau und die Schätzwerte. Mehr hängt nicht daran.']},
  age:{t:['How old are you?','Wie alt bist du?'],
@@ -12365,7 +13167,18 @@ var IT={
   n:['Next','Weiter']},
  exp:{t:['How long have you trained?','Wie lange trainierst du schon?'],
   s:['Sets your starting rungs — the strength test fine-tunes them next.','Setzt deine Startstufen — der Krafttest justiert gleich fein nach.']},
+ /* v31: Startstufen und Krafttest sind Calisthenics-Mechanik -- im
+    Sportmodus bestimmt die Erfahrung die empfohlene Wochenfrequenz. */
+ expSport:{t:['How long have you trained?','Wie lange trainierst du schon?'],
+  s:['Shapes how demanding your first weeks are dosed and which frequency we suggest.','Bestimmt, wie fordernd die ersten Wochen dosiert werden und welche Frequenz wir vorschlagen.']},
 notify:{t:['Should VALKR remind you?','Soll VALKR dich erinnern?'],  s:['A short nudge on training days, a warning when the streak is about to break. Changeable any time, and nothing leaves the device.','Ein kurzer Anstoß an Trainingstagen, ein Hinweis wenn die Serie zu reißen droht. Jederzeit änderbar, und nichts verlässt das Gerät.']},
+ /* v31: Eigener Abschlusstext fuer den Sportmodus -- der Calisthenics-Text
+    verspricht Tausch-Knopf und Einmess-Leitern, die es bei festen
+    Sport-Vorgaben nicht gibt. Falsche Zusagen als letzter
+    Onboarding-Eindruck waeren der teuerste Platz dafuer. */
+ readySport:{t:['Your plan is ready.','Dein Plan steht.'],
+  s:['Today shows your session — every exercise carries its target and cue, your weaknesses get their own focus work, and the plan section explains every strategy with its study. Nutrition is matched to your sport. Change sport or anything else later in settings.','Unter „Heute" steht deine Einheit — jede Übung trägt Vorgabe und Hinweis, deine Schwächen bekommen eigene Schwerpunkt-Übungen, und der Plan-Bereich erklärt jede Strategie samt Studie. Die Ernährung ist auf deinen Sport abgestimmt. Sportart und alles andere bleiben in den Einstellungen änderbar.'],
+  n:['Start day one','Los mit Tag eins']},
  ready:{t:['Your plan is ready.','Dein Plan steht.'],
   s:['Today shows your session — every exercise has a swap button, and the coach reads your numbers. Your first session measures you in: three sets per exercise, you enter your reps, and every ladder starts at your level. No test before the training — the training is the test.','Unter „Heute" steht deine Einheit — jede Übung hat einen Tausch-Knopf, und der Coach liest deine Zahlen mit. Dein erstes Training misst dich ein: drei Sätze je Übung, du trägst deine Wiederholungen ein, und jede Leiter startet auf deinem Level. Kein Test vor dem Training — das Training ist der Test.'],
   n:['Start day one','Los mit Tag eins']}
@@ -12374,11 +13187,14 @@ notify:{t:['Should VALKR remind you?','Soll VALKR dich erinnern?'],  s:['A short
    nach Erlaubnis fragt man, wenn klar ist, wofuer sie gut sein soll -- nicht
    im ersten Bild, wo die Antwort reflexhaft Nein lautet. Und der Zeitpunkt
    ist der richtige, weil hier gerade die Trainingstage festgelegt wurden. */
-var ISTEPS=['hello','sex','age','height','weight','bf','b1','goal','exp','b2','act','ngoal','b3','days','tdays','eq','avoid','notify','ready'],inIdx=0;
+/* v31: Sportwahl direkt nach dem Hallo -- sie bestimmt, was danach gebaut
+   wird; die Schwaechen folgen im Ziele-Kapitel (bei Calisthenics wird der
+   Schritt uebersprungen, dort traegt die Stufen-Progression die Anpassung). */
+var ISTEPS=['hello','sport','sex','age','height','weight','bf','b1','goal','exp','schwaechen','b2','act','ngoal','b3','days','tdays','eq','avoid','notify','ready'],inIdx=0;
 /* Kapitel je Schritt (1 Profil, 2 Ziele, 3 Rahmen); Hallo und Fertig laufen ohne Chip. */
-var ICH={sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,b2:2,act:3,ngoal:3,b3:3,days:4,tdays:4,eq:4,avoid:4,notify:4,ready:4};
+var ICH={sport:1,sex:1,age:1,height:1,weight:1,bf:1,b1:1,goal:2,exp:2,schwaechen:2,b2:2,act:3,ngoal:3,b3:3,days:4,tdays:4,eq:4,avoid:4,notify:4,ready:4};
 var ICHN=[null,['Your profile','Dein Profil'],['Your goals','Deine Ziele'],['Your fuel','Deine Ernährung'],['Your setup','Dein Rahmen']];
-var ICHSTEPS=[null,['sex','age','height','weight','bf'],['goal','exp'],['act','ngoal'],['days','tdays','eq','avoid']];
+var ICHSTEPS=[null,['sport','sex','age','height','weight','bf'],['goal','exp','schwaechen'],['act','ngoal'],['days','tdays','eq','avoid']];
 /* Koerperfett-Schaetzung nach Deurenberg: BMI, Alter, Geschlecht. */
 function bfEstimate(){
   var h=obState.height/100,bmi=obState.weight/(h*h);
@@ -12459,14 +13275,25 @@ function introFinishProfile(){
      darf sie es auch nicht stillschweigend loeschen. */
   var altSwaps=(profile&&profile.swaps)||{};
   var altTest=(profile&&profile.testAsked)||1;
+  /* v31: Sportart und Schwaechen wandern in cfg -- dort liest sessOf/calc
+     sie zur Laufzeit; profile traegt sie als Onboarding-Protokoll mit. */
+  var schwListe=[];
+  if(obState.sport!=='cali'){for(var swk in obState.schwaechen)if(obState.schwaechen[swk])schwListe.push(swk);}
   profile={goal:obState.goal,days:obState.days,
     eq:{bar:!!obState.eq.bar,dip:!!obState.eq.dip,rings:!!obState.eq.rings,
       kb:!!obState.eq.kb,cbl:!!obState.eq.cbl,mp:!!obState.eq.mp,bnd:!!obState.eq.bnd},
     avoid:av,exp:obState.exp,swaps:altSwaps,testAsked:altTest,
     sex:obState.sex,age:obState.age,height:obState.height,weight:obState.weight,bf:obState.bf,
     act:obState.act,ngoal:obState.ngoal,
+    sport:obState.sport,schwaechen:schwListe.slice(),
     tdays:obState.tdays.slice().sort(function(a,b){return a-b;})};
   set('profile',profile);
+  cfg.sport=obState.sport;cfg.schwaechen=schwListe.slice();
+  /* Kacheln/Aufstellung/Einstellungsfelder haengen am Sportmodus und
+     liefen sonst erst beim naechsten Themen- oder Sprachwechsel neu. */
+  if(typeof buildTiles==='function')buildTiles();
+  if(typeof volBar==='function')volBar();
+  if(typeof syncSettings==='function')syncSettings();
   /* Ernaehrungsrechner vorbefuellen und rechnen lassen -- damit stehen die
      Ziele (Ring, Balken, Coach) ab Tag eins, ohne dass jemand den Rechner
      erst suchen muss. */
@@ -12492,7 +13319,23 @@ function introFinishProfile(){
   applyProfile();buildCatalog();renderDay();volBar();refresh();
   if(typeof paintSetProfile==='function')paintSetProfile();
 }
-function inNextStep(){inIdx=Math.min(ISTEPS.length-1,inIdx+1);renderIntro();}
+/* Schritte, die es im gewaehlten Weg nicht gibt: Calisthenics kennt keine
+   Sportarten-Schwaechen (die Stufen-Progression traegt die Anpassung);
+   der Sportmodus kennt weder Geraete- noch Schonungs-Filter -- beide
+   steuern den Calisthenics-Katalogtausch, den es dort nicht gibt. Eine
+   Frage zu stellen, deren Antwort nichts bewirkt, waere ein gebrochenes
+   Versprechen im Onboarding (Schonungs-Steuerung fuer Sport-Bausteine ist
+   fuer v31.x vorgesehen, mit eigener Wirkung statt leerer Zusage). */
+function inSkip(k){
+  if(k==='schwaechen')return obState.sport==='cali';
+  if(k==='eq'||k==='avoid')return obState.sport!=='cali';
+  return false;
+}
+function inNextStep(){
+  var schutz=0;
+  do{inIdx=Math.min(ISTEPS.length-1,inIdx+1);}while(inSkip(ISTEPS[inIdx])&&++schutz<5);
+  renderIntro();
+}
 var NUMS={age:{min:14,max:80,unit:['years','Jahre']},height:{min:140,max:210,unit:['cm','cm']},weight:{min:40,max:150,unit:['kg','kg']}};
 /* Scroll-Rad (iOS-Stil): ein Bauplan fuer jedes Zahlenrad in der App --
    Einfuehrung (Alter/Groesse/Gewicht) UND Erinnerungs-Uhrzeit (Stunde/Minute)
@@ -12571,7 +13414,10 @@ function inHead(k,L){
       var fill=0;
       if(chDone(c,k))fill=100;
       else if(ch===c){
-        var steps=ICHSTEPS[c],i=steps.indexOf(k);
+        /* Uebersprungene Schritte zaehlen nicht in den Kapitel-Fortschritt
+           -- sonst bliebe der Balken im Rahmen-Kapitel des Sportmodus bei
+           50 % stehen, obwohl alles Beantwortbare beantwortet ist. */
+        var steps=ICHSTEPS[c].filter(function(sk){return !(typeof inSkip==='function'&&inSkip(sk));}),i=steps.indexOf(k);
         fill=i<0?100:Math.round((i+1)/steps.length*100);
       }
       h+='<span class="seg"><i style="width:'+fill+'%;background:'+CCOL[c]+'"></i></span>';
@@ -12581,8 +13427,17 @@ function inHead(k,L){
   }
 }
 /* Antwortkarten: Icon-Chip links, Text, Auswahlkreis rechts. */
+/* v31: Die Schwaechen-Kacheln haengen von der gewaehlten Sportart ab und
+   werden deshalb je Aufruf frisch aus SPORT gebaut, nicht statisch in OBL
+   gehalten. */
+function schwOpts(){
+  var sp=SPORT[obState.sport];
+  if(!sp||obState.sport==='cali')return[];
+  return sp.schw.map(function(w){return[w.key,[w.l[0],w.l[1]],null,null,'var(--aurora)'];});
+}
 function inOpts(k,L){
-  var opts=OBL[k],multi=(k==='eq'||k==='avoid');
+  if(k==='schwaechen')OBL.schwaechen=schwOpts();
+  var opts=OBL[k],multi=(k==='eq'||k==='avoid'||k==='schwaechen');
   /* ngoal zeigt fuenf Kacheln, obState.ngoal traegt aber nur einen von drei
      Kalorien-Werten (Mehrfachbelegung, siehe NGMAP) -- die Auswahlkachel
      selbst steht separat in obState.goalphys. */
@@ -12613,7 +13468,12 @@ function tdaysHtml(L){
      Farbe zu erfinden. `null` (Track 7, letzter Platz) ist kein Trainingstag
      sondern der leichte Tag -- eigene Beschriftung ohne SESSALL-Nachschlage. */
   h+='</div><div class="tdleg">'+order.map(function(key,i){
-    var label=key?sessDe(SESSALL[key].title):(L?'Leicht':'Easy');
+    /* v31: Die Legende nennt die Einheiten der GEWAEHLTEN Sportart -- zu
+       diesem Zeitpunkt steht sie erst in obState, nicht in cfg. */
+    var spo=SPORT[obState.sport];
+    var label=key
+      ?((spo&&obState.sport!=='cali'&&spo.sess[key])?spTxt(spo.sess[key].t):sessDe(SESSALL[key].title))
+      :(L?'Leicht':'Easy');
     return '<span><i style="background:'+TDCOLS[i%TDCOLS.length]+'"></i>'+label+'</span>';
   }).join('')+'</div>';
   h+='<p class="tdmeta" id="tdHint"></p><p class="tdfirst" id="tdFirst"></p>';
@@ -12656,7 +13516,11 @@ function fuelPreviewHtml(DE){
   var sx=obState.sex==='f'?-161:(obState.sex==='x'?-78:5);
   var bmr=10*obState.weight+6.25*obState.height-5*obState.age+sx;
   var kcal=Math.round((bmr*parseFloat(obState.act)+parseFloat(obState.ngoal))/10)*10;
-  var pro=Math.round(obState.weight*1.8);
+  /* Denselben Protein-Faktor nehmen, den calc() spaeter nimmt -- zwei
+     hart kodierte Zahlen laufen sonst lautlos auseinander, sobald eine
+     Sportart einen anderen Korridor bekommt. */
+  var spv=SPORT[obState.sport];
+  var pro=Math.round(obState.weight*((obState.sport!=='cali'&&spv)?spv.ern.pro:1.9));
   return '<div class="fuelprev">'+
     '<div><b>≈ '+kcal+'</b><span>'+(DE?'kcal am Tag':'kcal per day')+'</span></div>'+
     '<div><b>≈ '+pro+' g</b><span>Protein</span></div>'+
@@ -12664,6 +13528,8 @@ function fuelPreviewHtml(DE){
 }
 function renderIntro(){
   var L=cfg.lang==='de'?1:0,DE=L===1,k=ISTEPS[inIdx],T=IT[k],host=$('inStep');
+  if(k==='ready'&&obState.sport!=='cali')T=IT.readySport;
+  if(k==='exp'&&obState.sport!=='cali')T=IT.expSport;
   if(k==='bf'&&!obState.bfTouched)obState.bf=bfEstimate();
   inHead(k,L);
   host.className='istep'+((k==='hello'||k==='ready')?' center':'');
@@ -12675,8 +13541,8 @@ function renderIntro(){
        letzte Stelle, an der sie ueberlebt hat; wer die App zum ersten Mal
        oeffnet, sah also ein anderes Zeichen als danach ueberall.
        Jetzt dasselbe V unter der Stange wie im Symbol, im Startbild und im
-       Markenfuss auf HEUTE, mit "Calisthenics" darunter. */
-    h+='<div class="brandline"><svg width="40" height="40" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg><span><b>VALKR</b><em>Calisthenics</em></span></div>';
+       Markenfuss auf HEUTE — seit v31 mit "Athletik" darunter. */
+    h+='<div class="brandline"><svg width="40" height="40" viewBox="0 0 512 512" aria-hidden="true"><g fill="none" stroke="var(--brass)" stroke-linecap="round" stroke-linejoin="round"><path d="M136 122 H376" stroke-width="34"/><path d="M164 190 L256 380 L348 190" stroke-width="60"/></g></svg><span><b>VALKR</b><em>Athletik</em></span></div>';
     h+='<h2></h2><p class="isub"></p>';
     h+='<div class="ilang"><button type="button" data-lang="de" aria-pressed="'+(L===1)+'">Deutsch</button><button type="button" data-lang="en" aria-pressed="'+(L===0)+'">English</button></div>';
     /* Einheiten gehoeren VOR die Fragen nach Groesse und Gewicht -- sonst
@@ -12727,6 +13593,20 @@ function renderIntro(){
            '<button type="button" class="opt" data-nt="0"><b>'+(DE?'Nein danke,':'No thanks,')+'</b> <span>'+(DE?'später in den Einstellungen nachholbar':'can be turned on later in settings')+'</span></button>'+
            '</div>')+
        '</div>';
+  }else if(k==='schwaechen'){
+    /* OBL.schwaechen setzt inOpts() selbst (erste Zeile dort) -- hier nur
+       den Zweig ansteuern. */
+    h+=inOpts(k,L);
+  }else if(k==='goal'){
+    /* v31: Die Kachel "Skills lernen (Muscle-up, Handstand ...)" gehoert dem
+       Calisthenics-Weg -- einem Fussballer angeboten waere sie ein sichtbarer
+       Bruch im sonst sportspezifischen Onboarding. Render und Klick-Zuhoerer
+       lesen dieselbe OBL.goal-Liste, deshalb wird sie hier je Durchlauf
+       gesetzt statt einmalig. */
+    if(!OBL._goalVoll)OBL._goalVoll=OBL.goal;
+    OBL.goal=(obState.sport==='cali')?OBL._goalVoll:OBL._goalVoll.filter(function(o){return o[0]!=='skills';});
+    if(obState.goal==='skills'&&obState.sport!=='cali')obState.goal='fit';
+    h+=inOpts(k,L);
   }else if(OBL[k]&&k!=='sex'){
     h+=inOpts(k,L);
   }
@@ -12786,14 +13666,25 @@ function renderIntro(){
   if(opts){
     [].forEach.call(host.querySelectorAll('.iopt'),function(b){
       b.addEventListener('click',function(){
-        var o=opts[parseInt(b.dataset.i,10)],multi=(k==='eq'||k==='avoid');
+        var o=opts[parseInt(b.dataset.i,10)],multi=(k==='eq'||k==='avoid'||k==='schwaechen');
         if(multi){
+          /* Schwaechen: hoechstens zwei -- mehr Schwerpunkte je Einheit
+             wuerden den Plan verwaessern statt ihn zu schaerfen. */
+          if(k==='schwaechen'&&!obState.schwaechen[o[0]]){
+            var an=0;for(var sk in obState.schwaechen)if(obState.schwaechen[sk])an++;
+            if(an>=2)return;
+          }
           obState[k][o[0]]=!obState[k][o[0]];
           b.setAttribute('aria-pressed',String(!!obState[k][o[0]]));
         }else if(k==='ngoal'){
           obState.goalphys=o[0];obState.ngoal=NGMAP[o[0]];
           [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
         }else{
+          /* Neue Sportart -> gewaehlte Schwaechen verwerfen: die Schluessel
+             der alten Sportart existieren in der neuen nicht. NUR bei echtem
+             Wechsel -- wer seine Sportart beim Zurueckblaettern bestaetigt,
+             soll seine Schwaechen behalten. */
+          if(k==='sport'&&obState.sport!==o[0])obState.schwaechen={};
           obState[k]=o[0];
           [].forEach.call(host.querySelectorAll('.iopt'),function(x){x.setAttribute('aria-pressed',String(x===b));});
           if(k==='sex'){var fs=$('figStage');if(fs)fs.innerHTML=bfFigure(obState.bf,obState.sex);}
@@ -12832,7 +13723,11 @@ function renderIntro(){
   var next=$('inNext');
   next.textContent=T.n?T.n[L]:(DE?'Weiter':'Next');
 }
-$('inBack').addEventListener('click',function(){inIdx=Math.max(0,inIdx-1);renderIntro();});
+$('inBack').addEventListener('click',function(){
+  var schutz=0;
+  do{inIdx=Math.max(0,inIdx-1);}while(inSkip(ISTEPS[inIdx])&&inIdx>0&&++schutz<5);
+  renderIntro();
+});
 $('inNext').addEventListener('click',function(){
   var k=ISTEPS[inIdx];
   if(k==='tdays'&&obState.tdays.length!==tdNeed()){
@@ -13048,12 +13943,93 @@ function syncSettings(){
   var sp=$('setSpar');if(sp)sp.value=get('spar','auto');
   if(typeof sparNote==='function')sparNote();
   $('setLang').value=cfg.lang;$('setUnits').value=cfg.units;
+  /* v31: Sportarten-Auswahl aus SPORT fuellen -- Reihenfolge wie im
+     Onboarding, Calisthenics zuletzt. */
+  var ssp=$('setSport');
+  if(ssp){
+    var ordnung=['fussball','basketball','tennis','handball','laufen','cali'];
+    ssp.innerHTML=ordnung.map(function(k){
+      var nm=k==='cali'?'Calisthenics':spTxt(SPORT[k].n);
+      return '<option value="'+k+'">'+nm+'</option>';
+    }).join('');
+    ssp.value=cfg.sport||'cali';
+  }
+  schwChips();
   $('setTrack').value=cfg.track;$('setMotion').value=cfg.motion;$('setSound').value=cfg.sound;
   $('setHealth').value=cfg.health||'off';syncHealthUI();
   $('setStart').value=ST;
   $('u-h').textContent=ul();$('u-w').textContent=uw();$('u-w2').textContent=uw();
 }
-$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildPost();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();if(typeof fuelPaint==='function')fuelPaint();drawW();refresh();testCalc();});
+$('setLang').addEventListener('change',function(){cfg.lang=this.value;saveCfg();applyI18n();buildSup();buildMeas();buildChips();buildLearn();buildSkills();buildMob();buildPost();buildTest();var _sd=$('skillDetail');if(_sd)_sd.innerHTML='';buildThemeGrid();renderDay();buildWeeks();renderWins();calc();if(typeof fuelPaint==='function')fuelPaint();drawW();refresh();testCalc();syncSettings();});
+/* v31: Schwaechen-Chips in den Einstellungen -- die Einfuehrung darf nicht
+   der einzige Weg zu den Schwerpunkt-Uebungen sein. Hoechstens zwei aktiv,
+   dieselbe Regel wie im Onboarding. */
+function schwChips(){
+  var feld=$('setSchwFeld'),host=$('setSchw');
+  if(!feld||!host)return;
+  var sp=sportAkt();
+  var lb=$('setSchwLabel');if(lb)lb.textContent=cfg.lang==='de'?'Schwächen':'Weaknesses';
+  if(!sp){feld.hidden=true;host.innerHTML='';return;}
+  feld.hidden=false;
+  host.innerHTML=sp.schw.map(function(w){
+    var an=(cfg.schwaechen||[]).indexOf(w.key)>=0;
+    return '<button type="button" class="chip" data-schw="'+w.key+'" aria-pressed="'+an+'">'+spTxt(w.l)+'</button>';
+  }).join('');
+}
+(function(){var host=$('setSchw');if(!host)return;
+ host.addEventListener('click',function(e){
+  var b=e.target.closest('[data-schw]');if(!b)return;
+  var k=b.dataset.schw,liste=(cfg.schwaechen||[]).slice(),ix=liste.indexOf(k);
+  if(ix>=0)liste.splice(ix,1);
+  else{if(liste.length>=2)return;liste.push(k);}
+  cfg.schwaechen=liste;saveCfg();
+  schwChips();renderDay();refresh();
+ });
+})();
+/* v31: Sportwechsel in den Einstellungen. Schwaechen bleiben nur, wenn ihr
+   Schluessel in der neuen Sportart existiert -- fremde Schluessel waeren
+   stille Karteileichen, die nie wieder ein Schwerpunkt-Item erzeugen. */
+(function(){var el=$('setSport');if(!el)return;
+ el.addEventListener('change',function(){
+  cfg.sport=this.value;
+  var sp=SPORT[cfg.sport];
+  cfg.schwaechen=(cfg.schwaechen||[]).filter(function(k){
+    if(cfg.sport==='cali'||!sp)return false;
+    for(var i=0;i<sp.schw.length;i++)if(sp.schw[i].key===k)return true;
+    return false;
+  });
+  saveCfg();
+  schwChips();
+  if(typeof buildTiles==='function')buildTiles();
+  if(typeof volBar==='function')volBar();
+  renderDay();buildWeeks();calc();
+  if(typeof fuelPaint==='function')fuelPaint();
+  refresh();
+  /* Leiste neu zeichnen: zweites Argument ist die tatsaechliche
+     Unteransicht (aus der aria-Markierung), nicht der Gruppenschluessel --
+     sonst springt die Markierung auf "Einheit", waehrend darunter noch
+     eine andere Unteransicht steht. */
+  var kb=document.body.dataset.view;
+  if(kb&&typeof drawSub==='function'){
+    var akt=document.querySelector('#subnav button[aria-selected="true"]');
+    drawSub(kb,(akt&&akt.dataset.view)||kb);
+  }
+  /* Steht unter dem Einstellungs-Push gerade eine Unteransicht, die es im
+     neuen Modus nicht mehr gibt (Skills/Test/Katalog), wird sie still auf
+     die Einheiten-Ansicht umgestellt -- nur die Klassen, der Push bleibt.
+     Sonst zeigte die App nach dem Schliessen genau die Inhalte, die die
+     Leiste eben verbannt hat. */
+  if(sportAkt()){
+    var verw=document.querySelector('.view.on:not(.pushv)');
+    if(verw&&{'v-skills':1,'v-test':1,'v-catalog':1}[verw.id]){
+      verw.classList.remove('on');
+      var zielV=$(VS.train||'v-train')||$('v-train');
+      if(zielV)zielV.classList.add('on');
+      if(typeof drawSub==='function')drawSub('train','train');
+    }
+  }
+ });
+})();
 $('setUnits').addEventListener('change',function(){
   var oldW=fromDisp(nv('f-w'),'w'),oldH=fromDisp(nv('f-h'),'l');
   cfg.units=this.value;saveCfg();
@@ -13509,14 +14485,14 @@ var ACH=[
  {id:'block2',cat:'consistency',n:['Second block','Zweiter Block'],d:['Start block 2','Block 2 starten'],p:180,f:function(){return blockNo>=2;}},
  {id:'block4',cat:'consistency',n:['Full cycle','Voller Zyklus'],d:['Reach block 4 — a year of training','Block 4 erreichen — ein Jahr Training'],p:400,f:function(){return blockNo>=4;}},
 
- {id:'pullup1',cat:'strength',n:['First pull-up','Erster Klimmzug'],d:['Reach the full pull-up step','Volle Klimmzug-Stufe erreichen'],p:60,f:function(){return (steps.pull||0)>=4;}},
- {id:'pullup10',cat:'strength',n:['Ten strict','Zehn strikte'],d:['10 clean pull-ups','10 saubere Klimmzüge'],p:90,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Pull-ups')r=p.v;});return r>=10;}},
- {id:'push4',cat:'strength',n:['Chest to floor','Brust zum Boden'],d:['Reach the full push-up step','Volle Liegestütz-Stufe erreichen'],p:40,f:function(){return (steps.push||0)>=3;}},
- {id:'push6',cat:'strength',n:['Archer','Archer'],d:['Reach archer push-ups','Archer-Liegestütze erreichen'],p:80,f:function(){return (steps.push||0)>=5;}},
- {id:'pistol',cat:'strength',n:['Pistol','Pistol'],d:['Reach the pistol squat step','Pistol-Stufe erreichen'],p:90,f:function(){return (steps.legs||0)>=6;}},
- {id:'hollow60',cat:'strength',n:['Hollow sixty','Hollow 60'],d:['60 s hollow hold','60 s Hollow Hold'],p:50,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Hollow hold')r=p.v;});return r>=60;}},
- {id:'allsteps',cat:'strength',n:['Broad base','Breite Basis'],d:['Every pattern past step 3','Jedes Muster über Stufe 3'],p:100,f:function(){return PAT.every(function(p){return (steps[p.id]||0)>=3;});}},
- {id:'skill3',cat:'strength',n:['Skill seeker','Skill-Jäger'],d:['Advance any skill 3 steps','Einen Skill 3 Stufen weiter'],p:60,f:function(){return SKILLS.some(function(s){return get('skill_'+s.id,0)>=3;});}},
+ {id:'pullup1',cali:1,cat:'strength',n:['First pull-up','Erster Klimmzug'],d:['Reach the full pull-up step','Volle Klimmzug-Stufe erreichen'],p:60,f:function(){return (steps.pull||0)>=4;}},
+ {id:'pullup10',cali:1,cat:'strength',n:['Ten strict','Zehn strikte'],d:['10 clean pull-ups','10 saubere Klimmzüge'],p:90,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Pull-ups')r=p.v;});return r>=10;}},
+ {id:'push4',cali:1,cat:'strength',n:['Chest to floor','Brust zum Boden'],d:['Reach the full push-up step','Volle Liegestütz-Stufe erreichen'],p:40,f:function(){return (steps.push||0)>=3;}},
+ {id:'push6',cali:1,cat:'strength',n:['Archer','Archer'],d:['Reach archer push-ups','Archer-Liegestütze erreichen'],p:80,f:function(){return (steps.push||0)>=5;}},
+ {id:'pistol',cali:1,cat:'strength',n:['Pistol','Pistol'],d:['Reach the pistol squat step','Pistol-Stufe erreichen'],p:90,f:function(){return (steps.legs||0)>=6;}},
+ {id:'hollow60',cali:1,cat:'strength',n:['Hollow sixty','Hollow 60'],d:['60 s hollow hold','60 s Hollow Hold'],p:50,f:function(){var r=0;PRS.forEach(function(p){if(p.n==='Hollow hold')r=p.v;});return r>=60;}},
+ {id:'allsteps',cali:1,cat:'strength',n:['Broad base','Breite Basis'],d:['Every pattern past step 3','Jedes Muster über Stufe 3'],p:100,f:function(){return PAT.every(function(p){return (steps[p.id]||0)>=3;});}},
+ {id:'skill3',cali:1,cat:'strength',n:['Skill seeker','Skill-Jäger'],d:['Advance any skill 3 steps','Einen Skill 3 Stufen weiter'],p:60,f:function(){return SKILLS.some(function(s){return get('skill_'+s.id,0)>=3;});}},
 
  {id:'rest',cat:'recovery',n:['Recovery respected','Regeneration respektiert'],d:['Log 5 rest days','5 Ruhetage eintragen'],p:40,f:function(){
    var n=0;for(var k in doneMap){var pl=plan(new Date(k+'T00:00:00'));if(pl.kind==='rest'&&dayDone(k))n++;}return n>=5;}},
@@ -13526,14 +14502,14 @@ var ACH=[
  {id:'mob5',cat:'recovery',n:['Mobility monk','Mobilitäts-Mönch'],d:['Finish the guided routine 5 times','Geführte Routine 5x beenden'],p:50,f:function(){return (seen.mobRuns||0)>=5;}},
 
  {id:'protein',cat:'fuel',n:['Well fed','Gut versorgt'],d:['Protein at 1.6 g/kg or above','Protein bei 1,6 g/kg oder mehr'],p:30,f:function(){
-   var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*1.9);return pro/kg>=1.6;}},
+   var kg=kgNow(),pro=over.pro!==undefined?over.pro:Math.round(kg*proFaktor());return pro/kg>=1.6;}},
  {id:'weigh10',cat:'fuel',n:['Data point','Datenpunkt'],d:['10 weigh-ins logged','10 Wiegungen eingetragen'],p:35,f:function(){return wlog.length>=10;}},
  {id:'tape',cat:'fuel',n:['Tape measure','Maßband'],d:['Fill in all measurements','Alle Umfänge eintragen'],p:30,f:function(){return MEAS.every(function(m){return meas[m[0]]!==undefined;});}},
  {id:'nowaste',cat:'fuel',n:['No snake oil','Kein Schlangenöl'],d:['Nothing useless on your supplement list','Nichts Nutzloses auf der Supplement-Liste'],p:25,f:function(){
    var any=false,bad=false;SUPPS.forEach(function(s,i){if(taken[i]){any=true;if(BADS[s])bad=true;}});return any&&!bad;}},
 
- {id:'tested',cat:'knowledge',n:['Measured','Eingemessen'],d:['Complete the level test','Level-Test ausfüllen'],p:35,f:function(){return TESTS.some(function(t){return (testVals[t.id]||0)>0;});}},
- {id:'scholar',cat:'knowledge',n:['Scholar','Gelehrter'],d:['Open all 12 chapters','Alle 12 Kapitel öffnen'],p:60,f:function(){return Object.keys(seen.chapters||{}).length>=12;}},
+ {id:'tested',cali:1,cat:'knowledge',n:['Measured','Eingemessen'],d:['Complete the level test','Level-Test ausfüllen'],p:35,f:function(){return TESTS.some(function(t){return (testVals[t.id]||0)>0;});}},
+ {id:'scholar',cali:1,cat:'knowledge',n:['Scholar','Gelehrter'],d:['Open all 12 chapters','Alle 12 Kapitel öffnen'],p:60,f:function(){return Object.keys(seen.chapters||{}).length>=12;}},
  {id:'rpe10',cat:'knowledge',n:['Self aware','Selbstwahrnehmung'],d:['Log RPE 10 times','10x RPE eintragen'],p:40,f:function(){return countLogs(function(l){return !!l.rpe;})>=10;}},
  {id:'logs20',cat:'knowledge',n:['Diarist','Chronist'],d:['Write 20 session logs','20 Trainingslogs schreiben'],p:60,f:function(){return Object.keys(logs).length>=20;}},
  {id:'miles5',cat:'knowledge',n:['Milestone keeper','Meilenstein-Sammler'],d:['Log 5 milestones','5 Meilensteine eintragen'],p:40,f:function(){return wins.length>=5;}},
@@ -13835,7 +14811,11 @@ function renderRanks(){
      zwanzig offen untereinander -- eine Wand aus Sechsecken, in der die
      wenigen erreichten untergingen. Zugeklappt sagt jede Zeile das Wichtigste:
      wie viele der Kategorie man hat. */
-  var byCat={};ACH.forEach(function(a){(byCat[a.cat]=byCat[a.cat]||[]).push(a);});
+  /* v31: Stufen-, Skill- und Test-Abzeichen sind im Sportmodus
+     unerreichbar (ihre Datenquellen werden dort nie befuellt) -- sie
+     erscheinen nur, wenn sie frueher auf dem Calisthenics-Weg schon
+     verdient wurden. */
+  var byCat={};ACH.forEach(function(a){if(a.cali&&sportAkt()&&!got[a.id])return;(byCat[a.cat]=byCat[a.cat]||[]).push(a);});
   var html='';
   Object.keys(CATN).forEach(function(c){
     if(!byCat[c])return;
@@ -14202,6 +15182,19 @@ if(reOnbBtn)reOnbBtn.addEventListener('click',function(){
     obState.eq={bar:!!(profile.eq&&profile.eq.bar),dip:!!(profile.eq&&profile.eq.dip),rings:!!(profile.eq&&profile.eq.rings),
       kb:!!(profile.eq&&profile.eq.kb),cbl:!!(profile.eq&&profile.eq.cbl),mp:!!(profile.eq&&profile.eq.mp),bnd:!!(profile.eq&&profile.eq.bnd)};
     obState.avoid={};if(profile.avoid)Object.keys(profile.avoid).forEach(function(a){if(profile.avoid[a])obState.avoid[a]=true;});
+    /* v31: Sportart und Schwaechen wie alle anderen Felder vorbesetzen --
+       cfg ist die Wahrheit (der Einstellungs-Wechsel schreibt nur dorthin).
+       Ohne dieses Seeding stand hier der Boot-Default 'fussball', und ein
+       durchgeklickter erneuter Durchlauf haette einem Calisthenics- oder
+       Basketball-Nutzer stillschweigend Fussball untergeschoben. */
+    obState.sport=cfg.sport||profile.sport||'cali';
+    obState.schwaechen={};
+    /* cfg ist die Wahrheit, AUCH wenn es ein leeres Array ist -- wer seine
+       Schwaechen in den Einstellungen bewusst abgewaehlt oder per
+       Sportwechsel verloren hat, bekommt sie hier nicht aus dem alten
+       Profil zurueckgeschoben. Das Profil greift nur, wenn cfg das Feld
+       noch gar nicht kennt (Bestand von vor v31). */
+    (Array.isArray(cfg.schwaechen)?cfg.schwaechen:(profile.schwaechen||[])).forEach(function(sk){obState.schwaechen[sk]=true;});
   }
   inIdx=0;
   /* Nur der erneute Durchlauf laesst sich abbrechen -- das Profil bleibt
