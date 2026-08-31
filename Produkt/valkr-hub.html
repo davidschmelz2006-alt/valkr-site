@@ -938,6 +938,18 @@
   /* Suche zuerst: Eingabe und Scanner in einer Zeile, statt der Scanner als
      eigener Vollbreite-Knopf ueber dem Feld -- das war der Umweg, den jede
      Mahlzeit brauchte, bevor man ueberhaupt zu tippen anfing. */
+  /* v30.1: Waehrend die Hinzufuegen-Seite offen ist, haengt die
+     Partikelflaeche (#bgfx) IN ihr (fxAdopt) -- der opake Seiten-Grund
+     wuerde sie sonst zudecken. Inhalt und Kopf liegen darueber. Der Kopf
+     verliert dabei seine Unschaerfe: backdrop-filter ueber bewegtem Grund
+     wird in jedem Partikel-Bild neu verrechnet -- genau die Falle, die
+     schon beim Trainingsmodus zugeschlagen hat. */
+  #v-food .pushhead{backdrop-filter:none;-webkit-backdrop-filter:none;
+    background:color-mix(in srgb,var(--bg) 92%,transparent)}
+  /* Sparmodus-Vertrag gilt auch hier: Vollflaeche statt Ueberblendung --
+     die ID-Regel darueber wuerde die Sparmodus-Regel sonst ausstechen. */
+  :root[data-spar="1"] #v-food .pushhead{background:var(--bg)}
+  #v-food #foodBody{position:relative;z-index:1}
   /* v30: Suchzeile als Glas-Pille (Lupe, randloses Feld, Scanner) und
      Glas-Karten -- derselbe Verlaufs-Grund wie der Kalenderkasten (.cal),
      nicht die flache .card: DAS ist die Glas-Sprache der App. */
@@ -3890,7 +3902,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='30.0';
+var VERSION='30.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6733,7 +6745,11 @@ var GROUP={
   settings:{v:['settings','access'],                l:[['Settings','Einstellungen'],['Access','Zugang']]}
 };
 var PUSHV={detail:1,coach:1,learn:1,settings:1,access:1,kam:1,food:1};
-function istHandy(){return window.matchMedia&&window.matchMedia('(max-width:640px)').matches;}
+/* Die Schwelle liegt EINMAL hier -- die Partikel-Engine hoert weiter unten
+   auf den change derselben Liste. Wer den Breakpoint aendert, aendert ihn
+   damit fuer beide. */
+var HANDY_MQ=window.matchMedia?window.matchMedia('(max-width:640px)'):null;
+function istHandy(){return !!HANDY_MQ&&HANDY_MQ.matches;}
 /* Rueckwaerts: welcher Abschnitt gehoert zu welchem Bereich. Damit fuehrt
    jedes vorhandene show('test') weiterhin ans Ziel, ohne dass eine einzige
    Aufrufstelle angefasst werden musste. */
@@ -6783,6 +6799,10 @@ function show(n,fromBack){
     Object.keys(VS).forEach(function(k){$(VS[k]).classList.toggle('on',k===n);});
     delete document.body.dataset.pushed;
   }
+  /* v30.1: Die Partikel-Leinwand haengt waehrend der Hinzufuegen-Seite in
+     ihr drin -- ihr opaker Grund wuerde sie sonst zudecken (Details am
+     fxAdopt weiter unten). */
+  fxAdopt(alsPush&&n==='food');
   var key=PARENT[n]||n;
   /* Bei einem Push bleibt der Bereich darunter der Bezugspunkt: Reiter,
      Abschnittsleiste und body-Attribut wechseln nicht mit. */
@@ -13015,6 +13035,26 @@ $('setStart').addEventListener('change',function(){
 
 /* ---------- ambient canvas ---------- */
 var cv=$('bgfx'),cx=cv.getContext('2d'),W=0,H=0,parts=[],shots=[],mouse={x:-999,y:-999},raf=null;
+/* v30.1: Die Hinzufuegen-Seite (#v-food) liegt auf dem Handy als opake
+   Flaeche UEBER der Leinwand -- dort waere es das einzige Stueck App ohne
+   Partikel. Statt einer zweiten Leinwand (doppelte Zeichenschleife) wandert
+   dieselbe waehrend der offenen Seite in sie hinein und beim Verlassen
+   zurueck an ihren Heimplatz. Position fixed und die Zeichenschleife
+   bleiben unveraendert -- nur die Malreihenfolge aendert sich. */
+var fxHeim=cv.parentNode,fxAnker=cv.nextSibling;
+function fxAdopt(an){
+  if(an){var fv=$('v-food');if(fv&&cv.parentNode!==fv)fv.insertBefore(cv,fv.firstChild);}
+  else if(fxHeim&&cv.parentNode!==fxHeim)fxHeim.insertBefore(cv,fxAnker);
+}
+/* Neubewertung ohne show(): die Media-Query macht #v-food rein ueber die
+   Fensterbreite zur opaken Wand (Telefon drehen, Fenster ziehen). Haengt
+   der Umzug nur an show(), blieben die Partikel auf der offenen Seite bis
+   zum naechsten Oeffnen verschwunden. Der matchMedia-Umschlag ist das
+   praezise Signal; sizeCv ruft zusaetzlich bei jedem resize an. */
+function fxLage(){var fv=$('v-food');fxAdopt(!!fv&&fv.classList.contains('on')&&istHandy());}
+(function(){if(!HANDY_MQ)return;
+  if(HANDY_MQ.addEventListener)HANDY_MQ.addEventListener('change',fxLage);
+  else if(HANDY_MQ.addListener)HANDY_MQ.addListener(fxLage);})();
 /* „Ruhig" heisst weniger Partikel, nicht keine -- ein paar driftende Punkte
    und ein seltener Lichtstreif sind das, was Atmosphaere ausmacht. */
 /* Die Partikel waren im Auslieferungszustand AUS -- und niemand hat es
@@ -13030,6 +13070,7 @@ function fxOn(){return !SYSRED&&cfg.motion!=='off'&&fxOf()!=='none';}
 function fxCalm(){return cfg.motion==='calm';}
 function pcol(){return cvar('--part')||'200,220,230';}
 function sizeCv(){
+  fxLage();
   if(raf){cancelAnimationFrame(raf);raf=null;}
   cx.clearRect(0,0,cv.width,cv.height);
   if(!fxOn()){cv.style.display='none';return;}
