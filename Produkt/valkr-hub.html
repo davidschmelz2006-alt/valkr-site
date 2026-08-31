@@ -1218,29 +1218,28 @@
   .calhead{display:grid;grid-template-columns:repeat(7,1fr);gap:.3rem;margin-bottom:.3rem}
   .calhead span{text-align:center;font-family:var(--fm);font-size:var(--t1);
     letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
-  /* Etwas laenger und mit einem Hauch Ueberschwingen: das Aufklappen soll
-     sich anfuehlen, als faehrt der Monat heraus, nicht als wird eine Hoehe
-     gesetzt. Beide Werte -- Fenster und Verschiebung -- laufen synchron, sonst
-     rutscht das Raster sichtbar hinter der Kante her.
-     Animiert wird ausschliesslich per clip-path (Compositor, kein Reflow) --
-     transition und will-change setzt calLayout() gezielt nur waehrend der
-     Animation selbst per Inline-Style, siehe dort. Vorher lief hier eine
-     transition auf height: eine reine Layout-Eigenschaft, die bei jedem der
-     ~25 Bilder in 420ms einen Reflow des Kastens ausgeloest hat -- das war
-     das Ruckeln. */
+  /* Das Aufklappen soll sich anfuehlen, als faehrt der Monat heraus, nicht
+     als wird eine Hoehe gesetzt. Beide Werte -- Kante und Verschiebung --
+     laufen synchron, sonst rutscht das Raster sichtbar hinter der Kante her.
+     Animiert wird ausschliesslich per clip-path am ganzen Kasten (#cal)
+     plus transform auf Griff und Seitenrest (Compositor, kein Reflow pro
+     Bild) -- transition und will-change setzt calLayout() gezielt nur
+     waehrend der Animation per Inline-Style, siehe dort. Die Geschichte
+     davor: erst transition auf height (Reflow in jedem der ~25 Bilder --
+     Ruckeln), dann clip-path nur auf dem Innenfenster (fluessig, aber der
+     Seitenrest teleportierte am Anfang bzw. Ende -- Liams "komplett am
+     Laggen" in v30.1). */
   .calview{overflow:hidden}
-  /* Die zusaetzlichen Zeilen blenden beim Aufklappen mit auf. Ohne das
-     erscheinen sie hart an der Kante, sobald die Hoehe sie freigibt.
-     Bewusst auf .calview eingegrenzt, nicht auf .cal allgemein: der
-     Ernaehrungsstreifen sitzt jetzt auch in einem .cal-Kasten, hat aber
-     kein .calview und keine .inweek-Zeilenlogik -- mit der weiteren Regel
-     blieben seine Tage dauerhaft auf Opazitaet .001 stehen, weil .inweek
-     dort nie vergeben wird. */
-  .cal:not(.offen) .calview .dstrip button{opacity:.001}
-  .cal:not(.offen) .calview .dstrip button.inweek{opacity:1}
-  /* Der Griff: eine kurze Linie, die sagt "hier laesst sich ziehen". Beim
-     Aufklappen dreht sie sich in ein flaches Dach -- dieselbe Sprache wie
-     ein Blatt, das sich schliessen laesst. */
+  /* v30.2: Der frueher hier stehende Auf-/Abblende-Trick der Aussermonats-
+     Zeilen (opacity .001 auf 42 Knoepfen) ist mit dem Fenster-Prinzip
+     ueberfluessig: zugeklappt schneidet .calview die Zeilen ohnehin ab,
+     beim Auf-/Zufahren deckt das wandernde Fenster (clip-path am Kasten)
+     sie auf und zu -- genau die Kalender-Metapher. Die Blende erzeugte
+     pro Umschalten 42 gleichzeitige Compositing-Ebenen; auf schwachen
+     Telefonen war das ein messbarer Teil des Ruckelns. */
+  /* Der Griff: eine kurze Linie, die sagt "hier laesst sich ziehen".
+     Aufgeklappt wird sie nur dunkler -- Zustand zeigen reicht, eine
+     Drehung gab es in einer frueheren Fassung und ist bewusst raus. */
   .calgrab{display:block;width:100%;padding:.5rem 0 .2rem;border:0;background:none;cursor:pointer}
   .calgrab i{display:block;width:36px;height:3px;border-radius:2px;margin:0 auto;
     background:var(--line);transition:background .16s,width .2s}
@@ -1262,19 +1261,10 @@
      heraussticht: heute und der gewaehlte Tag.
      Das ist auch der Grund, warum es aufgeklappt vorher unruhig aussah --
      42 Kacheln statt 42 Zahlen. */
-  /* v25.4: es gab hier zwei ".dstrip button{transition:...}"-Regeln. Diese
-     zweite stand spaeter im Stylesheet und hat bei gleicher Spezifitaet die
-     erste komplett ersetzt, nicht ergaenzt -- das dort deklarierte
-     opacity .2s ease .04s griff nie. Zahlen ausserhalb der Woche
-     verschwanden beim Zuklappen deshalb hart, statt auszublenden, waehrend
-     die Box selbst noch 280ms auf voller Groesse stand: ein leerer, grosser
-     Kasten fuer einen Wimpernschlag -- das gemeldete "bleibt offen, nur
-     ausgegraut". Die Transition steht jetzt nur noch hier, an der Regel,
-     die tatsaechlich gewinnt. */
   .dstrip button{position:relative;display:flex;align-items:center;justify-content:center;
     aspect-ratio:1;padding:0;border:0;border-radius:999px;
     background:none;color:var(--ink3);cursor:pointer;font-family:var(--fb);
-    transition:background .18s,color .18s,opacity .2s ease .04s}
+    transition:background .18s,color .18s}
   .dstrip button:hover{background:var(--surf2)}
   .dstrip button b{font-family:var(--fd);font-weight:600;font-size:.95rem;
     font-variant-numeric:tabular-nums;color:var(--ink2)}
@@ -3902,7 +3892,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='30.1';
+var VERSION='30.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -6781,6 +6771,7 @@ function drawSub(g,cur){
   }).join('');
 }
 
+var fxWechselT=null;
 function show(n,fromBack){
   /* Die Bewegungsdemo aus dem Speicher nehmen, sobald man die Ansicht verlaesst.
      Eine SVG-Animation laeuft auch in einem display:none-Bereich weiter -- man
@@ -6803,6 +6794,17 @@ function show(n,fromBack){
      ihr drin -- ihr opaker Grund wuerde sie sonst zudecken (Details am
      fxAdopt weiter unten). */
   fxAdopt(alsPush&&n==='food');
+  /* v30.2: Waehrend die Ansicht wechselt (Push-Gleiten .3s bzw.
+     Einblenden), ruht die Partikelschleife -- ihr 30-Hz-Neuzeichnen fiele
+     sonst genau in den teuersten Moment, das Compositing der gleitenden
+     Flaechen. 340ms decken die laengste Wechsel-Transition ab; die
+     langsame Drift steht dabei unmerklich still. */
+  fxPause();clearTimeout(fxWechselT);
+  fxWechselT=setTimeout(function(){
+    /* Nicht gegen andere Pausen anlaufen: waehrend der Trainingsmodus
+       offen ist oder die App im Hintergrund liegt, bleibt es still. */
+    if(!document.hidden&&!$('runner').classList.contains('on'))fxResume();
+  },340);
   var key=PARENT[n]||n;
   /* Bei einem Push bleibt der Bereich darunter der Bezugspunkt: Reiter,
      Abschnittsleiste und body-Attribut wechseln nicht mit. */
@@ -7164,7 +7166,7 @@ function sessOf(pl){
    weit nach oben, dass die Woche mit dem gewaehlten Tag im Fenster steht.
    Deshalb ist das Auf- und Zuklappen eine einzige Verschiebung und kein
    Neuaufbau -- es laeuft auf der Grafikeinheit und kostet nichts. */
-var calOffen=false,calZeile=0,calAnimT=null,calSperre=false;
+var calOffen=false,calZeile=0,calAnimT=null,calSperre=false,calAnimZiel='';
 function monatsRaster(d){
   /* Vom Montag der Woche, in der der Monatserste liegt, bis zum Sonntag der
      Woche, in der der Monatsletzte liegt. Dadurch sind es immer volle
@@ -7179,10 +7181,20 @@ function monatsRaster(d){
 function drawStrip(){
   var el=$('dstrip');if(!el)return;
   var DE=cfg.lang==='de';
-  var wd=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  var kopf=$('calhead');
-  if(kopf)kopf.innerHTML=wd.map(function(x){return '<span>'+x+'</span>';}).join('');
   var tage=monatsRaster(sel),html='',mon=sel.getMonth();
+  /* v30.2: Jeder Tages-Tipp lief hier frueher durch innerHTML -- 42 Knoepfe
+     wegwerfen und neu bauen, nur um eine Auswahl-Markierung zu setzen. Auf
+     dem Handy war das der spuerbare Nachlauf beim Tippen, und es brach eine
+     gerade laufende Auf/Zu-Animation hart ab. Solange der Monatsausschnitt
+     und die Sprache stehen, werden jetzt nur noch Klassen, Auswahl und
+     Marken der vorhandenen Knoepfe angefasst. */
+  var sig=iso(tage[0])+'|'+iso(tage[tage.length-1])+'|'+(DE?1:0);
+  var neu=el.dataset.sig!==sig||el.children.length!==tage.length;
+  if(neu){
+    var wd=DE?['Mo','Di','Mi','Do','Fr','Sa','So']:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    var kopf=$('calhead');
+    if(kopf)kopf.innerHTML=wd.map(function(x){return '<span>'+x+'</span>';}).join('');
+  }
   for(var i=0;i<tage.length;i++){
     var d=tage[i],k=iso(d);
     var pl=plan(d);
@@ -7192,7 +7204,7 @@ function drawStrip(){
     if(dayDone(k))cls.push('done');
     if(d.getMonth()!==mon)cls.push('out');
     var inWoche=(iso(monday(d))===iso(monday(sel)));
-    if(inWoche){calZeile=Math.floor(i/7);cls.push('inweek');}
+    if(inWoche)calZeile=Math.floor(i/7);
     /* Markierung je Tag. Gezaehlt wird erst ab Programmstart -- davor gab es
        nichts zu verpassen, und ein Kreuz auf einem Tag vor dem Beginn waere
        ein Vorwurf fuer etwas, das gar nicht anstand.
@@ -7207,32 +7219,82 @@ function drawStrip(){
       else if(d<TODAY){cls.push('miss');mark='✕';}
       else cls.push('plan');
     }
-    html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+(k===iso(sel))+'"'+
-      (cls.length?' class="'+cls.join(' ')+'"':'')+
-      ' aria-label="'+dname(d)+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
-      '<b>'+d.getDate()+'</b><i aria-hidden="true">'+mark+'</i></button>';
+    if(neu){
+      html+='<button type="button" role="tab" data-d="'+k+'" aria-selected="'+(k===iso(sel))+'"'+
+        (cls.length?' class="'+cls.join(' ')+'"':'')+
+        ' aria-label="'+dname(d)+', '+d.getDate()+'.'+(d.getMonth()+1)+'.">'+
+        '<b>'+d.getDate()+'</b><i aria-hidden="true">'+mark+'</i></button>';
+    }else{
+      var b=el.children[i];
+      b.className=cls.join(' ');
+      b.setAttribute('aria-selected',k===iso(sel)?'true':'false');
+      if(b.lastElementChild.textContent!==mark)b.lastElementChild.textContent=mark;
+    }
   }
-  el.innerHTML=html;
+  if(neu){el.innerHTML=html;el.dataset.sig=sig;}
   calLayout(false);
 }
 /* Fenster und Verschiebung setzen. Beim ersten Zeichnen ohne Uebergang, sonst
    faehrt der Kalender bei jedem Ansichtswechsel sichtbar an seinen Platz.
-   Animiert wird nur noch per clip-path (welches Stueck des Kastens sichtbar
-   ist) und transform -- beides Compositor-Eigenschaften, kein Reflow pro
-   Bild. Der Kasten bleibt waehrend der Animation auf voller Monatshoehe
-   stehen (das Fenster wird nur optisch zu-/aufgedeckt); die platzsparende
-   echte Hoehe wird erst am Ende in einem einzigen Reflow gesetzt, nicht bei
-   jedem der ~25 Bilder in 420ms. */
+   v30.2: Vorher lief der clip-path nur auf dem Innenfenster (.calview) --
+   der Glaskasten selbst sprang beim Oeffnen sofort auf Monatshoehe (alles
+   darunter teleportierte nach unten) und stand beim Zuklappen 300ms auf
+   voller Hoehe, bevor er in einem Ruck zusammenschnappte. Das war Liams
+   "komplett am Laggen": nicht die Bildrate der Animation, sondern die zwei
+   harten Spruenge des Seitenrests. Jetzt faehrt die sichtbare Unterkante
+   des GANZEN Kastens per clip-path, und alles unterhalb faehrt per
+   transform synchron mit (FLIP: erst ans Ziel legen, dann optisch vom
+   alten Platz hinueberfahren). Alles Compositor-Eigenschaften -- pro
+   Umschalten genau EIN Reflow, versteckt hinter deckungsgleichen
+   Transforms. Einziger Schoenheitspreis: waehrend der 280ms ist die
+   Kastenkante eine Schnittkante ohne Schatten und Eckenrundung. */
+function calNach(){
+  var out=[],e=$('cal');
+  while(e&&e.parentElement&&!e.classList.contains('view')){
+    for(var s=e.nextElementSibling;s;s=s.nextElementSibling)out.push(s);
+    e=e.parentElement;
+  }
+  return out;
+}
 function calLayout(anim){
   var view=$('calview'),grid=$('dstrip'),cal=$('cal'),grab=$('calgrab');
   if(!view||!grid||!grid.children.length)return;
+  /* Sparmodus-Vertrag: auf schwachen Geraeten wird Push app-weit zum harten
+     Umschalten -- der Kalender haelt sich daran und springt dort ebenfalls,
+     statt 280ms zu ueberblenden. Gleiches gilt fuer reduzierte Bewegung
+     (dort nullt die globale CSS-Regel die sichtbare Transition ohnehin,
+     der Anim-Pfad wuerde aber trotzdem Reflow, will-change auf acht
+     Elementen und die 300ms-Sperre bezahlen) und fuer Bewegung "aus" --
+     die lebt NUR als JS-Bedingung, keine CSS-Regel faengt sie ab; ohne
+     diesen Zweig liefe dort die volle Animation. */
+  if(anim&&(document.documentElement.dataset.spar==='1'||SYSRED||cfg.motion==='off'))anim=false;
   var zeilen=Math.ceil(grid.children.length/7);
-  var hoehe=grid.children[0].offsetHeight;
-  var luecke=parseFloat(getComputedStyle(grid).rowGap)||5;
-  var schritt=hoehe+luecke;
-  var voll=zeilen*schritt-luecke;
-  var einzugZu=calOffen?0:(voll-hoehe);
+  /* Gemessen statt gerechnet, und alles aus EINER Quelle: frueher wurde die
+     Monatshoehe aus gerundetem offsetHeight plus rowGap zusammengesetzt --
+     die Summe wich ein paar Pixel von der echten Rasterhoehe ab, sichtbar
+     als Mini-Ruck des Seitenrests am Animationsende. Das Raster zeichnet
+     immer den ganzen Monat, seine echte Hoehe ist also direkt ablesbar;
+     der Zeilenabstand faellt daraus ab. */
+  var hoehe=grid.children[0].getBoundingClientRect().height;
+  var voll=grid.getBoundingClientRect().height;
+  var schritt=zeilen>1?(voll-hoehe)/(zeilen-1):0;
+  var delta=voll-hoehe;
   var verschiebungZu=calOffen?0:(-calZeile*schritt);
+  /* Ein Re-Render mitten in der Animation (Tages-Tipp im offenen Monat,
+     Uebungs-Haken) zielt fast immer auf denselben Endzustand -- dann darf
+     die laufende Ueberblendung zu Ende fahren, statt hart in den Endzustand
+     zu springen. Nur wenn sich das Ziel wirklich geaendert hat (andere
+     Woche beim Zuklappen, Resize mit neuen Massen), raeumt der Ruhepfad
+     auf. Die Kennung nimmt die Verschiebung, nicht die Zeile: im offenen
+     Zustand ist die Verschiebung immer 0, ein Tages-Tipp auf eine andere
+     Woche aendert das Ziel dort also nicht. */
+  var ziel=(calOffen?1:0)+'|'+Math.round(verschiebungZu*100)+'|'+Math.round(voll*100);
+  if(!anim&&calAnimT&&ziel===calAnimZiel)return;
+  /* Der Griff faehrt mit wie die Geschwister unterhalb: er sitzt im Kasten
+     UNTER dem Fenster -- ohne Gegen-Transform wuerde der wandernde Schnitt
+     ihn abschneiden statt ihn die Kante reiten zu lassen. */
+  var nach=calNach();
+  if(grab)nach.push(grab);
   clearTimeout(calAnimT);calAnimT=null;
   if(cal)cal.classList.toggle('offen',calOffen);
   if(grab){
@@ -7241,13 +7303,20 @@ function calLayout(anim){
       ?(cfg.lang==='de'?'Monat zuklappen':'Collapse month')
       :(cfg.lang==='de'?'Monat anzeigen':'Show month'));
   }
-  if(!anim){
+  if(!anim||!cal){
     calSperre=false;
     view.style.transition='none';grid.style.transition='none';
-    view.style.willChange='';view.style.clipPath='none';
     view.style.height=(calOffen?voll:hoehe)+'px';
+    view.style.clipPath='none';view.style.willChange='';
     grid.style.transform='translateY('+verschiebungZu+'px)';
-    void view.offsetHeight;view.style.transition='';grid.style.transition='';
+    if(cal){cal.style.transition='none';cal.style.clipPath='none';cal.style.willChange='';}
+    /* Auch eine unterbrochene Animation (Re-Render, Resize mitten drin)
+       darf keine Transforms auf dem Seitenrest zuruecklassen. */
+    nach.forEach(function(el){el.style.transition='none';el.style.transform='';el.style.willChange='';});
+    void view.offsetHeight;
+    view.style.transition='';grid.style.transition='';
+    if(cal)cal.style.transition='';
+    nach.forEach(function(el){el.style.transition='';});
     return;
   }
   /* ponytail: calSperre haelt neue Klicks waehrend der laufenden Animation
@@ -7255,32 +7324,76 @@ function calLayout(anim){
      ein 300ms-Sperrfenster ist die einfachere Loesung fuer das seltene
      Doppel-Tipp-Timing und reicht hier aus. */
   calSperre=true;
-  var einzugVorher=(voll-hoehe)-einzugZu;
-  view.style.willChange='clip-path';
+  /* Der Einzug beschreibt, wie viel der Kastenunterkante abgedeckt ist.
+     Seitlich und oben laeuft der Schnitt weit draussen (-40px), damit
+     Rahmen und Schatten dort unangetastet bleiben -- nur unten wandert er. */
+  var einzugVon=calOffen?delta:0,einzugNach=calOffen?0:delta;
+  /* Keine round-Klausel: durch die -40px-Insets liegen die Rechteck-Ecken
+     weit ausserhalb der Box -- eine Rundung dort schneidet nie etwas
+     Sichtbares. Die wandernde Unterkante ist konstruktionsbedingt eine
+     gerade Schnittkante (dokumentierter Schoenheitspreis). */
+  var clipVon='inset(-40px -40px '+einzugVon+'px -40px)';
+  var clipNach='inset(-40px -40px '+einzugNach+'px -40px)';
+  var flipVon=calOffen?(-delta):0,flipNach=calOffen?0:(-delta);
+  calAnimZiel=ziel;
+  /* Ein Reflow: Zeichenflaeche auf Monatshoehe, Startzustaende festnageln.
+     Das Raster (#dstrip) bekommt hier nur sein Ziel -- seine dauerhafte
+     CSS-Transition faehrt es synchron zur Kante: das ist gewollt, denn nur
+     so landet die gewaehlte Woche beim Zuklappen im Fenster (seit v25.4:
+     "Kante und Verschiebung laufen synchron"). */
   view.style.transition='none';
   view.style.height=voll+'px';
-  view.style.clipPath='inset(0 0 '+einzugVorher+'px 0)';
   grid.style.transform='translateY('+verschiebungZu+'px)';
-  void view.offsetHeight;
+  cal.style.transition='none';
+  cal.style.willChange='clip-path';
+  cal.style.clipPath=clipVon;
+  /* Zweiter, synchroner Schnitt auf dem Innenfenster: die Kastenkante
+     traegt den Griff samt Fusspolster (~17px) -- ohne eigenen Schnitt
+     schaute in diesem Streifen die Oberkante der naechsten Zeile hervor
+     (sichtbar als Heute-Ring-Bogen, der am Ende wegploppte). Gleicher
+     Einzug, weil das Fenster genau um Griff+Polster hoeher endet. */
+  view.style.willChange='clip-path';
+  view.style.clipPath='inset(0 0 '+einzugVon+'px 0)';
+  nach.forEach(function(el){
+    el.style.transition='none';
+    el.style.willChange='transform';
+    el.style.transform=flipVon?('translateY('+flipVon+'px)'):'';
+  });
+  void cal.offsetHeight;
   /* v25.4: war .42s cubic-bezier(.22,1,.28,1) -- eine Kurve mit extrem langem
-     Auslauf. Gemessen: nach 130ms optisch schon 85% zu, aber der Kasten blieb
-     bis zum setTimeout unten auf voller Hoehe stehen, der Rest der Seite
-     ruckte erst nach vollen 440ms nach. Das war das gemeldete Hakeln beim
-     Zuklappen. ease-out mit kuerzerer Laufzeit schliesst den Kasten und
-     verschiebt den Inhalt darunter fast gleichzeitig. */
+     Auslauf; ease-out mit kuerzerer Laufzeit fuehlt sich direkter an. */
+  cal.style.transition='clip-path .28s ease-out';
+  cal.style.clipPath=clipNach;
   view.style.transition='clip-path .28s ease-out';
-  view.style.clipPath='inset(0 0 '+einzugZu+'px 0)';
+  view.style.clipPath='inset(0 0 '+einzugNach+'px 0)';
+  nach.forEach(function(el){
+    el.style.transition='transform .28s ease-out';
+    el.style.transform=flipNach?('translateY('+flipNach+'px)'):'';
+  });
   calAnimT=setTimeout(function(){
+    /* Aufraeumen in einem Rutsch: echte Hoehe setzen und alle Transforms
+       loesen -- Layoutsprung und Transform-Wegfall heben sich exakt auf,
+       optisch bewegt sich nichts. */
     view.style.transition='none';
     view.style.height=(calOffen?voll:hoehe)+'px';
-    view.style.clipPath='none';
-    view.style.willChange='';
+    view.style.clipPath='none';view.style.willChange='';
+    cal.style.transition='none';cal.style.clipPath='none';cal.style.willChange='';
+    nach.forEach(function(el){el.style.transition='none';el.style.transform='';el.style.willChange='';});
+    void cal.offsetHeight;
+    view.style.transition='';cal.style.transition='';
+    nach.forEach(function(el){el.style.transition='';});
     calSperre=false;calAnimT=null;
   },300);
 }
 function calToggle(auf){
   if(calSperre)return;
-  calOffen=(auf===undefined)?!calOffen:!!auf;
+  var neu=(auf===undefined)?!calOffen:!!auf;
+  /* Richtungswisch in den Zustand, der schon steht (nach oben auf dem
+     zugeklappten Kalender), ist kein Auftrag: der Anim-Pfad konstruiert
+     seinen Start als Gegenteil des Ziels und wuerde eine volle
+     Phantom-Ueberblendung samt Seitenrest-Teleport spielen. */
+  if(neu===calOffen)return;
+  calOffen=neu;
   calLayout(true);
 }
 (function(){
@@ -7452,7 +7565,9 @@ function startNextBlock(){
     sel=add(sel,dx<0?1:-1);renderDay();
   });
 })();
-/* Ein Zuhoerer auf dem Streifen: er wird bei jedem Tageswechsel neu gebaut. */
+/* Ein Zuhoerer auf dem Streifen statt 42 einzelner: die Knoepfe bleiben
+   seit v30.2 bei stehendem Monat dieselben, neu gebaut wird nur bei
+   Monats- oder Sprachwechsel -- Delegation deckt beide Faelle ab. */
 $('dstrip').addEventListener('click',function(e){
   var b=e.target.closest('button[data-d]');if(!b)return;
   sel=new Date(b.dataset.d+'T00:00:00');renderDay();
@@ -13188,7 +13303,10 @@ window.addEventListener('pointermove',function(e){mouse.x=e.clientX;mouse.y=e.cl
 window.addEventListener('pointerleave',function(){mouse.x=-999;mouse.y=-999;});
 document.addEventListener('visibilitychange',function(){
   if(document.hidden){if(raf){cancelAnimationFrame(raf);raf=null;}}
-  else if(fxOn()&&!raf){raf=requestAnimationFrame(tick);}
+  /* Die Trainingsmodus-Pause hat Vorrang: wer die App bei laufender
+     Einheit weglegt und zurueckholt, bekommt die Partikel erst nach dem
+     Schliessen des Runners wieder (fxResume dort). */
+  else if(fxOn()&&!raf&&!$('runner').classList.contains('on')){raf=requestAnimationFrame(tick);}
 });
 var G={snow:['*','+','.'],fireflies:['.','o'],pollen:['.','*'],bubbles:['o','.'],sparks:['.','*'],none:['.']};
 function burst(x,y,c){
