@@ -1368,9 +1368,18 @@
   .exrow.locked:hover{border-color:var(--line);transform:none}
   .tick{width:21px;height:21px;border:1.5px solid var(--line);border-radius:7px;flex:none;display:flex;align-items:center;justify-content:center;font-size:var(--t2);color:transparent;transition:.18s;cursor:pointer}
   .exrow.done .tick{background:var(--aurora);border-color:var(--aurora);color:var(--bg);transform:scale(1.06)}
+  .exrow.skip{opacity:.55}
+  .exrow.skip .tick{border-style:dashed}
   .exrow .nm{flex:1;min-width:0;cursor:pointer}
   .exrow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:var(--t4)}
   .exrow .nm span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;color:var(--ink3);text-transform:uppercase}
+  /* Muskelgruppe klein ueber dem Namen: Gruppe / Name / Ausfuehrung, die
+     Dreizeiler-Grammatik der MCI-Uebungskarte. */
+  .exrow .nm i.mg{display:block;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;
+    text-transform:uppercase;font-style:normal;margin-bottom:.06rem;color:var(--ink2)}
+  /* Der Ausfuehrungshinweis der Sport-Bausteine in Normalschrift -- sonst
+     stehen zwei Versal-Monozeilen um den Namen, die sich beissen. */
+  .exrow .nm span.cue{font-family:var(--fd);font-size:var(--t2);letter-spacing:0;text-transform:none;color:var(--ink3)}
   .exrow .sets{font-family:var(--fm);font-size:var(--t3);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
 
   .timer{background:var(--surf);border:1px solid var(--line);border-radius:var(--r2);padding:.8rem 1rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;box-shadow:var(--sh)}
@@ -1885,7 +1894,8 @@
   #sessov .sorow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.62rem .75rem}
   #sessov .sorow .nm{flex:1;min-width:0}
   #sessov .sorow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:.9rem}
-  #sessov .sorow .nm span{font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink3)}
+  #sessov .sorow .nm span{font-family:var(--fd);font-size:.72rem;letter-spacing:0;color:var(--ink3)}
+  #sessov .sorow .nm i.mg{display:block;font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:var(--ink2)}
   #sessov .sorow .sv{font-family:var(--fm);font-size:.62rem;color:var(--ink2);white-space:nowrap}
   #sessov .sorow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);transition:.16s}
   #sessov .sorow .swp:hover{border-color:var(--aurora);color:var(--ink)}
@@ -2540,6 +2550,12 @@
   #runner .rhtx{min-width:0;flex:1}
   #runner .rhead h3{margin:0;font-size:1.35rem;text-align:left}
   #runner .rstep{margin:.15rem 0 0;font-size:var(--t2);color:var(--ink3);text-align:left}
+  /* Muskelgruppe ueber dem Uebungsnamen -- die erste Zeile der MCI-Karte. */
+  #runner .rmg{margin:0 0 .1rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink2);text-align:left}
+  /* "Ueberspringen" am Aufwaermblock: leise, neben dem Timer. */
+  #runner .rreps button.tbtn.rskip{background:transparent;border:1px solid var(--line);color:var(--ink3);
+    box-shadow:none;min-width:0;font-weight:500}
   /* Der Auftrag des Tages: was jetzt zu tun ist, in einer Zeile. */
   #runner .rauf{margin:.55rem 0 0;font-family:var(--fd);font-size:var(--t4);
     color:var(--ember);text-align:left;line-height:1.3}
@@ -2553,19 +2569,38 @@
     font-size:var(--t2);color:var(--ink2);text-align:left}
   #runner .rlast b{color:var(--brass);font-family:var(--fd)}
   #runner .rsets{display:flex;flex-direction:column;gap:.3rem;margin-top:.7rem}
-  #runner .rsrow{display:grid;grid-template-columns:1.6rem 1fr auto;align-items:center;
-    gap:.5rem;padding:.5rem .6rem;border-radius:12px;border:1px solid transparent;
-    background:var(--surf);color:var(--ink3);font-size:var(--t3)}
-  #runner .rsrow .rsno{font-family:var(--fm);font-size:var(--t1);letter-spacing:.06em}
-  #runner .rsrow .rsziel{font-family:var(--fd);color:var(--ink2)}
+  /* Satzzeilen in der Kartengrammatik von MCI, im eigenen Kleid: links eine
+     runde Marke (Nummer oder Thermometer fuer den Aufwaermsatz), in der
+     Mitte ein zweizeiliger Block -- Art des Satzes klein und grau, Vorgabe
+     fett --, rechts das Ist bzw. die Eingabe. Aufwaermsaetze stehen
+     gestrichelt und ohne Fuellung: sie gehoeren zur Uebung, aber nicht zur
+     Bilanz. Der laufende Satz bleibt der einzige mit Farbe. */
+  #runner .rsrow{display:grid;grid-template-columns:2rem 1fr auto;align-items:center;
+    gap:.6rem;padding:.45rem .6rem;border-radius:12px;border:1px solid transparent;
+    background:var(--surf);color:var(--ink3);font-size:var(--t3);min-height:52px}
+  #runner .rsrow .rsno{width:2rem;height:2rem;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    font-family:var(--fm);font-size:var(--t1);letter-spacing:.04em;
+    border:1px solid var(--line);color:var(--ink2)}
+  #runner .rsrow .rsno svg{width:15px;height:15px}
+  #runner .rstx{min-width:0;display:flex;flex-direction:column;gap:.08rem;text-align:left}
+  #runner .rskind{font-family:var(--fm);font-size:.6rem;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink3);font-style:normal}
+  #runner .rsrow .rsziel{font-family:var(--fd);font-weight:600;color:var(--ink2)}
   #runner .rsrow .rsist{font-family:var(--fd);font-variant-numeric:tabular-nums;color:var(--ink3)}
+  #runner .rsrow.warm{background:transparent;border-style:dashed;border-color:var(--line);min-height:46px}
+  #runner .rsrow.warm .rsziel{font-weight:500;color:var(--ink3)}
+  #runner .rsrow.warm .rsno{border-style:dashed}
   /* Der laufende Satz ist der einzige, der Aufmerksamkeit braucht. */
-  #runner .rsrow.now{background:color-mix(in srgb,var(--ember) 14%,var(--surf2));
+  #runner .rsrow.now{background:color-mix(in srgb,var(--ember) 14%,var(--surf2));border-style:solid;
     border-color:color-mix(in srgb,var(--ember) 55%,transparent);color:var(--ink)}
+  #runner .rsrow.now .rsno{background:var(--ember);border-color:var(--ember);color:var(--night)}
+  #runner .rsrow.now .rskind{color:var(--ember)}
   #runner .rsrow.now .rsziel{color:var(--ink);font-size:var(--t4)}
   #runner .rsrow.done{background:var(--surf2);color:var(--ink3)}
+  #runner .rsrow.warm.done{background:transparent}
+  #runner .rsrow.done .rsno{border-color:color-mix(in srgb,var(--aurora) 60%,transparent);color:var(--aurora)}
   #runner .rsrow.done .rsist{color:var(--aurora)}
-  #runner .rsrow.done .rsno::after{content:" ✓";color:var(--aurora)}
   /* Eingabe direkt in der Zeile des laufenden Satzes: Last und Wiederholungen
      nebeneinander, grosse Tippflaechen fuer verschwitzte Finger. */
   #runner .rin{display:flex;align-items:center;gap:.35rem}
@@ -2580,6 +2615,13 @@
     background:color-mix(in srgb,var(--ember) 20%,transparent);color:var(--ember);
     display:flex;align-items:center;justify-content:center}
   #runner .rhak:hover{background:var(--ember);color:var(--night)}
+  /* 360-px-Telefone: Eingabeblock schmaler, sonst bricht "5 x 80 kg" in der
+     laufenden Zeile um. */
+  @media (max-width:380px){
+    #runner .rin input{width:54px}
+    #runner .rhak{width:40px}
+    #runner .rsrow.now .rsziel{font-size:var(--t3)}
+  }
   #runner .rnext{margin:.7rem 0 0;font-size:var(--t2);color:var(--ink3);text-align:left}
   #runner .rnext b{color:var(--ink2)}
   /* Der Krafttest hebt sich ab: er ist kein normaler Satz, sondern die
@@ -3118,7 +3160,7 @@
            Trainings-App eine Checkliste; mit ihm ein Werkzeug. -->
       <div class="rhead">
         <span class="ricon" id="rnIcon"></span>
-        <div class="rhtx"><h3 id="rnEx"></h3><p class="rstep" id="rnStep"></p></div>
+        <div class="rhtx"><p class="rmg" id="rnMg" hidden></p><h3 id="rnEx"></h3><p class="rstep" id="rnStep"></p></div>
       </div>
       <!-- Der Auftrag des Tages: was konkret zu tun ist, im Vergleich zum
            letzten Mal. Eine Zielspanne sagt, was erlaubt ist; ein Auftrag
@@ -4051,7 +4093,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='32.0';
+var VERSION='33.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -4798,7 +4840,205 @@ function vAit(b,DE,kk){
   if(b.e==='rd')return pre+b.s+(DE?' Runden':' rounds')+suf;
   if(b.e==='lf')return pre+b.s+(DE?' Läufe':' runs')+suf;
   if(b.s<=1)return pre+r+e+je+suf;
-  return pre+b.s+(b.sep?spTxt(b.sep):' x ')+r+e+je+suf;
+  return pre+b.s+(b.sep?spTxt(b.sep):' × ')+r+e+je+suf;
+}
+/* ---------- Muskelgruppen und Aufwaermsaetze (v33) ---------------------
+   MCI fuehrt jede Uebung unter ihrer Muskelgruppe und haengt vor schwere
+   Arbeitssaetze eigene Aufwaermsaetze -- weniger, wenn dieselbe Region in
+   der Einheit schon gearbeitet hat. Hier dasselbe, aus den Bausteinen
+   abgeleitet: MG ordnet jeden Baustein einer Gruppe zu, MGREG fasst die
+   Gruppen zu den Regionen zusammen, die sich gegenseitig vorwaermen. */
+var MG={kniebeuge:'bein',splitSq:'bein',stepDown:'bein',rdl:'hinten',hipThrust:'hinten',nordic:'hinten',
+  wadeExz:'wade',cph:'adduk',bank:'brust',rudern:'ruecken',ostrc:'schulter',
+  stuetz:'rumpf',pallof:'rumpf',deadBug:'rumpf',mbRot:'rumpf',mbSlam:'rumpf',
+  antritt:'sprint',sprint30:'sprint',rsa:'sprint',cod:'agil',spider:'agil',
+  cmj:'sprung',dropJump:'sprung',huerden:'sprung',skater:'sprung',lande:'sprung',seilspringen:'sprung',
+  int44:'ausdauer',zehn2030:'ausdauer',hiit1515:'ausdauer',
+  balance:'fuss',shortFoot:'fuss',
+  fifaVoll:'aufw',dynWarm:'aufw',nmWarm:'aufw',laufAbc:'aufw',auslauf:'cool'};
+var MGL={bein:['Legs','Beine'],hinten:['Posterior chain','Hintere Kette'],wade:['Calves','Waden'],
+  adduk:['Adductors','Adduktoren'],brust:['Chest','Brust'],ruecken:['Back','Rücken'],
+  schulter:['Shoulders','Schultern'],rumpf:['Core','Rumpf'],sprint:['Speed','Schnelligkeit'],
+  sprung:['Plyometrics','Sprungkraft'],ausdauer:['Conditioning','Ausdauer'],agil:['Agility','Agilität'],
+  fuss:['Feet and ankles','Fuß und Sprunggelenk'],aufw:['Warm-up','Aufwärmen'],cool:['Cool-down','Ausklang'],
+  mobil:['Mobility','Beweglichkeit'],praev:['Prevention','Prävention']};
+/* Fuss und Sprunggelenk bleiben eine eigene Region: eine Short-Foot-Uebung
+   waermt keine Wade fuer Zusatzlast vor. */
+var MGREG={bein:'unten',hinten:'unten',wade:'unten',adduk:'unten',sprint:'unten',sprung:'unten',
+  ausdauer:'unten',agil:'unten',fuss:'fuss',brust:'druck',schulter:'druck',ruecken:'zug',rumpf:'rumpf'};
+/* Schwerpunkt- und Testwochen-Items tragen eigene Schluessel ('schw:...',
+   'test:...'): ihre Gruppe kommt ueber den Baustein (ref), sonst ueber die
+   Schwaeche selbst, zuletzt ueber die Art -- spItem legt sie als mg ab. */
+var SCHWMG={schnelligkeit:'sprint','wiederholte-sprints':'sprint',sprungkraft:'sprung',reaktivkraft:'sprung',
+  ausdauer:'ausdauer',grundlagenausdauer:'ausdauer',tempohaerte:'ausdauer',laufoekonomie:'ausdauer',
+  richtungswechsel:'agil',wendigkeit:'agil',rumpfstabilitaet:'rumpf',schusskraft:'hinten',
+  schlagkraft:'rumpf',wurfkraft:'rumpf',beweglichkeit:'mobil',verletzungsanfaelligkeit:'praev'};
+function mgSchw(kk,b){
+  if(MG[kk])return MG[kk];
+  if(b&&b.ref&&MG[b.ref])return MG[b.ref];
+  var t=String(kk||'').split(':');
+  if(t[0]==='schw'&&SCHWMG[t[2]])return SCHWMG[t[2]];
+  if(!b)return '';
+  if(b.a==='lauf')return (b.e==='m'||b.mess==='s')?'sprint':'ausdauer';
+  return {sprung:'sprung',wurf:'rumpf',bw:'rumpf',zeit:'rumpf',last:'bein',block:'aufw'}[b.a]||'';
+}
+function mgVon(x){
+  if(!x)return '';
+  if(typeof x==='string')return MG[x]||'';
+  return x.mg||MG[x.kk]||'';
+}
+function mgLabel(x,DE){var g=mgVon(x);return (g&&MGL[g])?MGL[g][DE?1:0]:'';}
+function mgRegion(x){var g=mgVon(x);return (g&&MGREG[g])||'';}
+/* Aufwaermsaetze zaehlen NEGATIV bzw. null: run.set laeuft von 1-n bis 0
+   durch die Aufwaermsaetze und ab 1 durch die Arbeitssaetze. So bleiben
+   alle Leser von run.set, run.reps[ex-satz] und x.sets unveraendert gueltig
+   -- Verlauf, Bilanz, Fortschreibung und Testsatz sehen weiterhin nur
+   Saetze ab 1. Die Aufwaermzeilen tragen keine Eingabe, nur den Haken. */
+function satzStart(cur){return 1-((cur&&cur.warm)?cur.warm.length:0);}
+/* Beim Betreten einer Uebung: die Aufwaermsaetze aus einer FRISCHEN Liste
+   (nach dem Schreiben von doneMap bzw. skip) einmalig festhalten und
+   run.set darauf setzen. Wer zurueckspringt, findet seine alte Festlegung
+   wieder -- die Tabelle wechselt nie unter der Satznummer. */
+/* "Begonnen" heisst: ein Aufwaermsatz abgehakt (run.wOk) oder ein Satz
+   eingetragen (run.reps). Aufwaermsaetze hinterlassen sonst keine Spur --
+   deshalb der eigene Merker. */
+function uebungBegonnen(idx){
+  if(!run)return false;
+  if(run.wOk&&run.wOk[idx]!==undefined)return true;
+  if(run.reps){for(var k in run.reps){if(k.indexOf(idx+'-')===0)return true;}}
+  return false;
+}
+/* Der erste offene Satz einer Uebung: hinter den abgehakten Aufwaermsaetzen,
+   dann der erste Arbeitssatz ohne Eintrag. Wer vor- und zurueckblaettert,
+   landet wieder dort, wo er war -- nicht am Anfang der Rampe. */
+function ersterOffen(cur){
+  var q=satzStart(cur);
+  if(run.wOk&&run.wOk[run.ex]!==undefined)q=Math.max(q,run.wOk[run.ex]+1);
+  if(q<1)return q;
+  for(;q<=(cur.sets||1);q++){if(!run.reps||run.reps[run.ex+'-'+q]===undefined)return q;}
+  return cur.sets||1;
+}
+function warmEinfrieren(){
+  if(!run)return;
+  if(!run.warm)run.warm={};
+  /* Solange an dieser Uebung nichts lief, wird die Rampe beim Betreten NEU
+     abgeleitet -- ein Blick per Pfeil darf sie nicht festschreiben, sonst
+     bliebe nach "FIFA erst spaeter erledigt" die kalte Dreierrampe stehen.
+     Sobald ein Satz abgehakt ist, bleibt sie fest: run.set zaehlt gegen
+     genau diese Zeilen. */
+  if(!uebungBegonnen(run.ex))delete run.warm[run.ex];
+  var itF=runItems(),cF=itF&&itF[run.ex];
+  if(!cF)return;
+  if(run.warm[run.ex]===undefined)run.warm[run.ex]=cF.warm||null;
+  cF.warm=run.warm[run.ex];
+  run.set=ersterOffen(cF);
+}
+/* Was ein Aufwaermblock beim Ueberspringen sagt -- EINE Quelle fuer Runner
+   und Tagesliste. FIFA 11+ und das neuromuskulaere Aufwaermen tragen
+   dieselbe Beleglage (Olsen 2005, Webster & Hewett 2018) und heissen beide
+   Verletzungsschutz; der Ausklang ist kein Aufwaermen; vor dem Leistungstest
+   sichert der Testkasten "gleiche Bedingungen" zu. */
+function blockHinweis(kk,DE,testTag,hatRampe){
+  /* Der Nachsatz gilt nur, wenn die Einheit wirklich Aufwaermsaetze traegt --
+     in einer Laufeinheit mit 4x4-Intervallen gibt es keine. */
+  var nach=hatRampe?(DE?' Die Aufwärmsätze an den Übungen bleiben.':' The warm-up sets at the exercises stay.'):'';
+  if(kk==='fifaVoll'||kk==='nmWarm')return{
+    tag:DE?'Verletzungsschutz':'injury prevention',
+    hint:(kk==='fifaVoll'?'FIFA 11+':(DE?'Das neuromuskuläre Aufwärmen':'The neuromuscular warm-up'))+
+      (DE?' ist Verletzungsschutz mit Studienlage — lieber kürzen als weglassen.'
+         :' is injury prevention with trial evidence — better to shorten than to skip.')+nach};
+  if(mgVon(kk)==='cool')return{tag:'optional',
+    hint:DE?'Der Ausklang darf entfallen — ein paar Minuten locker gehen tun es auch.'
+           :'The cool-down may be skipped — a few minutes of easy walking will do.'};
+  if(testTag)return{tag:DE?'vor dem Test':'before the test',
+    hint:DE?'Vor dem Leistungstest nicht weglassen — gleiche Bedingungen wie beim letzten Mal.'
+           :'Do not skip before the performance test — same conditions as last time.'};
+  return{tag:'optional',
+    hint:(DE?'Schon warm? Dann weglassen.':'Already warm? Skip it.')+nach};
+}
+/* "Ist das ein Krafttest?" -- EINE Formel fuer runItems, Tagesliste und
+   Blatt: noch nie aufgezeichnet, oder Zusatzlast ohne hinterlegte Last
+   (kg-Feld geleert, nur Wiederholungen getippt). */
+function istErstkontakt(kk,art,pro){
+  if(pro)return false;
+  return erstKontakt(kk)||(art==='last'&&!lastVon(kk));
+}
+/* Satzschema fuer Listen in der MCI-Grammatik: "3 × 6 · 80 kg", beim
+   Erstkontakt das Label "Krafttest" statt eines Schemas ohne Last. */
+function schemaTxt(x,DE){
+  var t=satzGesamt(x,DE);
+  if(x.art!=='last'||x.pro)return t;
+  if(x.test)return (x.pre?(typeof x.pre==='string'?x.pre:spTxt(x.pre)):'')+(DE?'Krafttest':'Strength test');
+  var W=lastVon(exKey(x));
+  return W?(t+' · '+kgT(W)):t;
+}
+/* Pause nach dem Satz st -- EINE Regel fuer runAfterSet und die Hinweiszeile.
+   Zwischen Aufwaermsaetzen 45 Sekunden (warm machen, nicht ausruhen; beim
+   Test 90), nach dem letzten hoechstens 90, vor dem Testsatz die volle
+   Pause, die der Testkasten zusichert. */
+function pauseNach(cur,st){
+  var p=cur.rest||120;
+  if(st>0)return p;
+  /* Zwischen den Rampenstufen der MESSUNG 90 Sekunden -- der v32-Kasten
+     sagte "1,5 bis 3 Minuten", ein ermuedeter Testsatz schaetzt zu niedrig.
+     Im Training reichen 45. */
+  if(st<0)return cur.test?90:45;
+  return cur.test?p:Math.min(90,p);
+}
+/* EINE Bezeichnung je Satz fuer Tabelle (kurz: "Satz 2/4") und Pausenzeile
+   (lang: "Satz 2 von 4"): Aufwaermsatz, Versuch, Einmessen, Testsatz, Satz. */
+/* "Ist Satz q der Testsatz?" -- ein Praedikat fuer Beschriftung, Zielspalte
+   und Last-Schreiber; drei Kopien liefen sonst auseinander. */
+function istTestSatz(cur,q){
+  return !!cur.test&&(cur.cal||(q===1&&(cur.art==='last'||cur.art==='bw'||cur.art==='zeit')));
+}
+function satzLabel(cur,q,DE,langForm){
+  var tr=langForm?(DE?' von ':' of '):'/';
+  if(q<=0){
+    var n=(cur.warm||[]).length;
+    return (DE?'Aufwärmsatz ':'Warm-up set ')+(q-satzStart(cur)+1)+tr+n;
+  }
+  if(cur.mess)return (DE?'Versuch ':'Attempt ')+q;
+  if(istTestSatz(cur,q))return cur.cal?(DE?'Einmessen':'Baseline'):(DE?'Testsatz':'Test set');
+  return (DE?'Satz ':'Set ')+q+(cur.sets?(tr+cur.sets):'');
+}
+function satzName(cur,st,DE){return satzLabel(cur,st,DE,true);}
+/* Die Rampe zum Arbeitsgewicht, abgestuft nach dem, was in dieser Einheit
+   schon lief: stufe 0 = Region kalt (drei Saetze 50/70/85 %), 1 = schon
+   bewegt durch Sprint, Sprung oder Koerpergewicht (zwei), 2 = schon unter
+   Last (einer). Beim Erstkontakt dieselben Stufen aus der Testrampe
+   (testLastVor), die bis v32 als Text im Testkasten standen -- jetzt als
+   Zeilen in der Tabelle. Unter zwei Hantelstufen gibt es nichts
+   hochzufahren. */
+function aufwaermSaetze(x,stufe,mikro){
+  if(!x||x.art!=='last'||!x.kg||x.fixed)return null;
+  var sK=kgStufe(),rd=function(v){return Math.max(sK,Math.round(v/sK)*sK);};
+  var st,ziel;
+  if(x.test){
+    var R=testLastVor(x);ziel=R.t;
+    st=[[8,R.s],[5,R.r2],[3,R.r3]];
+  }else{
+    var W=lastVon(exKey(x));if(!W||W<=2*sK)return null;ziel=W;
+    st=[[10,rd(W*0.5)],[5,rd(W*0.7)],[3,rd(W*0.85)]];
+  }
+  var lvl=Math.max(0,Math.min(2,stufe|0));
+  /* Die Messung behaelt mindestens zwei Rampenstufen: der Testsatz ist
+     Protokoll, nicht Training -- testLastVor begruendet die Stufen als Teil
+     davon. */
+  if(x.test)lvl=Math.min(lvl,1);
+  st=st.slice(lvl);
+  /* Micro-Workout: ein Aufwaermsatz -- aber bei kalter Region der 70-%-Satz,
+     nicht der schwerste. 85 % allein auf kalter Muskulatur ist die Stufe mit
+     dem hoechsten Risiko und dem kleinsten Aufwaermeffekt. Der Erstkontakt
+     behaelt seine Rampe, dieselbe Ausnahme wie bei der Pausenkappung. */
+  if(mikro&&!x.test&&st.length>1)st=(lvl===0)?[st[1]]:[st[st.length-1]];
+  var aus=[],ges={};
+  for(var i=0;i<st.length;i++){
+    var w=st[i][1];
+    if(w>=ziel||ges[w])continue;
+    ges[w]=1;aus.push({r:st[i][0],kg:w});
+  }
+  return aus.length?aus:null;
 }
 var SPORT={
  fussball:{n:['Football','Fußball'],
@@ -5165,7 +5405,7 @@ function spItem(x,schl){
      Historie und Testwerte, unabhaengig von der Anzeigesprache. */
   var kkS=(typeof x==='string'?x:(schl||null));
   return{id:null,l:spTxt(b.l),k:b.k?spTxt(b.k):undefined,v:vAit(b,cfg.lang==='de',kkS),w:b.w,
-    kk:kkS,a:b.a,s:b.s,r:b.r,e:b.e,sd:b.sd,p:b.p,mess:b.mess,pro:b.pro,
+    kk:kkS,mg:mgSchw(kkS,b),a:b.a,s:b.s,r:b.r,e:b.e,sd:b.sd,p:b.p,mess:b.mess,pro:b.pro,
     pre:b.pre,suf:b.suf,sep:b.sep};
 }
 /* ---------- Uebungskatalog ------------------------------------------------
@@ -8304,10 +8544,21 @@ function renderDay(){
     :((pl.note&&!tagNote)?'<span>'+pl.note+'</span>':'');
   var list=$('today-list');list.innerHTML='';
   var dn=doneMap[key]||{};
+  var skR=get('skip',{})[key]||{};
+  var testGesehen={};
   var items=pl.kind==='train'?sessOf(pl).items.map(function(x){
     /* Dieselbe Vorgabe wie Uebersicht und Trainingsmodus: satzGesamt kennt
        Einheiten, Seiten, Runden und Messungen. */
-    var vTxt=x.v||(pl.ph.sets+' x '+pl.ph.reps);
+    var vTxt=x.v||(pl.ph.sets+' × '+pl.ph.reps);
+    /* MCI-Grammatik auch hier: Schema MIT Last, beim Erstkontakt "Krafttest". */
+    if(x.a==='last'&&!x.pro){
+      var kkL=x.kk||x.l;
+      /* Dieselbe Regel wie runItems (istErstkontakt) und wie dort nur das
+         ERSTE Vorkommen eines Schluessels -- der gespiegelte Schwerpunkt
+         hinten in der Liste ist kein zweiter Krafttest. */
+      if(istErstkontakt(kkL,x.a,x.pro)&&!testGesehen[kkL]){testGesehen[kkL]=1;vTxt=(x.pre?(typeof x.pre==='string'?x.pre:spTxt(x.pre)):'')+(cfg.lang==='de'?'Krafttest':'Strength test');}
+      else{var WL=lastVon(kkL);if(WL)vTxt+=' · '+kgT(WL);}
+    }
     if(x.mess||x.e==='rd'||x.e==='lf'){
       /* MIT pre/suf/sep -- das ist der zweite Aufrufer von satzGesamt, und
          ohne die Felder verlor die Tagesliste das "+" des Schwerpunkts,
@@ -8316,10 +8567,11 @@ function renderDay(){
       vTxt=satzGesamt({fixed:false,sets:x.s,reps:x.r,einh:x.e,sd:x.sd,mess:x.mess,
         pre:x.pre,suf:x.suf,sep:x.sep,kk:x.kk,art:x.a,pro:x.pro},cfg.lang==='de');
     }
-    return{id:x.id,l:x.l,k:x.k,a:x.a,v:vTxt};
+    return{id:x.id,l:x.l,k:x.k,a:x.a,v:vTxt,kk:x.kk,w:x.w,mg:x.mg,mess:x.mess};
   }):(pl.items||[]).map(function(x){return{id:null,l:x.l,v:x.v};});
+  var testTag=items.some(function(it){return !!it.mess;});
   items.forEach(function(it,i){
-    var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':'');
+    var row=document.createElement('div');row.className='exrow'+(dn[i]?' done':(skR[i]?' skip':''));
     /* v18: uebungs-spezifisches Strichmaennchen als Kachel (Standbild);
        solange eine Uebung kein eigenes hat, faellt es aufs Muster-Icon zurueck.
        Eintraege ohne id (lockere und Ruhetage) bekommen ihre eigene Kachel,
@@ -8327,7 +8579,11 @@ function renderDay(){
     /* v32: Sport-Bausteine tragen ihr Art-Symbol (Hantel, Sprung, Lauf …)
        statt sechsmal desselben Erholungs-Blatts nebeneinander. */
     var icon=it.id?exThumb(it.l,it.id):(it.a?'<span class="swthumb">'+artIcon(it.a)+'</span>':looseThumb(it.l));
-    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm"><b>'+itemName(it)+'</b><span>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?(cfg.lang==='de'?'Erholung':'recovery'):(cfg.lang==='de'?'locker':'easy'))))+'</span></span>'+
+    var DEr=cfg.lang==='de';
+    var mgR=(pl.kind==='train'&&!it.id&&it.kk)?mgLabel(it,DEr):'';
+    if(mgR&&it.w)mgR+=' · '+blockHinweis(it.kk,DEr,testTag).tag;
+    if(skR[i]&&!dn[i])mgR=(mgR?mgR+' · ':'')+(DEr?'übersprungen':'skipped');
+    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm">'+(mgR?'<i class="mg">'+mgR+'</i>':'')+'<b>'+itemName(it)+'</b><span'+((!it.id&&it.k)?' class="cue"':'')+'>'+(it.id?pid[it.id].kind:(it.k||(pl.kind==='rest'?(cfg.lang==='de'?'Erholung':'recovery'):(cfg.lang==='de'?'locker':'easy'))))+'</span></span>'+
       ((pl.kind==='train'&&it.id)?'<button type="button" class="swp" title="Swap exercise" aria-label="Swap exercise">&#8644;</button>':'')+
       '<span class="sets">'+it.v+'</span>';
     var swpBtn=row.querySelector('.swp');
@@ -8337,7 +8593,7 @@ function renderDay(){
        kann sich Planerfuellung erfinden. Vergangene Tage bleiben lesbar,
        zukuenftige zeigen den Plan -- beide nur ohne Haken. */
     if(isT){
-      row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);if(dn[i]&&it.id)markTrained(it.id,key);renderDay();streak();refresh();});
+      row.querySelector('.tick').addEventListener('click',function(e){e.stopPropagation();dn[i]=!dn[i];doneMap[key]=dn;set('done',doneMap);var smT=get('skip',{});if(smT[key]&&smT[key][i]){delete smT[key][i];set('skip',smT);}if(dn[i]&&it.id)markTrained(it.id,key);renderDay();streak();refresh();});
     }else{
       row.classList.add('locked');
       row.querySelector('.tick').setAttribute('aria-disabled','true');
@@ -8408,6 +8664,10 @@ function renderDay(){
      oder Sportwechsel kann die Liste verkuerzen, und alte Haken jenseits
      des Endes trieben den Ring sonst dauerhaft ueber 100 %. */
   var tot=items.length,dc=0;for(var k in dn){if(dn[k]&&parseInt(k,10)<tot)dc++;}
+  /* Uebersprungen ist weder erledigt noch offen: raus aus dem Nenner, sonst
+     bleibt der Ring bei 83 % stehen, obwohl die App selbst zum Weglassen
+     eingeladen hat. */
+  for(var ks in skR){if(skR[ks]&&!dn[ks]&&parseInt(ks,10)<items.length)tot--;}
   var pct=tot?Math.round(dc/tot*100):0;
   $('ringArc').setAttribute('stroke-dashoffset',String(163.4*(1-pct/100)));
   $('ringTxt').textContent=pct+'%';
@@ -8510,7 +8770,7 @@ function buildWeeks(){
         ?(w0===11?(LB?'halbe Umfänge':'half volumes')
           :w0===12?(LB?'messen statt trainieren':'measure, not train')
           :(LB?'Vorgabe an jeder Übung':'target on every exercise'))
-        :(ph.sets+' x '+ph.reps+' · '+ph.rest))+'</span>'+
+        :(ph.sets+' × '+ph.reps+' · '+ph.rest))+'</span>'+
       '<span class="wpct">'+(tot?Math.round(done/tot*100):0)+'%</span></div>';
     wrap.appendChild(row);
   });
@@ -8628,7 +8888,7 @@ function openDetail(id){
   ladder();fill('d-cues',p.cues);fill('d-bad',p.bad);
   var ph=phase(Math.min(12,Math.max(1,wkOf(TODAY))));
   var f=$('d-facts');f.innerHTML='';
-  [['This week',ph.sets+' x '+ph.reps]].concat(p.facts).forEach(function(x){
+  [['This week',ph.sets+' × '+ph.reps]].concat(p.facts).forEach(function(x){
     var d=document.createElement('div');d.className='fact';
     d.innerHTML='<span>'+x[0]+'</span><b style="font-weight:400">'+x[1]+'</b>';f.appendChild(d);});
   show('detail');
@@ -9458,7 +9718,7 @@ function runItems(){
       if(run&&run.on&&run.key===iso(TODAY)&&run.tst&&run.tst[tKey]!==undefined){
         frisch=!!run.tst[tKey];
       }else{
-        frisch=(!x.pro&&(erstKontakt(tKey)||(eKg&&!lastVon(tKey))));
+        frisch=istErstkontakt(tKey,x.a,x.pro);
       }
       var istErst=frisch&&!testGesehen[tKey];
       if(istErst)testGesehen[tKey]=1;
@@ -9484,7 +9744,7 @@ function runItems(){
          Sekunden vorgeben. Ein ermuedeter Testsatz schaetzt zu niedrig. */
       var mikroCap=mikro&&!x.mess&&!istErst;
       if(mikroCap)sAdj=Math.min(2,sAdj);
-      return{id:null,kk:x.kk,l:l,k:x.k,w:x.w,fixed:false,label:null,cal:false,
+      return{id:null,kk:x.kk,mg:x.mg,l:l,k:x.k,w:x.w,fixed:false,label:null,cal:false,
         art:x.a,sets:sAdj,reps:x.r,einh:x.e,sd:x.sd,kg:eKg,
         /* Praeventionsprotokolle (Nordic, Copenhagen) werden NICHT auf ein
            Maximum getestet: ihre Dosierung stammt aus den Studien, gegen die
@@ -9516,6 +9776,51 @@ function runItems(){
      runItems() konsumiert (Runner, Dock, sessWrap), sieht dadurch einfach
      eine kuerzere Einheit und braucht keinen eigenen Zweig. */
   if(run&&run.on&&run.key===iso(TODAY)&&run.micro)it=run.micro.map(function(i){return it[i];});
+  /* Aufwaermsaetze aus dem, was in dieser Einheit WIRKLICH schon lief. Es
+     zaehlen die Uebungen VOR der aktuellen in Listenreihenfolge, und nur,
+     wenn sie abgehakt sind oder mindestens ein Satz eingetragen wurde: wer
+     die Kniebeuge mit dem Pfeil uebergeht, weil kein Rack frei ist, bekommt
+     an der naechsten Uebung die Rampe, die zu dem passt, was tatsaechlich
+     lief. Region "bewegt" (eine Stufe weniger): Lauf jeder Art, Sprung,
+     Wurf, Koerpergewicht oder ein absolvierter Aufwaermblock -- FIFA 11+ enthaelt
+     Kniebeugen, Spruenge und Nordics. "Geladen" (zwei Stufen weniger): eine
+     Zusatzlast-Uebung derselben Region. Dieselbe Uebung ein zweites Mal
+     (Schwerpunkt mit geteiltem Schluessel) braucht gar keinen Aufwaermsatz
+     mehr. Gerechnet nach dem Micro-Filter, ueber die Liste, die tatsaechlich
+     laeuft; die Festlegung je Uebung friert warmEinfrieren ein. */
+  var regSt={},kkLief={},dnW=doneMap[iso(TODAY)]||{};
+  var laeuft=!!(run&&run.on&&run.key===iso(TODAY)),mikroW=laeuft&&!!run.micro;
+  var liefWirklich=function(idx){
+    if(!laeuft)return false;
+    var oi=run.micro?run.micro[idx]:idx;
+    if(dnW[oi])return true;
+    /* ... oder begonnen: nach drei abgehakten Aufwaermsaetzen ist die
+       Region nicht mehr kalt, auch wenn kein Arbeitssatz eingetragen ist. */
+    return uebungBegonnen(idx);
+  };
+  for(var wi=0;wi<it.length;wi++){
+    var wx=it[wi];if(!wx||wx.id||!wx.kk)continue;
+    var reg=mgRegion(wx),lief=liefWirklich(wi);
+    if(wx.fixed){
+      if(wx.w&&lief&&mgVon(wx)==='aufw'&&!regSt.unten)regSt.unten=1;
+      continue;
+    }
+    if(wx.art==='last'&&wx.kg){
+      wx.warm=kkLief[wx.kk]?null:aufwaermSaetze(wx,reg?(regSt[reg]||0):0,mikroW);
+      /* EINGEFROREN, sobald die Uebung aktuell wurde (run.warm[ex]): run.set
+         zaehlt gegen genau diese Zeilen. Liefe warm hier live weiter,
+         verschoebe jeder nachtraegliche Haken in der Tagesliste, jedes Undo
+         und der Haken der eben beendeten Uebung die Tabelle unter der
+         laufenden Satznummer -- keine .now-Zeile, ein Geisterdruck, eine
+         Geisterpause. Genau das passierte, weil runAfterSet die Liste vor
+         dem Schreiben von doneMap gebaut hatte. */
+      if(laeuft&&run.warm&&run.warm[wi]!==undefined)wx.warm=run.warm[wi];
+      if(lief&&reg)regSt[reg]=2;
+    }else if(lief&&reg&&!regSt[reg]&&(wx.art==='bw'||wx.art==='sprung'||wx.art==='lauf'||wx.art==='wurf')){
+      regSt[reg]=1;
+    }
+    if(lief)kkLief[wx.kk]=1;
+  }
   return it;
 }
 /* Waehlt die zwei tragenden Uebungen fuer das Micro-Workout. SESS3/SESS4
@@ -9939,6 +10244,10 @@ function runValid(){
   if(!(run&&run.on&&run.key===iso(TODAY)))return null;
   var it=runItems();
   if(!it)return null;
+  /* Einmalige Migration eines v32-Laufs: die laufende Uebung bekommt keine
+     nachtraeglichen Aufwaermzeilen (run.set=1 traefe sie als "erledigt"),
+     ab der naechsten Uebung gilt v33. */
+  if(!run.ver){run.ver=33;run.warm={};run.warm[run.ex]=null;saveRun();}
   var laenge=run.micro?run.micro.length:it.length;
   if((run.sig&&run.sig!==runSig())||run.ex>=laenge){
     /* Sauber beenden statt stillschweigend weiterlaufen: die bereits
@@ -9955,9 +10264,12 @@ function startRun(adj,micro,pain){
   /* Bei bereits abgehakten Bloecken vorn einsteigen, wo es weitergeht.
      Im Micro-Workout gilt dieselbe Regel, nur innerhalb der Auswahl. */
   var dn=doneMap[iso(TODAY)]||{},i=0,mic=micro?microPick(it):null;
-  if(mic){while(i<mic.length&&dn[mic[i]])i++;if(i>=mic.length)i=0;}
-  else{while(i<it.length&&dn[i])i++;if(i>=it.length)i=0;}
-  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',reps:{},kg:{},tEnd:0,t0:Date.now(),adj:adj||0,sig:runSig()};
+  /* Uebersprungene Bloecke gelten beim Einstieg wie erledigte -- sonst
+     landete "Weiter" wieder auf dem FIFA-Block, den man eben ausgelassen hat. */
+  var skT=get('skip',{})[iso(TODAY)]||{};
+  if(mic){while(i<mic.length&&(dn[mic[i]]||skT[mic[i]]))i++;if(i>=mic.length)i=0;}
+  else{while(i<it.length&&(dn[i]||skT[i]))i++;if(i>=it.length)i=0;}
+  run={on:true,key:iso(TODAY),ex:i,set:1,ph:'work',reps:{},kg:{},tEnd:0,t0:Date.now(),adj:adj||0,sig:runSig(),ver:33,warm:{}};
   if(mic)run.micro=mic;
   /* Welche Uebungen HEUTE eingemessen werden, wird jetzt festgeschrieben --
      danach kann kein Zwischenspeicher und kein Neustart das mehr umwerfen. */
@@ -9972,6 +10284,8 @@ function startRun(adj,micro,pain){
     if(t0.test)run.tst[k0]=1;
     else if(run.tst[k0]===undefined)run.tst[k0]=0;
   });
+  /* Erst jetzt steht fest, ob die erste Uebung Aufwaermsaetze traegt. */
+  warmEinfrieren();
   /* Schmerz aus dem Check-in: nur dieser eine run -- siehe exAllowed()/
      runItems(). Endet automatisch mit dem Abhaken der Einheit (run.on). */
   if(pain)run.pain=pain;
@@ -10150,7 +10464,7 @@ function lastAusSatz(cur,kgn,n){
   if(n<3)lastSetzen(exKey(cur),Math.floor(kgn*0.85/st0)*st0,0,kgn);
   else lastSetzen(exKey(cur),Math.max(arbeitsLast(kgn*(1+n/30),zr,st0,true),kgn),0,kgn);
 }
-function runAfterSet(){
+function runAfterSet(skip){
   var it=runItems();if(!it)return;
   var cur=it[run.ex];
   /* Eine laufende Satz- oder Blockuhr endet mit dem Satz -- sonst zaehlte
@@ -10180,15 +10494,25 @@ function runAfterSet(){
   /* Stand vor dem Abhaken merken, damit ein Fehlgriff zurueckgenommen
      werden kann, ohne dass die App vorher nachfragt. */
   run.vor={ex:run.ex,set:run.set};
+  /* Abgehakte Aufwaermsaetze merken -- sie schreiben nichts nach run.reps. */
+  if(run.set<=0){if(!run.wOk)run.wOk={};run.wOk[run.ex]=run.set;}
   if(run.set<cur.sets){run.set++;}
   else{
     /* Im Micro-Workout ist run.ex ein Index INNERHALB der Auswahl -- der
        Haken gehoert aber an die Originalposition des Tages, sonst haekelt
        eine Kurzeinheit fremde Uebungen ab. */
     var k=iso(TODAY),dn=doneMap[k]||{},oi=(run.micro?run.micro[run.ex]:run.ex);
-    dn[oi]=true;doneMap[k]=dn;set('done',doneMap);
-    if(cur.id)markTrained(cur.id,k);
-    streak();
+    if(skip){
+      /* Uebersprungen ist nicht erledigt: eigener Speicher (vk_skip), kein
+         Haken in der Tagesliste, kein Zaehler, keine Serie. Ein Block, den
+         jemand bewusst auslaesst, darf nicht als "gemacht" in den Rang
+         einfliessen. */
+      var sm=get('skip',{});(sm[k]=sm[k]||{})[oi]=1;set('skip',sm);
+    }else{
+      dn[oi]=true;doneMap[k]=dn;set('done',doneMap);
+      if(cur.id)markTrained(cur.id,k);
+      streak();
+    }
     if(run.ex>=it.length-1){
       run.ph='done';saveRun();
       /* Dauer kommt aus der echten Trainingszeit, nicht aus einem Feld. */
@@ -10211,14 +10535,15 @@ function runAfterSet(){
       bilanzIt=it;run.bIt=it;saveRun();
       sessWrap(it);
       runPaint();return;}
-    run.ex++;run.set=1;
+    run.ex++;warmEinfrieren();
   }
   /* Nach einem Aufwaermblock keine Pause: zweieinhalb Minuten Stillstand
      zwischen FIFA 11+ und dem ersten Sprint sind genau die Zeit, in der der
      Aufwaermeffekt zerfaellt. Dieselbe w-Markierung, die schon Deload und
      Micro-Workout lesen. */
   if(cur.w){run.ph='work';run.rEnd=0;saveRun();runPaint();return;}
-  var pause=cur.rest||120;
+  /* run.vor.set ist der Satz, der eben abgehakt wurde. */
+  var pause=pauseNach(cur,run.vor.set);
   /* run.left wird NICHT mehr geschrieben: run.rEnd traegt den Zustand
      allein, und restSek() liest left nur noch als Einmal-Migration alter
      Staende. Zwei Wahrheiten ueber dieselbe Sache in einem Objekt, das
@@ -10251,6 +10576,7 @@ function runAdvance(){
     if(run.vor.ex!==run.ex){
       var dn=doneMap[iso(TODAY)]||{},oiv=(run.micro?run.micro[run.vor.ex]:run.vor.ex);
       delete dn[oiv];doneMap[iso(TODAY)]=dn;set('done',doneMap);
+      var smU=get('skip',{});if(smU[iso(TODAY)]){delete smU[iso(TODAY)][oiv];set('skip',smU);}
       /* Auch den Muster-Vermerk zuruecknehmen. Ein Rueckgaengig, das den
          Haken loest und den Verlauf stehen laesst, ist nur zu zwei Dritteln
          umkehrbar -- genau der Vertrauensbruch im Kleinen, den der Knopf
@@ -10259,18 +10585,33 @@ function runAdvance(){
       if(curV&&curV.id&&typeof unmarkTrained==='function')unmarkTrained(curV.id,iso(TODAY));
     }
     run.ex=run.vor.ex;run.set=run.vor.set;run.ph='work';
+    /* Der zurueckgenommene Aufwaermsatz ist wieder offen. */
+    if(run.wOk&&run.set<=0){
+      var itU=runItems(),cU=itU&&itU[run.ex],wv=run.set-1;
+      if(!cU||wv<satzStart(cU))delete run.wOk[run.ex];else run.wOk[run.ex]=wv;
+    }
     run.rEnd=0;run.vor=null;
     saveRun();runPaint();renderDay();
   });
 })();
 function runJump(d){
+  if(!run)return;
   var it=runItems();if(!it)return;
   /* Im Abschlussbild ist die Einheit abgerechnet -- ein Sprung zurueck
      wuerde sie ein zweites Mal abschliessen. */
-  if(run&&run.ph==='done')return;
+  if(run.ph==='done')return;
   runStopTi();blockStopTi();
   run.ex=Math.max(0,Math.min(it.length-1,run.ex+d));
-  run.set=1;run.ph='work';run.tEnd=0;run.tUp=0;run.rEnd=0;run.tFertig=null;saveRun();runPaint();
+  warmEinfrieren();run.ph='work';run.tEnd=0;run.tUp=0;run.rEnd=0;run.tFertig=null;saveRun();runPaint();
+}
+/* Aufwaermblock ueberspringen: derselbe Satzwechsel wie "Erledigt", aber
+   als uebersprungen verbucht -- vk_skip statt doneMap, kein Zaehler, keine
+   Serie. Der Knopf steht nur, solange keine Uhr laeuft. */
+function runSkipBlock(){
+  if(!run||run.ph!=='work')return;
+  var it=runItems();if(!it)return;
+  var cur=it[run.ex];if(!cur||!cur.fixed)return;
+  runAfterSet(true);
 }
 /* ---------- Trainingsmodus, Anzeige (v32) ---------------------------------
    Vorher: eine riesige Zahl in der Bildmitte, darunter ein Knopf. Sie zeigte
@@ -10388,8 +10729,10 @@ function letztesMalTxt(cur,DE){
      gleicher Last einmal nennen, sonst Paar fuer Paar. */
   var kgE=kgs?kgs.filter(function(v){return v!==null&&v!==undefined;}):[];
   var gleich=kgE.length===reps.length&&kgE.every(function(v){return v===kgE[0];});
-  if(kgE.length&&gleich)t=kgT(kgE[0])+' × '+reps.join(', ');
-  else if(kgE.length)t=reps.map(function(r,i){return ((kgs[i]!==null&&kgs[i]!==undefined)?mzahl(String(kgZ(kgs[i])))+'×':'')+r;}).join(' · ')+' '+uw();
+  /* Wiederholungen zuerst, dann die Last -- dieselbe Reihenfolge wie die
+     Satzzeilen ("5 x 80 kg") und das Listenschema. */
+  if(kgE.length&&gleich)t=reps.join(', ')+' × '+kgT(kgE[0]);
+  else if(kgE.length)t=reps.map(function(r,i){return (kgs[i]!==null&&kgs[i]!==undefined)?(r+'×'+mzahl(String(kgZ(kgs[i])))):r;}).join(' · ')+' '+uw();
   else t=reps.map(function(v){return mzahl(String(v));}).join(' · ')+(eh2?' '+eh2:'');
   var tage=(e&&e.d)?Math.round((TODAY-new Date(e.d+'T00:00:00'))/86400000):null;
   var wann=(tage===null)?'':(tage<=0?(DE?'heute':'today'):(tage===1?(DE?'gestern':'yesterday'):(DE?'vor '+tage+' Tagen':tage+' days ago')));
@@ -10450,10 +10793,10 @@ function bilanz(it,DE){
     einh+=jeB;
     var txt;
     var alleGleich=kgL.length===wdhL.length&&kgL.every(function(v){return v===kgL[0];});
-    if(kgL.length&&alleGleich)txt=kgT(kgL[0])+' × '+wdhL.join(', ')+jeB;
-    else if(kgL.length)txt=wdhL.map(function(r,i){return (kgL[i]!==undefined?mzahl(String(kgZ(kgL[i])))+'×':'')+r;}).join(' · ')+' '+uw()+jeB;
+    if(kgL.length&&alleGleich)txt=wdhL.join(', ')+' × '+kgT(kgL[0])+jeB;
+    else if(kgL.length)txt=wdhL.map(function(r,i){return (kgL[i]!==undefined?(r+'×'+mzahl(String(kgZ(kgL[i])))):r);}).join(' · ')+' '+uw()+jeB;
     else txt=wdhL.map(function(v){return mzahl(String(v));}).join(', ')+einh;
-    zeilen+='<div class="rsrow done"><span class="rsno"></span>'+
+    zeilen+='<div class="rsrow done"><span class="rsno">&#10003;</span>'+
       '<span class="rsziel">'+String(itemName(x)||x.l).replace(/[<>&]/g,'')+'</span>'+
       '<span class="rsist">'+txt+'</span></div>';
   });
@@ -10516,7 +10859,7 @@ function satzGesamt(x,DE){
   var zg=zielAnz(x.kk,x.art,x.pro,x.mess,x.reps);
   var wertS=(zg!==null)?zg:x.reps;
   if((x.sets||1)<=1)return preS+wertS+e+je+sufS;
-  return preS+(x.sets||1)+(x.sep?spTxt(x.sep):' x ')+wertS+e+je+sufS;
+  return preS+(x.sets||1)+(x.sep?spTxt(x.sep):' × ')+wertS+e+je+sufS;
 }
 /* Der Auftrag des Tages. Bei Zusatzlast nennt er das Gewicht, das aus dem
    Krafttest folgt, und was sich gegenueber dem letzten Mal aendert. Bei
@@ -10529,7 +10872,7 @@ function auftragTxt(cur,DE){
      gehoert dort die Arbeitsvorgabe hin -- nicht weiter "wir messen ein".
      Der Testkasten daneben rechnet bereits so. */
   if(!cur||cur.fixed)return '';
-  var imTest=!!cur.test&&(cur.cal||!run||run.set===1);
+  var imTest=!!cur.test&&(cur.cal||!run||run.set<=1);
   /* Bei Messungen (Leistungstest Woche 12) sagt der Testkasten den Erstfall
      bereits -- zwei Ueberschriften mit demselben Inhalt uebereinander sind
      dieselbe Doppelung wie beim Zeitblock. */
@@ -10587,7 +10930,7 @@ function auftragTxt(cur,DE){
        bei genau den Uebungen, bei denen die Verwechslung die Belastung
        verdoppelt oder halbiert. */
     var jzA=cur.sd===2?(DE?'/Bein':'/leg'):(cur.sd===1?(DE?'/Seite':'/side'):'');
-    return (DE?'Heute: ':'Today: ')+kgT(soll)+' × '+zielR+jzA+zusatz;
+    return (DE?'Heute: ':'Today: ')+zielR+' × '+kgT(soll)+jzA+zusatz;
   }
   if(w&&w.ziel&&(cur.art==='bw'||cur.art==='zeit')&&!cur.pro){
     /* Dieselbe Zahl wie in den Satzzeilen -- zwei verschiedene Zielwerte
@@ -10669,25 +11012,6 @@ function testLastVor(cur){
   }
   return{s:S,r2:r2,r3:r3,t:tL};
 }
-/* Nur Stufen nennen, die sich voneinander UND von der Testlast
-   unterscheiden. Bei sehr kleinen Lasten (einseitige Uebungen, leichte
-   Athletinnen auf der untersten Stufe) fallen die Stufen auf dasselbe
-   Vielfache der kleinsten Scheibe zusammen -- der Kasten sagte dann
-   woertlich "8 x 2,5 kg, 5 x 2,5 kg, 3 x 5 kg", also zweimal dieselbe
-   Aufwaermstufe. Genau der Fehler, den der Kommentar an testLastVor
-   ausschliesst. Bleibt nichts uebrig, entfaellt die Rampe: bei zehn Kilo
-   Testlast braucht niemand drei Aufwaermsaetze. */
-function rampeStufen(R,DE){
-  var roh=[[8,R.s],[5,R.r2],[3,R.r3]],aus=[],gesehen={};
-  for(var i=0;i<roh.length;i++){
-    var w=roh[i][1];
-    if(w>=R.t||gesehen[w])continue;
-    gesehen[w]=1;aus.push(roh[i][0]+' × '+kgT(w));
-  }
-  if(!aus.length)return '';
-  return (DE?'Aufwärmen an der Übung: ':'Warm up on the exercise: ')+aus.join(', ')+
-    (DE?' — je 1,5 bis 3 Min Pause. ':' — 1.5 to 3 min rest each. ');
-}
 /* Bei Kniebeuge und Bankdruecken haengt der Ausstieg an Ablagen oder einem
    Partner -- ohne beides gehoert der Testsatz nicht gemacht. */
 var SICHER={kniebeuge:1,bank:1};
@@ -10714,9 +11038,14 @@ function testInfo(cur,DE){
   }
   if(a==='last'){
     var R=testLastVor(cur);
+    /* Stehen die Rampenstufen als Aufwaermsaetze in der Tabelle, sagt der
+       Kasten das -- und zaehlt sie nicht ein zweites Mal auf. */
+    var rampeTxt=(cur.warm&&cur.warm.length)
+      ?(DE?'Die Aufwärmsätze stehen in der Tabelle. ':'The warm-up sets are in the table. ')
+      :'';
     var ramp=DE
-      ?(rampeStufen(R,DE)+'Dann EIN Testsatz mit rund '+kgT(R.t)+': so viele saubere Wiederholungen wie möglich, Abbruch bei der ersten unsauberen. Drei bis zehn Wiederholungen sind der gültige Bereich. Schaffst du mehr als zehn, war es zu leicht — trage mehr ein und wiederhole den Satz.')
-      :(rampeStufen(R,DE)+'Then ONE test set at about '+kgT(R.t)+': as many clean reps as possible, stop at the first ugly one. Three to ten reps is the valid range. If you get more than ten it was too light — enter more and repeat the set.');
+      ?(rampeTxt+'Dann EIN Testsatz mit rund '+kgT(R.t)+': so viele saubere Wiederholungen wie möglich, Abbruch bei der ersten unsauberen. Drei bis zehn Wiederholungen sind der gültige Bereich. Schaffst du mehr als zehn, war es zu leicht — trage mehr ein und wiederhole den Satz.')
+      :(rampeTxt+'Then ONE test set at about '+kgT(R.t)+': as many clean reps as possible, stop at the first ugly one. Three to ten reps is the valid range. If you get more than ten it was too light — enter more and repeat the set.');
     var warn=SICHER[cur.kk||'']
       ?(DE?' Nur mit Ablagen oder Partner — sonst nimm die Kurzhantel- oder Körpergewichtsvariante.'
           :' Only with safety bars or a spotter — otherwise use the dumbbell or bodyweight variant.')
@@ -10763,6 +11092,8 @@ function testInfo(cur,DE){
 function runPaint(){
   var it=runItems();if(!it){closeRun();return;}
   var DE=cfg.lang==='de',cur=it[run.ex],L=DE?1:0;
+  /* Sicherung: run.set liegt nie unter der ersten Zeile der Uebung. */
+  if(run.ph!=='done'&&run.set<satzStart(cur)){run.set=satzStart(cur);saveRun();}
   /* Segmentleiste: ein Balken je Uebung, gefuellt nach erledigten Saetzen. */
   var segs='';
   for(var si=0;si<it.length;si++){
@@ -10771,7 +11102,7 @@ function runPaint(){
     else if(si===run.ex){
       if(run.ph==='done')f=100;
       else if(it[si].fixed)f=50;
-      else f=Math.round(((run.set-1)/Math.max(1,it[si].sets))*100);
+      else f=Math.round((Math.max(0,run.set-1)/Math.max(1,it[si].sets))*100);
     }
     segs+='<i style="--f:'+f+'%"></i>';
   }
@@ -10791,6 +11122,7 @@ function runPaint(){
     big.hidden=true;
     head.textContent=DE?'Einheit fertig':'Session done';
     $('rnStep').textContent='';$('rnIcon').innerHTML='';
+    var mgD=$('rnMg');if(mgD)mgD.hidden=true;
     /* Bilanz statt Haekchen: der Moment nach der letzten Wiederholung ist
        der einzige, in dem jemand freiwillig Zahlen liest. Wer dort sieht,
        dass er zugelegt hat, kommt wieder. */
@@ -10844,7 +11176,7 @@ function runPaint(){
     $('rnRestT').textContent=fmt(restSek());
     var uEl=$('rnUndo');if(uEl)uEl.hidden=!run.vor;
     $('rnRestNext').textContent=(DE?'Danach: ':'Up next: ')+(itemName(cur)||cur.l)+
-      (cur.fixed?'':(' · '+(DE?'Satz ':'set ')+run.set+(cur.sets?(DE?' von ':' of ')+cur.sets:'')));
+      (cur.fixed?'':(' · '+satzName(cur,run.set,DE)));
     mb.textContent=DE?'Weiter':'Continue';
   }else{
     restEl.hidden=true;
@@ -10856,6 +11188,8 @@ function runPaint(){
   $('rnIcon').innerHTML=cur.id?sv(cur.id,cvar(pid[cur.id].cv),40):artIcon(cur.art);
   head.textContent=(cur.id&&typeof itemName==='function')?itemName(cur):cur.l;
   $('rnStep').textContent=cur.id?stepName(cur.id):(cur.k||'');
+  var mgE=$('rnMg'),mgT=cur.id?'':mgLabel(cur,DE);
+  if(mgE){mgE.hidden=!mgT;mgE.textContent=mgT;}
   var lm=letztesMalTxt(cur,DE);
   if(lm){lastEl.hidden=false;lastEl.innerHTML=lm;}else lastEl.hidden=true;
   /* Auftragszeile: die eine Zeile, die sagt, was heute zu tun ist. */
@@ -10898,6 +11232,20 @@ function runPaint(){
       });
       reps.appendChild(tb);
     }
+    /* Aufwaermbloecke kann man weglassen -- MCI macht sie optional, weil die
+       Aufwaermsaetze an den Uebungen die eigentliche Vorbereitung tragen.
+       FIFA 11+ ist die Ausnahme mit Studienlage: bleibt ueberspringbar,
+       sagt aber, was es kostet. */
+    if(cur.w&&!run.tEnd&&!blockFertig){
+      var sb=document.createElement('button');sb.type='button';sb.className='tbtn rskip';
+      sb.textContent=DE?'Überspringen':'Skip';
+      if(run.ph==='rest')sb.disabled=true;
+      sb.addEventListener('click',function(){if(run.ph==='rest')return;runSkipBlock();});
+      reps.appendChild(sb);
+      hint.textContent=blockHinweis(cur.kk,DE,
+        it.some(function(x){return !!x.mess;}),
+        it.some(function(x){return !!(x.warm&&x.warm.length);})).hint;
+    }
     mb.textContent=(run.ph==='rest')?(DE?'Weiter':'Continue'):(DE?'Erledigt':'Done');
     return;
   }
@@ -10914,16 +11262,34 @@ function runPaint(){
                  bei jeder Art, gerade bei explosiven Bewegungen: dort steht
                  "volle Absicht, volle Pause" und "Tempo nach Vorgabe, nicht
                  schneller". Diese Texte waren zuletzt toter Code. */
-  var istTest=!!cur.test&&(cur.cal||(run.set===1&&(cur.art==='last'||cur.art==='bw'||cur.art==='zeit')));
-  var zeigTest=(!!cur.test||!!cur.mess)&&(cur.cal||run.set===1);
+  var istTest=istTestSatz(cur,run.set);
+  /* <=1: der Testkasten steht schon ueber den Aufwaermsaetzen, die zum
+     Test gehoeren -- istTest (schreibt die Last) bleibt bei genau 1. */
+  var zeigTest=(!!cur.test||!!cur.mess)&&(cur.cal||run.set<=1);
   /* Der Leistungstest der Woche 12 haengt nicht am Erstkontakt -- er ist
      der periodische Vergleich und muss sich bei JEDEM Block zeigen. Beim
      zweiten Durchlauf war er sonst kommentarlos verschwunden, ausgerechnet
      wenn "gleiche Bedingungen wie beim letzten Mal" endlich zutrifft. */
   var ti=(cur.test||cur.mess)?testInfo(cur,DE):null;
-  var h='';
-  for(var q=1;q<=(cur.sets||1);q++){
+  var h='',q0=satzStart(cur);
+  var thermo='<svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 14.8V5a2 2 0 0 0-4 0v9.8a4 4 0 1 0 4 0z"/></svg>';
+  var jzS=cur.sd===2?(DE?'/Bein':'/leg'):(cur.sd===1?(DE?'/Seite':'/side'):'');
+  /* Dieselbe Quelle wie das vorbelegte Feld -- einmal vor der Schleife. */
+  var zKgBasis=cur.kg?(lastVon(exKey(cur))||(cur.test?testLastVor(cur).t:0)):0;
+  var wdhTxt=DE?' Wdh':' reps';
+  for(var q=q0;q<=(cur.sets||1);q++){
     var kls=q<run.set?'done':(q===run.set?'now':'');
+    /* Aufwaermsatz: Thermometer statt Nummer, Vorgabe aus der Rampe, keine
+       Eingabe -- nur der Haken. Nichts davon erreicht run.reps. */
+    if(q<=0){
+      var wsp=cur.warm[q-q0];
+      h+='<div class="rsrow warm '+kls+'">'+
+         '<span class="rsno">'+thermo+'</span>'+
+         '<span class="rstx"><i class="rskind">'+satzLabel(cur,q,DE,false)+'</i>'+
+         '<span class="rsziel">'+wsp.r+' × '+kgT(wsp.kg)+jzS+'</span></span>'+
+         '<span class="rsist">'+(kls==='done'?'&#10003;':'—')+'</span></div>';
+      continue;
+    }
     var eing=run.reps[run.ex+'-'+q];
     var kgv=run.kg?run.kg[run.ex+'-'+q]:undefined;
     /* Zeitvorgaben werden in Sekunden erfasst -- auch die in Minuten
@@ -10931,18 +11297,34 @@ function runPaint(){
        nackte 240 neben einem Ziel von "4 Min". */
     var istTxt=(eing===undefined)?'—'
       :(cur.mess?(mzahl(String(eing))+' '+cur.mess)
-        :((kgv!==undefined?kgT(kgv)+' × ':'')+eing+((cur.einh==='s'||cur.einh==='min')?' s':'')));
+        :(eing+((cur.einh==='s'||cur.einh==='min')?' s':'')+(kgv!==undefined?' × '+kgT(kgv):'')));
+    /* "max" steht nur, wo der Satz wirklich bis zur Technikgrenze geht:
+       Calisthenics-Einmessen, Zusatzlast, Koerpergewicht, Haltezeit. Bei
+       Tempo-, Sprung- und Wurfvorgaben gilt die Planvorgabe -- dort sagt
+       der Testkasten ausdruecklich "nicht schneller". */
+    var istTestS=istTestSatz(cur,q);
+    var kind=satzLabel(cur,q,DE,false);
+    /* Messungen: Strecke oder Zeit als Vorgabe ("30 m", "3 km"); ohne Einheit
+       (Sprungtest zaehlt Versuche) bleibt die Vorgabe leer -- "max" sagt bei
+       einer Messung nichts, der Kasten erklaert die Anstrengung. */
+    var messE=cur.einh==='m'||cur.einh==='km'||cur.einh==='min'||cur.einh==='s';
+    var ziel=istTestS?'max':((cur.mess&&!messE)?'':satzZiel(cur,DE));
+    /* Zusatzlast in die Vorgabe: "5 × 80 kg" wie das MCI-Satzschema.
+       Dieselbe Quelle wie das vorbelegte Feld -- eingetragene Last, sonst
+       hinterlegte Arbeitslast, beim Erstkontakt das Testgewicht. */
+    var hatJz=!!jzS&&ziel.slice(-jzS.length)===jzS;
+    if(hatJz)ziel=ziel.slice(0,-jzS.length);
+    if(cur.kg){
+      var zKg=(kgv!==undefined&&kgv!==null)?kgv:zKgBasis;
+      if(zKg)ziel=ziel+(ziel==='max'?' · ':' × ')+kgT(zKg);
+    }else if(!cur.mess&&cur.einh==='w'&&/^\d/.test(ziel)){
+      /* Koerpergewicht: "6" allein wirkt neben "5 x 80 kg" abgeschnitten. */
+      ziel+=wdhTxt;
+    }
+    ziel+=jzS;
     h+='<div class="rsrow '+kls+'">'+
        '<span class="rsno">'+q+'</span>'+
-       /* "max" steht nur, wo der Satz wirklich bis zur Technikgrenze geht:
-          Calisthenics-Einmessen, Zusatzlast, Koerpergewicht, Haltezeit. Bei
-          Tempo-, Sprung- und Wurfvorgaben gilt die Planvorgabe -- dort sagt
-          der Testkasten ausdruecklich "nicht schneller". */
-       '<span class="rsziel">'+(cur.mess
-         ?((DE?'Versuch ':'Attempt ')+q)
-         :((cur.test&&(cur.cal||(q===1&&(cur.art==='last'||cur.art==='bw'||cur.art==='zeit'))))
-            ?(cur.cal?'max':(DE?'Testsatz · max':'Test set · max'))
-            :satzZiel(cur,DE)))+'</span>'+
+       '<span class="rstx"><i class="rskind">'+kind+'</i><span class="rsziel">'+ziel+'</span></span>'+
        '<span class="rsist">'+istTxt+'</span></div>';
   }
   sets.innerHTML=h;
@@ -10953,6 +11335,9 @@ function runPaint(){
   if(akt){
     akt.lastElementChild.remove();
     var box=document.createElement('span');box.className='rin';
+    /* Aufwaermsaetze haben keine Eingabe -- ihre Vorgabe ist die Rampe, und
+       nichts davon soll in Verlauf oder Fortschreibung geraten. */
+    if(run.set>=1){
     /* Zeitvorgaben bekommen eine Uhr UND ein Feld: die Uhr laeuft die
        Vorgabe herunter, das Feld traegt, was tatsaechlich gehalten wurde.
        Ohne Feld wurde die Uebung nie aufgezeichnet -- sie fragte in jeder
@@ -11123,12 +11508,13 @@ function runPaint(){
       });
       box.appendChild(ir);
     }
+    }
     /* Haken in der Zeile: ein Satz endet ausser Atem -- was dann verlangt
        wird, muss in eine Bewegung passen und dort liegen, wo der Daumen
        ohnehin ist. Der breite Knopf unten bleibt gleichwertig daneben. */
     var hk=document.createElement('button');
     hk.type='button';hk.className='rhak';hk.id='rnHak';
-    hk.setAttribute('aria-label',DE?'Satz abhaken':'Tick set');
+    hk.setAttribute('aria-label',run.set<=0?(DE?'Aufwärmsatz abhaken':'Tick warm-up set'):(DE?'Satz abhaken':'Tick set'));
     hk.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>';
     /* In der Pause zeigt die markierte Zeile den NAECHSTEN, noch nicht
        ausgefuehrten Satz -- ein Griff daneben haette ihn abgehakt und sofort
@@ -11152,7 +11538,8 @@ function runPaint(){
        niedrig aus. */
     var sdT=cur.sd?(cur.sd===2?(DE?'Beide Beine zählen als ein Satz.':'Both legs count as one set.')
                               :(DE?'Beide Seiten zählen als ein Satz.':'Both sides count as one set.')):'';
-    var pauseT=cur.rest?(DE?'Pause danach '+fmt(cur.rest):'Rest after '+fmt(cur.rest)):'';
+    var pNach=cur.rest?pauseNach(cur,run.set):0;
+    var pauseT=pNach?(DE?'Pause danach '+fmt(pNach):'Rest after '+fmt(pNach)):'';
     hint.textContent=[sdT,pauseT].filter(Boolean).join(' ');
   }else{
     tEl.hidden=true;tEl.innerHTML='';
@@ -11169,9 +11556,12 @@ function runPaint(){
     hint.textContent=extra.join(' ');
   }
   reps.innerHTML='';
-  mb.textContent=(run.set>=(cur.sets||1))
+  /* Dieselbe Bezeichnung wie die Zeile: "Testsatz fertig", "Aufwaermsatz 1
+     fertig", "Versuch 2 fertig" -- ohne das "/4", das der Knopf nicht braucht. */
+  var slK=satzLabel(cur,run.set,DE,false).replace(/\/\d+$/,'');
+  mb.textContent=(run.set>=1&&run.set>=(cur.sets||1))
     ?(DE?'Übung fertig':'Exercise done')
-    :(DE?'Satz '+run.set+' fertig':'Set '+run.set+' done');
+    :(DE?slK+' fertig':slK+' done');
   /* Waehrend der Pause fuehrt der Hauptknopf weiter, nicht in den naechsten
      Satz -- er steht ganz unten und wird deshalb zuletzt gesetzt. */
   if(run.ph==='rest'){
@@ -14138,6 +14528,7 @@ function snapState(){
      falsche 'Tag komplett'-Meldung ausloesen, waehrend der Ring daneben
      korrekt 80 % zeigt. */
   for(i in dn){if(dn[i]&&parseInt(i,10)<tot)dc++;}
+  var skS=get('skip',{})[k]||{},tot0=tot;for(i in skS){if(skS[i]&&!dn[i]&&parseInt(i,10)<tot0)tot--;}
   return{sleep:parseFloat($('y-sleep').value)||0,mood:parseInt($('y-mood').value,10),
     sore:parseInt($('y-sore').value,10),stress:parseInt($('y-stress').value,10),
     ppk:pro/kg,lv:levelOf(xpTotal()),tier:curTier,dayPct:tot?dc/tot:0,rd:lastRd};
@@ -14959,7 +15350,7 @@ function syncUndo(){
   ['undoBtn','undoBtn2'].forEach(function(id){var b=$(id);if(!b)return;b.disabled=!ok;b.style.opacity=ok?'':'.4';});
 }
 $('exportBtn').addEventListener('click',function(){
-  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile','exlog','exhist','weights','diary','fav'].forEach(function(k){dump[k]=get(k,null);});
+  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile','exlog','exhist','weights','diary','fav','skip'].forEach(function(k){dump[k]=get(k,null);});
   var txt=JSON.stringify(dump);
   try{navigator.clipboard.writeText(txt);}catch(e){}
   flash('expFlag');
@@ -14981,7 +15372,7 @@ $('exportBtn').addEventListener('click',function(){
       Entscheidungsgrundlage, "Wirklich fortfahren?" ist keine. */
 var IMPKEYS=['start','steps','done','logs','wins','over','meas','measBase','prs','wlog',
   'supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks',
-  'lastStepUp','run','profile','exlog','exhist','vrf','diary','fav','weights'];
+  'lastStepUp','run','profile','exlog','exhist','vrf','diary','fav','weights','skip'];
 function importPruefen(txt){
   var d;
   try{d=JSON.parse(txt);}catch(e){return{ok:false,grund:'json'};}
@@ -15086,8 +15477,8 @@ function renderSessOv(){
       :(DE?'Das steht heute an — Vorgaben und Hinweise stehen an jeder Übung.':'Today’s work — targets and cues sit on every exercise.'))+'</p>';
     h+='<div class="solist">'+it.map(function(x,i){
       return '<div class="sorow">'+(x.id?sv(x.id,cvar(pid[x.id].cv),30):'')+
-        '<span class="nm"><b></b><span></span></span>'+
-        '<span class="sv">'+(x.fixed?x.label:satzGesamt(x,DE))+'</span>'+
+        '<span class="nm"><i class="mg" hidden></i><b></b><span></span></span>'+
+        '<span class="sv">'+(x.fixed?x.label:schemaTxt(x,DE))+'</span>'+
         (x.id?'<button type="button" class="swp" data-i="'+i+'" aria-label="Swap">&#8644;</button>':'')+'</div>';
     }).join('')+'</div>';
     h+='<button type="button" class="tbtn go sogo" id="soStart">'+(DE?'Training starten':'Start session')+'</button>';
@@ -15125,6 +15516,8 @@ function renderSessOv(){
          ersten Bildschirm jeder Einheit "Pull-up or negative". */
       rows[i].querySelector('.nm b').textContent=(x.id&&typeof itemName==='function')?itemName(x):x.l;
       rows[i].querySelector('.nm span').textContent=x.id?stepName(x.id):(x.k||'');
+      var mgS=rows[i].querySelector('.nm i.mg'),mgSt=x.id?'':mgLabel(x,DE);
+      if(mgS){mgS.textContent=mgSt;mgS.hidden=!mgSt;}
     });
     [].forEach.call(host.querySelectorAll('.swp'),function(b){
       b.addEventListener('click',function(){
