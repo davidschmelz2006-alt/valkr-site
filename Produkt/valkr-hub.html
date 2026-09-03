@@ -2710,6 +2710,13 @@
     background:var(--surf);border:1px solid var(--line);
     font-size:var(--t2);color:var(--ink2);text-align:left}
   #runner .rlast b{color:var(--ink);font-family:var(--fd)}
+  /* v35.2: Notiz je Uebung -- leiser Textknopf, Feld erst auf Tipp. */
+  #runner .rnotew{margin:.3rem 0 0;text-align:left}
+  #runner .rnotel{margin:0 0 .15rem;font-size:var(--t2);color:var(--ink3)}
+  #runner .rnotel b{color:var(--ink2);font-weight:500}
+  #runner .rnoteb{min-height:40px;padding:0 .6rem;margin-left:-.6rem;color:var(--ink3)}
+  #runner .rnoteb[aria-expanded="true"]{color:var(--ink)}
+  #runner #rnNoteEx{min-height:56px;margin-top:.2rem}
   #runner .rsets{display:flex;flex-direction:column;gap:.3rem;margin-top:.7rem}
   /* Satzzeilen in der Kartengrammatik von MCI, im eigenen Kleid: links eine
      runde Marke (Nummer oder Thermometer fuer den Aufwaermsatz), in der
@@ -3421,6 +3428,14 @@
            einer Anzeigetafel. -->
       <p class="rauf" id="rnAuftrag" hidden></p>
       <p class="rlast" id="rnLast" hidden></p>
+      <!-- v35.2: Notiz je Uebung -- "Griff rutscht", "Knie links zwickt".
+           Landet im Verlaufseintrag der Uebung und steht beim naechsten Mal
+           als "Letzte Notiz" unter dem Namen. -->
+      <div class="rnotew" id="rnNoteW" hidden>
+        <p class="rnotel" id="rnNoteLast" hidden></p>
+        <button type="button" class="txtbtn rnoteb" id="rnNoteBtn" aria-expanded="false"></button>
+        <textarea id="rnNoteEx" hidden rows="2"></textarea>
+      </div>
       <!-- Der Krafttest steht VOR der Tabelle: man liest, was gemessen wird,
            bevor man den ersten Wert eintraegt. -->
       <div class="rtest" id="rnTest" hidden></div>
@@ -4371,7 +4386,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='35.1';
+var VERSION='35.2';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -10298,11 +10313,13 @@ function sessWrap(it){
       if(einhSp)vorh.u=einhSp;
       if(istMess)vorh.m=1;
       delete vorh.ohne;
+      if(run.notes&&run.notes[sk])vorh.n=run.notes[sk];
       xl[sk]={d:iso(TODAY),reps:vorh.r.slice(),n:(xl[sk]&&xl[sk].n)||x.l};
     }else{
       xl[sk]={d:iso(TODAY),reps:reps,n:x.l};
       eh[sk].push({d:iso(TODAY),r:reps.slice(),p:x.id||x.kk||null,
-        w:kgHat?kgs.slice():undefined,u:einhSp,m:istMess?1:undefined});
+        w:kgHat?kgs.slice():undefined,u:einhSp,m:istMess?1:undefined,
+        n:(run.notes&&run.notes[sk])?run.notes[sk]:undefined});
       if(eh[sk].length>20)eh[sk].shift();
     }
     ehNeu=true;
@@ -10983,6 +11000,7 @@ function runSkipBlock(){
    bevor man anfaengt. Alles liest denselben Zustand (run, runItems) wie der
    Rest des Trainingsmodus -- keine zweite Quelle. */
 var editSatz=null;   /* {ex,q}: welcher erledigte Satz gerade korrigiert wird */
+var noteEx=-1;       /* Uebungsindex, an dem das Notizfeld aufgeklappt ist */
 var testAuf=false;   /* Testkasten aufgeklappt? Gilt fuer die Sitzung. */
 var clockTi=null;
 var runScrollKey=''; /* letzter Satz/Phase, zu dem gescrollt wurde */
@@ -11262,6 +11280,25 @@ function runListPaint(){
     });
     var sh=$('sheet'),sb=$('sheetBg');
     if(sh)sh.classList.add('over');if(sb)sb.classList.add('over');
+  });
+  /* v35.2: Notiz je Uebung -- Knopf klappt das Feld auf, Eingabe schreibt
+     nach run.notes[Uebungsschluessel]; sessWrap traegt sie in den
+     Verlaufseintrag (n) ein. */
+  var nBtn=$('rnNoteBtn'),nEx=$('rnNoteEx');
+  if(nBtn)nBtn.addEventListener('click',function(){
+    if(!run)return;
+    var offen=nEx.hidden;
+    nEx.hidden=!offen;nBtn.setAttribute('aria-expanded',String(offen));
+    noteEx=offen?run.ex:-1;
+    if(offen)nEx.focus();
+  });
+  if(nEx)nEx.addEventListener('input',function(){
+    if(!run)return;
+    var it=runItems(),cur=it&&it[run.ex];if(!cur||cur.fixed)return;
+    if(!run.notes)run.notes={};
+    var v=nEx.value.trim().slice(0,240);
+    if(v)run.notes[exKey(cur)]=v;else delete run.notes[exKey(cur)];
+    saveRun();
   });
   /* Zeitblock: auch die grosse Zahl startet die Uhr. */
   var bg=$('rnBig');
@@ -11983,6 +12020,23 @@ function runPaint(){
   var leCur=cur.fixed?null:letzterEintrag(cur);
   var lm=(leCur&&leCur.r&&leCur.r.length)?'':letztesMalTxt(cur,DE);
   if(lm){lastEl.hidden=false;lastEl.innerHTML=lm;}else lastEl.hidden=true;
+  /* v35.2: Notiz je Uebung -- nur bei Saetzen, nicht bei Zeitbloecken. */
+  var nW=$('rnNoteW');
+  if(nW){
+    nW.hidden=!!cur.fixed;
+    if(!cur.fixed){
+      var nK=exKey(cur),nT=(run.notes&&run.notes[nK])||'';
+      var nB=$('rnNoteBtn'),nX=$('rnNoteEx'),nL=$('rnNoteLast');
+      nB.textContent=nT?(DE?'Notiz · '+nT.slice(0,28)+(nT.length>28?'…':''):'Note · '+nT.slice(0,28)+(nT.length>28?'…':'')):(DE?'Notiz zur Übung':'Note for this exercise');
+      var nOffen=nB.getAttribute('aria-expanded')==='true'&&noteEx===run.ex;
+      nX.hidden=!nOffen;nB.setAttribute('aria-expanded',String(nOffen));
+      if(nX.value!==nT)nX.value=nT;
+      nX.placeholder=DE?'Griff rutscht, Knie links zwickt, Stufe geschafft …':'Grip slipping, left knee twinging, cleared a step …';
+      var nPrev=(leCur&&leCur.n)?String(leCur.n):'';
+      nL.hidden=!nPrev;
+      nL.innerHTML=nPrev?((DE?'Letzte Notiz: ':'Last note: ')+'<b>'+nPrev.replace(/[<>&]/g,'')+'</b>'):'';
+    }
+  }
   /* Auftragszeile: die eine Zeile, die sagt, was heute zu tun ist. */
   var aufEl=$('rnAuftrag'),auf=auftragTxt(cur,DE);
   if(auf){aufEl.hidden=false;aufEl.innerHTML=auf;}else aufEl.hidden=true;
