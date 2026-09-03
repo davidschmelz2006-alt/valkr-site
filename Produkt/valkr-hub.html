@@ -1351,7 +1351,10 @@
 
   .exlist{display:flex;flex-direction:column;gap:.4rem}
   .exrow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);padding:.58rem .72rem;border-radius:3px;transition:.18s}
-  .exrow .swp{flex:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;color:var(--ink3);font-size:.95rem;line-height:1;transition:.16s}
+  .exrow .swp{flex:none;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;color:var(--ink3);font-size:.95rem;line-height:1;transition:.16s}
+  /* v34.4: Der Name fuehrt zur Detailkarte -- das Zeichen sagt es. */
+  .exrow .nm.tap b::after{content:"";display:inline-block;width:6px;height:6px;margin-left:.45rem;
+    border-right:1.5px solid var(--ink3);border-top:1.5px solid var(--ink3);transform:rotate(45deg);vertical-align:middle}
   .exrow .swp:hover{border-color:var(--aurora);color:var(--ink)}
   /* Kein max-height, kein overflow: eine scrollende Liste in einer scrollenden
      Seite ist auf dem Telefon die haeufigste Bedienfalle. Die Laenge begrenzt
@@ -1893,10 +1896,13 @@
   /* Trainings-Uebersicht vor dem Start: erst sehen was ansteht (und tauschen),
      dann der kurze Check-in -- der Tag passt sich der Tagesform an. */
   #sessov{position:fixed;inset:0;z-index:78;background:var(--bg);display:none;overflow:auto;
-    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.2rem calc(1.4rem + env(safe-area-inset-bottom,0px))}
+    padding:calc(1rem + env(safe-area-inset-top,0px)) 1.2rem 0}
   #sessov.on{display:flex;justify-content:center}
   #sessov .sobox{width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;height:max-content}
-  #sessov .sohead{display:flex;align-items:center;gap:.8rem}
+  /* v34.4: Kopf klebt oben wie der Fuss unten -- das X bleibt erreichbar. */
+  #sessov .sohead{display:flex;align-items:center;gap:.8rem;position:sticky;top:0;z-index:2;
+    background:var(--bg);padding-bottom:.4rem;margin-top:-.2rem}
+  #sessov .sotit{flex:1;min-width:0}
   #sessov .sotit b{font-family:var(--fd);font-weight:600;font-size:1.2rem;display:block}
   #sessov .sotit span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
   /* v34.1: Start-Knoepfe des Trainingsflusses in EINER Farbe (Ember, wie
@@ -1917,26 +1923,31 @@
   #sessov .sorow .nm b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
   #sessov .sorow .nm span.sch{display:block;font-family:var(--fm);font-size:var(--t2);color:var(--ink);
     font-variant-numeric:tabular-nums;margin-top:.12rem}
-  #sessov .sorow .swp{flex:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;color:var(--ink3);transition:.16s}
+  #sessov .sorow .swp{flex:none;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;color:var(--ink3);transition:.16s}
   #sessov .sorow .swp:hover{border-color:var(--aurora);color:var(--ink)}
   #sessov .sogo{width:100%;text-align:center;padding:.8rem}
   #sessov .soopts{display:flex;flex-direction:column;gap:.5rem}
   /* v34.2: Check-in als Chip-Zeile auf der Uebersicht. */
   #sessov .sochk{display:flex;flex-direction:column;gap:.45rem;margin-top:.2rem;align-items:flex-start}
   #sessov .sochk .eyebrow,#sessov .sofoot .eyebrow{margin:0}
-  #sessov .soopts.row{flex-direction:row}
-  /* Eine Chip-Grammatik fuer Energie und Schmerz: gewaehlt = Aurora-Fuellung. */
-  #sessov .soopts.row .soopt{flex:1;min-height:44px;padding:.5rem .3rem;font-family:var(--fd);font-size:var(--t3);
-    letter-spacing:0;text-transform:none;border-radius:12px}
-  #sessov .soopts.row .soopt[aria-pressed="true"]{background:color-mix(in srgb,var(--aurora) 18%,transparent);
+  #sessov .soopts.row{flex-direction:row;gap:.4rem}
+  /* v34.4: EINE Chip-Grammatik fuer Energie UND Schmerz -- 44 px, 12 px
+     Radius, Sans, gewaehlt = Aurora-Fuellung. */
+  #sessov .soopt{min-height:44px;padding:.5rem .8rem;font-family:var(--fd);font-size:var(--t3);
+    letter-spacing:0;text-transform:none;border-radius:12px;background:var(--surf);border:1px solid var(--line);color:var(--ink2)}
+  #sessov .soopts.row .soopt{flex:1;padding:.5rem .3rem;min-height:42px}
+  #sessov .soopt[aria-pressed="true"]{background:color-mix(in srgb,var(--aurora) 18%,transparent);
     border-color:var(--aurora);color:var(--ink)}
-  #sessov .soopts.row .soopt[aria-pressed="true"]::after{display:none}
-  #sessov #soAdj:empty{display:none}
-  #sessov #soAdj{margin:0}
-  /* v34.3: fester Fuss der Uebersicht. */
-  #sessov .sofoot{position:sticky;bottom:0;z-index:2;margin-top:auto;padding:.7rem 0 .2rem;
-    display:flex;flex-direction:column;gap:.5rem;
-    background:linear-gradient(to bottom,transparent,var(--bg) 26%)}
+  #sessov .soopt[aria-pressed="true"]::after{display:none}
+  #sessov .soopt:hover{transform:none;border-color:var(--aurora)}
+  /* v34.3/34.4: fester Fuss der Uebersicht -- deckender Grund, Safe-Area
+     im Fuss (sonst lag der Knopf unter dem Home-Balken und sprang am
+     Scrollende), ein weicher Rand nach oben. */
+  #sessov .sofoot{position:sticky;bottom:0;z-index:2;padding:.55rem 0 calc(.9rem + env(safe-area-inset-bottom,0px));
+    display:flex;flex-direction:column;gap:.4rem;background:var(--bg)}
+  #sessov .sofoot::before{content:"";position:absolute;left:0;right:0;top:-18px;height:18px;
+    background:linear-gradient(to bottom,transparent,var(--bg));pointer-events:none}
+  #sessov .txtbtn{min-height:44px}
   #sessov .sorow .nm span:not(.sch){display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   #sessov .sopainT{align-self:flex-start;min-height:40px}
   #sessov .sopainT::after{content:"";display:inline-block;width:6px;height:6px;margin-left:.4rem;
@@ -2574,16 +2585,18 @@
      Saetze. Die Zeile im Bearbeiten-Zustand traegt Ice statt Ember: sie ist
      nicht der laufende Satz, sie ist eine Korrektur. */
   #runner .rsrow.done[data-q]{cursor:pointer}
-  #runner .rsrow.edit{background:color-mix(in srgb,var(--ice) 12%,var(--surf2));border-style:solid;
-    border-color:color-mix(in srgb,var(--ice) 50%,transparent);color:var(--ink)}
-  #runner .rsrow.edit .rsno{border-color:var(--ice);color:var(--ice)}
-  #runner .rsrow.edit .rskind{color:var(--ice)}
-  #runner .rsrow.edit .rin input:focus{border-color:var(--ice)}
+  /* v34.4: neutral statt Ice -- Ice bleibt der Messung (Testkasten), die
+     Korrektur ist ein Zustand, kein zweiter Ice-Kasten darueber. */
+  #runner .rsrow.done.edit{background:var(--surf3);border-style:solid;
+    border-color:color-mix(in srgb,var(--ink) 35%,transparent);color:var(--ink)}
+  #runner .rsrow.edit .rsno{border-color:var(--ink2);color:var(--ink)}
+  #runner .rsrow.edit .rskind{color:var(--ink2)}
+  #runner .rsrow.edit .rin input:focus{border-color:var(--ink2)}
   #runner .rsrow.edit .rok{width:40px;height:44px;border-radius:12px;flex:none;
-    border:1px solid color-mix(in srgb,var(--ice) 55%,transparent);
-    background:color-mix(in srgb,var(--ice) 18%,transparent);color:var(--ice);
+    border:1px solid color-mix(in srgb,var(--ink) 35%,transparent);
+    background:var(--surf);color:var(--ink);
     display:flex;align-items:center;justify-content:center}
-  #runner .rsrow.edit .rok:hover{background:var(--ice);color:var(--night)}
+  #runner .rsrow.edit .rok:hover{background:var(--ink);color:var(--bg)}
 
 
   #runner h3{font-family:var(--fd);font-weight:600;font-size:1.6rem;margin:.35rem 0 0;
@@ -2761,16 +2774,20 @@
   @media (max-width:380px){
     #runner .rin input{width:54px}
     #runner .rhak{width:44px}
-    #runner .rsrow.now .rsziel{font-size:1.1rem}
+    /* Kennzahl > Titel, auch auf 375 px: die Vorgabe bleibt gross, der
+       Uebungsname weicht. */
+    #runner .rsrow.now .rsziel{font-size:1.25rem}
+    #runner .rhead h3{font-size:1.1rem}
   }
   /* v34.1: Tippflaechen mindestens 44 px -- Ortszeile als Pille, X,
      Felder, Haken, Korrektur-Haken. */
   #runner .rwhere{min-height:44px;padding:.5rem .9rem;white-space:nowrap}
-  #runner .rin .rvorin{margin-right:auto;text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
-  /* Play-Zeichen vor der Blockuhr: die Zahl ist der Startknopf. */
-  #runner .rbig.tap::before{content:"";display:inline-block;width:0;height:0;vertical-align:middle;
-    border-left:.34em solid var(--ember);border-top:.2em solid transparent;border-bottom:.2em solid transparent;
-    margin-right:.2em;transform:translateY(-.06em)}
+  /* v34.4: Der Vorher-Wert steht in eigener Zeile ueber der Eingabe --
+     neben zwei Feldern und dem Haken blieb ihm auf 360 px nur "zuletzt 5…". */
+  #runner .rsrow.now .rin{flex-wrap:wrap}
+  #runner .rin .rvorin{flex:1 0 100%;text-align:left;margin:0 0 .15rem}
+  /* v34.4: kein Play-Zeichen mehr -- der Hauptknopf sagt "Timer starten",
+     die Zahl bleibt stille zweite Tippflaeche. */
   /* RPE-Anker unter der Skala. */
   #runner .rpewrap{display:flex;flex-direction:column;align-items:center;gap:.2rem}
   #runner .rpeank{display:flex;justify-content:space-between;width:100%;font-family:var(--fm);
@@ -2855,6 +2872,9 @@
      Telefonen griff seit v32 nicht mehr, und "Einbeiniges Wadenheben,
      exzentrisch" brach dort auf voller Groesse um. */
   @media (max-width:420px){#runner .rhead h3{font-size:1.2rem}}
+  /* v34.4: auf 375 px unter der Vorgabe des laufenden Satzes (1,25 rem) --
+     steht hinter der 420-Regel, sonst verliert sie. */
+  @media (max-width:380px){#runner .rhead h3{font-size:1.1rem}}
   #a2hs{position:fixed;left:0;right:0;bottom:0;z-index:70;display:none;align-items:center;gap:.7rem;
     background:var(--surf);border-top:1px solid var(--line);padding:.8rem clamp(.8rem,4vw,1.2rem);
     padding-bottom:calc(.8rem + env(safe-area-inset-bottom,0px));box-shadow:0 -4px 20px rgba(0,0,0,.2)}
@@ -4324,7 +4344,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='34.3';
+var VERSION='34.4';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8842,7 +8862,7 @@ function renderDay(){
        Schema), nicht rechts daneben -- rechts blieb bei "3 x 10/Bein ·
        20 kg" dem Namen kein Platz mehr, er brach Wort fuer Wort. Rechts
        nur noch der Tausch-Knopf. */
-    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm">'+(mgR?'<i class="mg">'+mgR+'</i>':'')+'<b>'+itemName(it)+'</b><span'+((!it.id&&it.k)?' class="cue"':'')+'>'+(it.id?kindTxt(pid[it.id].kind):(it.k||(pl.kind==='rest'?(cfg.lang==='de'?'Erholung':'recovery'):(cfg.lang==='de'?'locker':'easy'))))+'</span>'+
+    row.innerHTML='<span class="tick">&#10003;</span>'+icon+'<span class="nm'+(it.id?' tap':'')+'">'+(mgR?'<i class="mg">'+mgR+'</i>':'')+'<b>'+itemName(it)+'</b><span'+((!it.id&&it.k)?' class="cue"':'')+'>'+(it.id?kindTxt(pid[it.id].kind):(it.k||(pl.kind==='rest'?(cfg.lang==='de'?'Erholung':'recovery'):(cfg.lang==='de'?'locker':'easy'))))+'</span>'+
       (it.v?'<span class="sch">'+it.v+'</span>':'')+'</span>'+
       ((pl.kind==='train'&&it.id)?'<button type="button" class="swp" title="'+(DEr?'Übung tauschen':'Swap exercise')+'" aria-label="'+(DEr?'Übung tauschen':'Swap exercise')+'">&#8644;</button>':'');
     var swpBtn=row.querySelector('.swp');
@@ -9133,7 +9153,7 @@ function buildTiles(){
   PAT.forEach(function(p){
     var b=document.createElement('button');b.className='tile';
     var s=steps[p.id]||0,pct=Math.round((s+1)/p.ladder.length*100);
-    b.innerHTML=demoHost('p:'+p.id,p.id,cvar(p.cv),'tdemo')+'<b>'+p.name+'</b><span class="k">'+p.kind+'</span><span class="lvl">'+(cfg.lang==='de'?'Stufe ':'Step ')+(s+1)+' / '+p.ladder.length+'</span><span class="prog"><i style="width:'+pct+'%"></i></span>';
+    b.innerHTML=demoHost('p:'+p.id,p.id,cvar(p.cv),'tdemo')+'<b>'+p.name+'</b><span class="k">'+kindTxt(p.kind)+'</span><span class="lvl">'+(cfg.lang==='de'?'Stufe ':'Step ')+(s+1)+' / '+p.ladder.length+'</span><span class="prog"><i style="width:'+pct+'%"></i></span>';
     b.addEventListener('click',function(){openDetail(p.id);});
     t.appendChild(b);});
 }
@@ -9141,7 +9161,7 @@ var cur=null;
 function openDetail(id){
   var p=pid[id];cur=id;
   $('d-icon').innerHTML=sv(p.id,cvar(p.cv),44);
-  $('d-name').innerHTML=p.name+' · <span style="font-size:.7em;color:var(--ink3)">'+p.kind+'</span>';
+  $('d-name').innerHTML=p.name+' · <span style="font-size:.7em;color:var(--ink3)">'+kindTxt(p.kind)+'</span>';
   $('d-blurb').textContent=p.blurb;$('d-media').textContent=p.media;
   $("d-demo").innerHTML=demoHost('h:'+p.id,p.id,cvar(p.cv)||cvar('--aurora'),'hdemo',{fokus:1});
   ladder();fill('d-cues',p.cues);fill('d-bad',p.bad);
@@ -10512,7 +10532,7 @@ function runValid(){
     /* Sauber beenden statt stillschweigend weiterlaufen: die bereits
        erfassten Saetze sind ueber sessWrap laengst geschrieben, nur die
        Fortsetzung ergibt keinen Sinn mehr. */
-    run.on=false;saveRun();
+    runBeenden();
     return null;
   }
   return it;
@@ -11032,6 +11052,10 @@ function vorbelegungLeeren(cur,eq){
     var neu=lastVon(exKey(cur))||(cur.test?testLastVor(cur).t:0);
     if(neu)run.kg[ex+'-'+run.set]=neu;
     var fk=$('rnKgIn');if(fk)fk.value=neu?kgZ(neu):'';
+    /* ... und die Vorgabe der Zeile ("5 x 85 kg") gleich mit -- ohne
+       Neuaufbau, der den Fokus im Korrekturfeld kostete. */
+    var zEl=document.querySelector('#rnSets .rsrow.now .rsziel');
+    if(zEl&&neu)zEl.textContent=zEl.textContent.replace(/(×|·)\s*[\d.,]+\s*(kg|lb)/,'$1 '+kgT(neu));
   }
   saveRun();
 }
@@ -11044,7 +11068,9 @@ function saetzeGemacht(x,i){
   if(!run||!x||x.fixed)return 0;
   var n=0,mark=(i===run.ex&&run.ph!=='done')?run.set:0;
   var dnS=doneMap[iso(TODAY)]||{},oi=run.micro?run.micro[i]:i;
-  if(dnS[oi]&&i!==run.ex)return x.sets||1;
+  /* Abgehakt zaehlt voll -- auch die laufende Uebung im Abschlussbild und
+     eine zurueckgeblaetterte, schon abgehakte (Sprints ohne Zahl). */
+  if(dnS[oi]&&(i!==run.ex||run.ph==='done'))return x.sets||1;
   for(var q=1;q<=(x.sets||1);q++){if(run.reps[i+'-'+q]!==undefined||q<mark)n++;}
   return Math.min(n,x.sets||1);
 }
@@ -11740,6 +11766,12 @@ function runPaint(){
   $('rnClose').setAttribute('aria-label',DE?'Schließen':'Close');
   var big=$('rnBig'),hint=$('rnHint'),reps=$('rnReps'),mb=$('rnMain'),
       sets=$('rnSets'),lastEl=$('rnLast'),nextEl=$('rnNextUp'),head=$('rnEx');
+  /* v34.4: Die Start-Markierung des Hauptknopfs gilt nur fuer den
+     Zeitblock-Zweig, der sie setzt -- jeder andere Aufbau loescht sie.
+     Sonst blieb sie nach einem uebersprungenen Block stehen, und "Satz
+     fertig" rief eine Blockuhr, die es nicht gab: kein Satz liess sich
+     mehr per Hauptknopf oder Enter abhaken. */
+  mb.dataset.blk='';
   var tEl0=$('rnTest');
   function ausblenden(){sets.innerHTML='';lastEl.hidden=true;nextEl.hidden=true;
     if(tEl0){tEl0.hidden=true;tEl0.innerHTML='';}}
@@ -11911,7 +11943,7 @@ function runPaint(){
        der Hauptknopf sagt "Timer starten". */
     if(cap){
       cap.hidden=!(blockFertig||blockDone);
-      cap.textContent=blockDone?(DE?'Erledigt':'Done'):(DE?'Zeit um — gleich geht es weiter':'Time is up — moving on');
+      cap.textContent=blockDone?(DE?'Erledigt':'Done'):(DE?'Zeit um':'Time is up');
     }
     mb.dataset.blk=startbar?'start':'';
     /* Aufwaermbloecke kann man weglassen -- MCI macht sie optional, weil die
@@ -11924,14 +11956,18 @@ function runPaint(){
       if(run.ph==='rest')sb.disabled=true;
       sb.addEventListener('click',function(){if(run.ph==='rest')return;runSkipBlock();});
       reps.appendChild(sb);
+      /* Ohne den Nachsatz ueber die Aufwaermsaetze: der beantwortet eine
+         Frage, die erst beim Ueberspringen entsteht -- auf dem Timer-
+         Bildschirm reicht der eine Satz zur Studienlage. */
       hint.textContent=blockHinweis(cur.kk,DE,
-        it.some(function(x){return !!x.mess;}),
-        it.some(function(x){return !!(x.warm&&x.warm.length);})).hint;
+        it.some(function(x){return !!x.mess;}),false).hint;
     }
     /* Eine Wortfamilie: Satz fertig / Uebung fertig / Block fertig -- und
        vor dem Start "Timer starten". */
     mb.textContent=(run.ph==='rest')?(DE?'Pause beenden':'End rest')
-      :(startbar?(DE?'Timer starten':'Start timer'):(DE?'Block fertig':'Block done'));
+      :(startbar?(DE?'Timer starten':'Start timer')
+      :((blockWeiter&&blockWeiter.key===run.tFertig)?((DE?'Weiter in ':'Next in ')+Math.max(1,blockWeiter.n+1))
+      :(DE?'Block fertig':'Block done')));
     return;
   }
   /* ---- Satztabelle ---- */
@@ -12269,9 +12305,6 @@ function runPaint(){
           vorbelegungLeeren(cur,eq);
         }
       });
-      /* Verlassen des Felds zeichnet neu: die Vorgabe der markierten Zeile
-         zieht dann nach (die Eingabe selbst zeichnet nicht, der Fokus). */
-      ek.addEventListener('change',function(){runPaint();});
       ebox.appendChild(ek);
       var exs=document.createElement('span');exs.textContent='×';ebox.appendChild(exs);
     }
@@ -12299,7 +12332,6 @@ function runPaint(){
         vorbelegungLeeren(cur,eq);
       }
     });
-    er.addEventListener('change',function(){runPaint();});
     ebox.appendChild(er);
     var eok=document.createElement('button');eok.type='button';eok.className='rok';
     eok.setAttribute('aria-label',DE?'Korrektur übernehmen':'Apply correction');
@@ -12414,7 +12446,21 @@ function artIcon(a){
 /* Die Satz- und Blockuhr. Eigener Taktgeber, weil die Pausenuhr (runStartTi)
    an run.ph==='rest' haengt -- hier laeuft die Zeit waehrend der Arbeit. */
 var blockTi=null;
-function blockStopTi(){if(blockTi){clearInterval(blockTi);blockTi=null;}}
+function blockStopTi(){if(blockTi){clearInterval(blockTi);blockTi=null;}blockWeiter=null;}
+/* Countdown nach Ablauf eines Zeitblocks: drei Sekunden im Hauptknopf,
+   dann weiter. Jeder Satzwechsel oder Sprung (blockStopTi) bricht ihn ab;
+   nach einem Neuladen gibt es keinen -- dann sagt der Knopf "Block fertig"
+   und die Unterschrift nur "Zeit um". */
+var blockWeiter=null;
+function blockWeiterTick(){
+  if(!blockWeiter||!run)return;
+  var mbW=$('rnMain'),DEw=cfg.lang==='de';
+  if(run.ph!=='work'||run.tFertig!==blockWeiter.key||run.tEnd){blockWeiter=null;return;}
+  if(blockWeiter.n<=0){blockWeiter=null;runAfterSet();return;}
+  if(mbW)mbW.textContent=(DEw?'Weiter in ':'Next in ')+blockWeiter.n;
+  blockWeiter.n--;
+  setTimeout(blockWeiterTick,1000);
+}
 function blockStartTi(){
   blockStopTi();
   blockTi=setInterval(function(){
@@ -12491,11 +12537,10 @@ function blockStartTi(){
            dann weiter -- ein Bildschirm, der ohne Vorwarnung wegspringt,
            waehrend man mitten in der letzten Uebung steckt, ist kein
            Weitergang, sondern ein Verlust. */
-        var keyZ=run.tFertig;
-        runPaint();
-        setTimeout(function(){
-          if(run&&run.ph==='work'&&run.tFertig===keyZ&&!run.tEnd)runAfterSet();
-        },3000);
+        /* v34.4: Der Countdown steht im Hauptknopf ("Weiter in 3 · 2 · 1"),
+           nicht in einer 11-px-Unterschrift; ein Tipp geht sofort weiter. */
+        blockWeiter={key:run.tFertig,n:3};
+        runPaint();blockWeiterTick();
         return;
       }
       if(run.ph==='work')runPaint();
@@ -12529,7 +12574,10 @@ $('rnMain').addEventListener('click',function(){
      starten" und tut genau das -- der lauteste Knopf war vorher "Block
      fertig", und wer dem Farbprotokoll folgt, hakte FIFA 11+ nach null
      Sekunden ab. */
-  if(this.dataset.blk==='start'){blockStarten();return;}
+  if(this.dataset.blk==='start'){
+    var itB=runItems(),cB=itB&&itB[run.ex];
+    if(cB&&cB.fixed){blockStarten();return;}
+  }
   runAfterSet();
 });
 document.addEventListener('keydown',function(e){
@@ -16353,7 +16401,7 @@ function renderSessOv(){
       /* v34: Sport-Bausteine tragen ihr Art-Symbol -- dieselbe Spalte wie
          Tagesliste und Startkarte, sonst war die Uebersicht die einzige
          Liste ohne Bild. */
-      return '<div class="sorow">'+(x.id?sv(x.id,cvar(pid[x.id].cv),30):(x.art?'<span class="swthumb">'+artIcon(x.art)+'</span>':''))+
+      return '<div class="sorow">'+(x.id?'<span class="swthumb">'+sv(x.id,cvar(pid[x.id].cv),30)+'</span>':(x.art?'<span class="swthumb">'+artIcon(x.art)+'</span>':''))+
         '<span class="nm"><i class="mg" hidden></i><b></b><span></span>'+
         '<span class="sch">'+(x.fixed?x.label:schemaTxt(x,DE))+'</span></span>'+
         (x.id?'<button type="button" class="swp" data-i="'+i+'" aria-label="'+(DE?'Übung tauschen':'Swap exercise')+'">&#8644;</button>':'')+'</div>';
@@ -16370,7 +16418,7 @@ function renderSessOv(){
     h+='<div class="sochk">'+
       '<button type="button" class="txtbtn sopainT" id="soPainT" aria-expanded="'+(curPain!=='None')+'">'+(DE?'Muskelkater oder Schmerz?':'Sore or hurting?')+'</button>'+
       '<div class="chips" id="soPain"'+(curPain!=='None'?'':' hidden')+'>'+PAIN.map(function(x){
-        return '<button type="button" class="chip" data-p="'+x+'" aria-pressed="'+(curPain===x)+'">'+(DE?PAIN_DE[x]:x)+'</button>';
+        return '<button type="button" class="chip soopt" data-p="'+x+'" aria-pressed="'+(curPain===x)+'">'+(DE?PAIN_DE[x]:x)+'</button>';
       }).join('')+'</div>'+
       /* Notfallmodus: keine Zeit, keine Lust -- die zwei tragenden Uebungen
          reichen, um die Serie zu retten. Leiser Textknopf, kein zweiter Block. */
@@ -16382,7 +16430,6 @@ function renderSessOv(){
     h+='<div class="sofoot"><p class="eyebrow">'+(DE?'Wie geht es dir heute?':'How are you today?')+'</p>'+
       '<div class="soopts row">'+opts.map(function(o){
         return '<button type="button" class="chip soopt" data-e="'+o[0]+'" aria-pressed="'+(soEnergy===o[0])+'">'+o[1]+'</button>';}).join('')+'</div>'+
-      '<p class="hint" id="soAdj"></p>'+
       '<button type="button" class="tbtn go sogo" id="soGo">'+(DE?'Training starten':'Start session')+'</button></div>';
   }
   host.innerHTML=h;
@@ -16403,24 +16450,23 @@ function renderSessOv(){
         openSwap(pl,i,runItems()[i],function(){renderSessOv();});
       });
     });
-    function adjTxt(){$('soAdj').textContent=soEnergy==='1'
-      ?(DE?'Heute eine Runde weniger je Übung — durchkommen zählt.':'One set less per exercise today — showing up counts.')
-      :'';}
-    adjTxt();
-    [].forEach.call(host.querySelectorAll('.soopt'),function(b){
+    /* v34.4: Die Folge von "Wenig drin" als Coach-Meldung, nicht als Zeile
+       im festen Fuss -- der aenderte sonst seine Hoehe unter dem Finger. */
+    [].forEach.call(host.querySelectorAll('.soopts .soopt'),function(b){
       b.addEventListener('click',function(){
         soEnergy=b.dataset.e;
-        [].forEach.call(host.querySelectorAll('.soopt'),function(x){x.setAttribute('aria-pressed',String(x.dataset.e===soEnergy));});
-        adjTxt();
+        [].forEach.call(host.querySelectorAll('.soopts .soopt'),function(x){x.setAttribute('aria-pressed',String(x.dataset.e===soEnergy));});
+        if(soEnergy==='1')coachSay(DE?'Heute reduziert':'Reduced today',
+          DE?'Einen Satz weniger je Übung — durchkommen zählt.':'One set less per exercise — showing up counts.');
       });
     });
     var soPainV=curPain;
     var pT=$('soPainT'),pB=$('soPain');
     if(pT)pT.addEventListener('click',function(){pB.hidden=!pB.hidden;pT.setAttribute('aria-expanded',String(!pB.hidden));});
-    [].forEach.call(host.querySelectorAll('#soPain .chip'),function(b){
+    [].forEach.call(host.querySelectorAll('#soPain .soopt'),function(b){
       b.addEventListener('click',function(){
         soPainV=b.dataset.p;
-        [].forEach.call(host.querySelectorAll('#soPain .chip'),function(x){x.setAttribute('aria-pressed',String(x.dataset.p===soPainV));});
+        [].forEach.call(host.querySelectorAll('#soPain .soopt'),function(x){x.setAttribute('aria-pressed',String(x.dataset.p===soPainV));});
       });
     });
     $('soGo').addEventListener('click',function(){
