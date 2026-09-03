@@ -2749,7 +2749,17 @@
      je Bein" stand als Treppe. */
   #runner .rsrow.now,#runner .rsrow.edit{grid-template-columns:2rem 1fr}
   #runner .rsrow.now .rin,#runner .rsrow.edit .rin{grid-column:1/-1;justify-content:flex-end;margin-top:.2rem}
-  #runner .rsrow.now .rin input,#runner .rsrow.edit .rin input{width:80px}
+  #runner .rsrow.now .rin input,#runner .rsrow.edit .rin input{width:72px}
+  /* v35: Stepper-Knoepfe um das Gewichtsfeld. */
+  #runner .rkst{width:38px;height:44px;flex:none;border-radius:10px;border:1px solid var(--line);
+    background:var(--surf);color:var(--ink2);font-family:var(--fd);font-size:1.15rem;line-height:1;
+    display:flex;align-items:center;justify-content:center}
+  #runner .rkst:hover{border-color:var(--ember);color:var(--ink)}
+  #runner .rkst:active{background:var(--surf3)}
+  @media (max-width:380px){
+    #runner .rsrow.now .rin input,#runner .rsrow.edit .rin input{width:60px}
+    #runner .rkst{width:34px}
+  }
   #runner .rsrow.now .rin .ruhr{min-width:96px}
   #runner .rskind{font-size:var(--t1)}
   #runner .rsrow.done{background:var(--surf2);color:var(--ink3)}
@@ -2761,6 +2771,13 @@
     font-variant-numeric:tabular-nums;line-height:1.3}
   #runner .rsrow.done .rsval{color:var(--aurora)}
   #runner .rhead .ricon:empty{display:none}
+  /* v35: Tausch-Knopf im Runner-Kopf, dieselbe Form wie in den Listen. */
+  #runner .rswap{flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);
+    background:var(--surf);color:var(--ink3);font-size:1rem}
+  #runner .rswap:hover{border-color:var(--aurora);color:var(--ink)}
+  /* Das Tausch-Blatt aus dem Runner heraus liegt ueber ihm. */
+  #sheet.over{z-index:96}
+  #sheetBg.over{z-index:95}
   /* Eingabe direkt in der Zeile des laufenden Satzes: Last und Wiederholungen
      nebeneinander, grosse Tippflaechen fuer verschwitzte Finger. */
   #runner .rin{display:flex;align-items:center;gap:.35rem}
@@ -3392,6 +3409,11 @@
       <div class="rhead">
         <span class="ricon" id="rnIcon"></span>
         <div class="rhtx"><p class="rmg" id="rnMg" hidden></p><h3 id="rnEx"></h3><p class="rstep" id="rnStep"></p></div>
+        <!-- v35: Tausch aus dem Runner-Kopf (Calisthenics-Weg), solange an
+             der Uebung noch nichts eingetragen ist. Vorher musste man den
+             Trainingsmodus verlassen, um eine Stange zu ersetzen, die
+             gerade belegt ist. -->
+        <button type="button" class="iconbtn rswap" id="rnSwap" hidden aria-label="Swap exercise">&#8644;</button>
       </div>
       <!-- Der Auftrag des Tages: was konkret zu tun ist, im Vergleich zum
            letzten Mal. Eine Zielspanne sagt, was erlaubt ist; ein Auftrag
@@ -4349,7 +4371,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='34.6';
+var VERSION='35.0';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8276,6 +8298,7 @@ function closeSheet(){
   s.classList.remove('on');b.classList.remove('on');
   s.style.transform='';
   sheetOpen=false;
+  setTimeout(function(){if(!sheetOpen){s.classList.remove('over');b.classList.remove('over');}},280);
   document.body.style.overflow='';
   setTimeout(function(){if(!sheetOpen){s.hidden=true;b.hidden=true;}},280);
 }
@@ -11208,6 +11231,21 @@ function runListPaint(){
     if(!row||e.target!==row)return;
     e.preventDefault();satzToggle(row);
   });
+  /* v35: Tausch aus dem Runner-Kopf. Das Blatt liegt sonst UNTER dem
+     Runner (z-index 79 gegen 90) -- solange es aus dem Runner kommt, traegt
+     es die Klasse over; closeSheet nimmt sie wieder weg. */
+  var swR=$('rnSwap');
+  if(swR)swR.addEventListener('click',function(){
+    if(!run||run.ph==='rest')return;
+    var it=runItems(),cur=it&&it[run.ex];
+    if(!cur||!cur.id||uebungBegonnen(run.ex))return;
+    var pl=plan(TODAY);
+    for(var vz=1;vz<=14&&pl.kind!=='train';vz++)pl=plan(add(TODAY,vz));
+    var oi=run.micro?run.micro[run.ex]:run.ex;
+    openSwap(pl,oi,cur,function(){warmEinfrieren();runPaint();});
+    var sh=$('sheet'),sb=$('sheetBg');
+    if(sh)sh.classList.add('over');if(sb)sb.classList.add('over');
+  });
   /* Zeitblock: auch die grosse Zahl startet die Uhr. */
   var bg=$('rnBig');
   if(bg){
@@ -11215,6 +11253,25 @@ function runListPaint(){
     bg.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();blockStarten();}});
   }
 })();
+/* v35: Stepper-Knopf fuer ein Gewichtsfeld: eine Hantelstufe (kgStufe, in
+   Anzeige-Einheiten) rauf oder runter, gerundet aufs Raster, und dann
+   dasselbe input-Ereignis, das auch die Tastatur ausloest -- der Schreiber
+   nach run.kg bleibt derselbe. */
+function kgStepper(input,dir){
+  var b=document.createElement('button');b.type='button';b.className='rkst';
+  b.textContent=dir<0?'−':'+';
+  b.setAttribute('aria-label',(cfg.lang==='de'?(dir<0?'Last verringern':'Last erhöhen'):(dir<0?'Decrease load':'Increase load')));
+  b.addEventListener('click',function(e){
+    e.stopPropagation();
+    var st=Math.round(toDisp(kgStufe(),'w')*100)/100;
+    var v=parseFloat(String(input.value).replace(',','.'));
+    if(isNaN(v))v=0;
+    v=Math.max(0,Math.round((v+dir*st)/st)*st);
+    input.value=String(Math.round(v*100)/100);
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  return b;
+}
 /* Blockuhr starten -- vom Hauptknopf ("Timer starten") und von der Zahl. */
 function blockStarten(){
   if(!run||run.ph==='rest'||run.tEnd)return;
@@ -11890,6 +11947,14 @@ function runPaint(){
   $('rnIcon').innerHTML=cur.id?sv(cur.id,cvar(pid[cur.id].cv),40):artIcon(cur.art);
   head.textContent=(cur.id&&typeof itemName==='function')?itemName(cur):cur.l;
   $('rnStep').textContent=cur.id?stepName(cur.id):(cur.k||'');
+  /* v35: Tausch nur, solange die Uebung unberuehrt ist -- run.reps haengt
+     am Listenindex, ein Tausch mit Eintraegen schriebe sie der neuen
+     Uebung zu. In der Pause nicht: die naechste Zeile ist gesperrt. */
+  var swB=$('rnSwap');
+  if(swB){
+    swB.hidden=!(cur.id&&!uebungBegonnen(run.ex)&&run.ph!=='rest');
+    swB.setAttribute('aria-label',DE?'Übung tauschen':'Swap exercise');
+  }
   var mgE=$('rnMg'),mgT=cur.id?'':mgLabel(cur,DE);
   if(mgE){mgE.hidden=!mgT;mgE.textContent=mgT;}
   /* v34.2: Der letzte Eintrag EINMAL je Bildaufbau, nicht je Zeile. Und:
@@ -12226,7 +12291,12 @@ function runPaint(){
           var wn=run.reps?run.reps[run.ex+'-'+run.set]:undefined;
           if(istTest&&cur.kg&&wn>0)lastAusSatz(cur,run.kg[run.ex+'-'+run.set]||0,wn);
         });
+        /* v35: Stepper um das Gewichtsfeld -- eine Hantelstufe je Tipp. Auf
+           dem Telefon tippt man am Zahlenfeld Kommazahlen; 82,5 -> 85 ist
+           mit dem Daumen ein Tipp, mit der Tastatur sechs. */
+        box.appendChild(kgStepper(ik,-1));
         box.appendChild(ik);
+        box.appendChild(kgStepper(ik,1));
         var xs=document.createElement('span');xs.textContent='×';box.appendChild(xs);
       }
       var ir=document.createElement('input');ir.type='number';ir.min='0';
@@ -12323,7 +12393,9 @@ function runPaint(){
           vorbelegungLeeren(cur,eq);
         }
       });
+      ebox.appendChild(kgStepper(ek,-1));
       ebox.appendChild(ek);
+      ebox.appendChild(kgStepper(ek,1));
       var exs=document.createElement('span');exs.textContent='×';ebox.appendChild(exs);
     }
     var er=document.createElement('input');er.type='number';er.min='0';
@@ -16288,7 +16360,12 @@ function syncUndo(){
   ['undoBtn','undoBtn2'].forEach(function(id){var b=$(id);if(!b)return;b.disabled=!ok;b.style.opacity=ok?'':'.4';});
 }
 $('exportBtn').addEventListener('click',function(){
-  var dump={};['start','steps','done','logs','wins','over','meas','measBase','prs','wlog','supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks','lastStepUp','run','profile','exlog','exhist','weights','diary','fav','skip'].forEach(function(k){dump[k]=get(k,null);});
+  /* v35: ALLE Schluessel der App, nach Praefix -- dieselbe Regel wie der
+     Reset. Die feste Liste hatte Ernaehrungstagebuch, eigene Lebensmittel,
+     Rezepte, Wasser und Schritte nie enthalten: wer "Daten kopieren" und
+     spaeter "Daten einspielen" drueckte, bekam Training und Rang zurueck
+     und verlor das Tagebuch ersatzlos. Solche Listen veralten still. */
+  var dump={};alleSchluessel().forEach(function(k){dump[k]=get(k,null);});
   var txt=JSON.stringify(dump);
   try{navigator.clipboard.writeText(txt);}catch(e){}
   flash('expFlag');
@@ -16308,6 +16385,16 @@ $('exportBtn').addEventListener('click',function(){
       verliert nicht alles, was er hatte.
    3. Es wird gefragt, mit Zahlen. "Ersetzt 34 Einheiten und 12 Logs" ist eine
       Entscheidungsgrundlage, "Wirklich fortfahren?" ist keine. */
+/* Jeder Schluessel, den die App gerade haelt: localStorage nach Praefix
+   vk_ (ohne die Import-Rueckhalte vk_backup_* und den Entwicklermodus) plus
+   der Speicher-Rueckfall mem, wenn localStorage nicht traegt. */
+function alleSchluessel(){
+  var seen={},out=[];
+  function add(k){if(!k||seen[k]||k.indexOf('backup_')===0||k==='dev')return;seen[k]=1;out.push(k);}
+  try{for(var i=0;i<localStorage.length;i++){var n=localStorage.key(i);if(n&&n.indexOf('vk_')===0)add(n.slice(3));}}catch(e){}
+  for(var m in mem)add(m);
+  return out;
+}
 var IMPKEYS=['start','steps','done','logs','wins','over','meas','measBase','prs','wlog',
   'supps','suppList','test','goal','cfg','pack','ach','seen','coachSaid','block','blocks',
   'lastStepUp','run','profile','exlog','exhist','vrf','diary','fav','weights','skip'];
@@ -16328,11 +16415,19 @@ function importPruefen(txt){
 function importAusfuehren(d){
   /* Rueckhalt anlegen -- einmal, unter eigenem Schluessel, damit ein zweiter
      Import den ersten Rueckhalt nicht ueberschreibt. */
+  /* v35: Rueckhalt und Einspielen ueber ALLE Schluessel -- die der App und
+     die der Sicherung. IMPKEYS bleibt nur die Erkennung "das ist unsere
+     Sicherung". Schluessel aus der Sicherung muessen wie unsere aussehen
+     (Buchstaben, Ziffern, Unterstrich); Rueckhalte reisen nicht mit. */
   var vorher={};
-  IMPKEYS.forEach(function(k){vorher[k]=get(k,null);});
+  alleSchluessel().forEach(function(k){vorher[k]=get(k,null);});
   try{localStorage.setItem('vk_backup_'+Date.now(),JSON.stringify(vorher));}catch(e){}
-  IMPKEYS.forEach(function(k){
-    if(d[k]===undefined)return;
+  /* Nur, was die Sicherung nennt: null loescht, ein Wert ersetzt. Was sie
+     nicht kennt (eine aeltere Sicherung ohne Tagebuch), bleibt stehen --
+     eine Trainings-Sicherung von gestern darf das Tagebuch von heute nicht
+     mitnehmen. */
+  Object.keys(d).forEach(function(k){
+    if(!/^[A-Za-z][A-Za-z0-9_]*$/.test(k)||k.indexOf('backup_')===0||k==='dev')return;
     if(d[k]===null)del(k);else set(k,d[k]);
   });
 }
