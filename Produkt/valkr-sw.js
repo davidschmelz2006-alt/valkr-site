@@ -12,7 +12,7 @@
    Das alte Problem „haengt fuer immer auf einer alten Version" bleibt
    trotzdem geloest: der Cache-Name traegt die Version, beim Aktivieren
    fliegt alles Aeltere raus. */
-var CACHE = 'valkr-v35.0';
+var CACHE = 'valkr-v35.1';
 var ASSETS = [
   './valkr-hub.html',
   './valkr-identity.html',

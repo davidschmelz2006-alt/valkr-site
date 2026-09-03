@@ -4371,7 +4371,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='35.0';
+var VERSION='35.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8215,8 +8215,10 @@ function histBackStep(){
   }
   el=$('runner');
   if(el&&el.classList.contains('on')){
-    /* Erst die Uebungsliste zu, dann der Runner -- die Zuruecktaste
-       schliesst eine Ebene, nicht zwei. */
+    /* Erst ein offenes Blatt (Tausch aus dem Runner), dann die
+       Uebungsliste, dann der Runner -- die Zuruecktaste schliesst eine
+       Ebene, nicht zwei. */
+    if(sheetOpen){closeSheet();return true;}
     var rl=$('rnList');
     if(rl&&!rl.hidden){runListShow(false);return true;}
     /* Im Abschlussbild wie X und "Fertig": die Einheit ist abgerechnet. */
@@ -8314,7 +8316,10 @@ $('sheetGrip').addEventListener('click',closeSheet);
    der Tastatur-Weg. Der Runner hat weiter unten seinen eigenen Escape. */
 document.addEventListener('keydown',function(e){
   if(e.key!=='Escape')return;
-  if(sheetOpen){closeSheet();return;}
+  /* v35.1: Das Blatt nimmt das Escape allein -- der Runner-Handler weiter
+     unten haengt am selben Dokument und sah sheetOpen sonst schon auf
+     false, wenn er drankam: ein Escape schloss Blatt UND Runner. */
+  if(sheetOpen){closeSheet();e.stopImmediatePropagation();return;}
   var ic=$('inClose');
   if(ic&&!ic.hidden&&$('intro').classList.contains('on')){introShow(false);return;}
   popPush();
@@ -11236,13 +11241,25 @@ function runListPaint(){
      es die Klasse over; closeSheet nimmt sie wieder weg. */
   var swR=$('rnSwap');
   if(swR)swR.addEventListener('click',function(){
-    if(!run||run.ph==='rest')return;
+    if(!run||run.ph==='rest'||run.ph==='done')return;
     var it=runItems(),cur=it&&it[run.ex];
     if(!cur||!cur.id||uebungBegonnen(run.ex))return;
     var pl=plan(TODAY);
     for(var vz=1;vz<=14&&pl.kind!=='train';vz++)pl=plan(add(TODAY,vz));
     var oi=run.micro?run.micro[run.ex]:run.ex;
-    openSwap(pl,oi,cur,function(){warmEinfrieren();runPaint();});
+    openSwap(pl,oi,cur,function(){
+      /* v35.1: Die Vorbelegung der ALTEN Uebung (run.kg wird beim ersten
+         Aufbau geschrieben, uebungBegonnen sieht sie nicht) darf die neue
+         nicht erben -- sonst stand die 60-kg-Kniebeuge im Feld des Split
+         Squat, und ein Haken protokollierte sie. Danach den Erstkontakt
+         der neuen Uebung einfrieren, wie startRun es fuer alle tut. */
+      var pre=run.ex+'-';
+      if(run.kg)Object.keys(run.kg).forEach(function(k){if(k.indexOf(pre)===0)delete run.kg[k];});
+      if(run.autoZ)Object.keys(run.autoZ).forEach(function(k){if(k.indexOf(pre)===0)delete run.autoZ[k];});
+      var itN=runItems(),cN=itN&&itN[run.ex];
+      if(cN){var kN=cN.kk||cN.l;if(kN){if(!run.tst)run.tst={};run.tst[kN]=cN.test?1:0;}}
+      saveRun();warmEinfrieren();runPaint();
+    });
     var sh=$('sheet'),sb=$('sheetBg');
     if(sh)sh.classList.add('over');if(sb)sb.classList.add('over');
   });
@@ -11261,12 +11278,14 @@ function kgStepper(input,dir){
   var b=document.createElement('button');b.type='button';b.className='rkst';
   b.textContent=dir<0?'−':'+';
   b.setAttribute('aria-label',(cfg.lang==='de'?(dir<0?'Last verringern':'Last erhöhen'):(dir<0?'Decrease load':'Increase load')));
-  b.addEventListener('click',function(e){
-    e.stopPropagation();
+  b.addEventListener('click',function(){
     var st=Math.round(toDisp(kgStufe(),'w')*100)/100;
     var v=parseFloat(String(input.value).replace(',','.'));
-    if(isNaN(v))v=0;
-    v=Math.max(0,Math.round((v+dir*st)/st)*st);
+    /* Leeres Feld: "+" beginnt bei einer Stufe, "-" tut nichts -- eine
+       ausdrueckliche 0 waere ein Eintrag, kein leeres Feld. */
+    if(isNaN(v)){if(dir<0)return;v=0;}
+    var mx=parseFloat(input.max)||Infinity;
+    v=Math.min(mx,Math.max(0,Math.round((v+dir*st)/st)*st));
     input.value=String(Math.round(v*100)/100);
     input.dispatchEvent(new Event('input',{bubbles:true}));
   });
@@ -11847,6 +11866,7 @@ function runPaint(){
      fertig" rief eine Blockuhr, die es nicht gab: kein Satz liess sich
      mehr per Hauptknopf oder Enter abhaken. */
   mb.dataset.blk='';
+  var swB0=$('rnSwap');if(swB0)swB0.hidden=true;
   var tEl0=$('rnTest');
   function ausblenden(){sets.innerHTML='';lastEl.hidden=true;nextEl.hidden=true;
     if(tEl0){tEl0.hidden=true;tEl0.innerHTML='';}}
@@ -12673,6 +12693,8 @@ $('rnMain').addEventListener('click',function(){
 document.addEventListener('keydown',function(e){
   if(!$('runner').classList.contains('on'))return;
   if(e.key==='Escape'){
+    /* Ein offenes Blatt ueber dem Runner nimmt das Escape allein. */
+    if(sheetOpen)return;
     var rlE=$('rnList');
     if(rlE&&!rlE.hidden){runListShow(false);return;}
     if(run&&run.ph==='done')runBeenden();
@@ -16421,7 +16443,13 @@ function importAusfuehren(d){
      (Buchstaben, Ziffern, Unterstrich); Rueckhalte reisen nicht mit. */
   var vorher={};
   alleSchluessel().forEach(function(k){vorher[k]=get(k,null);});
-  try{localStorage.setItem('vk_backup_'+Date.now(),JSON.stringify(vorher));}catch(e){}
+  /* Nur der juengste Rueckhalt bleibt -- jeder Import legte sonst eine
+     volle Kopie dazu, mit Tagebuch ueber Monate. */
+  try{
+    var alt=[];for(var bi=0;bi<localStorage.length;bi++){var bn=localStorage.key(bi);if(bn&&bn.indexOf('vk_backup_')===0)alt.push(bn);}
+    alt.forEach(function(bn){localStorage.removeItem(bn);});
+    localStorage.setItem('vk_backup_'+Date.now(),JSON.stringify(vorher));
+  }catch(e){}
   /* Nur, was die Sicherung nennt: null loescht, ein Wert ersetzt. Was sie
      nicht kennt (eine aeltere Sicherung ohne Tagebuch), bleibt stehen --
      eine Trainings-Sicherung von gestern darf das Tagebuch von heute nicht
@@ -17451,7 +17479,14 @@ function openSwap(pl,idx,it,after){
            Tage SESS3- und SESS4-Tage mischen, waere ein Tausch auf einer
            gemischten Woche sonst unter dem falschen Schluessel abgelegt und
            nie wiedergefunden worden. */
-        var key=(SESS3[pl.s]?'3':'4')+':'+pl.s+':'+idx;
+        /* v35.1: Im Skill-Block stellt sessOf ein Item voran ("Skill-Uebung")
+           -- der Listenindex ist dann um eins groesser als der Slot in
+           SESS3/SESS4, gegen den applyProfile den Schluessel liest. Ohne
+           den Abzug landete in Woche 9-12 jeder Tausch auf der naechsten
+           Uebung. EINE Stelle fuer alle drei Aufrufer (Tagesliste,
+           Uebersicht, Runner-Kopf). */
+        var off=(typeof curBlock==='function'&&curBlock().id==='skill'&&SESSALL[pl.s]&&!sportAkt())?1:0;
+        var key=(SESS3[pl.s]?'3':'4')+':'+pl.s+':'+Math.max(0,idx-off);
         if(v)profile.swaps[key]=v;else delete profile.swaps[key];
         set('profile',profile);applyProfile();renderDay();
         closeSheet();
