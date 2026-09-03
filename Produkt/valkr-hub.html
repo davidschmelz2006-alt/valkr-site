@@ -1351,7 +1351,7 @@
 
   .exlist{display:flex;flex-direction:column;gap:.4rem}
   .exrow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);padding:.58rem .72rem;border-radius:3px;transition:.18s}
-  .exrow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:9px;color:var(--ink3);font-size:.85rem;line-height:1;transition:.16s}
+  .exrow .swp{flex:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;color:var(--ink3);font-size:.95rem;line-height:1;transition:.16s}
   .exrow .swp:hover{border-color:var(--aurora);color:var(--ink)}
   /* Kein max-height, kein overflow: eine scrollende Liste in einer scrollenden
      Seite ist auf dem Telefon die haeufigste Bedienfalle. Die Laenge begrenzt
@@ -1888,7 +1888,11 @@
   #sessov .sobox{width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;height:max-content}
   #sessov .sohead{display:flex;align-items:center;gap:.8rem}
   #sessov .sotit b{font-family:var(--fd);font-weight:600;font-size:1.2rem;display:block}
-  #sessov .sotit span{font-family:var(--fm);font-size:.56rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+  #sessov .sotit span{font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;text-transform:uppercase;color:var(--ink3)}
+  /* v34.1: Start-Knoepfe des Trainingsflusses in EINER Farbe (Ember, wie
+     der Hauptknopf im Runner) -- vorher gruen hier, orange dort. */
+  #sessov .tbtn.go{background:var(--ember)}
+  #sessov .tbtn.go:hover{background:color-mix(in srgb,var(--ember) 85%,#fff)}
   #sessov #soBody{display:flex;flex-direction:column;gap:.8rem}
   #sessov .solist{display:flex;flex-direction:column;gap:.45rem}
   #sessov .sorow{display:flex;align-items:center;gap:.7rem;background:var(--surf);border:1px solid var(--line);border-radius:4px;padding:.62rem .75rem}
@@ -1897,9 +1901,9 @@
   #sessov .sorow .nm{flex:1;min-width:0}
   #sessov .sorow .nm b{display:block;font-family:var(--fd);font-weight:600;font-size:.9rem}
   #sessov .sorow .nm span{font-family:var(--fd);font-size:.72rem;letter-spacing:0;color:var(--ink3)}
-  #sessov .sorow .nm i.mg{display:block;font-family:var(--fm);font-size:.52rem;letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:var(--ink2)}
-  #sessov .sorow .sv{font-family:var(--fm);font-size:.62rem;color:var(--ink2);white-space:nowrap}
-  #sessov .sorow .swp{flex:none;width:30px;height:30px;border:1px solid var(--line);border-radius:3px;color:var(--ink3);transition:.16s}
+  #sessov .sorow .nm i.mg{display:block;font-family:var(--fm);font-size:var(--t1);letter-spacing:.08em;text-transform:uppercase;font-style:normal;color:var(--ink2)}
+  #sessov .sorow .sv{font-family:var(--fm);font-size:var(--t2);color:var(--ink2);white-space:nowrap}
+  #sessov .sorow .swp{flex:none;width:40px;height:40px;border:1px solid var(--line);border-radius:10px;color:var(--ink3);transition:.16s}
   #sessov .sorow .swp:hover{border-color:var(--aurora);color:var(--ink)}
   #sessov .sogo{width:100%;text-align:center;padding:.8rem}
   #sessov .soopts{display:flex;flex-direction:column;gap:.5rem}
@@ -2557,7 +2561,9 @@
   /* .rest faerbt die grosse Uhr eines ZEITBLOCKS (FIFA 11+, Auslaufen) --
      dieselbe grosse Zahl, andere Bedeutung. Die Pause hat seit v32 ihre
      eigene Leiste (#rnRest) mit eigener Uhr und eigener Farbe. */
-  #runner .rbig.rest{color:var(--brass)}
+  /* v34.1: Ember, nicht Brass -- der Zeitblock ist Arbeit, Brass gehoert
+     der Pause allein. */
+  #runner .rbig.rest{color:var(--ember)}
   /* v34: Der Zeitblock (FIFA 11+, Auslaufen) ist ein Timer-Bildschirm und
      steht mittig: Zahl, Streifen, Hinweis, zwei Knoepfe. Linksbuendig
      neben leerem Raum sah die grosse Zahl aus wie ein Tabellenrest. */
@@ -2566,7 +2572,7 @@
   #runner.blk .rnext{text-align:center}
   #runner .rblkbar{height:4px;border-radius:2px;background:var(--line);overflow:hidden;
     margin:.6rem auto 0;width:min(260px,70%)}
-  #runner .rblkbar i{display:block;height:100%;background:var(--brass);width:0%;transition:width .9s linear}
+  #runner .rblkbar i{display:block;height:100%;background:var(--ember);width:0%;transition:width .9s linear}
   #runner .rhint{margin:.2rem 0 0;font-size:var(--t3);color:var(--ink2);
     min-height:1.2em;max-width:32ch;line-height:1.45}
 
@@ -2644,11 +2650,11 @@
     color:var(--ink3);margin-top:.1rem}
   /* Was beim letzten Mal herauskam -- die Zeile, an der sich Fortschritt
      ueberhaupt erst ablesen laesst. */
+  /* v34.1: neutral statt Brass -- Brass ist die Pause, sonst nichts. */
   #runner .rlast{margin:.4rem 0 0;padding:.45rem .6rem;border-radius:10px;
-    background:color-mix(in srgb,var(--brass) 12%,transparent);
-    border:1px solid color-mix(in srgb,var(--brass) 30%,transparent);
+    background:var(--surf);border:1px solid var(--line);
     font-size:var(--t2);color:var(--ink2);text-align:left}
-  #runner .rlast b{color:var(--brass);font-family:var(--fd)}
+  #runner .rlast b{color:var(--ink);font-family:var(--fd)}
   #runner .rsets{display:flex;flex-direction:column;gap:.3rem;margin-top:.7rem}
   /* Satzzeilen in der Kartengrammatik von MCI, im eigenen Kleid: links eine
      runde Marke (Nummer oder Thermometer fuer den Aufwaermsatz), in der
@@ -2677,7 +2683,12 @@
     border-color:color-mix(in srgb,var(--ember) 55%,transparent);color:var(--ink)}
   #runner .rsrow.now .rsno{background:var(--ember);border-color:var(--ember);color:var(--night)}
   #runner .rsrow.now .rskind{color:var(--ember)}
-  #runner .rsrow.now .rsziel{color:var(--ink);font-size:var(--t4)}
+  /* v34.1: Die Vorgabe des laufenden Satzes ist die wichtigste Zahl des
+     Bildschirms -- und war die kleinste (t4). Jetzt groesser als der
+     Uebungsname; Labels nie unter t1. */
+  #runner .rsrow.now .rsziel{color:var(--ink);font-size:1.3rem;line-height:1.1;letter-spacing:-.01em}
+  #runner .rsrow.now{min-height:60px}
+  #runner .rskind{font-size:var(--t1)}
   #runner .rsrow.done{background:var(--surf2);color:var(--ink3)}
   #runner .rsrow.warm.done{background:transparent}
   #runner .rsrow.done .rsno{border-color:color-mix(in srgb,var(--aurora) 60%,transparent);color:var(--aurora)}
@@ -2705,9 +2716,42 @@
      laufenden Zeile um. */
   @media (max-width:380px){
     #runner .rin input{width:54px}
-    #runner .rhak{width:40px}
-    #runner .rsrow.now .rsziel{font-size:var(--t3)}
+    #runner .rhak{width:44px}
+    #runner .rsrow.now .rsziel{font-size:1.1rem}
   }
+  /* v34.1: Tippflaechen mindestens 44 px -- Ortszeile als Pille, X,
+     Felder, Haken, Korrektur-Haken. */
+  #runner .rwhere{min-height:44px;padding:.5rem .9rem}
+  #runner .iconbtn{width:44px;height:44px}
+  #runner .rin input{height:44px}
+  #runner .rsrow.edit .rok{width:44px}
+  /* Vergleichswert je Satz ("zuletzt 5 x 80") in offenen Zeilen. */
+  #runner .rvor{font-family:var(--fm);font-size:var(--t1);color:var(--ink3);letter-spacing:.02em}
+  #runner .rpen{display:inline-block;margin-left:.4rem;vertical-align:-1px;opacity:.6}
+  #runner .rsrow.done:hover .rpen,#runner .rsrow.done:focus-visible .rpen{opacity:1}
+  #runner .rsrow.done:focus-visible{outline:2px solid var(--ice);outline-offset:1px}
+  /* In der Pause tritt die naechste Zeile zurueck. */
+  #runner.pause .rsrow.now{background:var(--surf);border-color:var(--line);color:var(--ink2)}
+  #runner.pause .rsrow.now .rsno{background:transparent;border-color:var(--line);color:var(--ink2)}
+  #runner.pause .rsrow.now .rskind{color:var(--ink3)}
+  #runner.pause .rsrow.now .rsziel{color:var(--ink2)}
+  /* Bilanz-Kacheln am Ende der Einheit: die Kennzahlen am groessten. */
+  #runner .rbil{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem;margin:.2rem 0 .5rem}
+  #runner .rbil div{background:var(--surf);border-radius:12px;padding:.6rem .3rem .5rem;text-align:center;min-width:0}
+  #runner .rbil b{display:block;font-family:var(--fd);font-weight:600;font-size:1.75rem;line-height:1.05;
+    color:var(--aurora);font-variant-numeric:tabular-nums;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #runner .rbil span{display:block;margin-top:.2rem;font-family:var(--fm);font-size:var(--t1);letter-spacing:.1em;
+    text-transform:uppercase;color:var(--ink3)}
+  #runner .rbilsub{margin:0 0 .5rem;font-size:var(--t2);color:var(--ink3);text-align:left}
+  /* Zeitblock: die Zahl ist der Startknopf, die Unterschrift sagt es. */
+  #runner .rbig.tap{cursor:pointer;border-radius:16px}
+  #runner .rbig.tap:hover{color:var(--ember)}
+  #runner .rbig.tap:focus-visible{outline:2px solid var(--ember);outline-offset:4px}
+  #runner .rbcap{margin:.45rem 0 0;text-align:center;font-family:var(--fm);font-size:var(--t1);
+    letter-spacing:.12em;text-transform:uppercase;color:var(--ink3)}
+  /* RPE 9 und 10 bleiben Ember -- die Runner-Regel fuer gedrueckte Knoepfe
+     schlug die .hard-Regel der Skala (Spezifitaet). */
+  #runner .rreps button.hard[aria-pressed="true"]{background:var(--ember);border-color:var(--ember);color:#fff}
   #runner .rnext{margin:.7rem 0 0;font-size:var(--t2);color:var(--ink3);text-align:left}
   #runner .rnext b{color:var(--ink2)}
   /* Der Krafttest hebt sich ab: er ist kein normaler Satz, sondern die
@@ -2733,7 +2777,7 @@
   #runner .rrbar{height:3px;border-radius:2px;background:var(--line);overflow:hidden}
   #runner .rrbar i{display:block;height:100%;background:var(--brass);width:100%}
   #runner .rrrow{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}
-  #runner .rrrow b{flex:1;font-family:var(--fd);font-size:1.6rem;color:var(--brass);
+  #runner .rrrow b{flex:1;font-family:var(--fd);font-size:2.3rem;color:var(--brass);
     font-variant-numeric:tabular-nums;line-height:1}
   #runner .rrmin{min-width:52px;height:44px;border-radius:12px;border:1px solid var(--line);
     background:var(--surf2);color:var(--ink2);font-family:var(--fm);font-size:var(--t2)}
@@ -3282,6 +3326,10 @@
       <!-- v34: Fortschritt der Blockuhr als Streifen unter der Zahl --
            dieselbe Sprache wie die Pausenleiste. -->
       <div class="rblkbar" id="rnBlkBar" hidden aria-hidden="true"><i></i></div>
+      <!-- v34.1: Die grosse Zahl selbst startet die Uhr; die Unterschrift
+           sagt es. Damit hat der Zeitblock einen Hauptknopf ("Erledigt")
+           und einen leisen Ausweg ("Ueberspringen") -- nicht drei Knoepfe. -->
+      <p class="rbcap" id="rnBlkCap" hidden></p>
       <p class="rhint" id="rnHint"></p>
       <div class="rreps" id="rnReps"></div>
       <p class="rnext" id="rnNextUp" hidden></p>
@@ -4211,7 +4259,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='34.0';
+var VERSION='34.1';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -8048,7 +8096,13 @@ function histBackStep(){
     return true;                    /* auf Schritt 1 bleibt die Einleitung stehen */
   }
   el=$('runner');
-  if(el&&el.classList.contains('on')){closeRun();return true;}
+  if(el&&el.classList.contains('on')){
+    /* Erst die Uebungsliste zu, dann der Runner -- die Zuruecktaste
+       schliesst eine Ebene, nicht zwei. */
+    var rl=$('rnList');
+    if(rl&&!rl.hidden){runListShow(false);return true;}
+    closeRun();return true;
+  }
   el=$('modal');
   if(el&&el.classList.contains('on')){closeModal();return true;}
   if(sheetOpen){closeSheet();return true;}
@@ -10550,7 +10604,14 @@ function runStartTi(){
        der Ebene, die v30.2 vom Ruckeln befreit hat. run.rEnd traegt den
        Zustand laengst allein und ueberlebt Reload und Bildschirmsperre. */
     var restL=restSek();
-    if(restL<=0){runStopTi();beep();burst(window.innerWidth/2,window.innerHeight/2,14);runAdvance();}
+    if(restL<=0){
+      runStopTi();beep();burst(window.innerWidth/2,window.innerHeight/2,14);
+      /* Vibration zum Pausenende: in der Halle hoert niemand den Ton, und
+         das Telefon liegt auf der Bank -- der Stoss ist die Rueckmeldung,
+         die ankommt. */
+      if(navigator.vibrate)try{navigator.vibrate([90,50,90]);}catch(e){}
+      runAdvance();
+    }
     /* runPaint() statt runTick() wuerde hier Segmentleiste (rnSegs) und
        Satztabelle jede Sekunde per innerHTML neu bauen, obwohl sich waehrend
        der Pause nur die Uhr aendert -- run.ex/run.set bleiben stehen, bis die
@@ -10664,6 +10725,28 @@ function runAfterSet(skip){
          auf die neu abgeleitete, durch Autoregulation gekuerzte Liste
          zurueck -- der Fehler, gegen den das Einfrieren gebaut wurde. */
       bilanzIt=it;run.bIt=it;saveRun();
+      /* v34.1: Der Abschluss darf zweimal laufen -- "Letzten Satz
+         korrigieren" fuehrt aus dem Abschlussbild zurueck, und der Haken
+         schliesst danach erneut ab. sessWrap HAENGT AN (Verlauf, Fortschrei-
+         bung der Last, Cali-Basiswerte): beim zweiten Lauf standen die
+         Saetze doppelt im Verlauf und die Last war zweimal gestiegen.
+         Deshalb vor dem ERSTEN Abschluss der Einheit die betroffenen
+         Speicher sichern und vor jedem weiteren zuruecksetzen -- der
+         Abschluss schreibt dann immer auf denselben Stand. */
+      var SNAP=['exhist','exlog','weights','prs','steps'];
+      if(!run.snap){
+        run.snap={};SNAP.forEach(function(k){run.snap[k]=rawGet(k);});
+      }else{
+        SNAP.forEach(function(k){
+          var v=run.snap[k];
+          if(v===null||v===undefined){del(k);return;}
+          try{set(k,JSON.parse(v));}catch(e){}
+        });
+        /* PRS und steps leben auch im Speicher der Seite. */
+        try{if(run.snap.prs)PRS=JSON.parse(run.snap.prs);if(run.snap.steps)steps=JSON.parse(run.snap.steps);}catch(e){}
+        laReset();ekReset();
+      }
+      saveRun();
       sessWrap(it);
       runPaint();return;}
     run.ex++;warmEinfrieren();
@@ -10721,8 +10804,10 @@ function runAdvance(){
       var itU=runItems(),cU=itU&&itU[run.ex],wv=run.set-1;
       if(!cU||wv<satzStart(cU))delete run.wOk[run.ex];else run.wOk[run.ex]=wv;
     }
-    run.rEnd=0;run.vor=null;
+    run.rEnd=0;run.vor=null;editSatz=null;
     saveRun();runPaint();renderDay();
+    /* Aus dem Abschlussbild zurueckgeholt: die Uhr laeuft wieder. */
+    runClockStart();
   });
 })();
 function runJump(d){
@@ -10731,9 +10816,19 @@ function runJump(d){
   /* Im Abschlussbild ist die Einheit abgerechnet -- ein Sprung zurueck
      wuerde sie ein zweites Mal abschliessen. */
   if(run.ph==='done')return;
-  runStopTi();blockStopTi();
+  /* v34.1: Die Pause ueberlebt den Sprung. Ein Wisch zur naechsten Uebung
+     waehrend der Pause loeschte sie stumm -- wer waehrend der Pause
+     nachsieht, was als Naechstes kommt, hat sich nicht ausgeruht. Die
+     Pausenuhr laeuft weiter, die markierte Zeile der neuen Uebung bleibt
+     bis zu ihrem Ende gesperrt, wie in der Pause ueblich. */
+  var inPause=(run.ph==='rest');
+  if(!inPause)runStopTi();
+  blockStopTi();
+  editSatz=null;
   run.ex=Math.max(0,Math.min(it.length-1,run.ex+d));
-  warmEinfrieren();run.ph='work';run.tEnd=0;run.tUp=0;run.rEnd=0;run.tFertig=null;saveRun();runPaint();
+  warmEinfrieren();
+  if(!inPause){run.ph='work';run.rEnd=0;}
+  run.tEnd=0;run.tUp=0;run.tFertig=null;saveRun();runPaint();
 }
 /* Aufwaermblock ueberspringen: derselbe Satzwechsel wie "Erledigt", aber
    als uebersprungen verbucht -- vk_skip statt doneMap, kein Zaehler, keine
@@ -10765,12 +10860,13 @@ function runClockPaint(){
   if(!run||!run.t0){c.textContent='';return;}
   var s;
   if(run.ph==='done'){
-    /* Dieselbe Quelle wie die Bilanz: die protokollierte Dauer, nicht die
-       Zeit bis zum Zuklappen des Telefons. */
-    var d=(logs[iso(TODAY)]&&logs[iso(TODAY)].dur)?parseInt(logs[iso(TODAY)].dur,10):0;
+    /* Dieselbe Quelle wie Bilanz und Listenfuss: die protokollierte Dauer,
+       nicht die Zeit bis zum Zuklappen des Telefons. */
+    var d=einheitMinuten();
     s=d>0?d*60:Math.round((Date.now()-run.t0)/1000);
   }else s=Math.round((Date.now()-run.t0)/1000);
   c.textContent=fmtUhr(s);
+  c.setAttribute('aria-label',cfg.lang==='de'?'Trainingszeit':'Session time');
 }
 function runClockStop(){if(clockTi){clearInterval(clockTi);clockTi=null;}}
 function runClockStart(){
@@ -10802,22 +10898,58 @@ function dauerSchaetz(it){
     else arbeit=35;
     if(x.sd)arbeit*=2;
     s+=n*arbeit+Math.max(0,n-1)*rest+45;
-    var warm=x.warm?x.warm.length:(art==='last'?2:0);
+    /* warm===null heisst: Rampe bewusst weggelassen (Region schon geladen)
+       -- nicht "unbekannt". Nur die Planform ohne das Feld schaetzt. */
+    var warm=(x.warm!==undefined)?(x.warm?x.warm.length:0):(art==='last'?2:0);
     s+=warm*(20+45);
   });
   return Math.max(5,Math.round(s/60/5)*5);
 }
 function dauerTxt(it,DE){var m=dauerSchaetz(it);return m?('≈ '+m+(DE?' Min':' min')):'';}
 /* Dieselbe Schaetzung fuer einen PLAN-Tag (Tagesliste, Startkarte): die
-   Calisthenics-Bausteine tragen ihre Saetze nicht selbst, die Phase tut es. */
+   Calisthenics-Bausteine tragen ihre Saetze nicht selbst, die Phase tut es.
+   Die Pause faellt wie in runItems auf die Phasenpause zurueck (x.p||rs),
+   damit Tageskarte und Uebersicht dieselbe Zahl nennen. */
 function dauerPlan(pl){
   if(!pl||pl.kind!=='train')return '';
   var its=sessOf(pl).items.map(function(x){
-    if(x.a)return x;
+    if(x.a)return{a:x.a,s:x.s,r:x.r,e:x.e,p:x.p||pl.ph.rs,sd:x.sd,v:x.v};
     if(x.v)return{fixed:true,label:x.v};
     return{sets:pl.ph.sets,reps:pl.ph.reps,rest:pl.ph.rs,einh:'w'};
   });
   return dauerTxt(its,cfg.lang==='de');
+}
+/* Minuten der Einheit -- EINE Quelle fuer Kopf-Uhr, Listenfuss und Bilanz:
+   solange sie laeuft die echte Zeit, danach die protokollierte Dauer. */
+function einheitMinuten(){
+  if(run&&run.ph==='done'){
+    var d=(logs[iso(TODAY)]&&logs[iso(TODAY)].dur)?parseInt(logs[iso(TODAY)].dur,10):0;
+    if(d>0)return d;
+  }
+  return runMinutes();
+}
+/* Ein korrigierter TESTSATZ setzt die Arbeitslast neu. Die noch offenen
+   Saetze tragen aber schon den alten Vorschlag in run.kg (der laufende
+   Satz wird beim Zeichnen vorbelegt) -- ohne diesen Schritt stuende Satz 2
+   bei 82,5 und Satz 3 bei 87,5 kg, aus derselben Messung. Nur Saetze OHNE
+   Eintrag werden geleert; der naechste Aufbau belegt sie neu vor. Laeuft
+   bei JEDER Eingabe, nicht erst beim Haken -- wer die Zeile antippt, per
+   Pfeil weggeht oder neu laedt, hat sonst den alten Wert zurueck. */
+function vorbelegungLeeren(cur,eq){
+  if(!run||!run.kg||!cur)return;
+  var ex=run.ex;
+  for(var qN=1;qN<=(cur.sets||1);qN++){
+    if(qN!==eq&&run.reps[ex+'-'+qN]===undefined)delete run.kg[ex+'-'+qN];
+  }
+  saveRun();
+}
+/* Arbeitslast einer Uebung verwerfen -- wenn die Zahl, aus der sie
+   stammt, aus dem Protokoll geloescht wurde. */
+function lastLoeschen(name){
+  laReset();
+  var w=lastAll();
+  if(w[name]){delete w[name];set('weights',w);}
+  laReset();
 }
 /* Uebungsliste der Einheit: Stand je Uebung, Sprung an jede Stelle. */
 function runListShow(on){
@@ -10851,11 +10983,15 @@ function runListPaint(){
       '<span class="rlst">'+esc(st)+'</span></button>';
   });
   h+='<p class="rlsum">'+fertig+'/'+it.length+' '+(DE?'Übungen':'exercises')+' · '+saetze+' '+(DE?'Sätze':'sets')+
-     ' · '+runMinutes()+(DE?' Min':' min')+'</p>';
+     ' · '+einheitMinuten()+(DE?' Min':' min')+'</p>';
   $('rnListBody').innerHTML=h;
   $('rnListTit').textContent=pl.title||(DE?'Einheit':'Session');
   var dT=dauerTxt(it,DE);
-  $('rnListSub').textContent=(DE?'Übung ':'Exercise ')+Math.min(run.ex+1,it.length)+'/'+it.length+(dT?' · '+dT:'');
+  /* Nicht noch einmal "Uebung 2/5" -- das steht auf dem Knopf, der die
+     Liste geoeffnet hat, und in den Segmenten. Hier: Woche und Dauer. */
+  $('rnListSub').textContent=(DE?'Woche ':'Week ')+pl.w+(dT?' · '+dT:'');
+  $('rnListClose').setAttribute('aria-label',DE?'Schließen':'Close');
+  l.setAttribute('aria-label',DE?'Übungen der Einheit':'Exercises of this session');
 }
 (function(){
   var p=$('rnProg'),c=$('rnListClose'),b=$('rnListBody'),s=$('rnSets');
@@ -10869,15 +11005,39 @@ function runListPaint(){
     runJump(i-run.ex);
   });
   /* Erledigten Satz antippen: Korrektur in der Zeile. Felder und Knoepfe
-     in der Zeile selbst loesen das nicht aus. */
-  if(s)s.addEventListener('click',function(e){
+     in der Zeile selbst loesen das nicht aus. Enter/Leertaste auf der
+     fokussierten Zeile tut dasselbe. */
+  function satzToggle(row){
     if(!run||run.ph==='done')return;
-    if(e.target.closest('input,button'))return;
-    var row=e.target.closest('.rsrow.done[data-q]');if(!row)return;
     var q=parseInt(row.dataset.q,10);if(isNaN(q))return;
     editSatz=(editSatz&&editSatz.ex===run.ex&&editSatz.q===q)?null:{ex:run.ex,q:q};
     runPaint();
+  }
+  if(s)s.addEventListener('click',function(e){
+    if(e.target.closest('input,button'))return;
+    var row=e.target.closest('.rsrow.done[data-q]');if(row)satzToggle(row);
   });
+  if(s)s.addEventListener('keydown',function(e){
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    var row=e.target.closest?e.target.closest('.rsrow.done[data-q]'):null;
+    if(!row||e.target!==row)return;
+    e.preventDefault();satzToggle(row);
+  });
+  /* Zeitblock: die grosse Zahl startet die Uhr. */
+  var bg=$('rnBig');
+  function blockStart(){
+    if(!run||run.ph==='rest'||run.tEnd)return;
+    var it=runItems(),cur=it&&it[run.ex];
+    if(!cur||!cur.fixed)return;
+    if(run.tFertig===run.ex+'-'+run.set)return;
+    var m=parseFloat(String(cur.label).replace(',','.'))||0;
+    if(!(m>0)||!/min/i.test(String(cur.label)))return;
+    run.tEnd=Date.now()+m*60000;saveRun();runPaint();blockStartTi();
+  }
+  if(bg){
+    bg.addEventListener('click',blockStart);
+    bg.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();blockStart();}});
+  }
 })();
 /* ---------- Trainingsmodus, Anzeige (v32) ---------------------------------
    Vorher: eine riesige Zahl in der Bildmitte, darunter ein Knopf. Sie zeigte
@@ -11093,7 +11253,41 @@ function bilanz(it,DE){
     ?(Math.floor(zeitGes/60)+':'+('0'+(zeitGes%60)).slice(-2)+(DE?' Min':' min'))
     :(zeitGes+' s')));
   var sub=tl.length?tl.join(' · '):(DE?'Abgeschlossen':'Completed');
-  return{kopf:kopf+'<small>'+sub+'</small>',zeilen:zeilen};
+  /* v34.1: Die Kennzahlen als Kacheln -- Dauer, Saetze und die dritte
+     Groesse, die es an diesem Tag gab (bewegte Last vor Wiederholungen vor
+     Zeit vor Strecke vor Durchgaengen). Der einzige Bildschirm, der
+     freiwillig gelesen wird, setzte seine Zahlen am kleinsten; MCI setzt
+     Kennzahlen am groessten. Der Rest der Summen steht als Zeile darunter. */
+  var kach=[[String(dauerL>0?dauerL:runMinutes()),DE?'Min':'min'],[String(saetze),DE?'Sätze':'sets']];
+  var dritte=null,rest=tl.slice();
+  if(tonnage>0){dritte=[Math.round(toDisp(tonnage,'w')).toLocaleString(DE?'de-DE':'en-US'),uw()];rest.shift();}
+  else if(wdhGes>0){dritte=[String(wdhGes),DE?'Wdh':'reps'];rest.shift();}
+  else if(zeitGes>0){dritte=[zeitGes>=60?(Math.floor(zeitGes/60)+':'+('0'+(zeitGes%60)).slice(-2)):String(zeitGes),zeitGes>=60?(DE?'Min unter Last':'min under load'):(DE?'s unter Last':'s under load')];rest.pop();}
+  else if(distGes>0){dritte=[mzahl(String(Math.round(distGes*10)/10)),distE||'m'];rest.shift();}
+  else if(durchGes>0){dritte=[String(durchGes),DE?'Durchgänge':'rounds'];rest.shift();}
+  if(dritte)kach.push(dritte);
+  var kacheln='<div class="rbil">'+kach.map(function(k){return '<div><b>'+k[0]+'</b><span>'+k[1]+'</span></div>';}).join('')+'</div>'+
+    (rest.length?'<p class="rbilsub">'+rest.join(' · ')+'</p>':'');
+  return{kopf:kopf+'<small>'+sub+'</small>',zeilen:zeilen,kacheln:kacheln};
+}
+/* Letzter Eintrag MIT Zahlen zu einer Uebung -- dieselbe Suche wie in
+   letztesMalTxt, hier fuer die Satzzeilen. */
+function letzterEintrag(cur){
+  var eh=get('exhist',{})[exKey(cur)];
+  if(!eh||!eh.length)return null;
+  for(var i=eh.length-1;i>=0;i--){if(eh[i]&&eh[i].r&&eh[i].r.length)return eh[i];}
+  return null;
+}
+/* v34.1: "zuletzt 5 x 80" in der Ist-Spalte eines noch offenen Satzes --
+   der Vergleichswert je Satz, den Hevy und Strong als eigene Spalte
+   fuehren. Ohne ihn ist die Zeile bis zur Eingabe ein Strich. */
+function vorherSatzTxt(cur,q,DE){
+  var e=letzterEintrag(cur);
+  if(!e||e.r[q-1]===undefined||e.r[q-1]===null)return '';
+  var r=e.r[q-1],w=(e.w&&e.w[q-1]!==null&&e.w[q-1]!==undefined)?e.w[q-1]:null;
+  var t=cur.mess?(mzahl(String(r))+' '+cur.mess):(String(r)+((cur.einh==='s'||cur.einh==='min')?' s':''));
+  if(w!==null)t+=' × '+mzahl(String(kgZ(w)));
+  return (DE?'zuletzt ':'last ')+t;
 }
 /* Die Vorgabe einer ganzen Uebung als Text ("4 x 5", "3 x 30 s/Seite").
    ZWEITER Textweg neben vAit: er fasst eine ganze Uebung zusammen ("4 x 5"),
@@ -11385,7 +11579,11 @@ function runPaint(){
   $('rnSegs').innerHTML=segs;
   var pl0=plan(TODAY);
   for(var vz0=1;vz0<=14&&pl0.kind!=='train';vz0++)pl0=plan(add(TODAY,vz0));
-  $('rnProg').textContent=(pl0.title?pl0.title+' · ':'')+(DE?'Übung ':'Exercise ')+(run.ex+1)+'/'+it.length;
+  /* v34.1: Der Zustand der Einheit steht mit in der Ortszeile -- Micro,
+     Deload (Woche 11 und die lockere Testwoche), Reduziert (Check-in
+     "wenig drin"). Vorher sah eine halbierte Einheit aus wie eine volle. */
+  var modus=run.micro?'Micro':(run.adj<0?(DE?'Reduziert':'Reduced'):((pl0.w===11||pl0.w12locker)?'Deload':''));
+  $('rnProg').textContent=(pl0.title?pl0.title+' · ':'')+(DE?'Übung ':'Exercise ')+(run.ex+1)+'/'+it.length+(modus?' · '+modus:'');
   var big=$('rnBig'),hint=$('rnHint'),reps=$('rnReps'),mb=$('rnMain'),
       sets=$('rnSets'),lastEl=$('rnLast'),nextEl=$('rnNextUp'),head=$('rnEx');
   var tEl0=$('rnTest');
@@ -11395,8 +11593,9 @@ function runPaint(){
   if(run.ph==='done'){
     ausblenden();
     $('rnRest').hidden=true;
-    big.hidden=true;$('runner').classList.remove('blk');
+    big.hidden=true;$('runner').classList.remove('blk','pause');
     var bbarD=$('rnBlkBar');if(bbarD)bbarD.hidden=true;
+    var capD=$('rnBlkCap');if(capD)capD.hidden=true;
     head.textContent=DE?'Einheit fertig':'Session done';
     $('rnStep').textContent='';$('rnIcon').innerHTML='';
     var mgD=$('rnMg');if(mgD)mgD.hidden=true;
@@ -11404,11 +11603,9 @@ function runPaint(){
        der einzige, in dem jemand freiwillig Zahlen liest. Wer dort sieht,
        dass er zugelegt hat, kommt wieder. */
     var bil=bilanz(bilanzIt||(run&&run.bIt)||it,DE);
-    $('rnAuftrag').hidden=false;
-    $('rnAuftrag').innerHTML=bil.kopf;
-    if(bil.zeilen){
-      $('rnSets').innerHTML=bil.zeilen;
-    }
+    /* v34.1: Kennzahlen als Kacheln in der Tabelle, nicht als Ember-Zeile. */
+    $('rnAuftrag').hidden=true;
+    $('rnSets').innerHTML=bil.kacheln+(bil.zeilen||'');
     hint.textContent=DE?'Wie hart war die Einheit? Damit rechnet der Coach.'
                        :'How hard was it? That is what the coach works with.';
     reps.innerHTML='';
@@ -11440,6 +11637,18 @@ function runPaint(){
       hb.addEventListener('click',function(){healthLog(runMinutes());});
       reps.appendChild(hb);
     }
+    /* v34.1: Der letzte Satz war bis hierher der einzige, den niemand
+       korrigieren konnte -- sein Haken schliesst die Einheit ab. Der Weg
+       zurueck ist derselbe wie der Rueckgaengig-Knopf in der Pause; der
+       zweite Abschluss setzt vorher den gesicherten Stand zurueck (run.snap
+       in runAfterSet). Steht zuletzt, hinter RPE und Notiz: ein Ausweg,
+       kein Hauptweg. */
+    if(run.vor){
+      var rb=document.createElement('button');rb.type='button';rb.className='tbtn rskip';
+      rb.textContent=DE?'Letzten Satz korrigieren':'Correct last set';
+      rb.addEventListener('click',function(){var u=$('rnUndo');if(u)u.click();});
+      reps.appendChild(rb);
+    }
     mb.textContent=DE?'Fertig':'Done';
     var pv=$('rnPrev'),nx=$('rnNext');
     if(pv)pv.hidden=true;
@@ -11450,6 +11659,10 @@ function runPaint(){
   }
   /* ---- Pause: Leiste einblenden, Tabelle bleibt stehen ---- */
   var restEl=$('rnRest');
+  /* v34.1: In der Pause tritt die naechste Zeile zurueck -- zwei leuchtende
+     Zustaende auf einem Bildschirm (Ember-Zeile, Brass-Leiste) sagen nicht,
+     was gerade zaehlt. Die Pausenuhr ist dann die groesste Zahl. */
+  $('runner').classList.toggle('pause',run.ph==='rest');
   if(run.ph==='rest'){
     restEl.hidden=false;
     $('rnRestT').textContent=fmt(restSek());
@@ -11512,18 +11725,19 @@ function runPaint(){
     hint.textContent=cur.k?'':(DE?'Sauber ausführen, Zeit im Blick behalten.':'Clean execution, keep an eye on the clock.');
     reps.innerHTML='';
     var minuten=parseFloat(String(cur.label).replace(',','.'))||0;
-    if(!run.tEnd&&!blockFertig&&minuten>0&&/min/i.test(String(cur.label))){
-      var tb=document.createElement('button');tb.type='button';tb.className='tbtn';
-      tb.textContent=DE?'Timer starten':'Start timer';
-      if(run.ph==='rest')tb.disabled=true;
-      tb.addEventListener('click',function(){
-        /* Auch der Blocktimer nicht aus der Pause heraus: sonst laufen zwei
-           Countdowns gleichzeitig und das Auslaufen ist um die Restpause
-           kuerzer, als der Plan sagt. */
-        if(run.ph==='rest')return;
-        run.tEnd=Date.now()+minuten*60000;saveRun();runPaint();blockStartTi();
-      });
-      reps.appendChild(tb);
+    /* v34.1: Kein eigener Timer-Knopf mehr -- die grosse Zahl startet die
+       Uhr (Tipp oder Enter), die Unterschrift sagt es. Damit bleiben ein
+       Hauptknopf und ein leiser Ausweg. In der Pause bleibt sie gesperrt:
+       sonst laufen zwei Countdowns gleichzeitig. */
+    var startbar=(!run.tEnd&&!blockFertig&&minuten>0&&/min/i.test(String(cur.label))&&run.ph!=='rest');
+    var cap=$('rnBlkCap');
+    big.classList.toggle('tap',startbar);
+    if(startbar){big.setAttribute('role','button');big.setAttribute('tabindex','0');
+      big.setAttribute('aria-label',DE?'Timer starten':'Start timer');}
+    else{big.removeAttribute('role');big.removeAttribute('tabindex');big.removeAttribute('aria-label');}
+    if(cap){
+      cap.hidden=!(startbar||blockFertig);
+      cap.textContent=blockFertig?(DE?'Zeit um':'Time is up'):(DE?'Antippen zum Starten':'Tap to start');
     }
     /* Aufwaermbloecke kann man weglassen -- MCI macht sie optional, weil die
        Aufwaermsaetze an den Uebungen die eigentliche Vorbereitung tragen.
@@ -11545,6 +11759,7 @@ function runPaint(){
   /* ---- Satztabelle ---- */
   big.hidden=true;$('runner').classList.remove('blk');
   var bbar0=$('rnBlkBar');if(bbar0)bbar0.hidden=true;
+  var cap0=$('rnBlkCap');if(cap0)cap0.hidden=true;
   /* Beim Calisthenics-Einmessen sind ALLE drei Saetze Testsaetze (der beste
      zaehlt), bei Zusatzlast nur der erste -- danach wird mit dem gefundenen
      Gewicht gearbeitet. */
@@ -11586,10 +11801,17 @@ function runPaint(){
     }
     var eing=run.reps[run.ex+'-'+q];
     var kgv=run.kg?run.kg[run.ex+'-'+q]:undefined;
+    /* v34.1: Ein Satz MIT Eintrag ist erledigt, auch wenn er hinter der
+       markierten Zeile liegt -- wer den Testsatz ohne Zahl abgehakt hat und
+       zurueckspringt, landet auf Satz 1, und Satz 2 (8 x 85) stand als
+       offene Zeile da: nicht gruen, nicht antippbar, nicht korrigierbar. */
+    if(eing!==undefined&&q!==run.set)kls='done';
     /* Zeitvorgaben werden in Sekunden erfasst -- auch die in Minuten
        geplanten Intervalle. Ohne Einheit stuende in der Ist-Spalte eine
        nackte 240 neben einem Ziel von "4 Min". */
-    var istTxt=(eing===undefined)?'—'
+    /* v34.1: Offene Saetze tragen den Wert vom letzten Mal, satzgenau. */
+    var vorT=(eing===undefined&&kls==='')?vorherSatzTxt(cur,q,DE):'';
+    var istTxt=(eing===undefined)?(vorT?'<span class="rvor">'+vorT+'</span>':'—')
       :(cur.mess?(mzahl(String(eing))+' '+cur.mess)
         :(eing+((cur.einh==='s'||cur.einh==='min')?' s':'')+(kgv!==undefined?' × '+kgT(kgv):'')));
     /* "max" steht nur, wo der Satz wirklich bis zur Technikgrenze geht:
@@ -11619,10 +11841,13 @@ function runPaint(){
     /* v34: erledigte Arbeitssaetze sind antippbar (data-q) und im
        Bearbeiten-Zustand markiert; die Eingabe haengt runPaint unten an. */
     var bearb=(kls==='done'&&editSatz&&editSatz.ex===run.ex&&editSatz.q===q);
-    h+='<div class="rsrow '+kls+(bearb?' edit':'')+'"'+(kls==='done'?' data-q="'+q+'"':'')+'>'+
+    /* Erledigte Zeilen: antippbar UND per Tastatur erreichbar, mit
+       Stift-Zeichen -- eine Funktion, die niemand findet, gibt es nicht. */
+    var stift=(kls==='done'&&!bearb)?'<svg class="rpen" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L18 10l-4-4L4 16z"/></svg>':'';
+    h+='<div class="rsrow '+kls+(bearb?' edit':'')+'"'+(kls==='done'?' data-q="'+q+'" role="button" tabindex="0" aria-label="'+(DE?'Satz '+q+' korrigieren':'Correct set '+q)+'"':'')+'>'+
        '<span class="rsno">'+q+'</span>'+
        '<span class="rstx"><i class="rskind">'+kind+'</i><span class="rsziel">'+ziel+'</span></span>'+
-       '<span class="rsist">'+istTxt+'</span></div>';
+       '<span class="rsist">'+istTxt+stift+'</span></div>';
   }
   sets.innerHTML=h;
   /* Der laufende Satz bekommt seine Eingabe in die Zeile: Last und
@@ -11846,9 +12071,15 @@ function runPaint(){
         if(isNaN(n))delete run.kg[eK];else run.kg[eK]=Math.round(fromDisp(n,'w')*100)/100;
         saveRun();
         /* Derselbe Schreiber wie im laufenden Testsatz: die Arbeitslast
-           folgt der korrigierten Zahl, nicht der ersten. */
+           folgt der korrigierten Zahl, nicht der ersten. Geleert heisst
+           geloescht: eine Arbeitslast aus einer Zahl, die im Protokoll
+           nicht mehr steht, waere eine Behauptung ohne Beleg. */
         var wn=run.reps?run.reps[eK]:undefined;
-        if(eTest&&cur.kg&&wn>0)lastAusSatz(cur,run.kg[eK]||0,wn);
+        if(eTest&&cur.kg){
+          if(isNaN(n))lastLoeschen(exKey(cur));
+          else if(wn>0)lastAusSatz(cur,run.kg[eK]||0,wn);
+          vorbelegungLeeren(cur,eq);
+        }
       });
       ebox.appendChild(ek);
       var exs=document.createElement('span');exs.textContent='×';ebox.appendChild(exs);
@@ -11871,7 +12102,7 @@ function runPaint(){
       /* Von Hand korrigiert ist ein echter Beleg. */
       if(run.autoZ)delete run.autoZ[eK];
       saveRun();
-      if(eTest&&cur.kg&&!isNaN(n))lastAusSatz(cur,run.kg?run.kg[eK]:0,n);
+      if(eTest&&cur.kg&&!isNaN(n)){lastAusSatz(cur,run.kg?run.kg[eK]:0,n);vorbelegungLeeren(cur,eq);}
     });
     ebox.appendChild(er);
     var eok=document.createElement('button');eok.type='button';eok.className='rok';
@@ -11879,18 +12110,7 @@ function runPaint(){
     eok.innerHTML='<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 12.5l5 5 10-11"/></svg>';
     eok.addEventListener('click',function(e){
       e.stopPropagation();
-      /* Ein korrigierter TESTSATZ setzt die Arbeitslast neu. Die noch
-         offenen Saetze tragen aber schon den alten Vorschlag in run.kg
-         (der laufende Satz wird beim Zeichnen vorbelegt) -- ohne diesen
-         Schritt stuende Satz 2 bei 82,5 und Satz 3 bei 87,5 kg, aus
-         derselben Messung. Nur Saetze OHNE Eintrag werden geleert; der
-         naechste Aufbau belegt sie mit der neuen Last vor. */
-      if(eTest&&cur.kg&&run.kg){
-        for(var qN=1;qN<=(cur.sets||1);qN++){
-          if(qN!==eq&&run.reps[run.ex+'-'+qN]===undefined)delete run.kg[run.ex+'-'+qN];
-        }
-        saveRun();
-      }
+      if(eTest&&cur.kg)vorbelegungLeeren(cur,eq);
       editSatz=null;runPaint();
     });
     ebox.appendChild(eok);
@@ -11901,6 +12121,11 @@ function runPaint(){
   if(zeigTest&&ti){
     tEl.hidden=false;
     tEl.innerHTML='';
+    /* v34.1: Der Kasten traegt die Erstkontakt-Botschaft allein. Die
+       Auftragszeile ("Erstes Mal -- wir messen ein" plus Nachsatz) sagte
+       darueber dasselbe ein zweites Mal -- vier Textbloecke vor der
+       Tabelle, alle mit derselben Nachricht. */
+    if(cur.test)$('rnAuftrag').hidden=true;
     /* v34: Der Kasten ist zugeklappt zwei Zeilen hoch -- Titel und der
        Kern (Testlast, "so viele saubere wie moeglich") -- und klappt auf
        Tipp auf. Sieben Zeilen Anleitung ueber der Satztabelle waren
@@ -12065,7 +12290,12 @@ function blockStartTi(){
     openSessOv();
   });
 })();
-$('rnClose').addEventListener('click',closeRun);
+/* v34.1: Im Abschlussbild tut das X, was "Fertig" tut -- sonst blieb die
+   Einheit im Dock als laufend stehen, obwohl sie abgerechnet ist. */
+$('rnClose').addEventListener('click',function(){
+  if(run&&run.ph==='done'){run.on=false;saveRun();}
+  closeRun();
+});
 $('rnPrev').addEventListener('click',function(){runJump(-1);});
 $('rnNext').addEventListener('click',function(){runJump(1);});
 $('rnMain').addEventListener('click',function(){
@@ -12080,7 +12310,7 @@ $('rnMain').addEventListener('click',function(){
 });
 document.addEventListener('keydown',function(e){
   if(!$('runner').classList.contains('on'))return;
-  if(e.key==='Escape')closeRun();
+  if(e.key==='Escape'){var rlE=$('rnList');if(rlE&&!rlE.hidden)runListShow(false);else closeRun();return;}
   /* Nicht ausloesen, waehrend jemand tippt: seit v32 stehen Zahlenfelder
      fuer Last und Wiederholungen im Bild -- ein Leerzeichen darin darf
      nicht den Satz beenden. */
