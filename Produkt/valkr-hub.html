@@ -1945,7 +1945,6 @@
   #sessov .soopts.row .soopt{flex:1;padding:.5rem .3rem}
   #sessov .soopt[aria-pressed="true"]{background:color-mix(in srgb,var(--aurora) 18%,transparent);
     border-color:var(--aurora);color:var(--ink)}
-  #sessov .soopt[aria-pressed="true"]::after{display:none}
   #sessov .soopt:hover{transform:none;border-color:var(--aurora)}
   /* v34.3/34.4: fester Fuss der Uebersicht -- deckender Grund, Safe-Area
      im Fuss (sonst lag der Knopf unter dem Home-Balken und sprang am
@@ -4350,7 +4349,7 @@
 <script>
 (function(){
 "use strict";
-var VERSION='34.5';
+var VERSION='34.6';
 var mem={};
 /* Zwei Ebenen mit Absicht: erst der Speicher des Browsers, dann der des
    laufenden Tabs. Faellt localStorage aus -- privater Modus, volles Kontingent,
@@ -11085,14 +11084,12 @@ function saetzeGemacht(x,i){
   if(!run||!x||x.fixed)return 0;
   var n=0,mark=(i===run.ex&&run.ph!=='done')?run.set:0;
   var dnS=doneMap[iso(TODAY)]||{},oi=run.micro?run.micro[i]:i;
-  /* Abgehakt zaehlt voll -- auch die laufende Uebung im Abschlussbild und
-     eine zurueckgeblaetterte, schon abgehakte ohne Eintraege (Sprints
-     ohne Zahl). Nur wer nach dem Zuruecksprung wieder Werte eintraegt,
-     wird satzweise gezaehlt. */
-  var hatEintrag=false;
-  for(var q=1;q<=(x.sets||1);q++){if(run.reps[i+'-'+q]!==undefined){hatEintrag=true;if(mark>0)break;}}
-  if(dnS[oi]&&(i!==run.ex||run.ph==='done'||!hatEintrag))return x.sets||1;
-  for(var q2=1;q2<=(x.sets||1);q2++){if(run.reps[i+'-'+q2]!==undefined||q2<mark)n++;}
+  /* v34.6: Der Tageshaken ist die Wahrheit -- abgehakt zaehlt voll, egal
+     ob die Uebung gerade wieder aufgeschlagen ist (Zurueckblaettern) und
+     wie viele Saetze eine Zahl tragen. Nur Rueckgaengig loest den Haken,
+     und danach wird wieder satzweise gezaehlt. */
+  if(dnS[oi])return x.sets||1;
+  for(var q=1;q<=(x.sets||1);q++){if(run.reps[i+'-'+q]!==undefined||q<mark)n++;}
   return Math.min(n,x.sets||1);
 }
 /* Einheit abgerechnet und geschlossen: die Sicherung des Abschlusses hat
@@ -16389,7 +16386,7 @@ function dataStats(){
    -> Training starten fragt Energie und Notiz ab -> bei wenig Energie faehrt
    der Tag einen Satz je Uebung runter. Buchregel, kein Gimmick. */
 var soView='ov',soEnergy='2',soWenigGesagt=false;
-function soShow(on){var el=$('sessov');if(!el)return;el.classList.toggle('on',!!on);document.body.style.overflow=on?'hidden':'';}
+function soShow(on){var el=$('sessov');if(!el)return;el.classList.toggle('on',!!on);if(on)el.scrollTop=0;document.body.style.overflow=on?'hidden':'';}
 function openSessOv(){
   if(runValid()){openRun();return;}
   if(!runItems())return;
